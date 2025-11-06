@@ -49,23 +49,79 @@ function sortCandidatesByFreq(candidates) {
 }
 
 /**
+ * Get selection index from key press
+ * Maps selection keys to candidate indices
+ * @param {string} key - The pressed key
+ * @returns {number} - Candidate index (0-5) or -1 if not a selection key
+ */
+function getSelectionIndexFromKey(key) {
+  const selectionKeys = {
+    ' ': 0,   // Space = 1st candidate
+    "'": 1,   // Apostrophe = 2nd candidate
+    '[': 2,   // Left bracket = 3rd candidate
+    ']': 3,   // Right bracket = 4th candidate
+    '-': 4,   // Dash = 5th candidate
+    '\\': 5   // Backslash = 6th candidate
+  };
+
+  return selectionKeys[key] !== undefined ? selectionKeys[key] : -1;
+}
+
+/**
+ * Check if a character is valid for Dayi input
+ * @param {string} char - The character to check
+ * @returns {boolean} - True if valid input character
+ */
+function isValidInputChar(char) {
+  if (!char || char.length !== 1) return false;
+
+  // Selection keys are NOT input characters
+  if (getSelectionIndexFromKey(char) !== -1) {
+    return false;
+  }
+
+  // Allow: a-z, 0-9, and common punctuation used in Dayi
+  // Based on the dictionary, valid chars include: a-z, 0-9, , . / ; and others
+  const validPattern = /^[a-z0-9,.\\/;'`=\[\]\-]$/i;
+  return validPattern.test(char);
+}
+
+/**
+ * Get selection key label for display
+ * @param {number} index - Candidate index (0-based)
+ * @returns {string} - Display label for the selection key
+ */
+function getSelectionKeyLabel(index) {
+  const labels = [
+    'Space',  // 0: 1st candidate
+    "'",      // 1: 2nd candidate
+    '[',      // 2: 3rd candidate
+    ']',      // 3: 4th candidate
+    '-',      // 4: 5th candidate
+    '\\'      // 5: 6th candidate
+  ];
+  return labels[index] || '';
+}
+
+/**
  * Render candidates as HTML string
  * @param {Array} candidates - Array of { char, freq } objects
- * @returns {string} - HTML string with numbered candidates
+ * @returns {string} - HTML string with new selection keys
  */
 function renderCandidatesHTML(candidates) {
   if (!candidates || candidates.length === 0) {
     return '';
   }
 
-  // Limit to 9 candidates (1-9 keys)
-  const limited = candidates.slice(0, 9);
+  // Limit to 6 candidates (matching our selection keys)
+  const limited = candidates.slice(0, 6);
 
   return limited
     .map((candidate, index) => {
-      const number = index + 1;
+      const keyLabel = getSelectionKeyLabel(index);
+      const displayKey = index === 0 ? '<kbd>Space</kbd>' : `<kbd>${keyLabel}</kbd>`;
       return `<div class="candidate-item">
-        <span class="candidate-number">${number}.</span>
+        <span class="candidate-key">${displayKey}</span>
         <span class="candidate-char">${candidate.char}</span>
       </div>`;
     })
@@ -132,8 +188,8 @@ function updateCandidateArea(candidates) {
 }
 
 /**
- * Handle number key selection (1-9)
- * @param {number} index - The selected index (0-8)
+ * Handle candidate selection
+ * @param {number} index - The selected index (0-5)
  */
 function handleSelection(index) {
   if (!currentCode) return;
@@ -141,7 +197,7 @@ function handleSelection(index) {
   const candidates = queryCandidates(dayiMap, currentCode);
   const sorted = sortCandidatesByFreq(candidates);
 
-  if (index >= 0 && index < sorted.length && index < 9) {
+  if (index >= 0 && index < sorted.length && index < 6) {
     const selected = sorted[index];
     appendToOutputBuffer(selected.char);
     clearInputBox();
@@ -225,14 +281,18 @@ async function initialize() {
         handleInput(e.target.value);
       });
 
-      // Handle number key selections
+      // Handle selection keys (Space, ', [, ], -, \)
       inputBox.addEventListener('keydown', (e) => {
         const key = e.key;
-        if (key >= '1' && key <= '9') {
+        const selectionIndex = getSelectionIndexFromKey(key);
+
+        // If it's a selection key and we have candidates
+        if (selectionIndex !== -1 && currentCode) {
           e.preventDefault();
-          const index = parseInt(key) - 1;
-          handleSelection(index);
+          handleSelection(selectionIndex);
         }
+        // Note: 0-9 and other chars will naturally go into the input
+        // because they're not prevented
       });
 
       // Auto-focus input box
