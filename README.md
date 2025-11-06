@@ -1,365 +1,367 @@
 # WebDaYi (網頁大易輸入法)
 
-> A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
+> **Language / 語言**: [English](README.en.md) | [正體中文](README.md)
+
+> 輕量、透明、網頁優先的大易中文輸入法引擎
 
 [![Status](https://img.shields.io/badge/status-MVP%201%20v7%20Complete%20%2B%20Bug%20Fix-brightgreen)]()
 [![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v7-blue)]()
 [![Tests](https://img.shields.io/badge/tests-35%2F35%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
-## 🎉 Live Demo
+## 🎉 線上展示
 
-**[Try WebDaYi MVP1 v7 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[立即試用 WebDaYi MVP1 v7 →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
-Experience the core Dàyì input engine in your browser with advanced features:
-- 🚀 **Auto-select**: Type 2 chars + 3rd char = auto-select first candidate (speeds up typing!)
-- 📄 **Pagination**: Press `=` to cycle through pages when there are 60+ candidates
-- ⌨️ **Smart Selection**: Use Space/' /[/]/- /\ to select candidates (0-9 are now part of codes!)
-- ⌫ **Smart Backspace**: Deletes input first, then output buffer (natural undo flow!)
-- 🎯 **Express Mode**: Toggle to minimal UI (hide distractions, focus on input!)
-- 🧠 **User Personalization**: IME learns your preferences! (MVP1.7-1.9) **[Bug Fixed!]**
-- 📱 **Touch-Friendly**: Click to select + prev/next page buttons! (MVP1.10)
+在瀏覽器中體驗核心大易輸入引擎，具備進階功能：
+- 🚀 **自動選字**：輸入2碼 + 第3碼 = 自動選取第一候選字（加速打字！）
+- 📄 **翻頁功能**：當候選字超過60個時，按 `=` 鍵循環翻頁
+- ⌨️ **智慧選字**：使用 Space/' /[/]/- /\ 選取候選字（0-9 現在是字碼的一部分！）
+- ⌫ **智慧倒退**：先刪除輸入，再刪除輸出緩衝區（自然的復原流程！）
+- 🎯 **專注模式**：切換至極簡介面（隱藏干擾，專注輸入！）
+- 🧠 **使用者個人化**：輸入法會學習您的偏好！(MVP1.7-1.9) **[Bug 已修復！]**
+- 📱 **觸控友善**：點擊選字 + 上下頁按鈕！(MVP1.10)
 
-## Overview
+## 專案概述
 
-**WebDaYi** replaces complex, monolithic IME frameworks with a simple, modern solution built in JavaScript. Instead of wrestling with configuration files, you get a transparent input method that:
+**WebDaYi** 以簡單、現代的 JavaScript 解決方案取代複雜、龐大的輸入法框架。不需要與設定檔搏鬥，您將獲得一個透明的輸入法：
 
-- 🎯 **Just Works**: Zero configuration required
-- 🪶 **Lightweight**: Pure JavaScript, no heavy frameworks
-- 🔍 **Transparent**: Every line of code is readable and modifiable
-- 🌐 **Browser-First**: Optimized for Gmail, Google Docs, Notion, and other web apps
-- 🔄 **Smart**: Leverages Rime's excellent Dàyì dictionary data
+- 🎯 **開箱即用**：無需任何設定
+- 🪶 **輕量級**：純 JavaScript，無笨重框架
+- 🔍 **透明**：每一行程式碼都可讀且可修改
+- 🌐 **瀏覽器優先**：為 Gmail、Google Docs、Notion 等網頁應用程式最佳化
+- 🔄 **智慧**：採用 Rime 優秀的大易字典資料
 
-## Project Status
+## 專案狀態
 
-**Current Phase**: ✅ MVP 1.0 v7 Complete!
-**Completion**: ~48% (Phase 0 & MVP 1 v7 done, MVP 2a next)
+**目前階段**：✅ MVP 1.0 v7 完成！
+**完成度**：~48%（Phase 0 與 MVP 1 v7 完成，MVP 2a 下一步）
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0 v7           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   ├─ Selection Keys Fix       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   ├─ Pagination               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   ├─ Auto-select              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   ├─ Smart Backspace          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   ├─ Input Mode Toggle        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   ├─ User Personalization     [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ Touch-Friendly UX        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 2: MVP 2a               [░░░░░░░░░░░░]   0% ⏳    │
+│ Phase 0: 資料處理管線       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v7        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ 選字鍵修正             [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ 翻頁功能               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ 自動選字               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ 智慧倒退               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ 輸入模式切換           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ 使用者個人化           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ 觸控友善 UX            [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 2: MVP 2a            [░░░░░░░░░░░░]   0% ⏳    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 v7 with touch-friendly UX + critical bug fix (35/35 tests passing)
-- ✅ Touch-friendly UX implemented (MVP1.10)
-- 🐛 Fixed: Auto-select now respects user preferences (MVP1.9 bug fix)
-**Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
+**最新成就**：MVP 1.0 v7 具備觸控友善 UX + 關鍵 bug 修復（35/35 測試通過）
+- ✅ 觸控友善 UX 已實作（MVP1.10）
+- 🐛 已修復：自動選字現在會遵循使用者偏好（MVP1.9 bug 修復）
+**下個里程碑**：開始 MVP 2a（瀏覽器外掛）實作
 
-## Quick Start
+## 快速開始
 
-### Try It Now (Live Demo)
+### 立即試用（線上展示）
 
-**[Launch WebDaYi MVP1 v7 →](https://clarencechien.github.io/webdayi/)**
+**[啟動 WebDaYi MVP1 v7 →](https://clarencechien.github.io/webdayi/)**
 
-No installation required! Just open the link and start typing:
-- Try `v` → 大, 夫, 禾
-- Try `a` → 人, 入
-- Try `ux` → 61 candidates, press `=` or use buttons to page through
-- Press `Space` (1st), `'` (2nd), `[` (3rd), `]` (4th), `-` (5th), `\` (6th) to select
-- **Or click** candidates directly to select (touch-friendly!)
-- Type 2 chars then continue → auto-selects first candidate!
-- Press `Backspace` to undo (deletes input, then output buffer)
-- Toggle to Express Mode (top-right) for minimal UI
-- Select a non-default candidate → **IME learns your preference and uses it in auto-select!** [Bug Fixed ✅]
-- **New**: Use ◀ **上一頁** / **下一頁** ▶ buttons for easy paging on mobile/tablet!
-- Click "Copy" when done
+無需安裝！只要開啟連結並開始輸入：
+- 試試 `v` → 大, 夫, 禾
+- 試試 `a` → 人, 入
+- 試試 `ux` → 61 個候選字，按 `=` 或使用按鈕翻頁
+- 按 `Space`（第1個）、`'`（第2個）、`[`（第3個）、`]`（第4個）、`-`（第5個）、`\`（第6個）選字
+- **或直接點擊**候選字選取（觸控友善！）
+- 輸入 2 碼後繼續 → 自動選取第一候選字！
+- 按 `Backspace` 復原（刪除輸入，然後是輸出緩衝區）
+- 切換至專注模式（右上角）取得極簡介面
+- 選取非預設候選字 → **輸入法會學習您的偏好並在自動選字時使用！**[Bug 已修復 ✅]
+- **新功能**：使用 ◀ **上一頁** / **下一頁** ▶ 按鈕在手機/平板上輕鬆翻頁！
+- 完成後點擊「複製」
 
-### For Developers
+### 給開發者
 
 ```bash
-# Clone repository
+# 複製儲存庫
 git clone https://github.com/clarencechien/webdayi.git
 cd webdayi
 
-# Run tests (all 35 tests should pass)
+# 執行測試（全部 35 個測試應通過）
 cd mvp1
-node test-node-v6.js  # User personalization tests (19/19)
-node test-node-v7.js  # Auto-select bug fix tests (16/16)
+node test-node-v6.js  # 使用者個人化測試 (19/19)
+node test-node-v7.js  # 自動選字 bug 修復測試 (16/16)
 
-# Open locally in browser
+# 在瀏覽器中本地開啟
 open index.html
-# Or use a local server:
+# 或使用本地伺服器：
 python3 -m http.server 8000
-# Visit: http://localhost:8000
+# 造訪：http://localhost:8000
 
-# Data Pipeline: Regenerate database (if needed)
+# 資料處理管線：重新產生資料庫（如有需要）
 cd ../converter
-node convert.js  # Creates mvp1/dayi_db.json
+node convert.js  # 建立 mvp1/dayi_db.json
 ```
 
-### For Future (MVP 2a - Browser Extension)
+### 未來功能（MVP 2a - 瀏覽器擴充套件）
 
-When MVP 2a is complete:
-1. Install extension from Chrome Web Store
-2. Start typing in any web app (Gmail, Docs, etc.)
-3. Native input experience!
+當 MVP 2a 完成時：
+1. 從 Chrome 線上應用程式商店安裝擴充套件
+2. 在任何網頁應用程式（Gmail、Docs 等）開始輸入
+3. 原生輸入體驗！
 
-## Documentation
+## 文件
 
-### Core Documents
+### 核心文件
 
-| Document | Purpose | Audience |
+| 文件 | 用途 | 受眾 |
 |----------|---------|----------|
-| [PRD.md](PRD.md) | Product requirements and specifications | Product, Engineering |
-| [CLAUDE.md](CLAUDE.md) | Technical guide for AI assistants | AI, Engineering |
+| [PRD.md](PRD.md) | 產品需求與規格 | 產品、工程 |
+| [CLAUDE.md](CLAUDE.md) | AI 助手技術指南 | AI、工程 |
 
-### Memory Bank (Detailed Documentation)
+### Memory Bank（詳細文件）
 
-The `memory-bank/` directory contains comprehensive project documentation:
+`memory-bank/` 目錄包含完整的專案文件：
 
-| File | Description |
+| 檔案 | 說明 |
 |------|-------------|
-| [projectbrief.md](memory-bank/projectbrief.md) | Mission, goals, scope, and architecture |
-| [productContext.md](memory-bank/productContext.md) | Why this exists, problems solved, UX vision |
-| [systemPatterns.md](memory-bank/systemPatterns.md) | Architecture, design patterns, technical decisions |
-| [techContext.md](memory-bank/techContext.md) | Tech stack, setup, APIs, dependencies |
-| [activeContext.md](memory-bank/activeContext.md) | Current work, next steps, active decisions |
-| [progress.md](memory-bank/progress.md) | Status tracker, milestones, completion rates |
+| [projectbrief.md](memory-bank/projectbrief.md) | 使命、目標、範圍與架構 |
+| [productContext.md](memory-bank/productContext.md) | 為何存在、解決的問題、UX 願景 |
+| [systemPatterns.md](memory-bank/systemPatterns.md) | 架構、設計模式、技術決策 |
+| [techContext.md](memory-bank/techContext.md) | 技術堆疊、設定、API、相依性 |
+| [activeContext.md](memory-bank/activeContext.md) | 目前工作、下一步、活躍決策 |
+| [progress.md](memory-bank/progress.md) | 狀態追蹤器、里程碑、完成率 |
 
-**💡 New to the project?** Start with [projectbrief.md](memory-bank/projectbrief.md), then [activeContext.md](memory-bank/activeContext.md)
+**💡 專案新手？** 從 [projectbrief.md](memory-bank/projectbrief.md) 開始，然後是 [activeContext.md](memory-bank/activeContext.md)
 
-## Architecture
+## 架構
 
-### The Big Picture
+### 大架構圖
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Rime Dictionary (YAML)                                 │
+│  Rime 字典（YAML）                                      │
 │  dayi.dict.yaml                                         │
 └─────────────┬───────────────────────────────────────────┘
               │
-              │ Phase 0: Offline Conversion
+              │ Phase 0：離線轉換
               ▼
 ┌─────────────────────────────────────────────────────────┐
-│  WebDaYi Database (JSON)                                │
-│  dayi_db.json - O(1) queryable                          │
+│  WebDaYi 資料庫（JSON）                                 │
+│  dayi_db.json - O(1) 可查詢                             │
 └─────────┬───────────────────────────┬───────────────────┘
           │                           │
           │ Phase 1                   │ Phase 2
           ▼                           ▼
 ┌───────────────────────┐   ┌───────────────────────────┐
-│  Static Webpage       │   │  Chrome Extension         │
-│  (Validation)         │   │  (Production)             │
+│  靜態網頁             │   │  Chrome 擴充套件          │
+│  （驗證）             │   │  （正式版）               │
 │                       │   │                           │
-│  • Input box          │   │  • Background script      │
-│  • Candidate display  │   │  • Content script         │
-│  • Clipboard output   │   │  • In-place injection     │
+│  • 輸入框             │   │  • 背景腳本               │
+│  • 候選字顯示         │   │  • 內容腳本               │
+│  • 剪貼簿輸出         │   │  • 即時注入               │
 └───────────────────────┘   └───────────────────────────┘
 ```
 
-### Project Structure
+### 專案結構
 
 ```
 webdayi/
-├── converter/              # Phase 0: Data pipeline
-│   ├── convert.js         # YAML → JSON converter
+├── converter/              # Phase 0：資料處理管線
+│   ├── convert.js         # YAML → JSON 轉換器
 │   └── raw_data/
-│       └── dayi.dict.yaml # Rime source
-├── mvp1/                  # Phase 1: Static webpage
+│       └── dayi.dict.yaml # Rime 來源
+├── mvp1/                  # Phase 1：靜態網頁
 │   ├── index.html
-│   ├── core_logic.js      # Core query engine
-│   └── dayi_db.json       # Generated database
-├── mvp2a-plugin/          # Phase 2: Browser extension
-│   ├── manifest.json      # Chrome Extension config
+│   ├── core_logic.js      # 核心查詢引擎
+│   └── dayi_db.json       # 產生的資料庫
+├── mvp2a-plugin/          # Phase 2：瀏覽器擴充套件
+│   ├── manifest.json      # Chrome 擴充套件設定
 │   ├── background.js      # Service Worker
-│   └── content.js         # DOM injection
-└── memory-bank/           # Project documentation
-    └── *.md               # Comprehensive docs
+│   └── content.js         # DOM 注入
+└── memory-bank/           # 專案文件
+    └── *.md               # 完整文件
 ```
 
-## Features
+## 功能
 
-### MVP 1.0 v6: Core Engine ✅ COMPLETE
+### MVP 1.0 v6：核心引擎 ✅ 完成
 
-**Basic Features:**
-- ✅ Load Dàyì dictionary into memory (Map data structure, 1,584 codes)
-- ✅ Query candidates by code (e.g., "4jp" → "易", "義")
-- ✅ Sort by frequency (most common first)
-- ✅ Select with smart keys (Space/' /[/]/- /\)
-  - **Important**: 0-9 are now part of codes (e.g., t0, t1), NOT selection keys
-- ✅ Copy composed text to clipboard
+**基本功能：**
+- ✅ 將大易字典載入記憶體（Map 資料結構，1,584 個字碼）
+- ✅ 依字碼查詢候選字（例如：「4jp」→「易」、「義」）
+- ✅ 依頻率排序（最常用的優先）
+- ✅ 使用智慧鍵選字（Space/' /[/]/- /\）
+  - **重要**：0-9 現在是字碼的一部分（例如：t0、t1），**不是**選字鍵
+- ✅ 複製組合文字至剪貼簿
 
-**Advanced Features (v3):**
-- ✅ **Pagination System**: Cycle through pages with `=` key
-  - Handles codes with 60+ candidates (e.g., ux: 61 candidates → 11 pages)
-  - Visual indicator: "第 1/3 頁 = 換頁"
-  - Cycles back to first page after last
-- ✅ **Auto-select on 3rd Character**: Speeds up typing
-  - Type 2 chars → 3rd char → first candidate auto-selected
-  - New character becomes new input code
-  - Does not trigger on selection/pagination keys
+**進階功能（v3）：**
+- ✅ **翻頁系統**：使用 `=` 鍵循環翻頁
+  - 處理超過 60 個候選字的字碼（例如：ux：61 個候選字 → 11 頁）
+  - 視覺指示器：「第 1/3 頁 = 換頁」
+  - 最後一頁後循環回第一頁
+- ✅ **第 3 字元自動選字**：加速打字
+  - 輸入 2 碼 → 第 3 碼 → 第一候選字自動選取
+  - 新字元成為新的輸入字碼
+  - 不會在選字/翻頁鍵上觸發
 
-**Advanced Features (v4):**
-- ✅ **Smart Backspace**: Professional IME-style undo behavior
-  - Backspace on input with 2 chars → 1 char (does NOT trigger auto-select)
-  - Backspace on input with 1 char → empty input
-  - Backspace on empty input → deletes last char from output buffer
-  - Continuous backspace → keeps deleting from output until empty
-  - Provides natural correction and undo flow
+**進階功能（v4）：**
+- ✅ **智慧倒退**：專業輸入法風格的復原行為
+  - 輸入有 2 碼時倒退 → 1 碼（**不會**觸發自動選字）
+  - 輸入有 1 碼時倒退 → 空輸入
+  - 輸入為空時倒退 → 從輸出緩衝區刪除最後一個字元
+  - 連續倒退 → 持續從輸出刪除直到清空
+  - 提供自然的修正與復原流程
 
-**Advanced Features (v5):**
-- ✅ **Input Mode Toggle**: Switch between normal and express modes
-  - Normal mode: Full UI with instructions and branding
-  - Express mode: Minimal UI (only input/candidates/output)
-  - Toggle button always visible (top-right corner)
-  - Preference saved to localStorage (persists across sessions)
-  - Visual indicator in express mode
+**進階功能（v5）：**
+- ✅ **輸入模式切換**：在一般與專注模式之間切換
+  - 一般模式：完整 UI，含說明與品牌
+  - 專注模式：極簡 UI（僅輸入/候選字/輸出）
+  - 切換按鈕始終可見（右上角）
+  - 偏好設定儲存至 localStorage（跨工作階段保留）
+  - 專注模式的視覺指示器
 
-**Advanced Features (v6):**
-- ✅ **User Personalization**: IME learns your character preferences
-  - **MVP1.7**: Load personal records from localStorage on page load
-  - **MVP1.8**: Save personal preference when selecting non-default candidates
-  - **MVP1.9**: Prioritize user preferences in candidate ordering
-  - Example: Prefer "義" over "易" for code `4jp` → "義" appears first next time
-  - Preferences persist across sessions
-  - Works seamlessly with pagination and auto-select
-  - Professional adaptive IME behavior
-  - **🐛 Bug Fixed**: Auto-select now correctly uses user preferences (was using default order)
+**進階功能（v6）：**
+- ✅ **使用者個人化**：輸入法學習您的字元偏好
+  - **MVP1.7**：頁面載入時從 localStorage 載入個人記錄
+  - **MVP1.8**：選取非預設候選字時儲存個人偏好
+  - **MVP1.9**：在候選字排序中優先使用者偏好
+  - 範例：字碼 `4jp` 偏好「義」而非「易」→「義」下次出現在第一位
+  - 偏好設定跨工作階段保留
+  - 與翻頁和自動選字無縫整合
+  - 專業的自適應輸入法行為
+  - **🐛 Bug 已修復**：自動選字現在正確使用使用者偏好（先前使用預設順序）
 
-**Advanced Features (v7):**
-- ✅ **Touch-Friendly UX**: Mobile and tablet optimized interactions
-  - **MVP1.10**: Click to select candidates + prev/next page buttons
-  - Click any candidate item to select (no keyboard required)
-  - Visual ◀ **上一頁** / **下一頁** ▶ buttons for easy pagination
-  - Touch-optimized button sizes (minimum 44px touch targets)
-  - Hover and active states for clear visual feedback
-  - Keyboard accessibility maintained (can use Enter/Space on focused items)
-  - Perfect for touch devices and trackpad users
+**進階功能（v7）：**
+- ✅ **觸控友善 UX**：為手機和平板最佳化的互動
+  - **MVP1.10**：點擊選取候選字 + 上下頁按鈕
+  - 點擊任何候選字項目即可選取（無需鍵盤）
+  - 視覺化 ◀ **上一頁** / **下一頁** ▶ 按鈕，方便翻頁
+  - 觸控最佳化按鈕大小（最小 44px 觸控目標）
+  - 懸停和活動狀態，提供清晰的視覺回饋
+  - 維持鍵盤無障礙功能（可在聚焦項目上使用 Enter/Space）
+  - 完美適合觸控裝置和軌跡板使用者
 
-**Target User**: Developer (for validation) & Power Users
-**Output Method**: Copy/Paste
-**Test Coverage**: 35/35 tests passing with TDD (19 personalization + 16 bug fix tests)
+**目標使用者**：開發者（用於驗證）與進階使用者
+**輸出方法**：複製/貼上
+**測試涵蓋率**：35/35 測試通過，採用 TDD（19 個個人化 + 16 個 bug 修復測試）
 
-### MVP 2a: Browser Plugin (Planned)
+### MVP 2a：瀏覽器外掛（規劃中）
 
-- ✅ Chrome Extension (Manifest V3)
-- ✅ Intercept keystrokes in web pages
-- ✅ Dynamic candidate UI at cursor position
-- ✅ In-place text injection (no copy/paste needed)
-- ✅ Works in Gmail, Google Docs, Notion
+- ✅ Chrome 擴充套件（Manifest V3）
+- ✅ 攔截網頁中的按鍵
+- ✅ 在游標位置動態顯示候選字 UI
+- ✅ 即時文字注入（無需複製/貼上）
+- ✅ 適用於 Gmail、Google Docs、Notion
 
-**Target User**: End user
-**Output Method**: Native typing experience
+**目標使用者**：終端使用者
+**輸出方法**：原生打字體驗
 
-### Future: MVP 2a+ (Roadmap)
+### 未來：MVP 2a+（路線圖）
 
-- 🔮 Cloud sync (personal dictionary via chrome.storage.sync)
-- 🔮 Context awareness (different suggestions for github.com vs gmail.com)
-- 🔮 N-gram learning (smart phrase completion)
-- 🔮 Manual dictionary editing
+- 🔮 雲端同步（透過 chrome.storage.sync 同步個人字典）
+- 🔮 情境感知（針對 github.com 與 gmail.com 提供不同建議）
+- 🔮 N-gram 學習（智慧詞組完成）
+- 🔮 手動字典編輯
 
-## Technology Stack
+## 技術堆疊
 
-- **Language**: JavaScript (ES6+)
-- **Runtime**: Chrome 88+
-- **Extension**: Manifest V3
-- **Data**: JSON (from Rime YAML)
-- **Dependencies**: Zero (production), js-yaml (dev)
+- **語言**：JavaScript（ES6+）
+- **執行環境**：Chrome 88+
+- **擴充套件**：Manifest V3
+- **資料**：JSON（來自 Rime YAML）
+- **相依性**：零（正式版）、js-yaml（開發版）
 
-**Philosophy**: No frameworks, maximum transparency
+**理念**：無框架，最大透明度
 
-## Development
+## 開發
 
-### Prerequisites
+### 先決條件
 
 - Node.js ≥ 18
-- Chrome browser ≥ 88
-- Basic understanding of JavaScript
+- Chrome 瀏覽器 ≥ 88
+- JavaScript 基礎知識
 
-### Current Phase: Data Pipeline
+### 目前階段：資料處理管線
 
 ```bash
-# 1. Setup converter
+# 1. 設定轉換器
 mkdir -p converter/raw_data
 mv dayi2dict.yaml converter/raw_data/dayi.dict.yaml
 
-# 2. Install dependency
+# 2. 安裝相依性
 cd converter
 npm install js-yaml
 
-# 3. Run converter (to be implemented)
+# 3. 執行轉換器（待實作）
 node convert.js
 
-# 4. Verify output
+# 4. 驗證輸出
 cat ../mvp1/dayi_db.json | jq '."4jp"'
-# Expected: [{"char":"易","freq":80}, ...]
+# 預期：[{"char":"易","freq":80}, ...]
 ```
 
-### Testing
+### 測試
 
-**Current**: Manual testing only
-**Future**: Automated tests for regression prevention
+**目前**：僅手動測試
+**未來**：自動化測試以防止迴歸
 
 ```bash
-# Test static page (Phase 1)
+# 測試靜態頁面（Phase 1）
 open mvp1/index.html
 
-# Test extension (Phase 2)
-# chrome://extensions → Developer Mode → Load Unpacked
+# 測試擴充套件（Phase 2）
+# chrome://extensions → 開發人員模式 → 載入未封裝項目
 ```
 
-## Contributing
+## 貢獻
 
-**Current Status**: Solo development project (learning/validation phase)
+**目前狀態**：個人開發專案（學習/驗證階段）
 
-Once MVP 2a is validated, contributions welcome for:
-- Firefox extension port
-- Additional language models
-- UI/UX improvements
-- Documentation
+一旦 MVP 2a 驗證完成，歡迎貢獻：
+- Firefox 擴充套件移植
+- 額外語言模型
+- UI/UX 改進
+- 文件
 
-## Roadmap
+## 路線圖
 
-| Milestone | Target Date | Status |
+| 里程碑 | 目標日期 | 狀態 |
 |-----------|-------------|--------|
-| ✅ Project Initialized | 2025-11-06 | Done |
-| ✅ Phase 0: Data Pipeline | 2025-11-06 | Done |
-| ✅ MVP 1.0: Core Engine | 2025-11-06 | Done |
-| ✅ MVP 1.0 v2: Selection Keys Fix | 2025-11-06 | Done |
-| ✅ MVP 1.0 v3: Pagination & Auto-select | 2025-11-06 | Done |
-| ✅ MVP 1.0 v4: Smart Backspace UX | 2025-11-06 | Done |
-| ⏳ MVP 2a: Browser Plugin | 2025-11-20 | Planned |
-| ⏳ Public Release (Chrome Web Store) | 2025-11-25 | Planned |
-| 📋 MVP 2a+: Advanced Features | 2025-12-15 | Future |
+| ✅ 專案初始化 | 2025-11-06 | 完成 |
+| ✅ Phase 0：資料處理管線 | 2025-11-06 | 完成 |
+| ✅ MVP 1.0：核心引擎 | 2025-11-06 | 完成 |
+| ✅ MVP 1.0 v2：選字鍵修正 | 2025-11-06 | 完成 |
+| ✅ MVP 1.0 v3：翻頁與自動選字 | 2025-11-06 | 完成 |
+| ✅ MVP 1.0 v4：智慧倒退 UX | 2025-11-06 | 完成 |
+| ⏳ MVP 2a：瀏覽器外掛 | 2025-11-20 | 規劃中 |
+| ⏳ 公開發布（Chrome 線上應用程式商店） | 2025-11-25 | 規劃中 |
+| 📋 MVP 2a+：進階功能 | 2025-12-15 | 未來 |
 
-## Philosophy
+## 理念
 
-> **Parasite on data, innovate on experience**
+> **寄生於資料，創新於體驗**
 
-We don't rebuild the Dàyì dictionary—we leverage Rime's excellent open-source work. Our innovation is in:
+我們不重建大易字典——我們採用 Rime 優秀的開源成果。我們的創新在於：
 
-- **Accessibility**: Web-first, works where you type
-- **Transparency**: Readable, modifiable code
-- **Extensibility**: Easy to add learning features
-- **Seamlessness**: Browser-native experience
+- **可及性**：網頁優先，在您打字的地方運作
+- **透明度**：可讀、可修改的程式碼
+- **可擴展性**：易於新增學習功能
+- **無縫性**：瀏覽器原生體驗
 
-## License
+## 授權
 
-Open source (license TBD - currently development phase)
+開源（授權待定 - 目前為開發階段）
 
-## Acknowledgments
+## 致謝
 
-- **Rime Project**: Source of high-quality Dàyì dictionary data
-- **Dàyì Input Method**: Classic Chinese input system
-- **Open Source Community**: Inspiration and tools
+- **Rime 專案**：高品質大易字典資料來源
+- **大易輸入法**：經典中文輸入系統
+- **開源社群**：靈感與工具
 
-## Contact
+## 聯絡
 
-- **Issues**: [GitHub Issues](../../issues) (when public)
-- **Discussions**: [GitHub Discussions](../../discussions) (when public)
+- **問題回報**：[GitHub Issues](../../issues)（公開時）
+- **討論**：[GitHub Discussions](../../discussions)（公開時）
 
 ---
 
-**Last Updated**: 2025-11-06
-**Status**: MVP 1.0 v4 Complete
-**Version**: 1.0.4-alpha (MVP1 v4 with smart backspace UX)
+**最後更新**：2025-11-06
+**狀態**：MVP 1.0 v4 完成
+**版本**：1.0.4-alpha（MVP1 v4 with smart backspace UX）

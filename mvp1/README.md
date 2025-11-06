@@ -1,249 +1,251 @@
-# WebDaYi MVP1 - Core Engine
+# WebDaYi MVP1 - 核心引擎
 
-This is the **MVP 1.0** implementation of WebDaYi - a static webpage for validating the core Dàyì input method engine.
+> **Language / 語言**: [English](README.en.md) | [正體中文](README.md)
 
-## Purpose
+這是 WebDaYi 的 **MVP 1.0** 實作 - 用於驗證核心大易輸入法引擎的靜態網頁。
 
-MVP1 serves as a validation tool for the core query/sort algorithm before wrapping it in a browser extension (MVP 2a). It allows developers to:
+## 目的
 
-1. Verify the database conversion is correct
-2. Test query and sorting logic
-3. Validate the user interaction flow
-4. Debug any issues in a simple environment
+MVP1 作為核心查詢/排序演算法的驗證工具，在將其包裝成瀏覽器擴充套件（MVP 2a）之前使用。它讓開發者能夠：
 
-## Files
+1. 驗證資料庫轉換正確
+2. 測試查詢與排序邏輯
+3. 驗證使用者互動流程
+4. 在簡單環境中除錯問題
 
-- **index.html** - Main application UI
-- **core_logic.js** - Core engine implementation (query, sort, render, user preferences)
-- **style.css** - Styling (including touch-friendly styles)
-- **dayi_db.json** - Generated database (from converter)
-- **test.html** - Browser-based test suite
-- **test-node-v6.js** - User personalization tests (19 tests)
-- **test-node-v7.js** - Auto-select bug fix tests (16 tests)
+## 檔案
 
-## Usage
+- **index.html** - 主要應用程式 UI
+- **core_logic.js** - 核心引擎實作（查詢、排序、渲染、使用者偏好）
+- **style.css** - 樣式（包括觸控友善樣式）
+- **dayi_db.json** - 產生的資料庫（來自轉換器）
+- **test.html** - 瀏覽器測試套件
+- **test-node-v6.js** - 使用者個人化測試（19 個測試）
+- **test-node-v7.js** - 自動選字 bug 修復測試（16 個測試）
 
-### Run the Application
+## 使用方式
 
-Simply open `index.html` in a web browser:
+### 執行應用程式
+
+只需在網頁瀏覽器中開啟 `index.html`：
 
 ```bash
-# Option 1: Direct file
+# 選項 1：直接開啟檔案
 open index.html
 
-# Option 2: Simple HTTP server (recommended)
+# 選項 2：簡單的 HTTP 伺服器（建議）
 python3 -m http.server 8000
-# Then visit: http://localhost:8000
+# 然後造訪：http://localhost:8000
 ```
 
-### Run Tests
+### 執行測試
 
-**Browser tests:**
+**瀏覽器測試：**
 ```bash
 open test.html
 ```
 
-**Node.js tests (TDD):**
+**Node.js 測試（TDD）：**
 ```bash
-node test-node-v6.js  # User personalization tests (19/19)
-node test-node-v7.js  # Auto-select bug fix tests (16/16)
-# Total: 35/35 tests passing
+node test-node-v6.js  # 使用者個人化測試 (19/19)
+node test-node-v7.js  # 自動選字 bug 修復測試 (16/16)
+# 總計：35/35 測試通過
 ```
 
-## How to Use
+## 如何使用
 
-### Input Codes
-1. **Type** a Dàyì code in the input box (e.g., `v`, `a`, `t0`, `t1`)
-   - **Important**: 0-9 are now part of codes (not selection keys!)
-2. **View** candidates appear automatically below
+### 輸入字碼
+1. **輸入**大易字碼至輸入框（例如：`v`、`a`、`t0`、`t1`）
+   - **重要**：0-9 現在是字碼的一部分（不是選字鍵！）
+2. **檢視**候選字自動出現在下方
 
-### Selection Keys
-Use these keys to select candidates:
-- `Space` → 1st candidate (fastest!)
-- `'` → 2nd candidate
-- `[` → 3rd candidate
-- `]` → 4th candidate
-- `-` → 5th candidate
-- `\` → 6th candidate
+### 選字鍵
+使用這些鍵選取候選字：
+- `Space` → 第 1 個候選字（最快！）
+- `'` → 第 2 個候選字
+- `[` → 第 3 個候選字
+- `]` → 第 4 個候選字
+- `-` → 第 5 個候選字
+- `\` → 第 6 個候選字
 
-### New Features v3, v4, v5, & v6
-1. **Auto-select on 3rd Character** (v3): When you type 2 characters and continue typing a 3rd character, the first candidate is automatically selected. This speeds up typing significantly!
-   - Example: Type "ab" → see candidates → type "c" → "ab"'s first candidate auto-selected, "c" becomes new input
+### v3、v4、v5 與 v6 的新功能
+1. **第 3 字元自動選字**（v3）：當您輸入 2 個字元後繼續輸入第 3 個字元時，第一候選字會自動選取。這能大幅加速打字！
+   - 範例：輸入「ab」→ 看到候選字 → 輸入「c」→「ab」的第一候選字自動選取，「c」成為新的輸入
 
-2. **Pagination** (v3): When there are more than 6 candidates, press `=` to cycle through pages
-   - Shows indicator: "第 1/3 頁 = 換頁" (Page 1/3, press = to page)
-   - Cycles back to page 1 after the last page
+2. **翻頁**（v3）：當候選字超過 6 個時，按 `=` 循環翻頁
+   - 顯示指示器：「第 1/3 頁 = 換頁」（第 1/3 頁，按 = 翻頁）
+   - 最後一頁後循環回第 1 頁
 
-3. **Smart Backspace** (v4): Intelligent backspace behavior that mimics professional IMEs
-   - When input has 2 chars: `Backspace` → 1 char (does NOT trigger auto-select)
-   - When input has 1 char: `Backspace` → empty input
-   - When input is empty: `Backspace` → deletes last character from output buffer
-   - Continuous backspace: Keeps deleting from output until empty
-   - This provides a natural "undo" flow for corrections
+3. **智慧倒退**（v4）：模仿專業輸入法的智慧倒退行為
+   - 輸入有 2 碼時：`Backspace` → 1 碼（**不會**觸發自動選字）
+   - 輸入有 1 碼時：`Backspace` → 空輸入
+   - 輸入為空時：`Backspace` → 從輸出緩衝區刪除最後一個字元
+   - 連續倒退：持續從輸出刪除直到清空
+   - 提供自然的「復原」流程以進行修正
 
-4. **Input Mode Toggle** (v5): Switch between normal and express modes
-   - **Normal Mode**: Full UI with instructions and branding (good for learning)
-   - **Express Mode**: Minimal UI with only input/candidates/output (good for fast typing)
-   - Toggle button: Top-right corner (always visible)
-   - Preference saved to localStorage (persists across sessions)
-   - Visual indicator: "專注模式" badge in express mode
+4. **輸入模式切換**（v5）：在一般與專注模式之間切換
+   - **一般模式**：完整 UI，含說明與品牌（適合學習）
+   - **專注模式**：極簡 UI，僅輸入/候選字/輸出（適合快速打字）
+   - 切換按鈕：右上角（始終可見）
+   - 偏好設定儲存至 localStorage（跨工作階段保留）
+   - 視覺指示器：專注模式中的「專注模式」徽章
 
-5. **User Personalization** (v6): IME learns your character preferences automatically!
-   - **MVP1.7**: Load personal records from localStorage on page load
-   - **MVP1.8**: Save personal preference when selecting non-default candidates
-   - **MVP1.9**: Prioritize user preferences in candidate ordering
-   - Example: If you prefer "義" over "易" for code `4jp`, after selecting it once, "義" will appear first next time
-   - Preferences persist across sessions (stored in localStorage)
-   - Works seamlessly with pagination and auto-select
-   - Professional adaptive IME behavior
+5. **使用者個人化**（v6）：輸入法自動學習您的字元偏好！
+   - **MVP1.7**：頁面載入時從 localStorage 載入個人記錄
+   - **MVP1.8**：選取非預設候選字時儲存個人偏好
+   - **MVP1.9**：在候選字排序中優先使用者偏好
+   - 範例：如果您偏好字碼 `4jp` 的「義」而非「易」，選取一次後，「義」下次會出現在第一位
+   - 偏好設定跨工作階段保留（儲存在 localStorage）
+   - 與翻頁和自動選字無縫整合
+   - 專業的自適應輸入法行為
 
-### Workflow
-3. **Select** a candidate using the selection keys above, OR continue typing to auto-select
-4. **Page** through candidates using `=` if there are more than 6
-5. **Repeat** to compose your text
-6. **Copy** the composed text using the "Copy" button
-7. **Paste** into your target application
+### 工作流程
+3. 使用上述選字鍵**選取**候選字，或繼續輸入以自動選字
+4. 如果候選字超過 6 個，使用 `=` **翻頁**
+5. **重複**以組合您的文字
+6. 使用「複製」按鈕**複製**組合的文字
+7. **貼上**到您的目標應用程式
 
-## Test Results
+## 測試結果
 
-All tests passing (35/35):
+全部測試通過（35/35）：
 
-**test-node-v6.js (19 tests):**
+**test-node-v6.js（19 個測試）：**
 ```
-✓ User Model - Storage Keys (2 tests) [v6]
-  - Correct localStorage key
-  - Empty model creation
-✓ User Model - Load and Parse (3 tests) [v6]
-  - Parse valid JSON to Map
-  - Handle empty JSON
-  - Handle null/invalid JSON
-✓ User Model - Save and Format (2 tests) [v6]
-  - Convert Map to JSON
-  - Handle empty Map
-✓ User Model - Update Logic (3 tests) [v6]
-  - Move selected char to front
-  - Handle first selection (no change)
-  - Handle last selection
-✓ User Model - Apply Preferences (3 tests) [v6]
-  - Apply user preference to candidates
-  - Use static order when no preference
-  - Handle partial preferences
-✓ User Model - Integration (2 tests) [v6]
-  - Update model after selection
-  - Update existing preference
-✓ Input Mode Toggle (2 tests) [v5]
-✓ Core Functions (2 tests)
-```
-
-**test-node-v7.js (16 tests) - Bug Fix Verification:**
-```
-✓ Auto-Select Bug - Setup (2 tests) [v7 Bug Fix]
-  - Verify performAutoSelect function exists
-  - Verify applyUserPreference function exists
-✓ Auto-Select Bug - Reproduce the Bug (2 tests) [v7 Bug Fix]
-  - Confirm bug: auto-select without user preferences
-  - Verify applyUserPreference works correctly
-✓ Auto-Select Bug - Test Fixed performAutoSelect (3 tests) [v7 Bug Fix]
-  - WITH user preferences returns user preference ✅ Fixed!
-  - WITHOUT user model falls back to default
-  - WITH empty user model falls back to default
-✓ Auto-Select Bug - Golden Path (2 tests) [v7 Bug Fix]
-  - User selects 2nd candidate → auto-select uses it
-  - User selects 3rd candidate → auto-select uses it
-✓ Auto-Select Bug - Edge Cases (4 tests) [v7 Bug Fix]
-  - Invalid code returns failure
-  - User preference has char not in static DB
-  - User preference is empty array
-  - Code has only one candidate
-✓ Auto-Select Bug - Integration (1 test) [v7 Bug Fix]
-  - Full workflow: query → select → save → auto-select
-✓ Previous Tests - No Regression (2 tests) [v7 Bug Fix]
-  - Database map creation still works
-  - Selection key mapping still works
+✓ 使用者模型 - 儲存鍵（2 個測試）[v6]
+  - 正確的 localStorage 鍵
+  - 空模型建立
+✓ 使用者模型 - 載入與解析（3 個測試）[v6]
+  - 解析有效 JSON 至 Map
+  - 處理空 JSON
+  - 處理 null/無效 JSON
+✓ 使用者模型 - 儲存與格式化（2 個測試）[v6]
+  - 將 Map 轉換為 JSON
+  - 處理空 Map
+✓ 使用者模型 - 更新邏輯（3 個測試）[v6]
+  - 將選取的字元移至前面
+  - 處理第一個選項（無需變更）
+  - 處理最後一個選項
+✓ 使用者模型 - 套用偏好（3 個測試）[v6]
+  - 將使用者偏好套用至候選字
+  - 無使用者偏好時使用靜態順序
+  - 處理部分偏好
+✓ 使用者模型 - 整合（2 個測試）[v6]
+  - 選取後更新模型
+  - 更新現有偏好
+✓ 輸入模式切換（2 個測試）[v5]
+✓ 核心功能（2 個測試）
 ```
 
-## Known Sample Codes
+**test-node-v7.js（16 個測試）- Bug 修復驗證：**
+```
+✓ 自動選字 Bug - 設定（2 個測試）[v7 Bug 修復]
+  - 驗證 performAutoSelect 函式存在
+  - 驗證 applyUserPreference 函式存在
+✓ 自動選字 Bug - 重現 Bug（2 個測試）[v7 Bug 修復]
+  - 確認 bug：沒有使用者偏好的自動選字
+  - 驗證 applyUserPreference 正確運作
+✓ 自動選字 Bug - 測試已修復的 performAutoSelect（3 個測試）[v7 Bug 修復]
+  - 使用使用者偏好時回傳使用者偏好 ✅ 已修復！
+  - 沒有使用者模型時回退至預設值
+  - 使用空使用者模型時回退至預設值
+✓ 自動選字 Bug - 黃金路徑（2 個測試）[v7 Bug 修復]
+  - 使用者選取第 2 個候選字 → 自動選字使用它
+  - 使用者選取第 3 個候選字 → 自動選字使用它
+✓ 自動選字 Bug - 邊緣案例（4 個測試）[v7 Bug 修復]
+  - 無效字碼回傳失敗
+  - 使用者偏好包含靜態資料庫中不存在的字元
+  - 使用者偏好是空陣列
+  - 字碼只有一個候選字
+✓ 自動選字 Bug - 整合（1 個測試）[v7 Bug 修復]
+  - 完整工作流程：查詢 → 選取 → 儲存 → 自動選字
+✓ 先前測試 - 無迴歸（2 個測試）[v7 Bug 修復]
+  - 資料庫 map 建立仍正常運作
+  - 選字鍵映射仍正常運作
+```
 
-From the generated database:
+## 已知範例字碼
+
+來自產生的資料庫：
 
 - `v` → 大, 夫, 禾
 - `a` → 人, 入
-- `t0` → 逍, 縫, 尐 (0-9 are valid code characters!)
+- `t0` → 逍, 縫, 尐（0-9 是有效的字碼字元！）
 - `t1` → 糾, 常, 紼
 - `,` → 力
 
-Try these to verify the system works!
+試試這些來驗證系統運作！
 
-## Success Criteria
+## 成功標準
 
-- [x] Database loads successfully (1584 codes)
-- [x] Query returns correct candidates
-- [x] Candidates sorted by frequency
-- [x] Selection works with new keys (Space, ', [, ], -, \)
-- [x] 0-9 allowed in input codes (not selection keys)
-- [x] Pagination works with = key (cycles through pages) [v3]
-- [x] Auto-select on 3rd character (speeds up typing) [v3]
-- [x] Smart backspace (input → output buffer deletion) [v4]
-- [x] Backspace does NOT trigger auto-select [v4]
-- [x] Input mode toggle (normal ↔ express) [v5]
-- [x] Express mode hides distractions [v5]
-- [x] Mode preference persists in localStorage [v5]
-- [x] User preferences load on page load [v6]
-- [x] User preferences save when selecting non-default candidate [v6]
-- [x] User preferences prioritize in candidate ordering [v6]
-- [x] User preferences persist across sessions [v6]
-- [x] Auto-select respects user preferences [BUG FIX v7] ← Fixed!
-- [x] Candidates are clickable (touch-friendly) [NEW v7]
-- [x] Visual prev/next page buttons work [NEW v7]
-- [x] Touch targets are minimum 44px [NEW v7]
-- [x] Text accumulates in output buffer
-- [x] Clipboard copy works
-- [x] All TDD tests pass (35/35: 19 personalization + 16 bug fix)
+- [x] 資料庫成功載入（1584 個字碼）
+- [x] 查詢回傳正確的候選字
+- [x] 候選字依頻率排序
+- [x] 使用新鍵的選字功能（Space、'、[、]、-、\）
+- [x] 輸入字碼中允許 0-9（不是選字鍵）
+- [x] 翻頁功能使用 = 鍵（循環翻頁）[v3]
+- [x] 第 3 字元自動選字（加速打字）[v3]
+- [x] 智慧倒退（輸入 → 輸出緩衝區刪除）[v4]
+- [x] 倒退**不會**觸發自動選字 [v4]
+- [x] 輸入模式切換（一般 ↔ 專注）[v5]
+- [x] 專注模式隱藏干擾 [v5]
+- [x] 模式偏好在 localStorage 中保留 [v5]
+- [x] 使用者偏好在頁面載入時載入 [v6]
+- [x] 選取非預設候選字時儲存使用者偏好 [v6]
+- [x] 使用者偏好在候選字排序中優先 [v6]
+- [x] 使用者偏好跨工作階段保留 [v6]
+- [x] 自動選字遵循使用者偏好 [BUG 修復 v7] ← 已修復！
+- [x] 候選字可點擊（觸控友善）[NEW v7]
+- [x] 視覺化上下頁按鈕運作 [NEW v7]
+- [x] 觸控目標最小 44px [NEW v7]
+- [x] 文字在輸出緩衝區中累積
+- [x] 剪貼簿複製運作
+- [x] 全部 TDD 測試通過（35/35：19 個個人化 + 16 個 bug 修復）
 
-## Next Steps
+## 下一步
 
-Once MVP1 is validated:
+一旦 MVP1 驗證完成：
 
-1. Review and confirm accuracy with more test cases
-2. Measure query performance (should be <50ms)
-3. Refactor core_logic.js into a module for MVP 2a
-4. Begin MVP 2a (Chrome Extension) implementation
+1. 透過更多測試案例審查並確認準確性
+2. 測量查詢效能（應 <50ms）
+3. 將 core_logic.js 重構為 MVP 2a 的模組
+4. 開始 MVP 2a（Chrome 擴充套件）實作
 
-## Architecture
+## 架構
 
 ```
-User types "v"
+使用者輸入「v」
   ↓
 handleInput("v")
   ↓
-queryCandidates(map, "v")  // O(1) lookup
+queryCandidates(map, "v")  // O(1) 查詢
   ↓
-sortCandidatesByFreq([...]) // Sort by freq
+sortCandidatesByFreq([...]) // 依頻率排序
   ↓
-renderCandidatesHTML([...]) // Generate HTML
+renderCandidatesHTML([...]) // 產生 HTML
   ↓
-updateCandidateArea(html)   // Display to user
+updateCandidateArea(html)   // 顯示給使用者
   ↓
-User presses "1"
+使用者按「1」
   ↓
-handleSelection(0)          // index 0
+handleSelection(0)          // 索引 0
   ↓
-appendToOutputBuffer("大")  // Add to buffer
+appendToOutputBuffer("大")  // 新增至緩衝區
   ↓
-clearInputBox()             // Reset for next
+clearInputBox()             // 重設以進行下一次
 ```
 
-## Performance
+## 效能
 
-- Database size: ~717KB
-- Total codes: 1,584
-- Query time: <1ms (O(1) Map lookup)
-- Sort time: <1ms (typically <10 candidates)
-- Total interaction time: <20ms (well under 100ms target)
+- 資料庫大小：~717KB
+- 總字碼數：1,584
+- 查詢時間：<1ms（O(1) Map 查詢）
+- 排序時間：<1ms（通常 <10 個候選字）
+- 總互動時間：<20ms（遠低於 100ms 目標）
 
-## Notes
+## 備註
 
-- This is a **validation tool**, not the final product
-- Output is via copy/paste (MVP 2a will inject directly)
-- Target user is **developer** (for verification)
-- UI is functional but not polished (focus on logic validation)
+- 這是一個**驗證工具**，不是最終產品
+- 輸出透過複製/貼上（MVP 2a 將直接注入）
+- 目標使用者是**開發者**（用於驗證）
+- UI 功能正常但未精雕細琢（專注於邏輯驗證）
