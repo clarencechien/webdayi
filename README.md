@@ -2,14 +2,14 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v5%20Complete-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v5-blue)]()
-[![Tests](https://img.shields.io/badge/tests-18%2F18%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v6%20Complete-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v6-blue)]()
+[![Tests](https://img.shields.io/badge/tests-19%2F19%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
 
-**[Try WebDaYi MVP1 v5 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[Try WebDaYi MVP1 v6 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
 Experience the core Dàyì input engine in your browser with advanced features:
 - 🚀 **Auto-select**: Type 2 chars + 3rd char = auto-select first candidate (speeds up typing!)
@@ -17,6 +17,7 @@ Experience the core Dàyì input engine in your browser with advanced features:
 - ⌨️ **Smart Selection**: Use Space/' /[/]/- /\ to select candidates (0-9 are now part of codes!)
 - ⌫ **Smart Backspace**: Deletes input first, then output buffer (natural undo flow!)
 - 🎯 **Express Mode**: Toggle to minimal UI (hide distractions, focus on input!)
+- 🧠 **User Personalization**: IME learns your preferences! (MVP1.7-1.9) ← NEW!
 
 ## Overview
 
@@ -30,37 +31,41 @@ Experience the core Dàyì input engine in your browser with advanced features:
 
 ## Project Status
 
-**Current Phase**: ✅ MVP 1.0 v4 Complete!
-**Completion**: ~40% (Phase 0 & MVP 1 v4 done, MVP 2a next)
+**Current Phase**: ✅ MVP 1.0 v6 Complete!
+**Completion**: ~45% (Phase 0 & MVP 1 v6 done, MVP 2a next)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0 v4           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v6           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Selection Keys Fix       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Pagination               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Auto-select              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ Smart Backspace          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Smart Backspace          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Input Mode Toggle        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ User Personalization     [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░]   0% ⏳    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 v4 with smart backspace UX (17/17 tests passing)
+**Latest Achievement**: MVP 1.0 v6 with user personalization (19/19 tests passing)
 **Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
 
 ## Quick Start
 
 ### Try It Now (Live Demo)
 
-**[Launch WebDaYi MVP1 v4 →](https://clarencechien.github.io/webdayi/)**
+**[Launch WebDaYi MVP1 v6 →](https://clarencechien.github.io/webdayi/)**
 
 No installation required! Just open the link and start typing:
 - Try `v` → 大, 夫, 禾
 - Try `a` → 人, 入
 - Try `ux` → 61 candidates, press `=` to page through
 - Press `Space` (1st), `'` (2nd), `[` (3rd), `]` (4th), `-` (5th), `\` (6th) to select
-- **New**: Type 2 chars then continue → auto-selects first candidate!
-- **New**: Press `Backspace` to undo (deletes input, then output buffer)
+- Type 2 chars then continue → auto-selects first candidate!
+- Press `Backspace` to undo (deletes input, then output buffer)
+- Toggle to Express Mode (top-right) for minimal UI
+- **New**: Select a non-default candidate → IME learns your preference!
 - Click "Copy" when done
 
 ### For Developers
@@ -70,9 +75,9 @@ No installation required! Just open the link and start typing:
 git clone https://github.com/clarencechien/webdayi.git
 cd webdayi
 
-# Run tests (all 17 tests should pass)
+# Run tests (all 19 tests should pass)
 cd mvp1
-node test-node-v4.js
+node test-node-v6.js
 
 # Open locally in browser
 open index.html
@@ -167,7 +172,7 @@ webdayi/
 
 ## Features
 
-### MVP 1.0 v4: Core Engine ✅ COMPLETE
+### MVP 1.0 v6: Core Engine ✅ COMPLETE
 
 **Basic Features:**
 - ✅ Load Dàyì dictionary into memory (Map data structure, 1,584 codes)
@@ -195,9 +200,27 @@ webdayi/
   - Continuous backspace → keeps deleting from output until empty
   - Provides natural correction and undo flow
 
+**Advanced Features (v5):**
+- ✅ **Input Mode Toggle**: Switch between normal and express modes
+  - Normal mode: Full UI with instructions and branding
+  - Express mode: Minimal UI (only input/candidates/output)
+  - Toggle button always visible (top-right corner)
+  - Preference saved to localStorage (persists across sessions)
+  - Visual indicator in express mode
+
+**Advanced Features (v6) ← NEW:**
+- ✅ **User Personalization**: IME learns your character preferences
+  - **MVP1.7**: Load personal records from localStorage on page load
+  - **MVP1.8**: Save personal preference when selecting non-default candidates
+  - **MVP1.9**: Prioritize user preferences in candidate ordering
+  - Example: Prefer "義" over "易" for code `4jp` → "義" appears first next time
+  - Preferences persist across sessions
+  - Works seamlessly with pagination and auto-select
+  - Professional adaptive IME behavior
+
 **Target User**: Developer (for validation) & Power Users
 **Output Method**: Copy/Paste
-**Test Coverage**: 17/17 tests passing with TDD
+**Test Coverage**: 19/19 tests passing with TDD
 
 ### MVP 2a: Browser Plugin (Planned)
 

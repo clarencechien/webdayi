@@ -11,6 +11,176 @@ let currentCode = '';  // Current input code buffer
 let currentPage = 0;  // Current page index for pagination
 let currentCandidates = [];  // Current candidates array (for pagination)
 let currentInputMode = 'normal';  // Current input mode: 'normal' or 'express'
+let userModel = null;  // User personalization model (Map of code -> char order)
+
+// ============================================
+// User Personalization Functions (v6 - MVP1.7, MVP1.8, MVP1.9)
+// ============================================
+
+/**
+ * Get localStorage key for user model
+ * @returns {string} - Storage key
+ */
+function getUserModelStorageKey() {
+  return 'webDayi_UserModel';
+}
+
+/**
+ * Create empty user model
+ * @returns {Map} - Empty Map
+ */
+function createEmptyUserModel() {
+  return new Map();
+}
+
+/**
+ * Parse user model from localStorage JSON string (MVP1.7)
+ * @param {string|null} jsonString - JSON string from localStorage
+ * @returns {Map} - Parsed user model Map
+ */
+function parseUserModelFromStorage(jsonString) {
+  if (!jsonString) {
+    return createEmptyUserModel();
+  }
+
+  try {
+    const obj = JSON.parse(jsonString);
+    const model = new Map();
+
+    for (const [code, charArray] of Object.entries(obj)) {
+      if (Array.isArray(charArray)) {
+        model.set(code, charArray);
+      }
+    }
+
+    return model;
+  } catch (error) {
+    console.warn('[WebDaYi] Failed to parse user model:', error);
+    return createEmptyUserModel();
+  }
+}
+
+/**
+ * Format user model to JSON string for storage (MVP1.8)
+ * @param {Map} model - User model Map
+ * @returns {string} - JSON string
+ */
+function formatUserModelForStorage(model) {
+  const obj = {};
+
+  for (const [code, charArray] of model.entries()) {
+    obj[code] = charArray;
+  }
+
+  return JSON.stringify(obj);
+}
+
+/**
+ * Reorder candidates by user selection (MVP1.8)
+ * Move selected candidate to front
+ * @param {Array} candidates - Array of {char, freq} objects
+ * @param {number} selectedIndex - Index of selected candidate
+ * @returns {Array} - Array of char strings in new order
+ */
+function reorderBySelection(candidates, selectedIndex) {
+  if (selectedIndex < 0 || selectedIndex >= candidates.length) {
+    return candidates.map(c => c.char);
+  }
+
+  const chars = candidates.map(c => c.char);
+  const selectedChar = chars[selectedIndex];
+
+  // Move selected char to front
+  const newOrder = [selectedChar];
+
+  for (let i = 0; i < chars.length; i++) {
+    if (i !== selectedIndex) {
+      newOrder.push(chars[i]);
+    }
+  }
+
+  return newOrder;
+}
+
+/**
+ * Apply user preference to candidates (MVP1.9)
+ * Reorder candidates based on user model
+ * @param {string} code - Input code
+ * @param {Array} staticCandidates - Static candidates from database
+ * @param {Map} userModel - User preference model
+ * @returns {Array} - Reordered candidates
+ */
+function applyUserPreference(code, staticCandidates, userModel) {
+  // If no user preference exists, return static order
+  if (!userModel.has(code)) {
+    return staticCandidates;
+  }
+
+  const userOrder = userModel.get(code);
+  const staticMap = new Map();
+
+  // Create a map of char -> candidate object for quick lookup
+  for (const candidate of staticCandidates) {
+    staticMap.set(candidate.char, candidate);
+  }
+
+  const reordered = [];
+
+  // First, add candidates in user's preferred order
+  for (const char of userOrder) {
+    if (staticMap.has(char)) {
+      reordered.push(staticMap.get(char));
+      staticMap.delete(char); // Remove from map to avoid duplicates
+    }
+  }
+
+  // Then, add remaining candidates (that weren't in user order)
+  for (const candidate of staticCandidates) {
+    if (staticMap.has(candidate.char)) {
+      reordered.push(candidate);
+    }
+  }
+
+  return reordered;
+}
+
+/**
+ * Update user model after candidate selection (MVP1.8)
+ * @param {string} code - Input code
+ * @param {Array} candidates - Current candidates
+ * @param {number} selectedIndex - Index of selected candidate
+ * @param {Map} userModel - User model to update
+ */
+function updateUserModel(code, candidates, selectedIndex, userModel) {
+  const newOrder = reorderBySelection(candidates, selectedIndex);
+  userModel.set(code, newOrder);
+}
+
+/**
+ * Load user model from localStorage (MVP1.7)
+ * @returns {Map} - Loaded user model
+ */
+function loadUserModel() {
+  if (typeof localStorage === 'undefined') {
+    return createEmptyUserModel();
+  }
+
+  const key = getUserModelStorageKey();
+  const jsonString = localStorage.getItem(key);
+  return parseUserModelFromStorage(jsonString);
+}
+
+/**
+ * Save user model to localStorage (MVP1.8)
+ * @param {Map} model - User model to save
+ */
+function saveUserModel(model) {
+  if (typeof localStorage === 'undefined') return;
+
+  const key = getUserModelStorageKey();
+  const jsonString = formatUserModelForStorage(model);
+  localStorage.setItem(key, jsonString);
+}
 
 // ============================================
 // Input Mode Toggle Functions (v5)
@@ -524,12 +694,17 @@ function handleInput(value, previousValue = '') {
   const candidates = queryCandidates(dayiMap, currentCode);
   const sorted = sortCandidatesByFreq(candidates);
 
+  // Apply user preference (MVP1.9)
+  const withUserPreference = userModel ?
+    applyUserPreference(currentCode, sorted, userModel) :
+    sorted;
+
   // Store candidates and reset page
-  currentCandidates = sorted;
+  currentCandidates = withUserPreference;
   currentPage = 0;
 
   // Update UI with pagination
-  updateCandidateArea(sorted, currentPage);
+  updateCandidateArea(withUserPreference, currentPage);
 }
 
 /**
@@ -562,6 +737,15 @@ function handleSelection(index) {
   if (index >= 0 && index < pageCandidates.length) {
     const selected = pageCandidates[index];
     appendToOutputBuffer(selected.char);
+
+    // Update user model with selection (MVP1.8)
+    if (userModel && currentCandidates) {
+      const actualIndex = currentPage * 6 + index; // Convert page index to actual index
+      updateUserModel(currentCode, currentCandidates, actualIndex, userModel);
+      saveUserModel(userModel);
+      console.log(`[WebDaYi] User preference saved for code: ${currentCode}`);
+    }
+
     clearInputBox();
   }
 }
@@ -653,6 +837,10 @@ async function initialize() {
   try {
     // Load database
     await loadDatabase();
+
+    // Load user model (MVP1.7)
+    userModel = loadUserModel();
+    console.log(`[WebDaYi] User model loaded: ${userModel.size} preferences`);
 
     // Set up event listeners
     const inputBox = document.getElementById('input-box');

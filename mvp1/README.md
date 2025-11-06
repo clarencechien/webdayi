@@ -44,7 +44,7 @@ open test.html
 
 **Node.js tests (TDD):**
 ```bash
-node test-node-v5.js  # Latest tests with input mode toggle
+node test-node-v6.js  # Latest tests with user personalization
 ```
 
 ## How to Use
@@ -63,7 +63,7 @@ Use these keys to select candidates:
 - `-` → 5th candidate
 - `\` → 6th candidate
 
-### New Features v3, v4, & v5
+### New Features v3, v4, v5, & v6
 1. **Auto-select on 3rd Character** (v3): When you type 2 characters and continue typing a 3rd character, the first candidate is automatically selected. This speeds up typing significantly!
    - Example: Type "ab" → see candidates → type "c" → "ab"'s first candidate auto-selected, "c" becomes new input
 
@@ -85,6 +85,15 @@ Use these keys to select candidates:
    - Preference saved to localStorage (persists across sessions)
    - Visual indicator: "專注模式" badge in express mode
 
+5. **User Personalization** (v6): IME learns your character preferences automatically!
+   - **MVP1.7**: Load personal records from localStorage on page load
+   - **MVP1.8**: Save personal preference when selecting non-default candidates
+   - **MVP1.9**: Prioritize user preferences in candidate ordering
+   - Example: If you prefer "義" over "易" for code `4jp`, after selecting it once, "義" will appear first next time
+   - Preferences persist across sessions (stored in localStorage)
+   - Works seamlessly with pagination and auto-select
+   - Professional adaptive IME behavior
+
 ### Workflow
 3. **Select** a candidate using the selection keys above, OR continue typing to auto-select
 4. **Page** through candidates using `=` if there are more than 6
@@ -94,29 +103,32 @@ Use these keys to select candidates:
 
 ## Test Results
 
-All tests passing (18/18):
+All tests passing (19/19):
 
 ```
-✓ Input Mode Toggle - Mode Management (3 tests) [NEW in v5]
-  - Default mode is "normal"
-  - Toggle between normal and express modes
-  - Validate mode values
-✓ Input Mode Toggle - Storage (3 tests) [NEW in v5]
-  - Save/load mode to/from localStorage
-  - Format and parse mode values
-  - Handle invalid values
-✓ Input Mode Toggle - UI Class Management (2 tests) [NEW in v5]
-  - Get body class for mode
-  - Determine express mode from class
-✓ Input Mode Toggle - Mode Labels (2 tests) [NEW in v5]
-  - Get Chinese labels for modes
-  - Get toggle button text
-✓ Backspace Behavior - Auto-select Prevention (2 tests) [v4]
-✓ Backspace Behavior - Delete from Output Buffer (2 tests) [v4]
-✓ Database Loading (1 test)
-✓ Selection Key Mapping (1 test)
-✓ Pagination System (1 test) [v3]
-✓ Auto-select on 3rd Character (1 test) [v3]
+✓ User Model - Storage Keys (2 tests) [NEW in v6]
+  - Correct localStorage key
+  - Empty model creation
+✓ User Model - Load and Parse (3 tests) [NEW in v6]
+  - Parse valid JSON to Map
+  - Handle empty JSON
+  - Handle null/invalid JSON
+✓ User Model - Save and Format (2 tests) [NEW in v6]
+  - Convert Map to JSON
+  - Handle empty Map
+✓ User Model - Update Logic (3 tests) [NEW in v6]
+  - Move selected char to front
+  - Handle first selection (no change)
+  - Handle last selection
+✓ User Model - Apply Preferences (3 tests) [NEW in v6]
+  - Apply user preference to candidates
+  - Use static order when no preference
+  - Handle partial preferences
+✓ User Model - Integration (2 tests) [NEW in v6]
+  - Update model after selection
+  - Update existing preference
+✓ Input Mode Toggle (2 tests) [v5]
+✓ Core Functions (2 tests)
 ```
 
 ## Known Sample Codes
@@ -142,12 +154,16 @@ Try these to verify the system works!
 - [x] Auto-select on 3rd character (speeds up typing) [v3]
 - [x] Smart backspace (input → output buffer deletion) [v4]
 - [x] Backspace does NOT trigger auto-select [v4]
-- [x] Input mode toggle (normal ↔ express) [NEW v5]
-- [x] Express mode hides distractions [NEW v5]
-- [x] Mode preference persists in localStorage [NEW v5]
+- [x] Input mode toggle (normal ↔ express) [v5]
+- [x] Express mode hides distractions [v5]
+- [x] Mode preference persists in localStorage [v5]
+- [x] User preferences load on page load [NEW v6]
+- [x] User preferences save when selecting non-default candidate [NEW v6]
+- [x] User preferences prioritize in candidate ordering [NEW v6]
+- [x] User preferences persist across sessions [NEW v6]
 - [x] Text accumulates in output buffer
 - [x] Clipboard copy works
-- [x] All TDD tests pass (18/18)
+- [x] All TDD tests pass (19/19)
 
 ## Next Steps
 
