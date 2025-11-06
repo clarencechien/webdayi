@@ -613,19 +613,24 @@ function renderCandidatesHTML(candidates, pageIndex = 0, totalPages = 1) {
     .map((candidate, index) => {
       const keyLabel = getSelectionKeyLabel(index);
       const displayKey = index === 0 ? '<kbd>Space</kbd>' : `<kbd>${keyLabel}</kbd>`;
-      return `<div class="candidate-item">
+      return `<div class="candidate-item clickable" data-index="${index}" role="button" tabindex="0" aria-label="選擇 ${candidate.char}">
         <span class="candidate-key">${displayKey}</span>
         <span class="candidate-char">${candidate.char}</span>
       </div>`;
     })
     .join('');
 
-  // Add pagination indicator if needed
+  // Add pagination controls if needed
   if (totalPages > 1) {
-    const pageIndicator = `<div class="page-indicator">
-      第 ${pageIndex + 1}/${totalPages} 頁 <kbd>=</kbd> 換頁
+    const prevDisabled = pageIndex === 0 ? 'disabled' : '';
+    const nextDisabled = pageIndex === totalPages - 1 ? 'disabled' : '';
+
+    const pageControls = `<div class="page-controls">
+      <button class="page-btn prev-page" ${prevDisabled} aria-label="上一頁">◀ 上一頁</button>
+      <span class="page-indicator">第 ${pageIndex + 1}/${totalPages} 頁</span>
+      <button class="page-btn next-page" ${nextDisabled} aria-label="下一頁">下一頁 ▶</button>
     </div>`;
-    return candidatesHtml + pageIndicator;
+    return candidatesHtml + pageControls;
   }
 
   return candidatesHtml;
@@ -767,6 +772,32 @@ function handlePagination() {
 }
 
 /**
+ * Navigate to previous page
+ */
+function handlePreviousPage() {
+  if (!currentCode || currentCandidates.length === 0) return;
+
+  const totalPages = getTotalPages(currentCandidates);
+  if (totalPages <= 1 || currentPage === 0) return;
+
+  currentPage--;
+  updateCandidateArea(currentCandidates, currentPage);
+}
+
+/**
+ * Navigate to next page
+ */
+function handleNextPage() {
+  if (!currentCode || currentCandidates.length === 0) return;
+
+  const totalPages = getTotalPages(currentCandidates);
+  if (totalPages <= 1 || currentPage >= totalPages - 1) return;
+
+  currentPage++;
+  updateCandidateArea(currentCandidates, currentPage);
+}
+
+/**
  * Append a character to the output buffer
  * @param {string} char - The character to append
  */
@@ -900,6 +931,44 @@ async function initialize() {
     const copyButton = document.getElementById('copy-button');
     if (copyButton) {
       copyButton.addEventListener('click', copyToClipboard);
+    }
+
+    // Set up candidate area click handlers (event delegation)
+    const candidateArea = document.getElementById('candidate-area');
+    if (candidateArea) {
+      candidateArea.addEventListener('click', (e) => {
+        // Handle candidate item click
+        const candidateItem = e.target.closest('.candidate-item');
+        if (candidateItem && candidateItem.dataset.index) {
+          const index = parseInt(candidateItem.dataset.index, 10);
+          handleSelection(index);
+          return;
+        }
+
+        // Handle previous page button
+        if (e.target.closest('.prev-page')) {
+          handlePreviousPage();
+          return;
+        }
+
+        // Handle next page button
+        if (e.target.closest('.next-page')) {
+          handleNextPage();
+          return;
+        }
+      });
+
+      // Add keyboard support for candidate items (accessibility)
+      candidateArea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          const candidateItem = e.target.closest('.candidate-item');
+          if (candidateItem && candidateItem.dataset.index) {
+            e.preventDefault();
+            const index = parseInt(candidateItem.dataset.index, 10);
+            handleSelection(index);
+          }
+        }
+      });
     }
 
     // Set up input mode toggle

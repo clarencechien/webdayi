@@ -2,14 +2,14 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v6%20Complete-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v6-blue)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v7%20Complete-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v7-blue)]()
 [![Tests](https://img.shields.io/badge/tests-19%2F19%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
 
-**[Try WebDaYi MVP1 v6 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[Try WebDaYi MVP1 v7 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
 Experience the core Dàyì input engine in your browser with advanced features:
 - 🚀 **Auto-select**: Type 2 chars + 3rd char = auto-select first candidate (speeds up typing!)
@@ -17,7 +17,8 @@ Experience the core Dàyì input engine in your browser with advanced features:
 - ⌨️ **Smart Selection**: Use Space/' /[/]/- /\ to select candidates (0-9 are now part of codes!)
 - ⌫ **Smart Backspace**: Deletes input first, then output buffer (natural undo flow!)
 - 🎯 **Express Mode**: Toggle to minimal UI (hide distractions, focus on input!)
-- 🧠 **User Personalization**: IME learns your preferences! (MVP1.7-1.9) ← NEW!
+- 🧠 **User Personalization**: IME learns your preferences! (MVP1.7-1.9)
+- 📱 **Touch-Friendly**: Click to select + prev/next page buttons! (MVP1.10) ← NEW!
 
 ## Overview
 
@@ -31,41 +32,44 @@ Experience the core Dàyì input engine in your browser with advanced features:
 
 ## Project Status
 
-**Current Phase**: ✅ MVP 1.0 v6 Complete!
-**Completion**: ~45% (Phase 0 & MVP 1 v6 done, MVP 2a next)
+**Current Phase**: ✅ MVP 1.0 v7 Complete!
+**Completion**: ~48% (Phase 0 & MVP 1 v7 done, MVP 2a next)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0 v6           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v7           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Selection Keys Fix       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Pagination               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Auto-select              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Smart Backspace          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Input Mode Toggle        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ User Personalization     [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ User Personalization     [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Touch-Friendly UX        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░]   0% ⏳    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 v6 with user personalization (19/19 tests passing)
+**Latest Achievement**: MVP 1.0 v7 with touch-friendly UX (19/19 tests passing)
 **Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
 
 ## Quick Start
 
 ### Try It Now (Live Demo)
 
-**[Launch WebDaYi MVP1 v6 →](https://clarencechien.github.io/webdayi/)**
+**[Launch WebDaYi MVP1 v7 →](https://clarencechien.github.io/webdayi/)**
 
 No installation required! Just open the link and start typing:
 - Try `v` → 大, 夫, 禾
 - Try `a` → 人, 入
-- Try `ux` → 61 candidates, press `=` to page through
+- Try `ux` → 61 candidates, press `=` or use buttons to page through
 - Press `Space` (1st), `'` (2nd), `[` (3rd), `]` (4th), `-` (5th), `\` (6th) to select
+- **Or click** candidates directly to select (touch-friendly!)
 - Type 2 chars then continue → auto-selects first candidate!
 - Press `Backspace` to undo (deletes input, then output buffer)
 - Toggle to Express Mode (top-right) for minimal UI
-- **New**: Select a non-default candidate → IME learns your preference!
+- Select a non-default candidate → IME learns your preference!
+- **New**: Use ◀ **上一頁** / **下一頁** ▶ buttons for easy paging on mobile/tablet!
 - Click "Copy" when done
 
 ### For Developers
@@ -208,7 +212,7 @@ webdayi/
   - Preference saved to localStorage (persists across sessions)
   - Visual indicator in express mode
 
-**Advanced Features (v6) ← NEW:**
+**Advanced Features (v6):**
 - ✅ **User Personalization**: IME learns your character preferences
   - **MVP1.7**: Load personal records from localStorage on page load
   - **MVP1.8**: Save personal preference when selecting non-default candidates
@@ -217,6 +221,16 @@ webdayi/
   - Preferences persist across sessions
   - Works seamlessly with pagination and auto-select
   - Professional adaptive IME behavior
+
+**Advanced Features (v7) ← NEW:**
+- ✅ **Touch-Friendly UX**: Mobile and tablet optimized interactions
+  - **MVP1.10**: Click to select candidates + prev/next page buttons
+  - Click any candidate item to select (no keyboard required)
+  - Visual ◀ **上一頁** / **下一頁** ▶ buttons for easy pagination
+  - Touch-optimized button sizes (minimum 44px touch targets)
+  - Hover and active states for clear visual feedback
+  - Keyboard accessibility maintained (can use Enter/Space on focused items)
+  - Perfect for touch devices and trackpad users
 
 **Target User**: Developer (for validation) & Power Users
 **Output Method**: Copy/Paste
