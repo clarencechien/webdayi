@@ -69,10 +69,19 @@ npm install js-yaml  # Only dependency
 ```
 webdayi/
 ├── converter/              # Data pipeline
-│   ├── convert.js         # YAML → JSON converter
-│   ├── package.json       # Only for js-yaml dependency
-│   └── raw_data/
-│       └── dayi.dict.yaml # Rime source data
+│   ├── convert.js         # v1: Basic converter (order-based freq)
+│   ├── convert-v2.js      # v2: Enhanced converter (frequency-based) ✨
+│   ├── convert-v2-lib.js  # v2: Library functions
+│   ├── convert-v2.test.js # v2: TDD test suite (21 tests)
+│   ├── DESIGN-v2.md       # v2: Design documentation
+│   ├── README.md          # Converter documentation
+│   ├── package.json       # (minimal dependencies)
+│   ├── raw_data/
+│   │   ├── dayi.dict.yaml       # Rime source data (char→code)
+│   │   ├── freq.yaml            # Character frequency rankings (1-2000)
+│   │   └── freq.yaml.example    # Sample frequency data (100 chars)
+│   └── test-data/
+│       └── freq-sample.yaml     # Test data for unit tests
 ├── mvp1/                  # Static webpage (validation)
 │   ├── index.html         # UI structure
 │   ├── core_logic.js      # Core engine
