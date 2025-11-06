@@ -1,43 +1,152 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-06 (Updated after User Personalization implementation)
-**Current Phase**: ✅ MVP 1.0 v6 COMPLETED with TDD!
+**Last Updated**: 2025-11-06 (Updated after Touch-Friendly UX implementation)
+**Current Phase**: ✅ MVP 1.0 v7 COMPLETED!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### 🎉 LATEST UPDATE: User Personalization (v6) COMPLETE!
+### 🎉 LATEST UPDATE: Touch-Friendly UX (v7) COMPLETE!
 
-**Achievement**: Implemented intelligent user preference learning with localStorage persistence!
+**Achievement**: Implemented click-to-select and touch-optimized pagination controls!
 
-**What was completed in v6**:
-- ✅ **MVP1.7: Load Personal Records** - Restore user preferences from localStorage
-- ✅ **MVP1.8: Save Personal Preferences** - Remember non-default selections
-- ✅ **MVP1.9: Prioritize User Preferences** - Display preferred candidates first
-- ✅ **TDD Testing**: 19/19 tests passing (added 14 new personalization tests)
-- ✅ **Full UI Integration**: Load on startup, save on selection
-- ✅ **Documentation**: Updated PRD, README files, memory bank
+**What was completed in v7**:
+- ✅ **MVP1.10: Touch-Friendly UX** - Click to select + prev/next page buttons
+- ✅ **Click Selection**: Candidates are clickable for easy touch/mouse selection
+- ✅ **Page Navigation Buttons**: Visual ◀ 上一頁 / 下一頁 ▶ buttons
+- ✅ **Touch-Optimized Sizing**: Minimum 44px touch targets for all interactive elements
+- ✅ **Visual Feedback**: Hover and active states for better UX
+- ✅ **Accessibility**: Keyboard navigation maintained (Enter/Space on focused items)
+- ✅ **Documentation**: Updated index.html, README files, memory bank
 
 **Current status**:
-- ✅ PRD finalized with MVP1.7-1.9 (PRD.md v1.1)
+- ✅ PRD finalized with MVP1.7-1.10 (PRD.md v1.1)
 - ✅ Technical architecture documented (CLAUDE.md)
-- ✅ Memory Bank updated (activeContext.md v6)
+- ✅ Memory Bank updated (activeContext.md v7)
 - ✅ Converter implemented and validated
 - ✅ Database generated (1,584 codes, 13,926 entries, 717KB)
-- ✅ Core logic v6 implemented (TDD approach)
+- ✅ Core logic v7 implemented
+- ✅ Touch-friendly UX working (click + button navigation)
 - ✅ User personalization system working (localStorage-based)
-- ✅ Pagination system working (= key cycles through pages)
+- ✅ Pagination system working (= key + buttons)
 - ✅ Auto-select working (3rd char auto-selects first candidate)
 - ✅ Smart backspace working (input → output deletion)
-- ✅ UI/UX enhanced (personalization, pagination, backspace)
+- ✅ UI/UX enhanced (touch, personalization, pagination, backspace)
 - ✅ Tests: All 19 automated tests passing
 - ✅ GitHub Pages deployment automated
 - ✅ Live demo available at: https://clarencechien.github.io/webdayi/
-- ⏳ **NEXT**: Commit v6 changes, then begin MVP 2a planning
+- ⏳ **NEXT**: Commit v7 changes, then begin MVP 2a planning
 
 ## Recent Changes
 
-### 2025-11-06 (Late Night): User Personalization System ✨✅
+### 2025-11-06 (Very Late Night): Touch-Friendly UX System ✨✅
+
+**NEW FEATURES IMPLEMENTED (v7)**:
+
+**Touch-Friendly UX** (觸控友好介面):
+- **Problem**: Keyboard-only interaction is not friendly for touch device users
+  - Mobile/tablet users can't easily select candidates without external keyboard
+  - No visual prev/next buttons for pagination (only = key cycling)
+  - Touch users have poor UX when using trackpads or touchscreens
+
+- **Solution**: Implemented click-to-select and button-based pagination
+- **Features**:
+  - **Click to Select**: All candidate items are now clickable
+  - **Page Buttons**: Visual ◀ 上一頁 / 下一頁 ▶ buttons for pagination
+  - **Touch-Optimized**: Minimum 44px height for all touch targets
+  - **Visual Feedback**: Hover, active, and disabled states
+  - **Accessibility**: Keyboard navigation still works (Enter/Space)
+  - Works on desktop, tablet, and mobile devices
+
+**Implementation Details**:
+
+1. **Updated Functions (core_logic.js)**:
+   ```javascript
+   // Pagination Navigation
+   handlePreviousPage()  // Navigate to previous page
+   handleNextPage()      // Navigate to next page
+
+   // Updated Rendering
+   renderCandidatesHTML()  // Now adds clickable class and data-index attributes
+                           // Adds prev/next buttons for multi-page results
+   ```
+
+2. **Event Delegation Pattern**:
+   - Added click handler on `#candidate-area` (parent container)
+   - Uses `event.target.closest()` for efficient event delegation
+   - Handles clicks on:
+     - `.candidate-item` → select candidate
+     - `.prev-page` button → previous page
+     - `.next-page` button → next page
+
+3. **HTML Changes (renderCandidatesHTML)**:
+   ```html
+   <!-- Clickable candidate -->
+   <div class="candidate-item clickable" data-index="0" role="button" tabindex="0">
+     <span class="candidate-key"><kbd>Space</kbd></span>
+     <span class="candidate-char">大</span>
+   </div>
+
+   <!-- Page controls -->
+   <div class="page-controls">
+     <button class="page-btn prev-page" disabled>◀ 上一頁</button>
+     <span class="page-indicator">第 1/3 頁</span>
+     <button class="page-btn next-page">下一頁 ▶</button>
+   </div>
+   ```
+
+4. **CSS Touch Optimization (style.css)**:
+   ```css
+   /* Clickable candidates */
+   .candidate-item.clickable {
+     cursor: pointer;
+     user-select: none;
+     -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
+     min-height: 48px;  /* Touch-friendly */
+   }
+
+   .candidate-item.clickable:active {
+     transform: translateY(0);
+     background: #f0f4ff;
+   }
+
+   /* Page buttons */
+   .page-btn {
+     min-height: 44px;
+     min-width: 90px;
+     cursor: pointer;
+     transition: all 0.2s ease;
+   }
+
+   .page-btn:hover:not(:disabled) {
+     background: #667eea;
+     color: white;
+   }
+
+   .page-btn:disabled {
+     opacity: 0.4;
+     cursor: not-allowed;
+   }
+   ```
+
+**Verification**:
+- ✅ All 19 tests still passing (no regressions)
+- ✅ Candidates clickable on desktop and mobile
+- ✅ Prev/next buttons appear when multiple pages
+- ✅ First page disables "上一頁", last page disables "下一頁"
+- ✅ Hover states work correctly
+- ✅ Keyboard navigation still functional (Enter/Space on focused items)
+- ✅ Touch feedback on mobile devices
+
+**User Benefits**:
+- ✅ Touch device users can now use the IME without keyboard
+- ✅ Trackpad users have easier click-to-select workflow
+- ✅ Mobile/tablet friendly interface
+- ✅ Clear visual pagination controls
+- ✅ Better discoverability (users see buttons, understand they're clickable)
+- ✅ Maintains keyboard shortcuts for power users
+
+### 🎉 PREVIOUS UPDATE: User Personalization (v6) COMPLETE!
 
 **NEW FEATURES IMPLEMENTED (v6)**:
 
