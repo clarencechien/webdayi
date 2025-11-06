@@ -1,20 +1,21 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-06 (Updated after MVP1 completion)
-**Current Phase**: ✅ MVP 1.0 COMPLETED with TDD!
+**Last Updated**: 2025-11-06 (Updated after Pagination & Auto-select implementation)
+**Current Phase**: ✅ MVP 1.0 v3 COMPLETED with TDD!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### 🎉 MAJOR MILESTONE: MVP 1.0 COMPLETE!
+### 🎉 LATEST UPDATE: Pagination & Auto-select (v3) COMPLETE!
 
-**Achievement**: Core engine fully implemented and validated using Test-Driven Development!
+**Achievement**: Added advanced input features with full TDD coverage!
 
-**What was completed today**:
-- ✅ **Phase 0: Data Pipeline** - Fully functional converter
-- ✅ **MVP 1.0: Core Engine** - All F-1.x features implemented
-- ✅ **TDD Testing**: 12/12 tests passing
-- ✅ **Documentation**: Comprehensive README for MVP1
+**What was completed in v3**:
+- ✅ **Pagination System**: Cycle through candidate pages with `=` key
+- ✅ **Auto-select on 3rd Character**: First candidate auto-selected when typing continues
+- ✅ **TDD Testing**: 19/19 tests passing (added 7 new tests)
+- ✅ **UI Updates**: Pagination indicator, updated instructions
+- ✅ **Documentation**: Updated README, index.html
 
 **Current status**:
 - ✅ PRD finalized (PRD.md v1.1)
@@ -22,15 +23,124 @@
 - ✅ Memory Bank initialized (6 core files)
 - ✅ Converter implemented and validated
 - ✅ Database generated (1,584 codes, 13,926 entries, 717KB)
-- ✅ Core logic implemented (TDD approach)
-- ✅ UI/UX implemented (responsive, polished)
-- ✅ Tests: All 12 automated tests passing
+- ✅ Core logic v3 implemented (TDD approach)
+- ✅ Pagination system working (= key cycles through pages)
+- ✅ Auto-select working (3rd char auto-selects first candidate)
+- ✅ UI/UX enhanced (pagination indicator, new features documented)
+- ✅ Tests: All 19 automated tests passing
 - ✅ GitHub Pages deployment automated
 - ✅ Live demo available at: https://clarencechien.github.io/webdayi/
-- 🔄 **IN PROGRESS**: Adding GitHub Actions for auto-deployment
-- ⏳ **NEXT**: Finalize deployment, then begin MVP 2a planning
+- ⏳ **NEXT**: Commit changes, then begin MVP 2a planning
 
 ## Recent Changes
+
+### 2025-11-06 (Late Night): Pagination & Auto-select Features ✨✅
+
+**NEW FEATURES IMPLEMENTED (v3)**:
+
+**1. Pagination System** (解決候選字過多問題):
+- **Problem**: Some codes have 60+ candidates (e.g., ux: 61 candidates)
+- **Solution**: Implemented pagination with = key cycling
+- **Features**:
+  - Shows max 6 candidates per page (matching 6 selection keys)
+  - Press `=` to cycle to next page
+  - Cycles back to page 1 after last page
+  - Visual indicator: "第 1/3 頁 = 換頁"
+  - Works seamlessly with existing selection keys
+
+**2. Auto-select on 3rd Character** (加速打字速度):
+- **Problem**: Users must explicitly select after every 2-char code
+- **Solution**: Auto-select first candidate when typing 3rd character
+- **Features**:
+  - Detects when user types 2 chars → 3rd char
+  - Automatically selects first candidate from 2-char code
+  - New character becomes new input code
+  - Speeds up continuous typing significantly
+  - Does NOT trigger on selection keys or pagination key
+
+**Implementation Details**:
+
+1. **New Functions Added (core_logic.js)**:
+   ```javascript
+   // Pagination
+   getTotalPages(candidates)         // Calculate total pages
+   getCandidatesForPage(candidates, pageIndex)  // Get page slice
+   getNextPage(currentPage, totalPages)  // Cycle to next page
+   needsPagination(candidates)       // Check if >6 candidates
+
+   // Auto-select
+   shouldAutoSelect(currentCode, newChar)  // Detect 2→3 transition
+   performAutoSelect(code, map)      // Execute auto-selection
+   splitCodeForAutoSelect(currentCode, newChar)  // Parse code
+
+   // Updated
+   renderCandidatesHTML(candidates, pageIndex, totalPages)  // With pagination
+   handleInput(value, previousValue)  // With auto-select detection
+   handlePagination()                 // New = key handler
+   ```
+
+2. **State Management**:
+   - Added `currentPage` (tracks current page index)
+   - Added `currentCandidates` (caches candidates for pagination)
+   - Updated `handleInput` to track previous value
+   - Reset pagination state on new query
+
+3. **Event Handlers**:
+   - Added `=` key handler for pagination
+   - Updated input handler to detect auto-select conditions
+   - Maintains previousValue for auto-select detection
+
+**TDD Approach** (Tests written first!):
+- Created `test-node-v3.js` with 19 comprehensive tests
+- All 19/19 tests passing:
+  - Database Loading (1 test)
+  - Selection Key Mapping (2 tests)
+  - **Pagination System (9 tests)** ← NEW
+    - Total pages calculation
+    - Page slicing (first, middle, last)
+    - Page cycling (including wrap-around)
+    - Pagination detection
+  - **Auto-select on 3rd Character (6 tests)** ← NEW
+    - Detection logic (2→3 transition)
+    - Exclusion of selection/pagination keys
+    - Valid/invalid code handling
+    - Code splitting
+  - Integration with Real Data (1 test)
+    - Tests with ux code (61 candidates, 11 pages)
+
+**UI/UX Updates**:
+1. **style.css** (new styling):
+   - `.page-indicator` - Gold-bordered pagination indicator
+   - Shows current page and total pages
+   - Highlights = key for paging
+
+2. **index.html** (updated instructions):
+   - New features section explaining auto-select and pagination
+   - Updated hint text to mention = key
+   - Clear examples of usage
+
+3. **README.md** (comprehensive documentation):
+   - New Features v3 section
+   - Updated test results (19/19)
+   - Updated success criteria
+   - Usage examples for pagination and auto-select
+
+**Verification**:
+- ✅ All 19 tests passing in test-node-v3.js
+- ✅ Pagination works with codes having 60+ candidates
+- ✅ Auto-select triggers correctly on 3rd character
+- ✅ No conflicts with selection keys or pagination key
+- ✅ UI shows pagination indicator correctly
+- ✅ Cycling works (last page → first page)
+
+**User Benefits**:
+- ✅ Can now access ALL candidates (not just first 6)
+- ✅ Faster typing with auto-select (no manual selection needed for 2-char codes)
+- ✅ Smooth cycling through pages
+- ✅ Clear visual feedback with pagination indicator
+- ✅ Natural typing flow maintained
+
+## Recent Changes (Previous)
 
 ### 2025-11-06 (Night): Critical Bug Fix - Selection Keys 🐛✅
 

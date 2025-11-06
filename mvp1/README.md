@@ -44,7 +44,7 @@ open test.html
 
 **Node.js tests (TDD):**
 ```bash
-node test-node-v2.js  # Updated tests with new selection keys
+node test-node-v3.js  # Latest tests with pagination and auto-select
 ```
 
 ## How to Use
@@ -54,7 +54,7 @@ node test-node-v2.js  # Updated tests with new selection keys
    - **Important**: 0-9 are now part of codes (not selection keys!)
 2. **View** candidates appear automatically below
 
-### Selection Keys (New!)
+### Selection Keys
 Use these keys to select candidates:
 - `Space` → 1st candidate (fastest!)
 - `'` → 2nd candidate
@@ -63,23 +63,39 @@ Use these keys to select candidates:
 - `-` → 5th candidate
 - `\` → 6th candidate
 
+### New Features v3
+1. **Auto-select on 3rd Character**: When you type 2 characters and continue typing a 3rd character, the first candidate is automatically selected. This speeds up typing significantly!
+   - Example: Type "ab" → see candidates → type "c" → "ab"'s first candidate auto-selected, "c" becomes new input
+
+2. **Pagination**: When there are more than 6 candidates, press `=` to cycle through pages
+   - Shows indicator: "第 1/3 頁 = 換頁" (Page 1/3, press = to page)
+   - Cycles back to page 1 after the last page
+
 ### Workflow
-3. **Select** a candidate using the selection keys above
-4. **Repeat** to compose your text
-5. **Copy** the composed text using the "Copy" button
-6. **Paste** into your target application
+3. **Select** a candidate using the selection keys above, OR continue typing to auto-select
+4. **Page** through candidates using `=` if there are more than 6
+5. **Repeat** to compose your text
+6. **Copy** the composed text using the "Copy" button
+7. **Paste** into your target application
 
 ## Test Results
 
-All tests passing (17/17):
+All tests passing (19/19):
 
 ```
-✓ Database Loading (2 tests)
-✓ Query Function (2 tests)
-✓ Sort Function (1 test)
-✓ Selection Key Mapping (7 tests) [NEW]
-✓ Input Character Validation (4 tests) [NEW]
+✓ Database Loading (1 test)
+✓ Selection Key Mapping (2 tests)
+✓ Pagination System (9 tests) [NEW in v3]
+  - Calculate total pages
+  - Get candidates for specific page
+  - Cycle through pages
+  - Check if pagination needed
+✓ Auto-select on 3rd Character (6 tests) [NEW in v3]
+  - Detect when to auto-select
+  - Handle auto-select with valid/invalid codes
+  - Split code correctly
 ✓ Integration Test (1 test)
+  - Real database with 60+ candidates (ux: 61 candidates, 11 pages)
 ```
 
 ## Known Sample Codes
@@ -101,9 +117,11 @@ Try these to verify the system works!
 - [x] Candidates sorted by frequency
 - [x] Selection works with new keys (Space, ', [, ], -, \)
 - [x] 0-9 allowed in input codes (not selection keys)
+- [x] Pagination works with = key (cycles through pages) [NEW v3]
+- [x] Auto-select on 3rd character (speeds up typing) [NEW v3]
 - [x] Text accumulates in output buffer
 - [x] Clipboard copy works
-- [x] All TDD tests pass (17/17)
+- [x] All TDD tests pass (19/19)
 
 ## Next Steps
 

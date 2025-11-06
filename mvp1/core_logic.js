@@ -8,6 +8,8 @@
 // Global state
 let dayiMap = null;  // The in-memory Map of code -> candidates
 let currentCode = '';  // Current input code buffer
+let currentPage = 0;  // Current page index for pagination
+let currentCandidates = [];  // Current candidates array (for pagination)
 
 /**
  * Create a Map from the database object for O(1) lookups
@@ -49,6 +51,57 @@ function sortCandidatesByFreq(candidates) {
 }
 
 /**
+ * Calculate total pages needed for candidates
+ * @param {Array} candidates - Array of candidate objects
+ * @returns {number} - Total number of pages needed
+ */
+function getTotalPages(candidates) {
+  if (!candidates || candidates.length === 0) {
+    return 0;
+  }
+  return Math.ceil(candidates.length / 6);
+}
+
+/**
+ * Get candidates for a specific page
+ * @param {Array} candidates - Array of candidate objects
+ * @param {number} pageIndex - Page index (0-based)
+ * @returns {Array} - Candidates for the specified page (max 6)
+ */
+function getCandidatesForPage(candidates, pageIndex) {
+  if (!candidates || candidates.length === 0 || pageIndex < 0) {
+    return [];
+  }
+
+  const startIndex = pageIndex * 6;
+  const endIndex = startIndex + 6;
+
+  return candidates.slice(startIndex, endIndex);
+}
+
+/**
+ * Get next page index (with cycling)
+ * @param {number} currentPage - Current page index
+ * @param {number} totalPages - Total number of pages
+ * @returns {number} - Next page index
+ */
+function getNextPage(currentPage, totalPages) {
+  if (totalPages <= 1) {
+    return 0;
+  }
+  return (currentPage + 1) % totalPages;
+}
+
+/**
+ * Check if pagination is needed
+ * @param {Array} candidates - Array of candidate objects
+ * @returns {boolean} - True if more than 6 candidates
+ */
+function needsPagination(candidates) {
+  return candidates && candidates.length > 6;
+}
+
+/**
  * Get selection index from key press
  * Maps selection keys to candidate indices
  * @param {string} key - The pressed key
@@ -87,6 +140,69 @@ function isValidInputChar(char) {
 }
 
 /**
+ * Check if auto-select should be triggered
+ * Auto-select happens when user types a 3rd character (after 2-char code)
+ * @param {string} currentCode - Current code in input box
+ * @param {string} newChar - The new character being typed
+ * @returns {boolean} - True if auto-select should trigger
+ */
+function shouldAutoSelect(currentCode, newChar) {
+  // Auto-select when going from 2 chars to 3rd char
+  if (currentCode.length !== 2) {
+    return false;
+  }
+
+  // Don't auto-select if the new char is a selection key
+  if (getSelectionIndexFromKey(newChar) !== -1) {
+    return false;
+  }
+
+  // Don't auto-select if the new char is pagination key
+  if (newChar === '=') {
+    return false;
+  }
+
+  // Auto-select if it's a valid input character
+  return isValidInputChar(newChar);
+}
+
+/**
+ * Split code for auto-select scenario
+ * @param {string} currentCode - Current code (e.g., "ab")
+ * @param {string} newChar - The new character (e.g., "c")
+ * @returns {Object} - { currentCode: "ab", newCode: "c" }
+ */
+function splitCodeForAutoSelect(currentCode, newChar) {
+  return {
+    currentCode: currentCode,
+    newCode: newChar
+  };
+}
+
+/**
+ * Perform auto-select of first candidate
+ * @param {string} code - The code to query
+ * @param {Map} map - The database map
+ * @returns {Object} - { success: boolean, selectedChar: string }
+ */
+function performAutoSelect(code, map) {
+  const candidates = queryCandidates(map, code);
+  const sorted = sortCandidatesByFreq(candidates);
+
+  if (sorted.length > 0) {
+    return {
+      success: true,
+      selectedChar: sorted[0].char
+    };
+  }
+
+  return {
+    success: false,
+    selectedChar: ''
+  };
+}
+
+/**
  * Get selection key label for display
  * @param {number} index - Candidate index (0-based)
  * @returns {string} - Display label for the selection key
@@ -104,19 +220,21 @@ function getSelectionKeyLabel(index) {
 }
 
 /**
- * Render candidates as HTML string
+ * Render candidates as HTML string (with pagination support)
  * @param {Array} candidates - Array of { char, freq } objects
+ * @param {number} pageIndex - Current page index
+ * @param {number} totalPages - Total pages
  * @returns {string} - HTML string with new selection keys
  */
-function renderCandidatesHTML(candidates) {
+function renderCandidatesHTML(candidates, pageIndex = 0, totalPages = 1) {
   if (!candidates || candidates.length === 0) {
     return '';
   }
 
-  // Limit to 6 candidates (matching our selection keys)
-  const limited = candidates.slice(0, 6);
+  // Get candidates for current page (max 6)
+  const pageCandidates = getCandidatesForPage(candidates, pageIndex);
 
-  return limited
+  const candidatesHtml = pageCandidates
     .map((candidate, index) => {
       const keyLabel = getSelectionKeyLabel(index);
       const displayKey = index === 0 ? '<kbd>Space</kbd>' : `<kbd>${keyLabel}</kbd>`;
@@ -126,6 +244,16 @@ function renderCandidatesHTML(candidates) {
       </div>`;
     })
     .join('');
+
+  // Add pagination indicator if needed
+  if (totalPages > 1) {
+    const pageIndicator = `<div class="page-indicator">
+      第 ${pageIndex + 1}/${totalPages} 頁 <kbd>=</kbd> 換頁
+    </div>`;
+    return candidatesHtml + pageIndicator;
+  }
+
+  return candidatesHtml;
 }
 
 /**
@@ -155,11 +283,33 @@ async function loadDatabase() {
 /**
  * Handle input changes in the input box
  * @param {string} value - The current input value
+ * @param {string} previousValue - Previous input value (for auto-select detection)
  */
-function handleInput(value) {
-  currentCode = value.trim().toLowerCase();
+function handleInput(value, previousValue = '') {
+  const newCode = value.trim().toLowerCase();
+
+  // Check for auto-select (2 chars → 3rd char)
+  if (previousValue && shouldAutoSelect(previousValue, newCode.charAt(newCode.length - 1))) {
+    // Auto-select first candidate from previous code
+    const result = performAutoSelect(previousValue, dayiMap);
+    if (result.success) {
+      appendToOutputBuffer(result.selectedChar);
+      // Update input to show only the new character
+      const inputBox = document.getElementById('input-box');
+      if (inputBox) {
+        inputBox.value = newCode.substring(previousValue.length);
+        // Recursively handle the new code
+        handleInput(inputBox.value, '');
+        return;
+      }
+    }
+  }
+
+  currentCode = newCode;
 
   if (!currentCode) {
+    currentCandidates = [];
+    currentPage = 0;
     updateCandidateArea([]);
     return;
   }
@@ -168,40 +318,62 @@ function handleInput(value) {
   const candidates = queryCandidates(dayiMap, currentCode);
   const sorted = sortCandidatesByFreq(candidates);
 
-  // Update UI
-  updateCandidateArea(sorted);
+  // Store candidates and reset page
+  currentCandidates = sorted;
+  currentPage = 0;
+
+  // Update UI with pagination
+  updateCandidateArea(sorted, currentPage);
 }
 
 /**
- * Update the candidate area with new candidates
+ * Update the candidate area with new candidates (with pagination)
  * @param {Array} candidates - Sorted candidates array
+ * @param {number} pageIndex - Current page index
  */
-function updateCandidateArea(candidates) {
+function updateCandidateArea(candidates, pageIndex = 0) {
   const candidateArea = document.getElementById('candidate-area');
   if (!candidateArea) return;
 
   if (candidates.length === 0) {
     candidateArea.innerHTML = '<div class="no-candidates">沒有候選字</div>';
   } else {
-    candidateArea.innerHTML = renderCandidatesHTML(candidates);
+    const totalPages = getTotalPages(candidates);
+    candidateArea.innerHTML = renderCandidatesHTML(candidates, pageIndex, totalPages);
   }
 }
 
 /**
- * Handle candidate selection
+ * Handle candidate selection (with pagination support)
  * @param {number} index - The selected index (0-5)
  */
 function handleSelection(index) {
-  if (!currentCode) return;
+  if (!currentCode || currentCandidates.length === 0) return;
 
-  const candidates = queryCandidates(dayiMap, currentCode);
-  const sorted = sortCandidatesByFreq(candidates);
+  // Get candidates for current page
+  const pageCandidates = getCandidatesForPage(currentCandidates, currentPage);
 
-  if (index >= 0 && index < sorted.length && index < 6) {
-    const selected = sorted[index];
+  if (index >= 0 && index < pageCandidates.length) {
+    const selected = pageCandidates[index];
     appendToOutputBuffer(selected.char);
     clearInputBox();
   }
+}
+
+/**
+ * Handle pagination (cycle to next page)
+ */
+function handlePagination() {
+  if (!currentCode || currentCandidates.length === 0) return;
+
+  const totalPages = getTotalPages(currentCandidates);
+  if (totalPages <= 1) return;
+
+  // Cycle to next page
+  currentPage = getNextPage(currentPage, totalPages);
+
+  // Update UI
+  updateCandidateArea(currentCandidates, currentPage);
 }
 
 /**
@@ -221,7 +393,7 @@ function appendToOutputBuffer(char) {
 }
 
 /**
- * Clear the input box
+ * Clear the input box and reset state
  */
 function clearInputBox() {
   const inputBox = document.getElementById('input-box');
@@ -229,6 +401,8 @@ function clearInputBox() {
 
   inputBox.value = '';
   currentCode = '';
+  currentCandidates = [];
+  currentPage = 0;
   updateCandidateArea([]);
 }
 
@@ -277,19 +451,30 @@ async function initialize() {
     // Set up event listeners
     const inputBox = document.getElementById('input-box');
     if (inputBox) {
+      let previousValue = '';
+
       inputBox.addEventListener('input', (e) => {
-        handleInput(e.target.value);
+        handleInput(e.target.value, previousValue);
+        previousValue = e.target.value.trim().toLowerCase();
       });
 
-      // Handle selection keys (Space, ', [, ], -, \)
+      // Handle selection keys (Space, ', [, ], -, \) and pagination (=)
       inputBox.addEventListener('keydown', (e) => {
         const key = e.key;
-        const selectionIndex = getSelectionIndexFromKey(key);
 
-        // If it's a selection key and we have candidates
+        // Handle pagination key (=)
+        if (key === '=' && currentCode) {
+          e.preventDefault();
+          handlePagination();
+          return;
+        }
+
+        // Handle selection keys
+        const selectionIndex = getSelectionIndexFromKey(key);
         if (selectionIndex !== -1 && currentCode) {
           e.preventDefault();
           handleSelection(selectionIndex);
+          previousValue = '';  // Reset after selection
         }
         // Note: 0-9 and other chars will naturally go into the input
         // because they're not prevented
