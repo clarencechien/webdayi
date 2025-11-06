@@ -2,20 +2,21 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v4%20Complete-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v4-blue)]()
-[![Tests](https://img.shields.io/badge/tests-17%2F17%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v5%20Complete-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v5-blue)]()
+[![Tests](https://img.shields.io/badge/tests-18%2F18%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
 
-**[Try WebDaYi MVP1 v4 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[Try WebDaYi MVP1 v5 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
 Experience the core Dàyì input engine in your browser with advanced features:
 - 🚀 **Auto-select**: Type 2 chars + 3rd char = auto-select first candidate (speeds up typing!)
 - 📄 **Pagination**: Press `=` to cycle through pages when there are 60+ candidates
 - ⌨️ **Smart Selection**: Use Space/' /[/]/- /\ to select candidates (0-9 are now part of codes!)
 - ⌫ **Smart Backspace**: Deletes input first, then output buffer (natural undo flow!)
+- 🎯 **Express Mode**: Toggle to minimal UI (hide distractions, focus on input!)
 
 ## Overview
 

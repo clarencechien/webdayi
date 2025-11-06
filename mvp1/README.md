@@ -44,7 +44,7 @@ open test.html
 
 **Node.js tests (TDD):**
 ```bash
-node test-node-v4.js  # Latest tests with pagination, auto-select, and backspace UX
+node test-node-v5.js  # Latest tests with input mode toggle
 ```
 
 ## How to Use
@@ -63,7 +63,7 @@ Use these keys to select candidates:
 - `-` → 5th candidate
 - `\` → 6th candidate
 
-### New Features v3 & v4
+### New Features v3, v4, & v5
 1. **Auto-select on 3rd Character** (v3): When you type 2 characters and continue typing a 3rd character, the first candidate is automatically selected. This speeds up typing significantly!
    - Example: Type "ab" → see candidates → type "c" → "ab"'s first candidate auto-selected, "c" becomes new input
 
@@ -78,6 +78,13 @@ Use these keys to select candidates:
    - Continuous backspace: Keeps deleting from output until empty
    - This provides a natural "undo" flow for corrections
 
+4. **Input Mode Toggle** (v5): Switch between normal and express modes
+   - **Normal Mode**: Full UI with instructions and branding (good for learning)
+   - **Express Mode**: Minimal UI with only input/candidates/output (good for fast typing)
+   - Toggle button: Top-right corner (always visible)
+   - Preference saved to localStorage (persists across sessions)
+   - Visual indicator: "專注模式" badge in express mode
+
 ### Workflow
 3. **Select** a candidate using the selection keys above, OR continue typing to auto-select
 4. **Page** through candidates using `=` if there are more than 6
@@ -87,25 +94,29 @@ Use these keys to select candidates:
 
 ## Test Results
 
-All tests passing (17/17):
+All tests passing (18/18):
 
 ```
-✓ Backspace Behavior - Auto-select Prevention (3 tests) [NEW in v4]
-  - Backspace does not trigger auto-select
-  - Adding 3rd char triggers auto-select (comparison)
-  - Backspace never triggers auto-select on shorter input
-✓ Backspace Behavior - Delete from Output Buffer (4 tests) [NEW in v4]
-  - Delete last character from output
-  - Handle single character and empty output
-  - Multi-char deletion sequence
-✓ Backspace Behavior - Should Handle Backspace Check (3 tests) [NEW in v4]
-  - Detect when to delete from output
-  - Not delete when input has content
-  - Not delete when both empty
+✓ Input Mode Toggle - Mode Management (3 tests) [NEW in v5]
+  - Default mode is "normal"
+  - Toggle between normal and express modes
+  - Validate mode values
+✓ Input Mode Toggle - Storage (3 tests) [NEW in v5]
+  - Save/load mode to/from localStorage
+  - Format and parse mode values
+  - Handle invalid values
+✓ Input Mode Toggle - UI Class Management (2 tests) [NEW in v5]
+  - Get body class for mode
+  - Determine express mode from class
+✓ Input Mode Toggle - Mode Labels (2 tests) [NEW in v5]
+  - Get Chinese labels for modes
+  - Get toggle button text
+✓ Backspace Behavior - Auto-select Prevention (2 tests) [v4]
+✓ Backspace Behavior - Delete from Output Buffer (2 tests) [v4]
 ✓ Database Loading (1 test)
-✓ Selection Key Mapping (2 tests)
-✓ Pagination System (2 tests) [v3]
-✓ Auto-select on 3rd Character (2 tests) [v3]
+✓ Selection Key Mapping (1 test)
+✓ Pagination System (1 test) [v3]
+✓ Auto-select on 3rd Character (1 test) [v3]
 ```
 
 ## Known Sample Codes
@@ -129,11 +140,14 @@ Try these to verify the system works!
 - [x] 0-9 allowed in input codes (not selection keys)
 - [x] Pagination works with = key (cycles through pages) [v3]
 - [x] Auto-select on 3rd character (speeds up typing) [v3]
-- [x] Smart backspace (input → output buffer deletion) [NEW v4]
-- [x] Backspace does NOT trigger auto-select [NEW v4]
+- [x] Smart backspace (input → output buffer deletion) [v4]
+- [x] Backspace does NOT trigger auto-select [v4]
+- [x] Input mode toggle (normal ↔ express) [NEW v5]
+- [x] Express mode hides distractions [NEW v5]
+- [x] Mode preference persists in localStorage [NEW v5]
 - [x] Text accumulates in output buffer
 - [x] Clipboard copy works
-- [x] All TDD tests pass (17/17)
+- [x] All TDD tests pass (18/18)
 
 ## Next Steps
 
