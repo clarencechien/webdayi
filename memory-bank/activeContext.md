@@ -1,21 +1,21 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-06 (Updated after Pagination & Auto-select implementation)
-**Current Phase**: ✅ MVP 1.0 v3 COMPLETED with TDD!
+**Last Updated**: 2025-11-06 (Updated after Smart Backspace implementation)
+**Current Phase**: ✅ MVP 1.0 v4 COMPLETED with TDD!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### 🎉 LATEST UPDATE: Pagination & Auto-select (v3) COMPLETE!
+### 🎉 LATEST UPDATE: Smart Backspace UX (v4) COMPLETE!
 
-**Achievement**: Added advanced input features with full TDD coverage!
+**Achievement**: Implemented professional IME-style backspace behavior with full TDD coverage!
 
-**What was completed in v3**:
-- ✅ **Pagination System**: Cycle through candidate pages with `=` key
-- ✅ **Auto-select on 3rd Character**: First candidate auto-selected when typing continues
-- ✅ **TDD Testing**: 19/19 tests passing (added 7 new tests)
-- ✅ **UI Updates**: Pagination indicator, updated instructions
-- ✅ **Documentation**: Updated README, index.html
+**What was completed in v4**:
+- ✅ **Smart Backspace**: Intelligent undo behavior (input → output buffer deletion)
+- ✅ **Auto-select Fix**: Backspace does NOT trigger auto-select
+- ✅ **TDD Testing**: 17/17 tests passing (added 10 new backspace tests)
+- ✅ **UI Updates**: Updated instructions to document backspace behavior
+- ✅ **Documentation**: Updated README files, memory bank
 
 **Current status**:
 - ✅ PRD finalized (PRD.md v1.1)
@@ -23,16 +23,114 @@
 - ✅ Memory Bank initialized (6 core files)
 - ✅ Converter implemented and validated
 - ✅ Database generated (1,584 codes, 13,926 entries, 717KB)
-- ✅ Core logic v3 implemented (TDD approach)
+- ✅ Core logic v4 implemented (TDD approach)
 - ✅ Pagination system working (= key cycles through pages)
 - ✅ Auto-select working (3rd char auto-selects first candidate)
-- ✅ UI/UX enhanced (pagination indicator, new features documented)
-- ✅ Tests: All 19 automated tests passing
+- ✅ Smart backspace working (input → output deletion)
+- ✅ UI/UX enhanced (pagination indicator, backspace docs)
+- ✅ Tests: All 17 automated tests passing
 - ✅ GitHub Pages deployment automated
 - ✅ Live demo available at: https://clarencechien.github.io/webdayi/
 - ⏳ **NEXT**: Commit changes, then begin MVP 2a planning
 
 ## Recent Changes
+
+### 2025-11-06 (Very Late Night): Smart Backspace UX ✨✅
+
+**NEW FEATURE IMPLEMENTED (v4)**:
+
+**Smart Backspace** (專業級退格鍵UX):
+- **Problem**: User reported that backspace behavior was not intuitive
+  - Original issue: "當按下backspace時 2碼需倒回去變為1碼 而不是選字送出去"
+  - Need for undo: Input should be cleared first, then output buffer
+  - Continuous backspace should clear everything
+
+- **Solution**: Implemented professional IME-style backspace behavior
+- **Features**:
+  - Backspace on 2-char input → 1 char (does NOT trigger auto-select)
+  - Backspace on 1-char input → empty input
+  - Backspace on empty input → deletes last char from output buffer
+  - Continuous backspace → keeps deleting from output until empty
+  - Provides natural correction and undo flow
+
+**Implementation Details**:
+
+1. **New Functions Added (core_logic.js)**:
+   ```javascript
+   // Backspace UX
+   shouldAutoSelectOnInput(previousValue, newValue)  // Checks if value is getting longer
+   deleteLastCharFromOutput(outputText)              // Removes last character
+   shouldDeleteFromOutput(inputValue, outputValue)   // Checks if should delete from output
+
+   // Updated
+   handleInput(value, previousValue)  // Now uses shouldAutoSelectOnInput
+   ```
+
+2. **Critical Fix**:
+   - **Auto-select Prevention**: Changed from `shouldAutoSelect()` to `shouldAutoSelectOnInput()`
+   - Old logic: Checked if current code is 2 chars and new char is valid
+   - **Bug**: Backspace from "ab" to "a" would trigger auto-select (both conditions met!)
+   - New logic: Also checks that `newValue.length > previousValue.length`
+   - **Fix**: Backspace makes value shorter, so auto-select won't trigger
+
+3. **Backspace Key Handler**:
+   - Intercepts `Backspace` key in keydown event
+   - Checks if input is empty using `shouldDeleteFromOutput()`
+   - If empty + output has content → prevent default + delete from output
+   - Otherwise → let default backspace work on input
+
+**TDD Approach** (Tests written first!):
+- Created `test-node-v4.js` with 17 comprehensive tests
+- All 17/17 tests passing:
+  - **Backspace Behavior - Auto-select Prevention (3 tests)** ← NEW
+    - Backspace does not trigger auto-select
+    - Adding 3rd char triggers auto-select (comparison)
+    - Backspace never triggers on shorter input
+  - **Backspace Behavior - Delete from Output Buffer (4 tests)** ← NEW
+    - Delete last character
+    - Handle single character and empty output
+    - Multi-char deletion sequence
+  - **Backspace Behavior - Should Handle Backspace Check (3 tests)** ← NEW
+    - Detect when to delete from output
+    - Not delete when input has content
+    - Not delete when both empty
+  - Database Loading (1 test)
+  - Selection Key Mapping (2 tests)
+  - Pagination System (2 tests)
+  - Auto-select on 3rd Character (2 tests)
+
+**UI/UX Updates**:
+1. **index.html** (updated instructions):
+   - Added: "智能 Backspace：按 Backspace 會依序刪除輸入碼，輸入碼清空後會刪除輸出緩衝區的最後一個字，連續按可一路清空"
+
+2. **mvp1/README.md** (comprehensive documentation):
+   - New Features v3 & v4 section
+   - Updated test results (17/17)
+   - Updated success criteria with v4 features
+
+3. **README.md** (root documentation):
+   - Updated badges: v4 Complete, 17/17 tests
+   - Updated live demo with backspace feature
+   - Updated project status with v4 sub-task
+   - Updated Features section with v4 details
+   - Updated roadmap with v4 milestone
+   - Updated version to 1.0.4-alpha
+
+**Verification**:
+- ✅ All 17 tests passing in test-node-v4.js
+- ✅ Backspace does NOT trigger auto-select when reducing input
+- ✅ Backspace deletes from output when input is empty
+- ✅ Continuous backspace clears everything
+- ✅ Natural undo flow works as expected
+
+**User Benefits**:
+- ✅ Natural correction flow (like professional IMEs)
+- ✅ Can undo mistakes by backspacing through output
+- ✅ No accidental auto-select on backspace
+- ✅ Intuitive behavior matches user expectations
+- ✅ Professional-grade UX for input method
+
+## Recent Changes (Previous)
 
 ### 2025-11-06 (Late Night): Pagination & Auto-select Features ✨✅
 

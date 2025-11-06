@@ -44,7 +44,7 @@ open test.html
 
 **Node.js tests (TDD):**
 ```bash
-node test-node-v3.js  # Latest tests with pagination and auto-select
+node test-node-v4.js  # Latest tests with pagination, auto-select, and backspace UX
 ```
 
 ## How to Use
@@ -63,13 +63,20 @@ Use these keys to select candidates:
 - `-` → 5th candidate
 - `\` → 6th candidate
 
-### New Features v3
-1. **Auto-select on 3rd Character**: When you type 2 characters and continue typing a 3rd character, the first candidate is automatically selected. This speeds up typing significantly!
+### New Features v3 & v4
+1. **Auto-select on 3rd Character** (v3): When you type 2 characters and continue typing a 3rd character, the first candidate is automatically selected. This speeds up typing significantly!
    - Example: Type "ab" → see candidates → type "c" → "ab"'s first candidate auto-selected, "c" becomes new input
 
-2. **Pagination**: When there are more than 6 candidates, press `=` to cycle through pages
+2. **Pagination** (v3): When there are more than 6 candidates, press `=` to cycle through pages
    - Shows indicator: "第 1/3 頁 = 換頁" (Page 1/3, press = to page)
    - Cycles back to page 1 after the last page
+
+3. **Smart Backspace** (v4): Intelligent backspace behavior that mimics professional IMEs
+   - When input has 2 chars: `Backspace` → 1 char (does NOT trigger auto-select)
+   - When input has 1 char: `Backspace` → empty input
+   - When input is empty: `Backspace` → deletes last character from output buffer
+   - Continuous backspace: Keeps deleting from output until empty
+   - This provides a natural "undo" flow for corrections
 
 ### Workflow
 3. **Select** a candidate using the selection keys above, OR continue typing to auto-select
@@ -80,22 +87,25 @@ Use these keys to select candidates:
 
 ## Test Results
 
-All tests passing (19/19):
+All tests passing (17/17):
 
 ```
+✓ Backspace Behavior - Auto-select Prevention (3 tests) [NEW in v4]
+  - Backspace does not trigger auto-select
+  - Adding 3rd char triggers auto-select (comparison)
+  - Backspace never triggers auto-select on shorter input
+✓ Backspace Behavior - Delete from Output Buffer (4 tests) [NEW in v4]
+  - Delete last character from output
+  - Handle single character and empty output
+  - Multi-char deletion sequence
+✓ Backspace Behavior - Should Handle Backspace Check (3 tests) [NEW in v4]
+  - Detect when to delete from output
+  - Not delete when input has content
+  - Not delete when both empty
 ✓ Database Loading (1 test)
 ✓ Selection Key Mapping (2 tests)
-✓ Pagination System (9 tests) [NEW in v3]
-  - Calculate total pages
-  - Get candidates for specific page
-  - Cycle through pages
-  - Check if pagination needed
-✓ Auto-select on 3rd Character (6 tests) [NEW in v3]
-  - Detect when to auto-select
-  - Handle auto-select with valid/invalid codes
-  - Split code correctly
-✓ Integration Test (1 test)
-  - Real database with 60+ candidates (ux: 61 candidates, 11 pages)
+✓ Pagination System (2 tests) [v3]
+✓ Auto-select on 3rd Character (2 tests) [v3]
 ```
 
 ## Known Sample Codes
@@ -117,11 +127,13 @@ Try these to verify the system works!
 - [x] Candidates sorted by frequency
 - [x] Selection works with new keys (Space, ', [, ], -, \)
 - [x] 0-9 allowed in input codes (not selection keys)
-- [x] Pagination works with = key (cycles through pages) [NEW v3]
-- [x] Auto-select on 3rd character (speeds up typing) [NEW v3]
+- [x] Pagination works with = key (cycles through pages) [v3]
+- [x] Auto-select on 3rd character (speeds up typing) [v3]
+- [x] Smart backspace (input → output buffer deletion) [NEW v4]
+- [x] Backspace does NOT trigger auto-select [NEW v4]
 - [x] Text accumulates in output buffer
 - [x] Clipboard copy works
-- [x] All TDD tests pass (19/19)
+- [x] All TDD tests pass (17/17)
 
 ## Next Steps
 

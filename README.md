@@ -2,19 +2,20 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v3%20Complete-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v3-blue)]()
-[![Tests](https://img.shields.io/badge/tests-19%2F19%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v4%20Complete-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v4-blue)]()
+[![Tests](https://img.shields.io/badge/tests-17%2F17%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
 
-**[Try WebDaYi MVP1 v3 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[Try WebDaYi MVP1 v4 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
 Experience the core Dàyì input engine in your browser with advanced features:
 - 🚀 **Auto-select**: Type 2 chars + 3rd char = auto-select first candidate (speeds up typing!)
 - 📄 **Pagination**: Press `=` to cycle through pages when there are 60+ candidates
 - ⌨️ **Smart Selection**: Use Space/' /[/]/- /\ to select candidates (0-9 are now part of codes!)
+- ⌫ **Smart Backspace**: Deletes input first, then output buffer (natural undo flow!)
 
 ## Overview
 
@@ -28,28 +29,29 @@ Experience the core Dàyì input engine in your browser with advanced features:
 
 ## Project Status
 
-**Current Phase**: ✅ MVP 1.0 v3 Complete!
-**Completion**: ~40% (Phase 0 & MVP 1 v3 done, MVP 2a next)
+**Current Phase**: ✅ MVP 1.0 v4 Complete!
+**Completion**: ~40% (Phase 0 & MVP 1 v4 done, MVP 2a next)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0 v3           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v4           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Selection Keys Fix       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Pagination               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ Auto-select              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Auto-select              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Smart Backspace          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░]   0% ⏳    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 v3 with pagination & auto-select (19/19 tests passing)
+**Latest Achievement**: MVP 1.0 v4 with smart backspace UX (17/17 tests passing)
 **Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
 
 ## Quick Start
 
 ### Try It Now (Live Demo)
 
-**[Launch WebDaYi MVP1 v3 →](https://clarencechien.github.io/webdayi/)**
+**[Launch WebDaYi MVP1 v4 →](https://clarencechien.github.io/webdayi/)**
 
 No installation required! Just open the link and start typing:
 - Try `v` → 大, 夫, 禾
@@ -57,6 +59,7 @@ No installation required! Just open the link and start typing:
 - Try `ux` → 61 candidates, press `=` to page through
 - Press `Space` (1st), `'` (2nd), `[` (3rd), `]` (4th), `-` (5th), `\` (6th) to select
 - **New**: Type 2 chars then continue → auto-selects first candidate!
+- **New**: Press `Backspace` to undo (deletes input, then output buffer)
 - Click "Copy" when done
 
 ### For Developers
@@ -66,9 +69,9 @@ No installation required! Just open the link and start typing:
 git clone https://github.com/clarencechien/webdayi.git
 cd webdayi
 
-# Run tests (all 19 tests should pass)
+# Run tests (all 17 tests should pass)
 cd mvp1
-node test-node-v3.js
+node test-node-v4.js
 
 # Open locally in browser
 open index.html
@@ -163,7 +166,7 @@ webdayi/
 
 ## Features
 
-### MVP 1.0 v3: Core Engine ✅ COMPLETE
+### MVP 1.0 v4: Core Engine ✅ COMPLETE
 
 **Basic Features:**
 - ✅ Load Dàyì dictionary into memory (Map data structure, 1,584 codes)
@@ -183,9 +186,17 @@ webdayi/
   - New character becomes new input code
   - Does not trigger on selection/pagination keys
 
+**Advanced Features (v4):**
+- ✅ **Smart Backspace**: Professional IME-style undo behavior
+  - Backspace on input with 2 chars → 1 char (does NOT trigger auto-select)
+  - Backspace on input with 1 char → empty input
+  - Backspace on empty input → deletes last char from output buffer
+  - Continuous backspace → keeps deleting from output until empty
+  - Provides natural correction and undo flow
+
 **Target User**: Developer (for validation) & Power Users
 **Output Method**: Copy/Paste
-**Test Coverage**: 19/19 tests passing with TDD
+**Test Coverage**: 17/17 tests passing with TDD
 
 ### MVP 2a: Browser Plugin (Planned)
 
@@ -274,6 +285,7 @@ Once MVP 2a is validated, contributions welcome for:
 | ✅ MVP 1.0: Core Engine | 2025-11-06 | Done |
 | ✅ MVP 1.0 v2: Selection Keys Fix | 2025-11-06 | Done |
 | ✅ MVP 1.0 v3: Pagination & Auto-select | 2025-11-06 | Done |
+| ✅ MVP 1.0 v4: Smart Backspace UX | 2025-11-06 | Done |
 | ⏳ MVP 2a: Browser Plugin | 2025-11-20 | Planned |
 | ⏳ Public Release (Chrome Web Store) | 2025-11-25 | Planned |
 | 📋 MVP 2a+: Advanced Features | 2025-12-15 | Future |
@@ -307,5 +319,5 @@ Open source (license TBD - currently development phase)
 ---
 
 **Last Updated**: 2025-11-06
-**Status**: MVP 1.0 v3 Complete
-**Version**: 1.0.3-alpha (MVP1 v3 with pagination & auto-select)
+**Status**: MVP 1.0 v4 Complete
+**Version**: 1.0.4-alpha (MVP1 v4 with smart backspace UX)

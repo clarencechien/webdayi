@@ -140,6 +140,56 @@ function isValidInputChar(char) {
 }
 
 /**
+ * Check if auto-select should trigger based on input value change
+ * This prevents auto-select on backspace (when value gets shorter)
+ * @param {string} previousValue - Previous input value
+ * @param {string} newValue - New input value
+ * @returns {boolean} - True if should trigger auto-select
+ */
+function shouldAutoSelectOnInput(previousValue, newValue) {
+  // Only trigger auto-select if value is getting longer (not backspace)
+  if (newValue.length <= previousValue.length) {
+    return false;
+  }
+
+  // Only trigger if going from 2 chars to 3+ chars
+  if (previousValue.length !== 2) {
+    return false;
+  }
+
+  // Get the new character that was added
+  const newChar = newValue.charAt(newValue.length - 1);
+
+  // Use existing shouldAutoSelect logic
+  return shouldAutoSelect(previousValue, newChar);
+}
+
+/**
+ * Delete last character from output text
+ * @param {string} outputText - Current output buffer text
+ * @returns {string} - Output text with last character removed
+ */
+function deleteLastCharFromOutput(outputText) {
+  if (!outputText || outputText.length === 0) {
+    return '';
+  }
+  return outputText.slice(0, -1);
+}
+
+/**
+ * Check if backspace should delete from output buffer
+ * @param {string} inputValue - Current input code value
+ * @param {string} outputValue - Current output buffer value
+ * @returns {boolean} - True if should delete from output
+ */
+function shouldDeleteFromOutput(inputValue, outputValue) {
+  // Only delete from output if:
+  // 1. Input is empty
+  // 2. Output has content to delete
+  return inputValue.length === 0 && outputValue.length > 0;
+}
+
+/**
  * Check if auto-select should be triggered
  * Auto-select happens when user types a 3rd character (after 2-char code)
  * @param {string} currentCode - Current code in input box
@@ -289,7 +339,8 @@ function handleInput(value, previousValue = '') {
   const newCode = value.trim().toLowerCase();
 
   // Check for auto-select (2 chars → 3rd char)
-  if (previousValue && shouldAutoSelect(previousValue, newCode.charAt(newCode.length - 1))) {
+  // This now properly checks that value is getting LONGER (not backspace)
+  if (previousValue && shouldAutoSelectOnInput(previousValue, newCode)) {
     // Auto-select first candidate from previous code
     const result = performAutoSelect(previousValue, dayiMap);
     if (result.success) {
@@ -458,9 +509,27 @@ async function initialize() {
         previousValue = e.target.value.trim().toLowerCase();
       });
 
-      // Handle selection keys (Space, ', [, ], -, \) and pagination (=)
+      // Handle selection keys (Space, ', [, ], -, \), pagination (=), and backspace
       inputBox.addEventListener('keydown', (e) => {
         const key = e.key;
+
+        // Handle backspace key for output buffer deletion
+        if (key === 'Backspace') {
+          const outputBuffer = document.getElementById('output-buffer');
+          const inputValue = inputBox.value.trim().toLowerCase();
+
+          // If input is empty and output has content, delete from output
+          if (shouldDeleteFromOutput(inputValue, outputBuffer ? outputBuffer.value : '')) {
+            e.preventDefault();
+            if (outputBuffer) {
+              outputBuffer.value = deleteLastCharFromOutput(outputBuffer.value);
+            }
+            return;
+          }
+          // Otherwise, let default backspace work on input
+          // (It will naturally delete from input box)
+          return;
+        }
 
         // Handle pagination key (=)
         if (key === '=' && currentCode) {
