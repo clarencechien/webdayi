@@ -2,9 +2,16 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-in%20development-yellow)]()
-[![Phase](https://img.shields.io/badge/phase-0%3A%20data%20pipeline-blue)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20Complete-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0-blue)]()
+[![Tests](https://img.shields.io/badge/tests-12%2F12%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
+
+## 🎉 Live Demo
+
+**[Try WebDaYi MVP1 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+
+Experience the core Dàyì input engine in your browser! Type codes like `v`, `a`, or `4` and select candidates with number keys.
 
 ## Overview
 
@@ -18,48 +25,60 @@
 
 ## Project Status
 
-**Current Phase**: Phase 0 - Data Pipeline Setup
-**Completion**: ~5% (Planning complete, implementation starting)
+**Current Phase**: ✅ MVP 1.0 Complete!
+**Completion**: ~40% (Phase 0 & MVP 1 done, MVP 2a next)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│ Phase 0: Data Pipeline        [▓▓░░░░░░░░░░] 15%  🔄    │
-│ Phase 1: MVP 1.0              [░░░░░░░░░░░░]  0%  ⏳    │
-│ Phase 2: MVP 2a               [░░░░░░░░░░░░]  0%  ⏳    │
+│ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 2: MVP 2a               [░░░░░░░░░░░░]   0% ⏳    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Next Milestone**: Complete data converter (converts Rime YAML → JSON)
+**Latest Achievement**: MVP 1.0 fully implemented with TDD (12/12 tests passing)
+**Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
 
 ## Quick Start
 
-### For Users (Future)
+### Try It Now (Live Demo)
 
-*Not yet ready for end users - still in development*
+**[Launch WebDaYi MVP1 →](https://clarencechien.github.io/webdayi/)**
 
-When MVP 2a is complete:
-1. Install extension from Chrome Web Store
-2. Start typing in any web app
-3. That's it!
+No installation required! Just open the link and start typing:
+- Try `v` → 大, 夫, 禾
+- Try `a` → 人, 入
+- Press `1`-`9` to select candidates
+- Click "Copy" when done
 
-### For Developers (Current)
+### For Developers
 
 ```bash
 # Clone repository
-git clone <repository-url>
+git clone https://github.com/clarencechien/webdayi.git
 cd webdayi
 
-# Phase 0: Generate database (in progress)
-cd converter
-npm install js-yaml
+# Run tests (all 12 tests should pass)
+cd mvp1
+node test-node.js
+
+# Open locally in browser
+open index.html
+# Or use a local server:
+python3 -m http.server 8000
+# Visit: http://localhost:8000
+
+# Data Pipeline: Regenerate database (if needed)
+cd ../converter
 node convert.js  # Creates mvp1/dayi_db.json
-
-# Phase 1: Test core engine (not ready)
-# Open mvp1/index.html in browser
-
-# Phase 2: Load browser extension (not ready)
-# chrome://extensions → Load Unpacked → mvp2a-plugin/
 ```
+
+### For Future (MVP 2a - Browser Extension)
+
+When MVP 2a is complete:
+1. Install extension from Chrome Web Store
+2. Start typing in any web app (Gmail, Docs, etc.)
+3. Native input experience!
 
 ## Documentation
 
