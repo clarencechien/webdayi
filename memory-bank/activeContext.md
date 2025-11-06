@@ -1,12 +1,58 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-06 (Updated after Touch-Friendly UX implementation)
-**Current Phase**: ✅ MVP 1.0 v7 COMPLETED!
+**Last Updated**: 2025-11-06 (Updated after Converter v2 implementation)
+**Current Phase**: ✅ MVP 1.0 v7 + Enhanced Converter COMPLETED!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### 🎉 LATEST UPDATE: Touch-Friendly UX (v7) COMPLETE!
+### 🎉 LATEST UPDATE: Enhanced Converter v2 with Frequency Ranking COMPLETE!
+
+**Achievement**: Implemented frequency-based converter with real-world character usage data!
+
+**What was completed in Converter v2**:
+- ✅ **TDD Approach**: 21 comprehensive tests written first, all passing
+- ✅ **Frequency-Based Ranking**: Uses real-world character frequency data (top 2000 chars)
+- ✅ **Smart Frequency Calculation**: Linear mapping from rank to frequency (10000→8000)
+- ✅ **Backward Compatible**: Falls back to v1 algorithm if freq.yaml not available
+- ✅ **Well Documented**: Design doc, README, test suite, inline comments
+- ✅ **Production Ready**: Command-line tool with validation and statistics
+
+**Technical Implementation**:
+```javascript
+// Frequency calculation algorithm
+BASE_FREQ = 10000  // Rank 1 (most common)
+MIN_FREQ = 8000    // Rank 2000
+DEFAULT_FREQ = 1000 // Not in frequency list
+
+// Linear mapping: rank → frequency
+freq = BASE_FREQ - (rank - 1) * (BASE_FREQ - MIN_FREQ) / 1999
+
+Examples:
+- Rank 1 (的)  → freq 10000
+- Rank 13 (大) → freq 9988
+- Rank 1000    → freq 9000
+- Rank 2000    → freq 8000
+- Not in list  → freq 1000
+```
+
+**Files Created**:
+- `converter/convert-v2.js` - Enhanced command-line tool
+- `converter/convert-v2-lib.js` - Library functions (testable)
+- `converter/convert-v2.test.js` - TDD test suite (21/21 passing)
+- `converter/DESIGN-v2.md` - Design documentation
+- `converter/README.md` - User documentation
+- `converter/raw_data/freq.yaml` - Frequency data (100 sample chars)
+- `converter/raw_data/freq.yaml.example` - Template with instructions
+- `converter/test-data/freq-sample.yaml` - Test data
+
+**Impact**:
+- More accurate candidate ordering based on real-world usage
+- Characters like "大", "人", "的" (high frequency) appear first
+- Rare characters with default frequency appear last
+- Seamless fallback if frequency data unavailable
+
+### Previous Update: Touch-Friendly UX (v7) COMPLETE!
 
 **Achievement**: Implemented click-to-select and touch-optimized pagination controls!
 

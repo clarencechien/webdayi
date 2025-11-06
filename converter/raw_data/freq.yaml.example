@@ -1,0 +1,118 @@
+# Example frequency ranking file
+# This is a SAMPLE file with only top 100 characters
+# For production use, you should obtain a complete list of top 2000 characters
+#
+# Format: char\trank
+# Rank 1 = most common, Rank 2000 = 2000th most common
+#
+# To use this file:
+# 1. Rename to freq.yaml (or create your own freq.yaml)
+# 2. Ensure it contains actual frequency rankings from real-world usage
+# 3. Run: node convert-v2.js
+#
+# Source for complete data:
+# - Search for "Chinese character frequency lists"
+# - Common sources: Modern Chinese Character Frequency List
+# - Or use corpus analysis tools on real text data
+#
+---
+的	1
+一	2
+是	3
+不	4
+了	5
+在	6
+人	7
+有	8
+我	9
+他	10
+這	11
+個	12
+大	13
+來	14
+上	15
+國	16
+中	17
+到	18
+說	19
+們	20
+為	21
+子	22
+和	23
+你	24
+地	25
+出	26
+道	27
+也	28
+時	29
+年	30
+得	31
+就	32
+那	33
+要	34
+下	35
+以	36
+生	37
+會	38
+自	39
+著	40
+去	41
+之	42
+過	43
+家	44
+學	45
+對	46
+可	47
+她	48
+裡	49
+後	50
+小	51
+麼	52
+心	53
+多	54
+天	55
+而	56
+能	57
+好	58
+都	59
+然	60
+沒	61
+日	62
+於	63
+起	64
+還	65
+發	66
+成	67
+事	68
+只	69
+作	70
+當	71
+想	72
+看	73
+文	74
+無	75
+開	76
+手	77
+十	78
+用	79
+主	80
+行	81
+方	82
+又	83
+如	84
+前	85
+所	86
+本	87
+見	88
+經	89
+頭	90
+面	91
+公	92
+同	93
+三	94
+已	95
+老	96
+從	97
+動	98
+兩	99
+長	100

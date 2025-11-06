@@ -1,8 +1,8 @@
 # Progress Tracker: WebDaYi
 
-**Last Updated**: 2025-11-06 (Updated after v7 + Critical Bug Fix)
-**Overall Status**: 🎉 MVP 1.0 v7 COMPLETE + Bug Fixed!
-**Completion**: ~48% (Phase 0 & MVP 1 v7 complete, MVP 2a next)
+**Last Updated**: 2025-11-06 (Updated after Converter v2 implementation)
+**Overall Status**: 🎉 MVP 1.0 v7 COMPLETE + Enhanced Converter v2!
+**Completion**: ~50% (Phase 0 v2 & MVP 1 v7 complete, MVP 2a next)
 
 ## Project Phases Overview
 
@@ -50,12 +50,14 @@ Legend: ✅ Complete | 🐛 Bug Fixed | 🔄 In Progress | ⏳ Next | 📋 Plann
 - ✅ Git repository initialized
 - ✅ Development workflow defined
 
-### Phase 0: Data Pipeline (100%) ✅
+### Phase 0: Data Pipeline (100%) ✅ + Enhanced Converter v2 ✨
 - ✅ Converter directory structure created
 - ✅ Rime dictionary moved to `converter/raw_data/`
-- ✅ YAML → JSON converter implemented (`convert.js`)
+- ✅ YAML → JSON converter v1 implemented (`convert.js`)
+- ✅ **Enhanced converter v2 implemented** (`convert-v2.js`) with frequency ranking ✨
 - ✅ Database generated: 1,584 codes, 13,926 entries, 717KB
 - ✅ Validation: All spot checks passing
+- ✅ TDD test suite: 21/21 tests passing
 
 | Task ID | Task | Status | Progress | Notes |
 |---------|------|--------|----------|-------|
@@ -63,6 +65,8 @@ Legend: ✅ Complete | 🐛 Bug Fixed | 🔄 In Progress | ⏳ Next | 📋 Plann
 | **C.2** | Read Rime YAML | ✅ Complete | 100% | Parses 13,926 lines |
 | **C.3** | Write dayi_db.json | ✅ Complete | 100% | 717KB valid JSON |
 | **C.4** | Validate JSON structure | ✅ Complete | 100% | All checks pass |
+| **C.5** | Enhanced v2 converter (TDD) | ✅ Complete | 100% | Frequency-based, 21 tests |
+| **C.6** | Frequency data integration | ✅ Complete | 100% | freq.yaml support |
 
 ### MVP 1.0 v7: Core Engine + Advanced Features (100%) ✅
 
