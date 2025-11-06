@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebDaYi MVP1 - Tests</title>
+  <style>
+    body {
+      font-family: 'Consolas', 'Monaco', monospace;
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #333; }
+    .test-suite {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-case {
+      padding: 10px;
+      margin: 5px 0;
+      border-left: 4px solid #ccc;
+      background: #fafafa;
+    }
+    .test-case.pass {
+      border-left-color: #4caf50;
+      background: #f1f8f4;
+    }
+    .test-case.fail {
+      border-left-color: #f44336;
+      background: #fef5f5;
+    }
+    .test-name { font-weight: bold; }
+    .test-error { color: #f44336; margin-top: 5px; font-size: 0.9em; }
+    .summary {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .summary.all-pass { background: #e8f5e9; color: #2e7d32; }
+    .summary.has-fail { background: #ffebee; color: #c62828; }
+  </style>
+</head>
+<body>
+  <h1>WebDaYi MVP1 - Test Suite</h1>
+  <div id="test-results"></div>
+
+  <script src="core_logic.js"></script>
+  <script>
+    // Simple test framework
+    class TestRunner {
+      constructor() {
+        this.results = [];
+      }
+
+      describe(suiteName, tests) {
+        const suiteResults = {
+          name: suiteName,
+          tests: []
+        };
+
+        tests.call({
+          it: (testName, testFn) => {
+            try {
+              testFn();
+              suiteResults.tests.push({ name: testName, pass: true });
+            } catch (error) {
+              suiteResults.tests.push({ name: testName, pass: false, error: error.message });
+            }
+          }
+        });
+
+        this.results.push(suiteResults);
+      }
+
+      assert(condition, message) {
+        if (!condition) {
+          throw new Error(message || 'Assertion failed');
+        }
+      }
+
+      assertEqual(actual, expected, message) {
+        if (actual !== expected) {
+          throw new Error(message || `Expected ${expected}, got ${actual}`);
+        }
+      }
+
+      assertDeepEqual(actual, expected, message) {
+        if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+          throw new Error(message || `Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+        }
+      }
+
+      render() {
+        const container = document.getElementById('test-results');
+        let totalTests = 0;
+        let passedTests = 0;
+
+        this.results.forEach(suite => {
+          const suiteDiv = document.createElement('div');
+          suiteDiv.className = 'test-suite';
+          suiteDiv.innerHTML = `<h2>${suite.name}</h2>`;
+
+          suite.tests.forEach(test => {
+            totalTests++;
+            if (test.pass) passedTests++;
+
+            const testDiv = document.createElement('div');
+            testDiv.className = `test-case ${test.pass ? 'pass' : 'fail'}`;
+            testDiv.innerHTML = `
+              <div class="test-name">${test.pass ? '✓' : '✗'} ${test.name}</div>
+              ${test.error ? `<div class="test-error">${test.error}</div>` : ''}
+            `;
+            suiteDiv.appendChild(testDiv);
+          });
+
+          container.appendChild(suiteDiv);
+        });
+
+        // Summary
+        const summaryDiv = document.createElement('div');
+        summaryDiv.className = `summary ${passedTests === totalTests ? 'all-pass' : 'has-fail'}`;
+        summaryDiv.textContent = `${passedTests}/${totalTests} tests passed`;
+        container.appendChild(summaryDiv);
+      }
+    }
+
+    // Run tests
+    const runner = new TestRunner();
+
+    // Test Suite 1: Database Loading
+    runner.describe('Database Loading', function() {
+      this.it('should create a Map from database object', () => {
+        const testDb = {
+          "v": [{ "char": "大", "freq": 100 }],
+          "a": [{ "char": "人", "freq": 100 }, { "char": "入", "freq": 99 }]
+        };
+        const map = createDatabaseMap(testDb);
+        runner.assert(map instanceof Map, 'Should return a Map');
+        runner.assertEqual(map.size, 2, 'Should have 2 entries');
+        runner.assert(map.has('v'), 'Should have key "v"');
+        runner.assert(map.has('a'), 'Should have key "a"');
+      });
+
+      this.it('should preserve candidate data in Map', () => {
+        const testDb = {
+          "v": [{ "char": "大", "freq": 100 }, { "char": "夫", "freq": 99 }]
+        };
+        const map = createDatabaseMap(testDb);
+        const candidates = map.get('v');
+        runner.assertEqual(candidates.length, 2, 'Should have 2 candidates');
+        runner.assertEqual(candidates[0].char, '大', 'First char should be 大');
+        runner.assertEqual(candidates[0].freq, 100, 'First freq should be 100');
+      });
+    });
+
+    // Test Suite 2: Query Function
+    runner.describe('Query Function', function() {
+      const testMap = new Map([
+        ['v', [{ "char": "大", "freq": 100 }, { "char": "夫", "freq": 99 }]],
+        ['a', [{ "char": "人", "freq": 100 }, { "char": "入", "freq": 99 }]]
+      ]);
+
+      this.it('should return candidates for valid code', () => {
+        const results = queryCandidates(testMap, 'v');
+        runner.assertEqual(results.length, 2, 'Should return 2 candidates');
+        runner.assertEqual(results[0].char, '大', 'First candidate should be 大');
+      });
+
+      this.it('should return empty array for invalid code', () => {
+        const results = queryCandidates(testMap, 'xyz');
+        runner.assertDeepEqual(results, [], 'Should return empty array');
+      });
+
+      this.it('should return empty array for empty code', () => {
+        const results = queryCandidates(testMap, '');
+        runner.assertDeepEqual(results, [], 'Should return empty array');
+      });
+    });
+
+    // Test Suite 3: Sort Function
+    runner.describe('Sort Function', function() {
+      this.it('should sort candidates by frequency descending', () => {
+        const candidates = [
+          { "char": "乙", "freq": 50 },
+          { "char": "甲", "freq": 100 },
+          { "char": "丙", "freq": 75 }
+        ];
+        const sorted = sortCandidatesByFreq(candidates);
+        runner.assertEqual(sorted[0].char, '甲', 'First should be highest freq');
+        runner.assertEqual(sorted[1].char, '丙', 'Second should be medium freq');
+        runner.assertEqual(sorted[2].char, '乙', 'Third should be lowest freq');
+        runner.assertEqual(sorted[0].freq, 100);
+        runner.assertEqual(sorted[1].freq, 75);
+        runner.assertEqual(sorted[2].freq, 50);
+      });
+
+      this.it('should handle already sorted candidates', () => {
+        const candidates = [
+          { "char": "甲", "freq": 100 },
+          { "char": "乙", "freq": 50 }
+        ];
+        const sorted = sortCandidatesByFreq(candidates);
+        runner.assertEqual(sorted[0].char, '甲');
+        runner.assertEqual(sorted[1].char, '乙');
+      });
+
+      this.it('should handle single candidate', () => {
+        const candidates = [{ "char": "甲", "freq": 100 }];
+        const sorted = sortCandidatesByFreq(candidates);
+        runner.assertEqual(sorted.length, 1);
+        runner.assertEqual(sorted[0].char, '甲');
+      });
+
+      this.it('should handle empty array', () => {
+        const sorted = sortCandidatesByFreq([]);
+        runner.assertDeepEqual(sorted, []);
+      });
+    });
+
+    // Test Suite 4: Render Function
+    runner.describe('Render Function', function() {
+      this.it('should generate correct HTML for candidates', () => {
+        const candidates = [
+          { "char": "大", "freq": 100 },
+          { "char": "夫", "freq": 99 }
+        ];
+        const html = renderCandidatesHTML(candidates);
+        runner.assert(html.includes('1. 大'), 'Should include numbered first candidate');
+        runner.assert(html.includes('2. 夫'), 'Should include numbered second candidate');
+      });
+
+      this.it('should handle empty candidates', () => {
+        const html = renderCandidatesHTML([]);
+        runner.assertEqual(html, '', 'Should return empty string');
+      });
+
+      this.it('should limit to 9 candidates', () => {
+        const candidates = Array.from({ length: 15 }, (_, i) => ({
+          char: String.fromCharCode(65 + i),
+          freq: 100 - i
+        }));
+        const html = renderCandidatesHTML(candidates);
+        const matches = html.match(/\d+\./g);
+        runner.assertEqual(matches.length, 9, 'Should show max 9 candidates');
+      });
+    });
+
+    // Render results
+    runner.render();
+  </script>
+</body>
+</html>
