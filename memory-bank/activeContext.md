@@ -25,10 +25,35 @@
 - ✅ Core logic implemented (TDD approach)
 - ✅ UI/UX implemented (responsive, polished)
 - ✅ Tests: All 12 automated tests passing
-- 🔄 **IN PROGRESS**: Updating memory bank and preparing commit
-- ⏳ **NEXT**: Commit MVP1, then begin MVP 2a planning
+- ✅ GitHub Pages deployment automated
+- ✅ Live demo available at: https://clarencechien.github.io/webdayi/
+- 🔄 **IN PROGRESS**: Adding GitHub Actions for auto-deployment
+- ⏳ **NEXT**: Finalize deployment, then begin MVP 2a planning
 
 ## Recent Changes
+
+### 2025-11-06 (Late Evening): GitHub Pages Deployment 🚀
+- ✅ Created GitHub Actions workflow (`.github/workflows/deploy-pages.yml`)
+- ✅ Configured auto-deployment to GitHub Pages on push to main
+- ✅ Live demo now available at: https://clarencechien.github.io/webdayi/
+- ✅ Updated README with:
+  - Live demo link prominently featured
+  - Updated status badges (MVP 1 Complete, 12/12 tests)
+  - Updated Quick Start with live demo instructions
+  - Updated project status (40% complete)
+
+**Deployment Configuration**:
+- Triggers: Push to main branch (mvp1/ changes) + manual dispatch
+- Build: Copies mvp1/ directory to GitHub Pages
+- Deploy: Uses GitHub Pages official action (v4)
+- Permissions: Minimal (contents: read, pages: write)
+- Concurrency: Single deployment at a time
+
+**Benefits**:
+- Users can try MVP1 immediately (no local setup)
+- Easy sharing for feedback and testing
+- Automatic updates when main branch changes
+- Professional presentation
 
 ### 2025-11-06 (Evening): MVP 1.0 Implementation - COMPLETE! 🎉
 
