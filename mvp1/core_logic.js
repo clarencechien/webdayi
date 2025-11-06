@@ -558,16 +558,22 @@ function splitCodeForAutoSelect(currentCode, newChar) {
  * Perform auto-select of first candidate
  * @param {string} code - The code to query
  * @param {Map} map - The database map
+ * @param {Map} userModel - Optional user preference model
  * @returns {Object} - { success: boolean, selectedChar: string }
  */
-function performAutoSelect(code, map) {
+function performAutoSelect(code, map, userModel = null) {
   const candidates = queryCandidates(map, code);
   const sorted = sortCandidatesByFreq(candidates);
 
-  if (sorted.length > 0) {
+  // Apply user preference if available (MVP1.9 bug fix)
+  const withUserPreference = userModel ?
+    applyUserPreference(code, sorted, userModel) :
+    sorted;
+
+  if (withUserPreference.length > 0) {
     return {
       success: true,
-      selectedChar: sorted[0].char
+      selectedChar: withUserPreference[0].char
     };
   }
 
@@ -671,8 +677,8 @@ function handleInput(value, previousValue = '') {
   // Check for auto-select (2 chars → 3rd char)
   // This now properly checks that value is getting LONGER (not backspace)
   if (previousValue && shouldAutoSelectOnInput(previousValue, newCode)) {
-    // Auto-select first candidate from previous code
-    const result = performAutoSelect(previousValue, dayiMap);
+    // Auto-select first candidate from previous code (with user preference - MVP1.9 bug fix)
+    const result = performAutoSelect(previousValue, dayiMap, userModel);
     if (result.success) {
       appendToOutputBuffer(result.selectedChar);
       // Update input to show only the new character
