@@ -221,6 +221,33 @@ label {
   color: #333;
 }
 
+/* Pagination Indicator */
+.page-indicator {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 15px;
+  background: #fff9e6;
+  border: 2px solid #ffd700;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.9em;
+  color: #666;
+  font-weight: 500;
+}
+
+.page-indicator kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-left: 5px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.95em;
+  background: #ffd700;
+  border: 1px solid #daa520;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-weight: 700;
+}
+
 /* Output Section */
 .output-group {
   margin-bottom: 20px;

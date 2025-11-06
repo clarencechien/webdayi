@@ -2,16 +2,19 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20Complete-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0-blue)]()
-[![Tests](https://img.shields.io/badge/tests-12%2F12%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v3%20Complete-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v3-blue)]()
+[![Tests](https://img.shields.io/badge/tests-19%2F19%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
 
-**[Try WebDaYi MVP1 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[Try WebDaYi MVP1 v3 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
-Experience the core Dàyì input engine in your browser! Type codes like `v`, `a`, or `4` and select candidates with number keys.
+Experience the core Dàyì input engine in your browser with advanced features:
+- 🚀 **Auto-select**: Type 2 chars + 3rd char = auto-select first candidate (speeds up typing!)
+- 📄 **Pagination**: Press `=` to cycle through pages when there are 60+ candidates
+- ⌨️ **Smart Selection**: Use Space/' /[/]/- /\ to select candidates (0-9 are now part of codes!)
 
 ## Overview
 
@@ -25,30 +28,35 @@ Experience the core Dàyì input engine in your browser! Type codes like `v`, `a
 
 ## Project Status
 
-**Current Phase**: ✅ MVP 1.0 Complete!
-**Completion**: ~40% (Phase 0 & MVP 1 done, MVP 2a next)
+**Current Phase**: ✅ MVP 1.0 v3 Complete!
+**Completion**: ~40% (Phase 0 & MVP 1 v3 done, MVP 2a next)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v3           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Selection Keys Fix       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Pagination               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Auto-select              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░]   0% ⏳    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 fully implemented with TDD (12/12 tests passing)
+**Latest Achievement**: MVP 1.0 v3 with pagination & auto-select (19/19 tests passing)
 **Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
 
 ## Quick Start
 
 ### Try It Now (Live Demo)
 
-**[Launch WebDaYi MVP1 →](https://clarencechien.github.io/webdayi/)**
+**[Launch WebDaYi MVP1 v3 →](https://clarencechien.github.io/webdayi/)**
 
 No installation required! Just open the link and start typing:
 - Try `v` → 大, 夫, 禾
 - Try `a` → 人, 入
-- Press `1`-`9` to select candidates
+- Try `ux` → 61 candidates, press `=` to page through
+- Press `Space` (1st), `'` (2nd), `[` (3rd), `]` (4th), `-` (5th), `\` (6th) to select
+- **New**: Type 2 chars then continue → auto-selects first candidate!
 - Click "Copy" when done
 
 ### For Developers
@@ -58,9 +66,9 @@ No installation required! Just open the link and start typing:
 git clone https://github.com/clarencechien/webdayi.git
 cd webdayi
 
-# Run tests (all 12 tests should pass)
+# Run tests (all 19 tests should pass)
 cd mvp1
-node test-node.js
+node test-node-v3.js
 
 # Open locally in browser
 open index.html
@@ -155,16 +163,29 @@ webdayi/
 
 ## Features
 
-### MVP 1.0: Core Engine (In Progress)
+### MVP 1.0 v3: Core Engine ✅ COMPLETE
 
-- ✅ Load Dàyì dictionary into memory (Map data structure)
+**Basic Features:**
+- ✅ Load Dàyì dictionary into memory (Map data structure, 1,584 codes)
 - ✅ Query candidates by code (e.g., "4jp" → "易", "義")
 - ✅ Sort by frequency (most common first)
-- ✅ Select with number keys (1-9)
+- ✅ Select with smart keys (Space/' /[/]/- /\)
+  - **Important**: 0-9 are now part of codes (e.g., t0, t1), NOT selection keys
 - ✅ Copy composed text to clipboard
 
-**Target User**: Developer (for validation)
+**Advanced Features (v3):**
+- ✅ **Pagination System**: Cycle through pages with `=` key
+  - Handles codes with 60+ candidates (e.g., ux: 61 candidates → 11 pages)
+  - Visual indicator: "第 1/3 頁 = 換頁"
+  - Cycles back to first page after last
+- ✅ **Auto-select on 3rd Character**: Speeds up typing
+  - Type 2 chars → 3rd char → first candidate auto-selected
+  - New character becomes new input code
+  - Does not trigger on selection/pagination keys
+
+**Target User**: Developer (for validation) & Power Users
 **Output Method**: Copy/Paste
+**Test Coverage**: 19/19 tests passing with TDD
 
 ### MVP 2a: Browser Plugin (Planned)
 
@@ -249,8 +270,10 @@ Once MVP 2a is validated, contributions welcome for:
 | Milestone | Target Date | Status |
 |-----------|-------------|--------|
 | ✅ Project Initialized | 2025-11-06 | Done |
-| 🔄 Phase 0: Data Pipeline | 2025-11-07 | In Progress |
-| ⏳ MVP 1.0: Core Engine | 2025-11-10 | Planned |
+| ✅ Phase 0: Data Pipeline | 2025-11-06 | Done |
+| ✅ MVP 1.0: Core Engine | 2025-11-06 | Done |
+| ✅ MVP 1.0 v2: Selection Keys Fix | 2025-11-06 | Done |
+| ✅ MVP 1.0 v3: Pagination & Auto-select | 2025-11-06 | Done |
 | ⏳ MVP 2a: Browser Plugin | 2025-11-20 | Planned |
 | ⏳ Public Release (Chrome Web Store) | 2025-11-25 | Planned |
 | 📋 MVP 2a+: Advanced Features | 2025-12-15 | Future |
@@ -284,5 +307,5 @@ Open source (license TBD - currently development phase)
 ---
 
 **Last Updated**: 2025-11-06
-**Status**: Active Development
-**Version**: 0.0.1-alpha
+**Status**: MVP 1.0 v3 Complete
+**Version**: 1.0.3-alpha (MVP1 v3 with pagination & auto-select)
