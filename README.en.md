@@ -4,9 +4,9 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v7%20Complete%20%2B%20Bug%20Fix-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v7%20Complete%20%2B%20Converter%20v2-brightgreen)]()
 [![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v7-blue)]()
-[![Tests](https://img.shields.io/badge/tests-35%2F35%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-56%2F56%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
@@ -52,10 +52,42 @@ Experience the core Dàyì input engine in your browser with advanced features:
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 v7 with touch-friendly UX + critical bug fix (35/35 tests passing)
+**Latest Achievement**: MVP 1.0 v7 with touch-friendly UX + critical bug fix (56/56 tests passing)
 - ✅ Touch-friendly UX implemented (MVP1.10)
 - 🐛 Fixed: Auto-select now respects user preferences (MVP1.9 bug fix)
+- ✅ **Frequency Converter v2**: Smart sorting using Taiwan MOE's 2000 high-frequency character data
 **Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
+
+## 💡 Core Feature: Frequency-Based Smart Sorting
+
+WebDaYi uses real-world character frequency data instead of arbitrary ordering:
+
+### 🎯 Converter v2: Frequency-Based Ranking System
+
+Our **enhanced data pipeline** integrates Taiwan Ministry of Education's 2000 most common Traditional Chinese characters:
+
+- **Real Data Source**: Taiwan MOE high-frequency character rankings (教育部)
+- **Smart Sorting**: Candidates sorted by actual usage frequency
+- **Test Verified**: 21 automated tests ensure correctness
+- **Backward Compatible**: Falls back to basic version when frequency data unavailable
+
+**Example**: For code `4jp`:
+```json
+{
+  "4jp": [
+    { "char": "易", "freq": 9992 },  // Rank 9 (very high frequency)
+    { "char": "義", "freq": 9544 },  // Rank ~500 (high frequency)
+    { "char": "蜴", "freq": 1000 }   // Not ranked (default)
+  ]
+}
+```
+
+This ensures the most commonly used characters appear first, making input faster and more intuitive.
+
+**Technical Details**:
+- Linear mapping: Rank 1 → Frequency 10000, Rank 2000 → Frequency 8000
+- Unranked characters default frequency: 1000
+- Developed with TDD (Test-Driven Development)
 
 ## Quick Start
 
@@ -164,20 +196,44 @@ The `memory-bank/` directory contains comprehensive project documentation:
 
 ```
 webdayi/
-├── converter/              # Phase 0: Data pipeline
-│   ├── convert.js         # YAML → JSON converter
-│   └── raw_data/
-│       └── dayi.dict.yaml # Rime source
-├── mvp1/                  # Phase 1: Static webpage
-│   ├── index.html
-│   ├── core_logic.js      # Core query engine
-│   └── dayi_db.json       # Generated database
-├── mvp2a-plugin/          # Phase 2: Browser extension
-│   ├── manifest.json      # Chrome Extension config
-│   ├── background.js      # Service Worker
-│   └── content.js         # DOM injection
-└── memory-bank/           # Project documentation
-    └── *.md               # Comprehensive docs
+├── converter/                   # Phase 0: Data Pipeline
+│   ├── convert.js              # YAML → JSON converter (basic version)
+│   ├── convert-v2.js           # Enhanced converter (frequency-based ranking) ✅
+│   ├── convert-v2-lib.js       # Converter library functions
+│   ├── convert-v2.test.js      # Converter test suite (21 tests)
+│   ├── DESIGN-v2.md            # Converter v2 design documentation
+│   ├── README.md               # Converter documentation
+│   ├── raw_data/
+│   │   ├── dayi.dict.yaml      # Rime Dàyì dictionary source
+│   │   └── freq.yaml           # Character frequency data (2000 chars, Taiwan MOE)
+│   └── test-data/
+│       └── freq-sample.yaml    # Test frequency data (20 char sample)
+├── mvp1/                       # Phase 1: Static Webpage
+│   ├── index.html              # Main user interface
+│   ├── core_logic.js           # Core query engine (v7)
+│   ├── style.css               # Stylesheet
+│   ├── dayi_db.json            # Generated database (frequency-sorted)
+│   ├── README.md               # MVP1 documentation (Traditional Chinese)
+│   ├── README.en.md            # MVP1 documentation (English)
+│   ├── test.html               # Browser test runner
+│   ├── test-node.js            # Node.js test runner (v1)
+│   ├── test-node-v2.js         # Selection keys tests (v2)
+│   ├── test-node-v3.js         # Pagination & auto-select tests (v3)
+│   ├── test-node-v4.js         # Smart backspace tests (v4)
+│   ├── test-node-v5.js         # Input mode toggle tests (v5)
+│   ├── test-node-v6.js         # User personalization tests (19 tests)
+│   └── test-node-v7.js         # Auto-select bug fix tests (16 tests)
+├── mvp2a-plugin/               # Phase 2: Browser Extension (Planned)
+│   ├── manifest.json           # Chrome Extension config
+│   ├── background.js           # Service Worker
+│   └── content.js              # DOM injection
+└── memory-bank/                # Project Documentation
+    ├── projectbrief.md         # Project brief
+    ├── productContext.md       # Product context
+    ├── systemPatterns.md       # System patterns
+    ├── techContext.md          # Tech context
+    ├── activeContext.md        # Active context
+    └── progress.md             # Progress tracking
 ```
 
 ## Features
@@ -300,16 +356,37 @@ cat ../mvp1/dayi_db.json | jq '."4jp"'
 
 ### Testing
 
-**Current**: Manual testing only
-**Future**: Automated tests for regression prevention
+**Test Coverage**: ✅ 56/56 tests passing (with TDD)
 
 ```bash
-# Test static page (Phase 1)
-open mvp1/index.html
+# Converter tests (21 tests)
+cd converter
+node convert-v2.test.js
+# ✓ Frequency parsing (3 tests)
+# ✓ Frequency calculation (5 tests)
+# ✓ Dayi dictionary parsing (3 tests)
+# ✓ Candidate enrichment (3 tests)
+# ✓ Integration tests (3 tests)
+# ✓ Edge cases (4 tests)
 
-# Test extension (Phase 2)
+# MVP1 tests (35 tests)
+cd mvp1
+node test-node-v6.js  # User personalization (19 tests)
+node test-node-v7.js  # Auto-select bug fix (16 tests)
+
+# Browser manual testing
+open mvp1/index.html
+# Or run test suite:
+open mvp1/test.html
+
+# Test extension (Phase 2 - Planned)
 # chrome://extensions → Developer Mode → Load Unpacked
 ```
+
+**Test Details**:
+- **Phase 0 (Converter)**: 21 automated tests covering frequency parsing, calculation, and database building
+- **Phase 1 (MVP1)**: 35 automated tests covering personalization, auto-select, and bug fixes
+- **Total**: 56 tests with 100% pass rate
 
 ## Contributing
 
@@ -326,11 +403,15 @@ Once MVP 2a is validated, contributions welcome for:
 | Milestone | Target Date | Status |
 |-----------|-------------|--------|
 | ✅ Project Initialized | 2025-11-06 | Done |
-| ✅ Phase 0: Data Pipeline | 2025-11-06 | Done |
-| ✅ MVP 1.0: Core Engine | 2025-11-06 | Done |
+| ✅ Phase 0: Data Pipeline (v1) | 2025-11-06 | Done |
+| ✅ Phase 0: Enhanced Converter (v2, frequency-based) | 2025-11-06 | Done |
+| ✅ MVP 1.0 v1: Core Engine | 2025-11-06 | Done |
 | ✅ MVP 1.0 v2: Selection Keys Fix | 2025-11-06 | Done |
 | ✅ MVP 1.0 v3: Pagination & Auto-select | 2025-11-06 | Done |
 | ✅ MVP 1.0 v4: Smart Backspace UX | 2025-11-06 | Done |
+| ✅ MVP 1.0 v5: Input Mode Toggle | 2025-11-06 | Done |
+| ✅ MVP 1.0 v6: User Personalization | 2025-11-06 | Done |
+| ✅ MVP 1.0 v7: Touch-Friendly UX + Bug Fix | 2025-11-06 | Done |
 | ⏳ MVP 2a: Browser Plugin | 2025-11-20 | Planned |
 | ⏳ Public Release (Chrome Web Store) | 2025-11-25 | Planned |
 | 📋 MVP 2a+: Advanced Features | 2025-12-15 | Future |
@@ -364,5 +445,5 @@ Open source (license TBD - currently development phase)
 ---
 
 **Last Updated**: 2025-11-06
-**Status**: MVP 1.0 v4 Complete
-**Version**: 1.0.4-alpha (MVP1 v4 with smart backspace UX)
+**Status**: MVP 1.0 v7 Complete (with Converter v2)
+**Version**: 1.0.7-alpha (MVP1 v7 with touch-friendly UX + Converter v2 with frequency-based ranking)

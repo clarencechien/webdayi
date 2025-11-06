@@ -4,9 +4,9 @@
 
 > 輕量、透明、網頁優先的大易中文輸入法引擎
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v7%20Complete%20%2B%20Bug%20Fix-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v7%20Complete%20%2B%20Converter%20v2-brightgreen)]()
 [![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v7-blue)]()
-[![Tests](https://img.shields.io/badge/tests-35%2F35%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-56%2F56%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 線上展示
@@ -52,10 +52,42 @@
 └──────────────────────────────────────────────────────────┘
 ```
 
-**最新成就**：MVP 1.0 v7 具備觸控友善 UX + 關鍵 bug 修復（35/35 測試通過）
+**最新成就**：MVP 1.0 v7 具備觸控友善 UX + 關鍵 bug 修復（56/56 測試通過）
 - ✅ 觸控友善 UX 已實作（MVP1.10）
 - 🐛 已修復：自動選字現在會遵循使用者偏好（MVP1.9 bug 修復）
+- ✅ **頻率轉換器 v2**：使用台灣教育部 2000 高頻字資料進行智慧排序
 **下個里程碑**：開始 MVP 2a（瀏覽器外掛）實作
+
+## 💡 核心特色：頻率導向的智慧排序
+
+WebDaYi 使用真實世界的字元使用頻率資料，而非任意排序：
+
+### 🎯 轉換器 v2：頻率排序系統
+
+我們的**增強資料管線**整合了台灣教育部的 2000 個最常用正體中文字資料：
+
+- **真實資料來源**：台灣教育部高頻字排名（教育部）
+- **智慧排序**：候選字依實際使用頻率排序
+- **測試驗證**：21 個自動化測試確保正確性
+- **向下相容**：沒有頻率資料時退回基礎版本
+
+**範例**：對於字碼 `4jp`：
+```json
+{
+  "4jp": [
+    { "char": "易", "freq": 9992 },  // 排名 9（超高頻）
+    { "char": "義", "freq": 9544 },  // 排名 ~500（高頻）
+    { "char": "蜴", "freq": 1000 }   // 不在排名中（預設）
+  ]
+}
+```
+
+這確保最常用的字元優先出現，使輸入更快速、更直覺。
+
+**技術細節**：
+- 線性映射：排名 1 → 頻率 10000，排名 2000 → 頻率 8000
+- 未排名字元預設頻率：1000
+- 採用 TDD（測試驅動開發）開發
 
 ## 快速開始
 
@@ -164,20 +196,44 @@ node convert-v2.js  # 使用頻率資料建立 mvp1/dayi_db.json（推薦）
 
 ```
 webdayi/
-├── converter/              # Phase 0：資料處理管線
-│   ├── convert.js         # YAML → JSON 轉換器
-│   └── raw_data/
-│       └── dayi.dict.yaml # Rime 來源
-├── mvp1/                  # Phase 1：靜態網頁
-│   ├── index.html
-│   ├── core_logic.js      # 核心查詢引擎
-│   └── dayi_db.json       # 產生的資料庫
-├── mvp2a-plugin/          # Phase 2：瀏覽器擴充套件
-│   ├── manifest.json      # Chrome 擴充套件設定
-│   ├── background.js      # Service Worker
-│   └── content.js         # DOM 注入
-└── memory-bank/           # 專案文件
-    └── *.md               # 完整文件
+├── converter/                   # Phase 0：資料處理管線
+│   ├── convert.js              # YAML → JSON 轉換器（基礎版本）
+│   ├── convert-v2.js           # 增強轉換器（頻率排序）✅
+│   ├── convert-v2-lib.js       # 轉換器函式庫
+│   ├── convert-v2.test.js      # 轉換器測試套件（21 個測試）
+│   ├── DESIGN-v2.md            # 轉換器 v2 設計文件
+│   ├── README.md               # 轉換器文件
+│   ├── raw_data/
+│   │   ├── dayi.dict.yaml      # Rime 大易字典來源
+│   │   └── freq.yaml           # 字元頻率資料（2000 字，台灣教育部）
+│   └── test-data/
+│       └── freq-sample.yaml    # 測試頻率資料（20 字範例）
+├── mvp1/                       # Phase 1：靜態網頁
+│   ├── index.html              # 主要使用者介面
+│   ├── core_logic.js           # 核心查詢引擎（v7）
+│   ├── style.css               # 樣式表
+│   ├── dayi_db.json            # 產生的資料庫（頻率排序）
+│   ├── README.md               # MVP1 文件（正體中文）
+│   ├── README.en.md            # MVP1 文件（英文）
+│   ├── test.html               # 瀏覽器測試執行器
+│   ├── test-node.js            # Node.js 測試執行器（v1）
+│   ├── test-node-v2.js         # 選字鍵測試（v2）
+│   ├── test-node-v3.js         # 翻頁與自動選字測試（v3）
+│   ├── test-node-v4.js         # 智慧倒退測試（v4）
+│   ├── test-node-v5.js         # 輸入模式切換測試（v5）
+│   ├── test-node-v6.js         # 使用者個人化測試（19 個測試）
+│   └── test-node-v7.js         # 自動選字 bug 修復測試（16 個測試）
+├── mvp2a-plugin/               # Phase 2：瀏覽器擴充套件（規劃中）
+│   ├── manifest.json           # Chrome 擴充套件設定
+│   ├── background.js           # Service Worker
+│   └── content.js              # DOM 注入
+└── memory-bank/                # 專案文件
+    ├── projectbrief.md         # 專案簡介
+    ├── productContext.md       # 產品脈絡
+    ├── systemPatterns.md       # 系統模式
+    ├── techContext.md          # 技術脈絡
+    ├── activeContext.md        # 活躍脈絡
+    └── progress.md             # 進度追蹤
 ```
 
 ## 功能
@@ -300,16 +356,37 @@ cat ../mvp1/dayi_db.json | jq '."4jp"'
 
 ### 測試
 
-**目前**：僅手動測試
-**未來**：自動化測試以防止迴歸
+**測試涵蓋率**：✅ 56/56 測試通過（採用 TDD）
 
 ```bash
-# 測試靜態頁面（Phase 1）
-open mvp1/index.html
+# 轉換器測試（21 個測試）
+cd converter
+node convert-v2.test.js
+# ✓ 頻率解析（3 個測試）
+# ✓ 頻率計算（5 個測試）
+# ✓ 大易字典解析（3 個測試）
+# ✓ 候選字豐富化（3 個測試）
+# ✓ 整合測試（3 個測試）
+# ✓ 邊界測試（4 個測試）
 
-# 測試擴充套件（Phase 2）
+# MVP1 測試（35 個測試）
+cd mvp1
+node test-node-v6.js  # 使用者個人化（19 個測試）
+node test-node-v7.js  # 自動選字 bug 修復（16 個測試）
+
+# 瀏覽器手動測試
+open mvp1/index.html
+# 或執行測試套件：
+open mvp1/test.html
+
+# 測試擴充套件（Phase 2 - 規劃中）
 # chrome://extensions → 開發人員模式 → 載入未封裝項目
 ```
+
+**測試詳情**：
+- **Phase 0（轉換器）**：21 個自動化測試，涵蓋頻率解析、計算與資料庫建立
+- **Phase 1（MVP1）**：35 個自動化測試，涵蓋個人化、自動選字與 bug 修復
+- **總計**：56 個測試，100% 通過率
 
 ## 貢獻
 
@@ -326,11 +403,15 @@ open mvp1/index.html
 | 里程碑 | 目標日期 | 狀態 |
 |-----------|-------------|--------|
 | ✅ 專案初始化 | 2025-11-06 | 完成 |
-| ✅ Phase 0：資料處理管線 | 2025-11-06 | 完成 |
-| ✅ MVP 1.0：核心引擎 | 2025-11-06 | 完成 |
+| ✅ Phase 0：資料處理管線（v1） | 2025-11-06 | 完成 |
+| ✅ Phase 0：增強轉換器（v2，頻率排序） | 2025-11-06 | 完成 |
+| ✅ MVP 1.0 v1：核心引擎 | 2025-11-06 | 完成 |
 | ✅ MVP 1.0 v2：選字鍵修正 | 2025-11-06 | 完成 |
 | ✅ MVP 1.0 v3：翻頁與自動選字 | 2025-11-06 | 完成 |
 | ✅ MVP 1.0 v4：智慧倒退 UX | 2025-11-06 | 完成 |
+| ✅ MVP 1.0 v5：輸入模式切換 | 2025-11-06 | 完成 |
+| ✅ MVP 1.0 v6：使用者個人化 | 2025-11-06 | 完成 |
+| ✅ MVP 1.0 v7：觸控友善 UX + Bug 修復 | 2025-11-06 | 完成 |
 | ⏳ MVP 2a：瀏覽器外掛 | 2025-11-20 | 規劃中 |
 | ⏳ 公開發布（Chrome 線上應用程式商店） | 2025-11-25 | 規劃中 |
 | 📋 MVP 2a+：進階功能 | 2025-12-15 | 未來 |
@@ -364,5 +445,5 @@ open mvp1/index.html
 ---
 
 **最後更新**：2025-11-06
-**狀態**：MVP 1.0 v4 完成
-**版本**：1.0.4-alpha（MVP1 v4 with smart backspace UX）
+**狀態**：MVP 1.0 v7 完成（含頻率轉換器 v2）
+**版本**：1.0.7-alpha（MVP1 v7 with touch-friendly UX + Converter v2 with frequency-based ranking）
