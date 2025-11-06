@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebDaYi (網頁大易輸入法) - MVP 1.0</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>WebDaYi <span class="chinese">網頁大易輸入法</span></h1>
+      <p class="subtitle">MVP 1.0 - Core Engine Validation</p>
+    </header>
+
+    <!-- Instructions -->
+    <section class="instructions">
+      <h2>使用說明 (Instructions)</h2>
+      <ol>
+        <li>在「輸入碼」框中輸入大易碼（例如：v, a, ab 等）</li>
+        <li>候選字會即時顯示在下方</li>
+        <li>按數字鍵 <kbd>1</kbd>-<kbd>9</kbd> 選擇候選字</li>
+        <li>選中的字會出現在「輸出緩衝區」</li>
+        <li>組完句子後，點擊「複製」按鈕</li>
+        <li>貼到其他應用程式使用</li>
+      </ol>
+    </section>
+
+    <!-- Input Section -->
+    <section class="input-section">
+      <div class="input-group">
+        <label for="input-box">
+          輸入碼 (Input Code)
+          <span class="hint">Type Dàyì code here</span>
+        </label>
+        <input
+          type="text"
+          id="input-box"
+          class="input-box"
+          placeholder="輸入大易碼..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+
+      <!-- Candidate Area -->
+      <div class="candidate-section">
+        <div class="candidate-header">
+          候選字 (Candidates)
+          <span class="hint">Press 1-9 to select</span>
+        </div>
+        <div id="candidate-area" class="candidate-area">
+          <div class="no-candidates">請輸入大易碼</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Output Section -->
+    <section class="output-section">
+      <div class="output-group">
+        <label for="output-buffer">
+          輸出緩衝區 (Output Buffer)
+          <span class="hint">Composed text appears here</span>
+        </label>
+        <textarea
+          id="output-buffer"
+          class="output-buffer"
+          placeholder="組好的文字會出現在這裡..."
+          rows="6"
+        ></textarea>
+      </div>
+
+      <button id="copy-button" class="copy-button">
+        📋 複製到剪貼簿 (Copy to Clipboard)
+      </button>
+    </section>
+
+    <!-- Debug Info -->
+    <section class="debug-section">
+      <details>
+        <summary>Debug Information</summary>
+        <div id="debug-info" class="debug-info">
+          <p>Database loading...</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>
+        WebDaYi MVP 1.0 - Core Engine Validation Tool
+        <br>
+        <small>
+          Data source: <a href="https://github.com/rime/rime-dayi" target="_blank">Rime Dàyì Dictionary</a>
+        </small>
+      </p>
+    </footer>
+  </div>
+
+  <!-- Core Logic -->
+  <script src="core_logic.js"></script>
+
+  <!-- Update debug info after loading -->
+  <script>
+    // Wait for database to load and update debug info
+    setTimeout(() => {
+      const debugInfo = document.getElementById('debug-info');
+      if (debugInfo && dayiMap) {
+        debugInfo.innerHTML = `
+          <p><strong>Database Status:</strong> ✓ Loaded</p>
+          <p><strong>Total Codes:</strong> ${dayiMap.size.toLocaleString()}</p>
+          <p><strong>Sample Queries:</strong></p>
+          <ul>
+            <li><code>v</code> → ${queryCandidates(dayiMap, 'v').slice(0, 3).map(c => c.char).join(', ')}</li>
+            <li><code>a</code> → ${queryCandidates(dayiMap, 'a').slice(0, 3).map(c => c.char).join(', ')}</li>
+          </ul>
+        `;
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
