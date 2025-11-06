@@ -96,7 +96,8 @@ python3 -m http.server 8000
 
 # Data Pipeline: Regenerate database (if needed)
 cd ../converter
-node convert.js  # Creates mvp1/dayi_db.json
+node convert-v2.js  # Creates mvp1/dayi_db.json with frequency data (recommended)
+# Or use: node convert.js (basic version)
 ```
 
 ### For Future (MVP 2a - Browser Extension)

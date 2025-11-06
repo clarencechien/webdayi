@@ -42,9 +42,8 @@ Examples:
 - `converter/convert-v2.test.js` - TDD test suite (21/21 passing)
 - `converter/DESIGN-v2.md` - Design documentation
 - `converter/README.md` - User documentation
-- `converter/raw_data/freq.yaml` - Frequency data (100 sample chars)
-- `converter/raw_data/freq.yaml.example` - Template with instructions
-- `converter/test-data/freq-sample.yaml` - Test data
+- `converter/raw_data/freq.yaml` - Frequency data (2000 chars, Taiwan MOE) ✅
+- `converter/test-data/freq-sample.yaml` - Test data (20 chars)
 
 **Impact**:
 - More accurate candidate ordering based on real-world usage
