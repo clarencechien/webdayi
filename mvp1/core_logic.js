@@ -10,6 +10,161 @@ let dayiMap = null;  // The in-memory Map of code -> candidates
 let currentCode = '';  // Current input code buffer
 let currentPage = 0;  // Current page index for pagination
 let currentCandidates = [];  // Current candidates array (for pagination)
+let currentInputMode = 'normal';  // Current input mode: 'normal' or 'express'
+
+// ============================================
+// Input Mode Toggle Functions (v5)
+// ============================================
+
+/**
+ * Get current input mode
+ * @returns {string} - Current mode: 'normal' or 'express'
+ */
+function getInputMode() {
+  return currentInputMode;
+}
+
+/**
+ * Toggle between normal and express modes
+ * @param {string} currentMode - Current mode
+ * @returns {string} - New mode
+ */
+function toggleInputMode(currentMode) {
+  return currentMode === 'normal' ? 'express' : 'normal';
+}
+
+/**
+ * Validate if mode value is valid
+ * @param {string} mode - Mode to validate
+ * @returns {boolean} - True if valid
+ */
+function isValidInputMode(mode) {
+  return mode === 'normal' || mode === 'express';
+}
+
+/**
+ * Get localStorage key for input mode
+ * @returns {string} - Storage key
+ */
+function getInputModeStorageKey() {
+  return 'webdayi_input_mode';
+}
+
+/**
+ * Format mode value for storage
+ * @param {string} mode - Mode to format
+ * @returns {string} - Formatted mode
+ */
+function formatModeForStorage(mode) {
+  return mode;  // Already in correct format
+}
+
+/**
+ * Parse mode value from storage
+ * @param {string|null} value - Storage value
+ * @returns {string} - Parsed mode (defaults to 'normal')
+ */
+function parseModeFromStorage(value) {
+  if (!value || !isValidInputMode(value)) {
+    return 'normal';
+  }
+  return value;
+}
+
+/**
+ * Get body class for mode
+ * @param {string} mode - Input mode
+ * @returns {string} - CSS class ('express-mode' or '')
+ */
+function getBodyClassForMode(mode) {
+  return mode === 'express' ? 'express-mode' : '';
+}
+
+/**
+ * Check if class name indicates express mode
+ * @param {string} className - Class name to check
+ * @returns {boolean} - True if express mode
+ */
+function isExpressModeClass(className) {
+  return className === 'express-mode';
+}
+
+/**
+ * Get label for mode
+ * @param {string} mode - Input mode
+ * @returns {string} - Chinese label
+ */
+function getModeLabel(mode) {
+  return mode === 'normal' ? '正常模式' : '專注模式';
+}
+
+/**
+ * Get toggle button text
+ * @param {string} currentMode - Current mode
+ * @returns {string} - Button text (what it will switch TO)
+ */
+function getToggleButtonText(currentMode) {
+  const nextMode = toggleInputMode(currentMode);
+  return `切換至${getModeLabel(nextMode)}`;
+}
+
+/**
+ * Apply input mode to UI
+ * @param {string} mode - Mode to apply
+ */
+function applyInputMode(mode) {
+  if (typeof document === 'undefined') return;
+
+  const bodyClass = getBodyClassForMode(mode);
+
+  if (bodyClass) {
+    document.body.classList.add(bodyClass);
+  } else {
+    document.body.classList.remove('express-mode');
+  }
+
+  currentInputMode = mode;
+
+  // Update toggle button text if it exists
+  const toggleButton = document.getElementById('mode-toggle-btn');
+  if (toggleButton) {
+    toggleButton.textContent = getToggleButtonText(mode);
+    toggleButton.setAttribute('aria-label', getToggleButtonText(mode));
+  }
+}
+
+/**
+ * Save input mode to localStorage
+ * @param {string} mode - Mode to save
+ */
+function saveInputMode(mode) {
+  if (typeof localStorage === 'undefined') return;
+
+  const key = getInputModeStorageKey();
+  const value = formatModeForStorage(mode);
+  localStorage.setItem(key, value);
+}
+
+/**
+ * Load input mode from localStorage
+ * @returns {string} - Loaded mode (defaults to 'normal')
+ */
+function loadInputMode() {
+  if (typeof localStorage === 'undefined') return 'normal';
+
+  const key = getInputModeStorageKey();
+  const value = localStorage.getItem(key);
+  return parseModeFromStorage(value);
+}
+
+/**
+ * Handle input mode toggle button click
+ */
+function handleModeToggle() {
+  const newMode = toggleInputMode(currentInputMode);
+  applyInputMode(newMode);
+  saveInputMode(newMode);
+}
 
 /**
  * Create a Map from the database object for O(1) lookups
@@ -557,6 +712,18 @@ async function initialize() {
     const copyButton = document.getElementById('copy-button');
     if (copyButton) {
       copyButton.addEventListener('click', copyToClipboard);
+    }
+
+    // Set up input mode toggle
+    const modeToggleBtn = document.getElementById('mode-toggle-btn');
+    if (modeToggleBtn) {
+      modeToggleBtn.addEventListener('click', handleModeToggle);
+
+      // Load saved mode from localStorage
+      const savedMode = loadInputMode();
+      applyInputMode(savedMode);
+
+      console.log(`[WebDaYi] Input mode loaded: ${savedMode}`);
     }
 
     console.log('[WebDaYi] Initialized successfully');
