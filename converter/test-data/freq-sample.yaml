@@ -1,24 +1,20 @@
-# Sample frequency data for testing
-# Top 20 most common characters (simplified for testing)
-# Format: char\trank
----
 的	1
-一	2
-是	3
-不	4
-了	5
-在	6
-人	7
-有	8
-我	9
-他	10
-這	11
-中	12
-大	13
-來	14
-上	15
-國	16
-個	17
-到	18
-說	19
-們	20
+不	2
+一	3
+我	4
+是	5
+人	6
+有	7
+了	8
+大	9
+國	10
+來	11
+生	12
+在	13
+子	14
+們	15
+中	16
+上	17
+他	18
+時	19
+小	20
