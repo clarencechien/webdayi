@@ -14,11 +14,12 @@ MVP1 serves as a validation tool for the core query/sort algorithm before wrappi
 ## Files
 
 - **index.html** - Main application UI
-- **core_logic.js** - Core engine implementation (query, sort, render)
-- **style.css** - Styling
+- **core_logic.js** - Core engine implementation (query, sort, render, user preferences)
+- **style.css** - Styling (including touch-friendly styles)
 - **dayi_db.json** - Generated database (from converter)
 - **test.html** - Browser-based test suite
-- **test-node.js** - Node.js test runner (TDD)
+- **test-node-v6.js** - User personalization tests (19 tests)
+- **test-node-v7.js** - Auto-select bug fix tests (16 tests)
 
 ## Usage
 
@@ -44,7 +45,9 @@ open test.html
 
 **Node.js tests (TDD):**
 ```bash
-node test-node-v6.js  # Latest tests with user personalization
+node test-node-v6.js  # User personalization tests (19/19)
+node test-node-v7.js  # Auto-select bug fix tests (16/16)
+# Total: 35/35 tests passing
 ```
 
 ## How to Use
@@ -103,32 +106,60 @@ Use these keys to select candidates:
 
 ## Test Results
 
-All tests passing (19/19):
+All tests passing (35/35):
 
+**test-node-v6.js (19 tests):**
 ```
-✓ User Model - Storage Keys (2 tests) [NEW in v6]
+✓ User Model - Storage Keys (2 tests) [v6]
   - Correct localStorage key
   - Empty model creation
-✓ User Model - Load and Parse (3 tests) [NEW in v6]
+✓ User Model - Load and Parse (3 tests) [v6]
   - Parse valid JSON to Map
   - Handle empty JSON
   - Handle null/invalid JSON
-✓ User Model - Save and Format (2 tests) [NEW in v6]
+✓ User Model - Save and Format (2 tests) [v6]
   - Convert Map to JSON
   - Handle empty Map
-✓ User Model - Update Logic (3 tests) [NEW in v6]
+✓ User Model - Update Logic (3 tests) [v6]
   - Move selected char to front
   - Handle first selection (no change)
   - Handle last selection
-✓ User Model - Apply Preferences (3 tests) [NEW in v6]
+✓ User Model - Apply Preferences (3 tests) [v6]
   - Apply user preference to candidates
   - Use static order when no preference
   - Handle partial preferences
-✓ User Model - Integration (2 tests) [NEW in v6]
+✓ User Model - Integration (2 tests) [v6]
   - Update model after selection
   - Update existing preference
 ✓ Input Mode Toggle (2 tests) [v5]
 ✓ Core Functions (2 tests)
+```
+
+**test-node-v7.js (16 tests) - Bug Fix Verification:**
+```
+✓ Auto-Select Bug - Setup (2 tests) [v7 Bug Fix]
+  - Verify performAutoSelect function exists
+  - Verify applyUserPreference function exists
+✓ Auto-Select Bug - Reproduce the Bug (2 tests) [v7 Bug Fix]
+  - Confirm bug: auto-select without user preferences
+  - Verify applyUserPreference works correctly
+✓ Auto-Select Bug - Test Fixed performAutoSelect (3 tests) [v7 Bug Fix]
+  - WITH user preferences returns user preference ✅ Fixed!
+  - WITHOUT user model falls back to default
+  - WITH empty user model falls back to default
+✓ Auto-Select Bug - Golden Path (2 tests) [v7 Bug Fix]
+  - User selects 2nd candidate → auto-select uses it
+  - User selects 3rd candidate → auto-select uses it
+✓ Auto-Select Bug - Edge Cases (4 tests) [v7 Bug Fix]
+  - Invalid code returns failure
+  - User preference has char not in static DB
+  - User preference is empty array
+  - Code has only one candidate
+✓ Auto-Select Bug - Integration (1 test) [v7 Bug Fix]
+  - Full workflow: query → select → save → auto-select
+✓ Previous Tests - No Regression (2 tests) [v7 Bug Fix]
+  - Database map creation still works
+  - Selection key mapping still works
 ```
 
 ## Known Sample Codes
@@ -157,13 +188,17 @@ Try these to verify the system works!
 - [x] Input mode toggle (normal ↔ express) [v5]
 - [x] Express mode hides distractions [v5]
 - [x] Mode preference persists in localStorage [v5]
-- [x] User preferences load on page load [NEW v6]
-- [x] User preferences save when selecting non-default candidate [NEW v6]
-- [x] User preferences prioritize in candidate ordering [NEW v6]
-- [x] User preferences persist across sessions [NEW v6]
+- [x] User preferences load on page load [v6]
+- [x] User preferences save when selecting non-default candidate [v6]
+- [x] User preferences prioritize in candidate ordering [v6]
+- [x] User preferences persist across sessions [v6]
+- [x] Auto-select respects user preferences [BUG FIX v7] ← Fixed!
+- [x] Candidates are clickable (touch-friendly) [NEW v7]
+- [x] Visual prev/next page buttons work [NEW v7]
+- [x] Touch targets are minimum 44px [NEW v7]
 - [x] Text accumulates in output buffer
 - [x] Clipboard copy works
-- [x] All TDD tests pass (19/19)
+- [x] All TDD tests pass (35/35: 19 personalization + 16 bug fix)
 
 ## Next Steps
 

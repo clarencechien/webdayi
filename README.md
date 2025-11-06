@@ -2,9 +2,9 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v7%20Complete-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v7%20Complete%20%2B%20Bug%20Fix-brightgreen)]()
 [![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v7-blue)]()
-[![Tests](https://img.shields.io/badge/tests-19%2F19%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-35%2F35%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
@@ -17,8 +17,8 @@ Experience the core Dàyì input engine in your browser with advanced features:
 - ⌨️ **Smart Selection**: Use Space/' /[/]/- /\ to select candidates (0-9 are now part of codes!)
 - ⌫ **Smart Backspace**: Deletes input first, then output buffer (natural undo flow!)
 - 🎯 **Express Mode**: Toggle to minimal UI (hide distractions, focus on input!)
-- 🧠 **User Personalization**: IME learns your preferences! (MVP1.7-1.9)
-- 📱 **Touch-Friendly**: Click to select + prev/next page buttons! (MVP1.10) ← NEW!
+- 🧠 **User Personalization**: IME learns your preferences! (MVP1.7-1.9) **[Bug Fixed!]**
+- 📱 **Touch-Friendly**: Click to select + prev/next page buttons! (MVP1.10)
 
 ## Overview
 
@@ -50,7 +50,9 @@ Experience the core Dàyì input engine in your browser with advanced features:
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 v7 with touch-friendly UX (19/19 tests passing)
+**Latest Achievement**: MVP 1.0 v7 with touch-friendly UX + critical bug fix (35/35 tests passing)
+- ✅ Touch-friendly UX implemented (MVP1.10)
+- 🐛 Fixed: Auto-select now respects user preferences (MVP1.9 bug fix)
 **Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
 
 ## Quick Start
@@ -68,7 +70,7 @@ No installation required! Just open the link and start typing:
 - Type 2 chars then continue → auto-selects first candidate!
 - Press `Backspace` to undo (deletes input, then output buffer)
 - Toggle to Express Mode (top-right) for minimal UI
-- Select a non-default candidate → IME learns your preference!
+- Select a non-default candidate → **IME learns your preference and uses it in auto-select!** [Bug Fixed ✅]
 - **New**: Use ◀ **上一頁** / **下一頁** ▶ buttons for easy paging on mobile/tablet!
 - Click "Copy" when done
 
@@ -79,9 +81,10 @@ No installation required! Just open the link and start typing:
 git clone https://github.com/clarencechien/webdayi.git
 cd webdayi
 
-# Run tests (all 19 tests should pass)
+# Run tests (all 35 tests should pass)
 cd mvp1
-node test-node-v6.js
+node test-node-v6.js  # User personalization tests (19/19)
+node test-node-v7.js  # Auto-select bug fix tests (16/16)
 
 # Open locally in browser
 open index.html
@@ -221,8 +224,9 @@ webdayi/
   - Preferences persist across sessions
   - Works seamlessly with pagination and auto-select
   - Professional adaptive IME behavior
+  - **🐛 Bug Fixed**: Auto-select now correctly uses user preferences (was using default order)
 
-**Advanced Features (v7) ← NEW:**
+**Advanced Features (v7):**
 - ✅ **Touch-Friendly UX**: Mobile and tablet optimized interactions
   - **MVP1.10**: Click to select candidates + prev/next page buttons
   - Click any candidate item to select (no keyboard required)
@@ -234,7 +238,7 @@ webdayi/
 
 **Target User**: Developer (for validation) & Power Users
 **Output Method**: Copy/Paste
-**Test Coverage**: 19/19 tests passing with TDD
+**Test Coverage**: 35/35 tests passing with TDD (19 personalization + 16 bug fix tests)
 
 ### MVP 2a: Browser Plugin (Planned)
 
