@@ -39,6 +39,81 @@
 
 ## Recent Changes
 
+### 2025-11-06 (Critical Bug Fix): Auto-Select User Preference Bug 🐛✅
+
+**CRITICAL BUG FIXED**:
+
+**Bug Description**:
+- User selects non-default candidate (e.g., "到" instead of "互" for code "en")
+- User preference should remember this and display "到" first next time
+- Manual selection (Space key) works correctly - shows "到" first
+- But auto-select (typing 2 chars + 3rd char) ignores user preference - still uses "互"
+- This breaks the user personalization feature (MVP1.9)
+
+**Root Cause**:
+- `performAutoSelect()` function didn't apply user preferences
+- Only used static frequency sorting: `sortCandidatesByFreq(candidates)`
+- Never called `applyUserPreference()` before returning first candidate
+- `handleInput()` called `performAutoSelect(previousValue, dayiMap)` without passing `userModel`
+
+**Fix Applied**:
+1. **Updated `performAutoSelect()` signature**:
+   ```javascript
+   // Before:
+   function performAutoSelect(code, map)
+
+   // After:
+   function performAutoSelect(code, map, userModel = null)
+   ```
+
+2. **Apply user preferences before returning**:
+   ```javascript
+   const candidates = queryCandidates(map, code);
+   const sorted = sortCandidatesByFreq(candidates);
+
+   // NEW: Apply user preference if available (MVP1.9 bug fix)
+   const withUserPreference = userModel ?
+     applyUserPreference(code, sorted, userModel) :
+     sorted;
+
+   if (withUserPreference.length > 0) {
+     return {
+       success: true,
+       selectedChar: withUserPreference[0].char  // Now uses user preference!
+     };
+   }
+   ```
+
+3. **Updated `handleInput()` to pass `userModel`**:
+   ```javascript
+   // Before:
+   const result = performAutoSelect(previousValue, dayiMap);
+
+   // After:
+   const result = performAutoSelect(previousValue, dayiMap, userModel);
+   ```
+
+**Test Coverage**:
+- Created comprehensive test suite: `test-node-v7.js` with 16 tests
+- Golden path tests: User selects 2nd/3rd candidate → auto-select uses it
+- Edge cases: Invalid code, missing chars, empty preferences, single candidate
+- Integration test: Full workflow from selection → preference save → auto-select
+- All 16/16 new tests passing ✅
+- All 19/19 previous tests passing ✅ (no regression)
+
+**Verification**:
+- ✅ Auto-select now respects user preferences
+- ✅ Manual selection still works correctly
+- ✅ Falls back to default order when no user preference exists
+- ✅ Handles edge cases gracefully
+- ✅ No breaking changes to existing functionality
+
+**User Impact**:
+- ✅ User personalization now works correctly with auto-select
+- ✅ Consistent behavior: both manual and auto-select use user preferences
+- ✅ IME truly "learns" user's character preferences across all input methods
+- ✅ Professional adaptive IME behavior fully functional
+
 ### 2025-11-06 (Very Late Night): Touch-Friendly UX System ✨✅
 
 **NEW FEATURES IMPLEMENTED (v7)**:
