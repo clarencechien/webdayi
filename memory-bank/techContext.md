@@ -77,11 +77,10 @@ webdayi/
 │   ├── README.md          # Converter documentation
 │   ├── package.json       # (minimal dependencies)
 │   ├── raw_data/
-│   │   ├── dayi.dict.yaml       # Rime source data (char→code)
-│   │   ├── freq.yaml            # Character frequency rankings (1-2000)
-│   │   └── freq.yaml.example    # Sample frequency data (100 chars)
+│   │   ├── dayi.dict.yaml # Rime source data (char→code)
+│   │   └── freq.yaml      # Character frequency rankings (1-2000) ✅
 │   └── test-data/
-│       └── freq-sample.yaml     # Test data for unit tests
+│       └── freq-sample.yaml # Test data for unit tests (20 chars)
 ├── mvp1/                  # Static webpage (validation)
 │   ├── index.html         # UI structure
 │   ├── core_logic.js      # Core engine

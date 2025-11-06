@@ -96,7 +96,8 @@ python3 -m http.server 8000
 
 # 資料處理管線：重新產生資料庫（如有需要）
 cd ../converter
-node convert.js  # 建立 mvp1/dayi_db.json
+node convert-v2.js  # 使用頻率資料建立 mvp1/dayi_db.json（推薦）
+# 或使用 node convert.js（基礎版本）
 ```
 
 ### 未來功能（MVP 2a - 瀏覽器擴充套件）
