@@ -93,6 +93,26 @@ h2 {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+.instructions ul {
+  margin-left: 20px;
+  margin-top: 10px;
+  list-style-type: disc;
+}
+
+.instructions ul li {
+  margin-bottom: 5px;
+  font-size: 0.95em;
+}
+
+.note {
+  margin-top: 15px;
+  padding: 12px 15px;
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
 /* Input Section */
 .input-group {
   margin-bottom: 20px;
@@ -177,11 +197,22 @@ label {
   box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
 }
 
-.candidate-number {
+.candidate-key {
   font-weight: 700;
   color: #667eea;
-  margin-right: 8px;
+  margin-right: 10px;
+  font-size: 0.85em;
+}
+
+.candidate-key kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: 'Consolas', 'Monaco', monospace;
   font-size: 0.9em;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .candidate-char {

@@ -44,27 +44,41 @@ open test.html
 
 **Node.js tests (TDD):**
 ```bash
-node test-node.js
+node test-node-v2.js  # Updated tests with new selection keys
 ```
 
 ## How to Use
 
-1. **Type** a Dàyì code in the input box (e.g., `v`, `a`, `ab`)
+### Input Codes
+1. **Type** a Dàyì code in the input box (e.g., `v`, `a`, `t0`, `t1`)
+   - **Important**: 0-9 are now part of codes (not selection keys!)
 2. **View** candidates appear automatically below
-3. **Select** a candidate by pressing number keys `1`-`9`
+
+### Selection Keys (New!)
+Use these keys to select candidates:
+- `Space` → 1st candidate (fastest!)
+- `'` → 2nd candidate
+- `[` → 3rd candidate
+- `]` → 4th candidate
+- `-` → 5th candidate
+- `\` → 6th candidate
+
+### Workflow
+3. **Select** a candidate using the selection keys above
 4. **Repeat** to compose your text
 5. **Copy** the composed text using the "Copy" button
 6. **Paste** into your target application
 
 ## Test Results
 
-All tests passing (12/12):
+All tests passing (17/17):
 
 ```
 ✓ Database Loading (2 tests)
-✓ Query Function (3 tests)
-✓ Sort Function (3 tests)
-✓ Render Function (3 tests)
+✓ Query Function (2 tests)
+✓ Sort Function (1 test)
+✓ Selection Key Mapping (7 tests) [NEW]
+✓ Input Character Validation (4 tests) [NEW]
 ✓ Integration Test (1 test)
 ```
 
@@ -74,7 +88,8 @@ From the generated database:
 
 - `v` → 大, 夫, 禾
 - `a` → 人, 入
-- `4` → 四, 西, 黑
+- `t0` → 逍, 縫, 尐 (0-9 are valid code characters!)
+- `t1` → 糾, 常, 紼
 - `,` → 力
 
 Try these to verify the system works!
@@ -84,10 +99,11 @@ Try these to verify the system works!
 - [x] Database loads successfully (1584 codes)
 - [x] Query returns correct candidates
 - [x] Candidates sorted by frequency
-- [x] Selection works with number keys
+- [x] Selection works with new keys (Space, ', [, ], -, \)
+- [x] 0-9 allowed in input codes (not selection keys)
 - [x] Text accumulates in output buffer
 - [x] Clipboard copy works
-- [x] All TDD tests pass
+- [x] All TDD tests pass (17/17)
 
 ## Next Steps
 

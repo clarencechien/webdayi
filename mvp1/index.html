@@ -18,13 +18,25 @@
     <section class="instructions">
       <h2>使用說明 (Instructions)</h2>
       <ol>
-        <li>在「輸入碼」框中輸入大易碼（例如：v, a, ab 等）</li>
+        <li>在「輸入碼」框中輸入大易碼（包含 0-9, a-z 等字碼）</li>
         <li>候選字會即時顯示在下方</li>
-        <li>按數字鍵 <kbd>1</kbd>-<kbd>9</kbd> 選擇候選字</li>
+        <li>使用快速選字鍵：
+          <ul>
+            <li><kbd>Space</kbd> 第 1 個字（最快！）</li>
+            <li><kbd>'</kbd> 第 2 個字</li>
+            <li><kbd>[</kbd> 第 3 個字</li>
+            <li><kbd>]</kbd> 第 4 個字</li>
+            <li><kbd>-</kbd> 第 5 個字</li>
+            <li><kbd>\</kbd> 第 6 個字</li>
+          </ul>
+        </li>
         <li>選中的字會出現在「輸出緩衝區」</li>
         <li>組完句子後，點擊「複製」按鈕</li>
         <li>貼到其他應用程式使用</li>
       </ol>
+      <div class="note">
+        <strong>注意：</strong>0-9 是字碼的一部分（如 t0, t1），不再用於選字。
+      </div>
     </section>
 
     <!-- Input Section -->
@@ -48,7 +60,7 @@
       <div class="candidate-section">
         <div class="candidate-header">
           候選字 (Candidates)
-          <span class="hint">Press 1-9 to select</span>
+          <span class="hint">Press Space/' /[/]/- /\ to select</span>
         </div>
         <div id="candidate-area" class="candidate-area">
           <div class="no-candidates">請輸入大易碼</div>

@@ -32,6 +32,58 @@
 
 ## Recent Changes
 
+### 2025-11-06 (Night): Critical Bug Fix - Selection Keys 🐛✅
+
+**CRITICAL BUG DISCOVERED AND FIXED**:
+- **Problem**: 0-9 were used for selection, but they're part of Dayi codes (e.g., t0, t1)
+- **Impact**: Users couldn't type codes containing numbers
+- **Root Cause**: Original design assumed 1-9 were only for selection
+
+**Solution Implemented (with TDD)**:
+- ✅ Removed 0-9 as selection keys
+- ✅ Implemented new selection key mapping:
+  - `Space` → 1st candidate (auto-select, fastest!)
+  - `'` → 2nd candidate
+  - `[` → 3rd candidate
+  - `]` → 4th candidate
+  - `-` → 5th candidate
+  - `\` → 6th candidate
+
+**Code Changes**:
+1. Added `getSelectionIndexFromKey()` - Maps keys to indices
+2. Added `isValidInputChar()` - Validates input characters
+3. Updated `renderCandidatesHTML()` - Shows new key labels
+4. Updated event handler - Uses new selection logic
+5. Updated UI (HTML/CSS) - Displays new instructions
+6. Limit to 6 candidates (matching 6 selection keys)
+
+**TDD Approach** (Tests written first!):
+- Created `test-node-v2.js` with comprehensive tests
+- All 17 tests passing:
+  - Database Loading (2 tests)
+  - Query Function (2 tests)
+  - Sort Function (1 test)
+  - Selection Key Mapping (7 tests) ← NEW
+  - Input Character Validation (4 tests) ← NEW
+  - Integration with number codes (1 test) ← NEW
+
+**Verification**:
+- Tested with `t0` → 逍, 縫, 尐
+- Tested with `t1` → 糾, 常, 紼
+- Confirmed 0-9 now work as input characters
+- Confirmed new selection keys work correctly
+
+**Documentation Updated**:
+- mvp1/index.html - New instructions with key list
+- mvp1/style.css - New candidate-key styling
+- mvp1/README.md - Updated usage guide and test results
+
+**User Benefits**:
+- ✅ Can now type ALL valid Dayi codes (including numbers)
+- ✅ Faster input with Space key auto-select
+- ✅ No conflicts between input and selection
+- ✅ More intuitive selection keys
+
 ### 2025-11-06 (Late Evening): GitHub Pages Deployment 🚀
 - ✅ Created GitHub Actions workflow (`.github/workflows/deploy-pages.yml`)
 - ✅ Configured auto-deployment to GitHub Pages on push to main
