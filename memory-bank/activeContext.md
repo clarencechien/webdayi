@@ -1,12 +1,149 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-06 (Updated after Smart Backspace implementation)
-**Current Phase**: ✅ MVP 1.0 v4 COMPLETED with TDD!
+**Last Updated**: 2025-11-06 (Updated after User Personalization implementation)
+**Current Phase**: ✅ MVP 1.0 v6 COMPLETED with TDD!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### 🎉 LATEST UPDATE: Smart Backspace UX (v4) COMPLETE!
+### 🎉 LATEST UPDATE: User Personalization (v6) COMPLETE!
+
+**Achievement**: Implemented intelligent user preference learning with localStorage persistence!
+
+**What was completed in v6**:
+- ✅ **MVP1.7: Load Personal Records** - Restore user preferences from localStorage
+- ✅ **MVP1.8: Save Personal Preferences** - Remember non-default selections
+- ✅ **MVP1.9: Prioritize User Preferences** - Display preferred candidates first
+- ✅ **TDD Testing**: 19/19 tests passing (added 14 new personalization tests)
+- ✅ **Full UI Integration**: Load on startup, save on selection
+- ✅ **Documentation**: Updated PRD, README files, memory bank
+
+**Current status**:
+- ✅ PRD finalized with MVP1.7-1.9 (PRD.md v1.1)
+- ✅ Technical architecture documented (CLAUDE.md)
+- ✅ Memory Bank updated (activeContext.md v6)
+- ✅ Converter implemented and validated
+- ✅ Database generated (1,584 codes, 13,926 entries, 717KB)
+- ✅ Core logic v6 implemented (TDD approach)
+- ✅ User personalization system working (localStorage-based)
+- ✅ Pagination system working (= key cycles through pages)
+- ✅ Auto-select working (3rd char auto-selects first candidate)
+- ✅ Smart backspace working (input → output deletion)
+- ✅ UI/UX enhanced (personalization, pagination, backspace)
+- ✅ Tests: All 19 automated tests passing
+- ✅ GitHub Pages deployment automated
+- ✅ Live demo available at: https://clarencechien.github.io/webdayi/
+- ⏳ **NEXT**: Commit v6 changes, then begin MVP 2a planning
+
+## Recent Changes
+
+### 2025-11-06 (Late Night): User Personalization System ✨✅
+
+**NEW FEATURES IMPLEMENTED (v6)**:
+
+**User Personalization** (個人化學習系統):
+- **Problem**: Every time user opens the app, they have to select the same non-default candidates repeatedly
+  - Example: User prefers "義" over "易" for code 4jp, but must select it every time
+  - No memory of user's actual usage patterns
+  - Static frequency doesn't match individual user preferences
+
+- **Solution**: Implemented localStorage-based personalization system
+- **Features**:
+  - **MVP1.7**: Load user preferences from localStorage on page load
+  - **MVP1.8**: Save user selection when choosing non-default candidate
+  - **MVP1.9**: Prioritize user's preferred candidates in display order
+  - Persists across browser sessions
+  - Updates dynamically as user types
+  - Seamlessly integrates with existing features (pagination, auto-select)
+
+**Implementation Details**:
+
+1. **New Functions Added (core_logic.js)**:
+   ```javascript
+   // Storage Keys (MVP1.7)
+   getUserModelStorageKey()           // Returns 'webDayi_UserModel'
+   createEmptyUserModel()             // Returns new Map()
+
+   // Load and Parse (MVP1.7)
+   parseUserModelFromStorage(json)    // Parse JSON → Map with error handling
+   loadUserModel()                    // Load from localStorage
+
+   // Save and Format (MVP1.8)
+   formatUserModelForStorage(model)   // Convert Map → JSON string
+   saveUserModel(model)               // Save to localStorage
+
+   // Update Logic (MVP1.8)
+   reorderBySelection(candidates, index)  // Move selected to front
+   updateUserModel(code, candidates, index, model)  // Update preference
+
+   // Apply Preferences (MVP1.9)
+   applyUserPreference(code, staticCandidates, userModel)  // Reorder by preference
+   ```
+
+2. **Global State Management**:
+   - Added `userModel` global variable (Map of code → char order array)
+   - Initialized in `initialize()` by calling `loadUserModel()`
+   - Updated in `handleSelection()` after each candidate selection
+
+3. **Storage Format**:
+   ```json
+   {
+     "4jp": ["義", "易"],
+     "v": ["夫", "大", "禾"]
+   }
+   ```
+   - Key: Dayi code (string)
+   - Value: Array of characters in user's preferred order
+
+4. **Integration Points**:
+   - **initialize()**: Load user model from localStorage on startup
+   - **handleInput()**: Apply user preferences when displaying candidates
+   - **handleSelection()**: Update and save user model after selection
+
+**TDD Approach** (Tests written first!):
+- Created `test-node-v6.js` with 19 comprehensive tests
+- All 19/19 tests passing:
+  - **User Model - Storage Keys (2 tests)** ← NEW
+    - Correct localStorage key
+    - Empty model creation
+  - **User Model - Load and Parse (3 tests)** ← NEW
+    - Parse valid JSON to Map
+    - Handle empty JSON
+    - Handle null/invalid JSON
+  - **User Model - Save and Format (2 tests)** ← NEW
+    - Convert Map to JSON
+    - Handle empty Map
+  - **User Model - Update Logic (3 tests)** ← NEW
+    - Move selected char to front
+    - Handle first selection (no change)
+    - Handle last selection
+  - **User Model - Apply Preferences (3 tests)** ← NEW
+    - Apply user preference to candidates
+    - Use static order when no preference
+    - Handle partial preferences
+  - **User Model - Integration (2 tests)** ← NEW
+    - Update model after selection
+    - Update existing preference
+  - Input Mode Toggle (2 tests)
+  - Core Functions (2 tests)
+
+**Verification**:
+- ✅ All 19 tests passing in test-node-v6.js
+- ✅ User preferences persist across page reloads
+- ✅ Selected candidates move to front of list
+- ✅ Preferences apply correctly in handleInput()
+- ✅ localStorage saves/loads without errors
+- ✅ Works seamlessly with pagination and auto-select
+
+**User Benefits**:
+- ✅ IME "learns" user's actual character preferences
+- ✅ Frequently used characters appear first
+- ✅ Reduces keystrokes for common selections
+- ✅ Preferences persist across sessions
+- ✅ Works automatically with no manual configuration
+- ✅ Professional-grade adaptive IME behavior
+
+### 🎉 PREVIOUS UPDATE: Smart Backspace UX (v4) COMPLETE!
 
 **Achievement**: Implemented professional IME-style backspace behavior with full TDD coverage!
 
