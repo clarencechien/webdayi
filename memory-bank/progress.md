@@ -1,32 +1,41 @@
 # Progress Tracker: WebDaYi
 
-**Last Updated**: 2025-11-06 (Updated after MVP1 completion)
-**Overall Status**: 🎉 MVP 1.0 COMPLETE with TDD!
-**Completion**: ~40% (Phase 0 & MVP 1 complete, MVP 2a next)
+**Last Updated**: 2025-11-06 (Updated after v7 + Critical Bug Fix)
+**Overall Status**: 🎉 MVP 1.0 v7 COMPLETE + Bug Fixed!
+**Completion**: ~48% (Phase 0 & MVP 1 v7 complete, MVP 2a next)
 
 ## Project Phases Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0              [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v7           [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Selection Keys (v2)      [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Pagination (v3)          [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Auto-select (v3)         [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Smart Backspace (v4)     [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Input Mode Toggle (v5)   [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ User Personalization (v6) [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Touch-Friendly UX (v7)   [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Auto-select Bug Fix (v7) [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🐛✅  │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 3: MVP 2a+ (Future)     [░░░░░░░░░░░░░░░░]   0% 📋    │
 └─────────────────────────────────────────────────────────────┘
 
-Legend: ✅ Complete | 🔄 In Progress | ⏳ Next | 📋 Planned | ❌ Blocked
+Legend: ✅ Complete | 🐛 Bug Fixed | 🔄 In Progress | ⏳ Next | 📋 Planned
 ```
 
 ## What's Complete ✅
 
-### 🎉 MAJOR MILESTONE: MVP 1.0 Complete!
+### 🎉 MAJOR MILESTONE: MVP 1.0 v7 Complete + Critical Bug Fixed!
 
 **Achievement Summary** (2025-11-06):
 - ✅ Data Pipeline: YAML → JSON converter working perfectly
-- ✅ MVP 1.0: Full static webpage implementation
-- ✅ TDD: 12/12 automated tests passing
+- ✅ MVP 1.0 v7: Full static webpage with touch-friendly UX
+- ✅ TDD: 35/35 automated tests passing (19 personalization + 16 bug fix)
 - ✅ Performance: All targets exceeded (< 20ms vs 100ms target)
 - ✅ Documentation: Comprehensive README and guides
+- 🐛 **Critical Bug Fixed**: Auto-select now respects user preferences
 
 ### Planning & Documentation (100%)
 - ✅ Product Requirements Document (PRD.md v1.1)
@@ -55,45 +64,72 @@ Legend: ✅ Complete | 🔄 In Progress | ⏳ Next | 📋 Planned | ❌ Blocked
 | **C.3** | Write dayi_db.json | ✅ Complete | 100% | 717KB valid JSON |
 | **C.4** | Validate JSON structure | ✅ Complete | 100% | All checks pass |
 
-### MVP 1.0: Core Engine (100%) ✅
+### MVP 1.0 v7: Core Engine + Advanced Features (100%) ✅
 
-**Implementation Status**: All features complete with TDD
+**Implementation Status**: All features complete with comprehensive TDD
 
-| Feature ID | Feature | Status | Tests | Notes |
-|------------|---------|--------|-------|-------|
-| **F-1.1** | Data Loading | ✅ Complete | 2/2 | Map creation, validation |
-| **F-1.2** | Fetch & Load DB | ✅ Complete | ✓ | ~500ms load time |
-| **F-1.3** | Query Map | ✅ Complete | 3/3 | O(1) lookup, <1ms |
-| **F-1.4** | Sort by Freq | ✅ Complete | 3/3 | Descending sort |
-| **F-1.5** | Render Candidates | ✅ Complete | 3/3 | HTML generation |
-| **F-1.6** | Number Selection | ✅ Complete | ✓ | Keys 1-9 |
-| **F-1.7** | Output Buffer | ✅ Complete | ✓ | Text accumulation |
-| **F-1.8** | Clipboard Copy | ✅ Complete | ✓ | navigator.clipboard |
+| Feature ID | Feature | Version | Status | Tests | Notes |
+|------------|---------|---------|--------|-------|-------|
+| **F-1.1** | Data Loading | v1 | ✅ Complete | ✓ | Map creation, validation |
+| **F-1.2** | Fetch & Load DB | v1 | ✅ Complete | ✓ | ~500ms load time |
+| **F-1.3** | Query Map | v1 | ✅ Complete | ✓ | O(1) lookup, <1ms |
+| **F-1.4** | Sort by Freq | v1 | ✅ Complete | ✓ | Descending sort |
+| **F-1.5** | Render Candidates | v1 | ✅ Complete | ✓ | HTML generation |
+| **F-1.6** | Selection Keys | v2 | ✅ Complete | ✓ | Space/' /[/]/- /\ |
+| **F-1.7** | Output Buffer | v1 | ✅ Complete | ✓ | Text accumulation |
+| **F-1.8** | Clipboard Copy | v1 | ✅ Complete | ✓ | navigator.clipboard |
+| **F-3.1** | Pagination | v3 | ✅ Complete | ✓ | = key + buttons |
+| **F-3.2** | Auto-select | v3 | ✅ Complete | ✓ | 2→3 char trigger |
+| **F-4.1** | Smart Backspace | v4 | ✅ Complete | ✓ | Input → output delete |
+| **F-5.1** | Input Mode Toggle | v5 | ✅ Complete | ✓ | Normal ↔ Express |
+| **F-6.1** | Load User Prefs | v6 | ✅ Complete | ✓ | localStorage load |
+| **F-6.2** | Save User Prefs | v6 | ✅ Complete | ✓ | Selection tracking |
+| **F-6.3** | Apply User Prefs | v6 | ✅ Complete | ✓ | Prioritize order |
+| **F-7.1** | Click to Select | v7 | ✅ Complete | ✓ | Touch-friendly |
+| **F-7.2** | Page Buttons | v7 | ✅ Complete | ✓ | Prev/Next buttons |
+| **BUG-1** | Auto-select Prefs | v7 | 🐛✅ Fixed | 16/16 | Critical bug fix |
 
 **Files Created**:
-- `mvp1/index.html` - Full UI with instructions
-- `mvp1/core_logic.js` - All core functions
-- `mvp1/style.css` - Modern, responsive styling
+- `mvp1/index.html` - Full UI with touch-friendly features
+- `mvp1/core_logic.js` - All core functions + user personalization
+- `mvp1/style.css` - Modern, responsive, touch-optimized styling
 - `mvp1/test.html` - Browser test suite
-- `mvp1/test-node.js` - Automated TDD tests
+- `mvp1/test-node-v6.js` - User personalization tests (19 tests)
+- `mvp1/test-node-v7.js` - Auto-select bug fix tests (16 tests)
 - `mvp1/README.md` - Comprehensive documentation
 - `mvp1/dayi_db.json` - Generated database (717KB)
 
-**Test Results**: 12/12 tests passing ✅
-- Database Loading: 2 tests ✓
-- Query Function: 3 tests ✓
-- Sort Function: 3 tests ✓
-- Render Function: 3 tests ✓
-- Integration Test: 1 test ✓
+**Test Results**: 35/35 tests passing ✅
+- **test-node-v6.js (19 tests)**:
+  - User Model Storage: 2 tests ✓
+  - User Model Load/Parse: 3 tests ✓
+  - User Model Save/Format: 2 tests ✓
+  - User Model Update Logic: 3 tests ✓
+  - User Model Apply Prefs: 3 tests ✓
+  - User Model Integration: 2 tests ✓
+  - Input Mode Toggle: 2 tests ✓
+  - Core Functions: 2 tests ✓
+- **test-node-v7.js (16 tests) - Bug Fix**:
+  - Auto-Select Bug Setup: 2 tests ✓
+  - Bug Reproduction: 2 tests ✓
+  - Bug Fix Verification: 3 tests ✓
+  - Golden Path: 2 tests ✓
+  - Edge Cases: 4 tests ✓
+  - Integration: 1 test ✓
+  - Regression: 2 tests ✓
 
 ## What's In Progress 🔄
 
-### Currently: Finalizing MVP1 Deliverable
+### Currently: All v7 deliverables complete!
 
-**Tasks**:
-- 🔄 Updating memory bank documentation
-- ⏳ Committing MVP1 implementation
-- ⏳ Updating main README with MVP1 status
+**Completed Tasks**:
+- ✅ Touch-friendly UX implemented (MVP1.10)
+- ✅ Critical bug fixed (auto-select user preferences)
+- ✅ All documentation updated (README, memory bank)
+- ✅ All tests passing (35/35)
+- ✅ Committed and pushed to repository
+
+**Next**: Ready to begin MVP 2a planning
 
 ## What's Left to Build 📋
 
