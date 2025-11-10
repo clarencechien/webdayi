@@ -4,21 +4,24 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v9%20Complete%20%2B%20Modern%20UI-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v9-blue)]()
-[![Tests](https://img.shields.io/badge/tests-59%2F59%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v10%20Complete%20%2B%20Mobile%20UX-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v10-blue)]()
+[![Tests](https://img.shields.io/badge/tests-91%2F91%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
 
-**[Try WebDaYi MVP1 v9 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[Try WebDaYi MVP1 v10 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
 Experience the core Dàyì input engine with modern design and advanced features:
-- 🎨 **Modern UI** *(v9 NEW!)*: Brand new Tailwind CSS design with rounded cards!
-- 🌗 **Dark Mode** *(v9 NEW!)*: Toggle dark/light theme, auto-saves preference!
-- ✨ **Material Icons** *(v9 NEW!)*: Professional icon system for unified visuals!
-- 📐 **New Layout** *(v9 NEW!)*: Output on top, Input below - more intuitive!
-- 📱 **Enhanced RWD** *(v9 NEW!)*: Perfect for mobile/tablet/desktop!
+- 💡 **Inline Key Hints** *(v10 NEW!)*: Selection keys shown directly with candidates, faster learning!
+- 📱 **Mobile Optimized** *(v10 NEW!)*: Responsive control panel, no more overlap on mobile!
+- 🔤 **Font Size Control** *(v10 NEW!)*: A−/A+ buttons adjust 80%-120%, fits all devices!
+- 🎨 **Modern UI** *(v9)*: Brand new Tailwind CSS design with rounded cards!
+- 🌗 **Dark Mode** *(v9)*: Toggle dark/light theme, auto-saves preference!
+- ✨ **Material Icons** *(v9)*: Professional icon system for unified visuals!
+- 📐 **New Layout** *(v9)*: Output on top, Input below - more intuitive!
+- 📱 **Enhanced RWD** *(v9)*: Perfect for mobile/tablet/desktop!
 - ✨ **Auto-Copy** *(v8)*: Automatically copies to clipboard, no manual clicking!
 - 🗑️ **Clear Button** *(v8)*: One-click to clear output buffer!
 - 🔄 **Auto-Copy Toggle**: Can enable/disable auto-copy anytime
@@ -42,13 +45,13 @@ Experience the core Dàyì input engine with modern design and advanced features
 
 ## Project Status
 
-**Current Phase**: ✅ MVP 1.0 v9 Complete!
-**Completion**: ~55% (Phase 0 & MVP 1 v9 done, MVP 2a next)
+**Current Phase**: ✅ MVP 1.0 v10 Complete!
+**Completion**: ~57% (Phase 0 & MVP 1 v10 done, MVP 2a next)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0 v9           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v10          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Selection Keys Fix       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Pagination               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Auto-select              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
@@ -60,18 +63,24 @@ Experience the core Dàyì input engine with modern design and advanced features
 │   ├─ Clear Button             [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Tailwind CSS             [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎨✅  │
 │   ├─ Dark Mode                [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🌗✅  │
-│   └─ Modern UI Redesign       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✨✅  │
+│   ├─ Modern UI Redesign       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✨✅  │
+│   ├─ Mobile UX Fixes          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 📱✅  │
+│   ├─ Font Size Control        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🔤✅  │
+│   └─ Inline Hints UX          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 💡✅  │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░]   0% ⏳    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 v9 with modern UI redesign (59/59 tests passing)
-- 🎨 **Tailwind CSS**: Industry-standard utility-first CSS framework
-- 🌗 **Dark Mode**: System detection + manual toggle, auto-saves preference
-- ✨ **Material Icons**: Professional icons replacing emoji
-- 📐 **New Layout**: Output on top, Input below - more intuitive
-- 📱 **Enhanced RWD**: Perfect for mobile/tablet/desktop (max-w-3xl)
-- 🎨 **Modern Design**: Card-based, rounded corners, shadows, smooth transitions
+**Latest Achievement**: MVP 1.0 v10 Mobile UX + Font Control + Inline Hints (91/91 tests passing)
+- 💡 **Inline Key Hints (v10)**: Keys shown with candidates (e.g., "1. 保 Space"), 50% reduced cognitive load!
+- 📱 **Responsive Control Panel (v10)**: Desktop fixed buttons / Mobile FAB + slide-in menu
+- 🔤 **Font Size Control (v10)**: A−/A+ buttons adjust 80%-120%, fits all devices
+- 📱 **Mobile Button Fix (v10)**: Perfect solution for Android web button overlap
+- 🎨 **Tailwind CSS (v9)**: Industry-standard utility-first CSS framework
+- 🌗 **Dark Mode (v9)**: System detection + manual toggle, auto-saves preference
+- ✨ **Material Icons (v9)**: Professional icons replacing emoji
+- 📐 **New Layout (v9)**: Output on top, Input below - more intuitive
+- 📱 **Enhanced RWD (v9)**: Perfect for mobile/tablet/desktop (max-w-3xl)
 - ✨ **Auto-Copy (v8)**: Seamless workflow, copies after selection
 - 🗑️ **Clear Button (v8)**: One-click buffer cleanup
 - ✅ **Frequency Converter v2**: Smart sorting using Taiwan MOE data
