@@ -27,12 +27,6 @@
   // UI Element References
   // ============================================
 
-  // Main mode toggle buttons (always visible - mobile & desktop)
-  const charModeBtnMain = document.getElementById('char-mode-btn-main');
-  const sentenceModeBtnMain = document.getElementById('sentence-mode-btn-main');
-  const predictionControl = document.getElementById('prediction-control');
-  const predictSentenceBtn = document.getElementById('predict-sentence-btn');
-
   // Desktop control panel buttons
   const charModeBtn = document.getElementById('char-mode-btn');
   const sentenceModeBtn = document.getElementById('sentence-mode-btn');
@@ -41,12 +35,15 @@
   const charModeBtnMobile = document.getElementById('char-mode-btn-mobile');
   const sentenceModeBtnMobile = document.getElementById('sentence-mode-btn-mobile');
 
-  // Other UI elements
-  const codeBufferDisplay = document.getElementById('code-buffer-display');
+  // v11 Sentence mode UI elements
+  const sentenceModePanel = document.getElementById('sentence-mode-panel');
+  const livePreviewContainer = document.getElementById('live-preview-container');
+  const previewText = document.getElementById('preview-text');
   const bufferedCodesContainer = document.getElementById('buffered-codes');
   const clearBufferBtn = document.getElementById('clear-buffer-btn');
-  const livePreview = document.getElementById('live-preview');
-  const previewText = document.getElementById('preview-text');
+  const predictSentenceBtn = document.getElementById('predict-sentence-btn');
+
+  // Other UI elements
   const ngramLoadingOverlay = document.getElementById('ngram-loading');
   const inputBox = document.getElementById('input-box');
   const candidateArea = document.getElementById('candidate-area');
@@ -123,24 +120,6 @@
     const buffer = getCodeBuffer();
 
     if (mode === 'character') {
-      // Main buttons (always visible)
-      if (charModeBtnMain) {
-        charModeBtnMain.style.borderColor = '#0fb8f0';
-        charModeBtnMain.style.background = '#0fb8f0';
-        charModeBtnMain.style.color = 'white';
-        charModeBtnMain.classList.add('active');
-      }
-      if (sentenceModeBtnMain) {
-        sentenceModeBtnMain.style.borderColor = '';
-        sentenceModeBtnMain.style.background = '';
-        sentenceModeBtnMain.style.color = '';
-        sentenceModeBtnMain.classList.remove('active');
-      }
-      // Hide prediction control in character mode
-      if (predictionControl) {
-        predictionControl.classList.add('hidden');
-      }
-
       // Desktop control panel buttons
       if (charModeBtn) {
         charModeBtn.classList.add('active');
@@ -165,40 +144,11 @@
         sentenceModeBtnMobile.style.color = '';
       }
 
-      // UI state
-      if (codeBufferDisplay) {
-        codeBufferDisplay.classList.add('hidden');
-      }
-      if (livePreview) {
-        livePreview.classList.add('hidden');
+      // Hide sentence mode panel in character mode
+      if (sentenceModePanel) {
+        sentenceModePanel.classList.add('hidden');
       }
     } else {
-      // Main buttons (always visible)
-      if (charModeBtnMain) {
-        charModeBtnMain.style.borderColor = '';
-        charModeBtnMain.style.background = '';
-        charModeBtnMain.style.color = '';
-        charModeBtnMain.classList.remove('active');
-      }
-      if (sentenceModeBtnMain) {
-        sentenceModeBtnMain.style.borderColor = '#0fb8f0';
-        sentenceModeBtnMain.style.background = '#0fb8f0';
-        sentenceModeBtnMain.style.color = 'white';
-        sentenceModeBtnMain.classList.add('active');
-      }
-      // Show prediction control in sentence mode
-      if (predictionControl) {
-        predictionControl.classList.remove('hidden');
-      }
-      // Enable/disable prediction button based on buffer
-      if (predictSentenceBtn) {
-        if (buffer.length === 0) {
-          predictSentenceBtn.disabled = true;
-        } else {
-          predictSentenceBtn.disabled = false;
-        }
-      }
-
       // Desktop control panel buttons
       if (charModeBtn) {
         charModeBtn.classList.remove('active');
@@ -223,9 +173,14 @@
         sentenceModeBtnMobile.style.color = 'white';
       }
 
-      // UI state
-      if (codeBufferDisplay) {
-        codeBufferDisplay.classList.remove('hidden');
+      // Show sentence mode panel
+      if (sentenceModePanel) {
+        sentenceModePanel.classList.remove('hidden');
+      }
+
+      // Enable/disable prediction button based on buffer
+      if (predictSentenceBtn) {
+        predictSentenceBtn.disabled = (buffer.length === 0);
       }
     }
 
@@ -256,19 +211,19 @@
   }
 
   function updateLivePreviewDisplay() {
-    if (!livePreview || !previewText) return;
+    if (!livePreviewContainer || !previewText) return;
 
     const buffer = getCodeBuffer();
 
     if (getInputMode() !== 'sentence' || buffer.length === 0) {
-      livePreview.classList.add('hidden');
+      livePreviewContainer.classList.add('hidden');
       return;
     }
 
     // Generate preview
     const preview = generateLivePreview(buffer, dayiMap, userModel);
     previewText.textContent = preview;
-    livePreview.classList.remove('hidden');
+    livePreviewContainer.classList.remove('hidden');
   }
 
   async function triggerPrediction() {
@@ -352,35 +307,6 @@
   // ============================================
   // Event Handlers
   // ============================================
-
-  // Main mode toggle buttons (always visible - mobile & desktop)
-  if (charModeBtnMain) {
-    charModeBtnMain.addEventListener('click', () => {
-      setInputMode('character');
-      updateModeUI();
-      if (inputBox) inputBox.value = '';
-      if (candidateArea) {
-        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">請輸入大易碼</div>';
-      }
-      console.log('[v11 UI] Switched to character mode (main button)');
-    });
-  }
-
-  if (sentenceModeBtnMain) {
-    sentenceModeBtnMain.addEventListener('click', async () => {
-      setInputMode('sentence');
-      updateModeUI();
-      if (inputBox) inputBox.value = '';
-      if (candidateArea) {
-        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 Space 預測句子</div>';
-      }
-
-      // Lazy load N-gram DB
-      await loadNgramDatabase();
-
-      console.log('[v11 UI] Switched to sentence mode (main button)');
-    });
-  }
 
   // Desktop control panel mode toggle buttons
   if (charModeBtn) {
@@ -567,7 +493,6 @@
   console.log('[v11 UI] Mode:', getInputMode());
   console.log('[v11 UI] N-gram DB:', getNgramDb() ? 'loaded' : 'not loaded (lazy)');
   console.log('[v11 UI] Event Listeners Bound:');
-  console.log('[v11 UI]   - Main buttons:', charModeBtnMain ? '✓' : '✗', sentenceModeBtnMain ? '✓' : '✗');
   console.log('[v11 UI]   - Desktop buttons:', charModeBtn ? '✓' : '✗', sentenceModeBtn ? '✓' : '✗');
   console.log('[v11 UI]   - Mobile buttons:', charModeBtnMobile ? '✓' : '✗', sentenceModeBtnMobile ? '✓' : '✗');
   console.log('[v11 UI]   - Prediction button:', predictSentenceBtn ? '✓' : '✗');
