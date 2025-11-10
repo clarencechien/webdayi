@@ -994,24 +994,39 @@ function renderCandidatesHTML(candidates, pageIndex = 0, totalPages = 1) {
     return '';
   }
 
+  // Selection key hints for first 6 candidates
+  const SELECTION_KEY_HINTS = {
+    0: 'Space',
+    1: "'",
+    2: '[',
+    3: ']',
+    4: '-',
+    5: '\\'
+  };
+
   // Get candidates for current page (max 6)
   const pageCandidates = getCandidatesForPage(candidates, pageIndex);
 
   const candidatesHtml = pageCandidates
     .map((candidate, index) => {
-      const keyLabel = getSelectionKeyLabel(index);
-      const displayKey = index === 0 ? 'Space' : keyLabel;
       // Use Tailwind CSS classes for modern styling
       const highlightClass = index === 0 ?
         'bg-primary text-white ring-2 ring-primary' :
         'bg-slate-200 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700';
 
-      return `<button class="candidate-item flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-md px-3 transition-all ${highlightClass}"
+      // Get key hint for first 6 candidates
+      const keyHint = SELECTION_KEY_HINTS[index];
+      const keyHintHtml = keyHint ?
+        `<kbd class="ml-1.5 px-1.5 py-0.5 text-xs font-mono bg-white/20 dark:bg-black/20 rounded">${keyHint}</kbd>` :
+        '';
+
+      return `<button class="candidate-item flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-1 rounded-md px-3 transition-all ${highlightClass}"
                       data-index="${index}"
                       role="button"
                       tabindex="0"
-                      aria-label="選擇 ${candidate.char}">
+                      aria-label="選擇 ${candidate.char}，按 ${keyHint || (index + 1)}">
         <p class="text-sm font-medium">${index + 1}. ${candidate.char}</p>
+        ${keyHintHtml}
       </button>`;
     })
     .join('');
@@ -1035,7 +1050,7 @@ function renderCandidatesHTML(candidates, pageIndex = 0, totalPages = 1) {
         <span class="material-symbols-outlined text-base">chevron_left</span>
         <span>上一頁</span>
       </button>
-      <span class="text-sm font-medium text-slate-700 dark:text-slate-300">第 ${pageIndex + 1}/${totalPages} 頁</span>
+      <span class="text-sm font-medium text-slate-700 dark:text-slate-300">第 ${pageIndex + 1}/${totalPages} 頁 <kbd class="ml-1 px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">=</kbd> 換頁</span>
       <button class="flex h-9 items-center gap-2 px-4 rounded-md bg-white dark:bg-slate-800 text-sm font-medium text-primary transition-all next-page ${nextClass}"
               ${nextDisabled ? 'disabled' : ''}
               aria-label="下一頁">
