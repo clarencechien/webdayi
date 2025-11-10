@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v8</title>
+  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v10</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,14 +49,14 @@
 
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 transition-colors duration-200">
 
-  <!-- Fixed Control Buttons -->
-  <div class="fixed top-4 right-4 z-50 flex flex-col gap-2">
+  <!-- Fixed Control Buttons (Desktop) -->
+  <div id="desktop-controls" class="fixed top-4 right-4 z-50 hidden sm:flex flex-col gap-2">
     <!-- Dark Mode Toggle -->
     <button id="dark-mode-toggle"
             class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg"
             aria-label="切換深色模式">
       <span class="material-symbols-outlined text-base">dark_mode</span>
-      <span class="hidden sm:inline">Dark</span>
+      <span>Dark</span>
     </button>
 
     <!-- Express Mode Toggle -->
@@ -64,7 +64,7 @@
             class="flex h-10 items-center gap-2 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary px-4 text-sm font-medium text-primary hover:bg-primary/20 dark:hover:bg-primary/30 shadow-md transition-all hover:shadow-lg"
             aria-label="切換專注模式">
       <span class="material-symbols-outlined text-base">center_focus_strong</span>
-      <span class="hidden sm:inline">Focus</span>
+      <span>Focus</span>
     </button>
 
     <!-- Auto-Copy Toggle -->
@@ -72,8 +72,102 @@
             class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border-2 px-4 text-sm font-medium shadow-md transition-all hover:shadow-lg"
             aria-label="自動複製">
       <span class="material-symbols-outlined text-base">content_copy</span>
-      <span class="hidden sm:inline auto-copy-label">Auto</span>
+      <span class="auto-copy-label">Auto</span>
     </button>
+
+    <!-- Font Size Decrease -->
+    <button id="font-size-decrease-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg"
+            aria-label="縮小字體">
+      <span class="text-base">A−</span>
+    </button>
+
+    <!-- Font Size Increase -->
+    <button id="font-size-increase-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg"
+            aria-label="放大字體">
+      <span class="text-base">A+</span>
+    </button>
+  </div>
+
+  <!-- Mobile FAB Button -->
+  <button id="mobile-controls-fab"
+          class="fixed top-4 right-4 z-50 flex sm:hidden h-12 w-12 items-center justify-center rounded-full bg-primary text-white shadow-lg hover:shadow-xl transition-all hover:scale-105"
+          aria-label="開啟設定">
+    <span class="material-symbols-outlined text-xl">settings</span>
+  </button>
+
+  <!-- Mobile Control Panel -->
+  <div id="mobile-controls-panel"
+       class="fixed inset-0 z-50 hidden sm:hidden">
+    <!-- Backdrop -->
+    <div class="backdrop absolute inset-0 bg-black/50 backdrop-blur-sm"
+         onclick="document.getElementById('mobile-controls-panel').classList.add('hidden')"></div>
+
+    <!-- Panel -->
+    <div class="panel absolute top-0 right-0 bottom-0 w-72 bg-white dark:bg-slate-900 shadow-2xl transform transition-transform">
+      <div class="flex flex-col h-full p-6">
+        <!-- Panel Header -->
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">設定 (Settings)</h3>
+          <button onclick="document.getElementById('mobile-controls-panel').classList.add('hidden')"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  aria-label="關閉">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="space-y-3">
+          <!-- Dark Mode Toggle (Mobile) -->
+          <button id="dark-mode-toggle-mobile"
+                  class="flex w-full h-12 items-center gap-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                  aria-label="切換深色模式">
+            <span class="material-symbols-outlined text-xl">dark_mode</span>
+            <span>深色模式 (Dark Mode)</span>
+          </button>
+
+          <!-- Focus Mode Toggle (Mobile) -->
+          <button id="mode-toggle-btn-mobile"
+                  class="flex w-full h-12 items-center gap-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                  aria-label="切換專注模式">
+            <span class="material-symbols-outlined text-xl">center_focus_strong</span>
+            <span id="mode-label-mobile">專注模式 (Focus Mode)</span>
+          </button>
+
+          <!-- Auto-Copy Toggle (Mobile) -->
+          <button id="auto-copy-toggle-btn-mobile"
+                  class="flex w-full h-12 items-center gap-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                  aria-label="自動複製">
+            <span class="material-symbols-outlined text-xl">content_copy</span>
+            <span class="auto-copy-label-mobile">自動複製 (Auto-Copy)</span>
+          </button>
+
+          <!-- Font Size Controls (Mobile) -->
+          <div class="flex gap-2">
+            <button id="font-size-decrease-btn-mobile"
+                    class="flex flex-1 h-12 items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                    aria-label="縮小字體">
+              <span class="text-lg">A−</span>
+              <span class="text-xs">縮小</span>
+            </button>
+            <button id="font-size-increase-btn-mobile"
+                    class="flex flex-1 h-12 items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                    aria-label="放大字體">
+              <span class="text-lg">A+</span>
+              <span class="text-xs">放大</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel Footer -->
+        <div class="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800">
+          <p class="text-xs text-slate-500 dark:text-slate-400 text-center">
+            字體大小: <span id="font-scale-display-mobile">100%</span>
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Copy Toast Notification -->
@@ -99,7 +193,7 @@
           </div>
           <h1 class="text-3xl font-bold tracking-tighter text-slate-900 dark:text-white">WebDaYi</h1>
         </div>
-        <p class="text-lg text-slate-600 dark:text-slate-400">網頁大易輸入法 Core Engine v8</p>
+        <p class="text-lg text-slate-600 dark:text-slate-400">網頁大易輸入法 Core Engine v10</p>
       </header>
 
       <!-- Instructions Section (hidden in express mode) -->
@@ -185,6 +279,19 @@
             <label class="text-sm font-medium text-slate-700 dark:text-slate-300">
               候選字 (Candidates)
             </label>
+            <!-- Selection Key Hints -->
+            <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 flex-wrap">
+              <span>按</span>
+              <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">Space</kbd>
+              <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">'</kbd>
+              <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">[</kbd>
+              <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">]</kbd>
+              <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">-</kbd>
+              <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">\</kbd>
+              <span>選字 | 點擊選字 |</span>
+              <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs font-mono">=</kbd>
+              <span>翻頁</span>
+            </p>
             <div id="candidate-area"
                  class="flex min-h-20 flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-3 transition-colors">
               <div class="w-full text-center text-sm text-slate-400 py-4">請輸入大易碼</div>

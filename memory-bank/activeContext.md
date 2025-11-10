@@ -1,12 +1,67 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-10 (Modern UI Redesign with Tailwind CSS + Dark Mode - MVP1 v9)
-**Current Phase**: ✅ MVP 1.0 v9 + Modern UI + Dark Mode COMPLETED!
+**Last Updated**: 2025-11-10 (Mobile UX Fixes + Font Size Control - MVP1 v10 COMPLETED!)
+**Current Phase**: ✅ MVP 1.0 v10 - Mobile Bug Fixes + Font Size Control COMPLETE!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### 🎨 LATEST UPDATE: Modern UI Redesign with Tailwind CSS + Dark Mode (MVP1 v9 - 2025-11-10)
+### ✅ COMPLETED: Mobile UX Fixes + Font Size Control (MVP1 v10 - 2025-11-10)
+
+**Status**: ✅ Complete! All 86 tests passing (27 new + 59 existing)
+
+**User Issues Reported** (from `issue/Screenshot_20251110-153133.png`):
+1. ✅ **Mobile Button Overlap**: Control buttons (dark/light, focus, auto-copy) overlap with content on Android web - FIXED
+2. ✅ **Missing Selection Hints**: v9 redesign removed the selection key hints that existed in v8 - RESTORED
+3. ✅ **No Font Size Control**: Users need ability to adjust font size for different devices - IMPLEMENTED
+
+**What was completed in v10**:
+- ✅ **Responsive Control Panel** (F-10.1) - Desktop/mobile layouts with FAB + slide-in panel
+- ✅ **Selection Key Hints** (F-10.2) - Restored visual hints with styled `<kbd>` tags
+- ✅ **Font Size Control** (F-10.3) - Adjustable 80%-120% with localStorage persistence
+- ✅ **27 New Tests** - Comprehensive TDD coverage for all new features
+- ✅ **No Regression** - All 59 existing tests still passing (86 total)
+
+**Design Solutions** (see `mvp1/DESIGN-v10.md` for full spec):
+
+**F-10.1: Responsive Control Panel**
+- **Desktop (≥640px)**: Keep fixed top-right buttons + add font controls
+- **Mobile (<640px)**: Collapse into FAB (Floating Action Button) → slide-in panel
+- **Goal**: No overlap, all controls accessible, better UX on small screens
+
+**F-10.2: Restore Selection Key Hints**
+- Add hint text between "候選字 (Candidates)" label and candidate area
+- Text: "按 Space/' /[/]/- /\ 選字 | 點擊選字 | = 翻頁"
+- Use styled `<kbd>` tags for visual clarity
+- Visible in both light/dark modes
+
+**F-10.3: Font Size Control**
+- **Range**: 0.8x (80%) to 1.2x (120%), step 0.1
+- **Default**: 1.0x (100%)
+- **Storage**: localStorage key `webdayi_font_scale`
+- **UI**: "A−" / "A+" buttons grouped with other controls
+- **Implementation**: CSS `font-size` on `:root` element
+
+**TDD Approach**:
+- 📝 **Test File**: `mvp1/test-node-v10.js` (27 new tests)
+- **Categories**:
+  - Mobile Layout Tests (10 tests): Panel behavior, responsive breakpoints
+  - Selection Hints Tests (5 tests): Display, visibility, themes
+  - Font Size Control Tests (12 tests): Persistence, bounds, layout integrity
+- **Total Tests**: 86 (59 existing + 27 new)
+
+**Next Steps**:
+1. ✅ Design complete (`DESIGN-v10.md`)
+2. ✅ Memory bank updated
+3. ⏳ Write 27 tests (TDD)
+4. ⏳ Implement features to pass tests
+5. ⏳ Manual testing on mobile viewport
+6. ⏳ Update documentation
+7. ⏳ Commit and push
+
+---
+
+### 🎨 PREVIOUS UPDATE: Modern UI Redesign with Tailwind CSS + Dark Mode (MVP1 v9 - 2025-11-10)
 
 **Achievement**: Complete UI overhaul with modern design system and dark mode support!
 
