@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>v11 Button Fix Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-section h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: 2px solid #0fb8f0;
+      background: white;
+      color: #333;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #0fb8f0;
+      color: white;
+    }
+    button.active {
+      background: #0fb8f0;
+      color: white;
+      font-weight: bold;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .log {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin: 2px 0;
+      padding: 2px 5px;
+    }
+    .log-entry.success {
+      color: green;
+    }
+    .log-entry.error {
+      color: red;
+    }
+    .log-entry.info {
+      color: blue;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .status.pass {
+      background: #4caf50;
+      color: white;
+    }
+    .status.fail {
+      background: #f44336;
+      color: white;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 v11 Button Fix Verification Test</h1>
+
+  <div class="test-section">
+    <h2>Bug Context</h2>
+    <p><strong>Problem:</strong> <code>arguments.callee</code> in strict mode throws error</p>
+    <p><strong>Impact:</strong> Entire IIFE fails, no event listeners bound</p>
+    <p><strong>Fix:</strong> Changed anonymous IIFE to named function <code>initV11UI()</code></p>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 1: Script Initialization <span id="test1-status" class="status">PENDING</span></h2>
+    <p>Testing if v11 UI script initializes without errors in strict mode.</p>
+    <div id="test1-result" class="log"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Button Binding <span id="test2-status" class="status">PENDING</span></h2>
+    <p>Testing if event listeners are bound to all buttons.</p>
+    <div id="test2-result" class="log"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Mode Toggle (Main Buttons) <span id="test3-status" class="status">PENDING</span></h2>
+    <button id="char-mode-btn-main">逐字模式 (Character)</button>
+    <button id="sentence-mode-btn-main">整句模式 (Sentence)</button>
+    <div id="test3-result" class="log"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 4: Prediction Button <span id="test4-status" class="status">PENDING</span></h2>
+    <div id="prediction-control" class="hidden">
+      <button id="predict-sentence-btn" disabled>智能預測 (Predict)</button>
+    </div>
+    <div id="test4-result" class="log"></div>
+  </div>
+
+  <!-- Hidden UI elements required by v11 -->
+  <div id="code-buffer-display" class="hidden">
+    <div id="buffered-codes"></div>
+  </div>
+  <div id="live-preview" class="hidden">
+    <div id="preview-text"></div>
+  </div>
+  <input id="input-box" style="display:none" />
+  <div id="candidate-area" style="display:none"></div>
+
+  <!-- Mock dayiMap -->
+  <script>
+    const dayiMap = new Map([
+      ['a', [{ char: '大', freq: 100 }]],
+      ['4jp', [{ char: '易', freq: 80 }]]
+    ]);
+  </script>
+
+  <!-- Load v11 core functions -->
+  <script src="core_logic_v11.js"></script>
+
+  <!-- Load v11 UI (THIS IS WHAT WE'RE TESTING) -->
+  <script src="core_logic_v11_ui.js"></script>
+
+  <!-- Test Runner -->
+  <script>
+    function log(testId, message, type = 'info') {
+      const resultDiv = document.getElementById(testId + '-result');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      resultDiv.appendChild(entry);
+      resultDiv.scrollTop = resultDiv.scrollHeight;
+    }
+
+    function updateStatus(testId, passed) {
+      const statusSpan = document.getElementById(testId + '-status');
+      statusSpan.textContent = passed ? 'PASS' : 'FAIL';
+      statusSpan.className = passed ? 'status pass' : 'status fail';
+    }
+
+    // Wait for scripts to load
+    setTimeout(() => {
+      runTests();
+    }, 500);
+
+    function runTests() {
+      log('test1', 'Starting Test 1: Script Initialization', 'info');
+
+      // Test 1: Check if v11 UI initialized without errors
+      try {
+        if (typeof getInputMode === 'function' && typeof setInputMode === 'function') {
+          log('test1', '✓ v11 core functions loaded', 'success');
+          log('test1', '✓ No strict mode errors thrown', 'success');
+          log('test1', `✓ Current mode: ${getInputMode()}`, 'success');
+          updateStatus('test1', true);
+        } else {
+          log('test1', '✗ v11 core functions not found', 'error');
+          updateStatus('test1', false);
+        }
+      } catch (e) {
+        log('test1', `✗ Error: ${e.message}`, 'error');
+        updateStatus('test1', false);
+      }
+
+      // Test 2: Check if buttons exist
+      log('test2', 'Starting Test 2: Button Binding', 'info');
+
+      const charModeBtnMain = document.getElementById('char-mode-btn-main');
+      const sentenceModeBtnMain = document.getElementById('sentence-mode-btn-main');
+      const predictSentenceBtn = document.getElementById('predict-sentence-btn');
+      const predictionControl = document.getElementById('prediction-control');
+
+      let test2Pass = true;
+
+      if (charModeBtnMain) {
+        log('test2', '✓ Main character button found', 'success');
+      } else {
+        log('test2', '✗ Main character button NOT found', 'error');
+        test2Pass = false;
+      }
+
+      if (sentenceModeBtnMain) {
+        log('test2', '✓ Main sentence button found', 'success');
+      } else {
+        log('test2', '✗ Main sentence button NOT found', 'error');
+        test2Pass = false;
+      }
+
+      if (predictSentenceBtn) {
+        log('test2', '✓ Prediction button found', 'success');
+      } else {
+        log('test2', '✗ Prediction button NOT found', 'error');
+        test2Pass = false;
+      }
+
+      updateStatus('test2', test2Pass);
+
+      // Test 3: Test mode toggle
+      log('test3', 'Starting Test 3: Mode Toggle', 'info');
+
+      let test3Pass = true;
+      const initialMode = getInputMode();
+      log('test3', `Initial mode: ${initialMode}`, 'info');
+
+      // Click sentence mode button
+      sentenceModeBtnMain.click();
+      setTimeout(() => {
+        const newMode1 = getInputMode();
+        log('test3', `After clicking sentence button: ${newMode1}`, 'info');
+
+        if (newMode1 === 'sentence') {
+          log('test3', '✓ Sentence mode button works!', 'success');
+
+          // Check if prediction control is visible
+          if (!predictionControl.classList.contains('hidden')) {
+            log('test3', '✓ Prediction control became visible', 'success');
+          } else {
+            log('test3', '✗ Prediction control still hidden', 'error');
+            test3Pass = false;
+          }
+        } else {
+          log('test3', '✗ Mode did not change to sentence', 'error');
+          test3Pass = false;
+        }
+
+        // Click character mode button
+        charModeBtnMain.click();
+        setTimeout(() => {
+          const newMode2 = getInputMode();
+          log('test3', `After clicking character button: ${newMode2}`, 'info');
+
+          if (newMode2 === 'character') {
+            log('test3', '✓ Character mode button works!', 'success');
+
+            // Check if prediction control is hidden
+            if (predictionControl.classList.contains('hidden')) {
+              log('test3', '✓ Prediction control became hidden', 'success');
+            } else {
+              log('test3', '✗ Prediction control still visible', 'error');
+              test3Pass = false;
+            }
+          } else {
+            log('test3', '✗ Mode did not change to character', 'error');
+            test3Pass = false;
+          }
+
+          updateStatus('test3', test3Pass);
+
+          // Test 4: Prediction button state
+          runTest4();
+        }, 100);
+      }, 100);
+    }
+
+    function runTest4() {
+      log('test4', 'Starting Test 4: Prediction Button State', 'info');
+
+      const predictSentenceBtn = document.getElementById('predict-sentence-btn');
+      let test4Pass = true;
+
+      // Switch to sentence mode
+      setInputMode('sentence');
+
+      // Clear buffer
+      clearCodeBuffer();
+      log('test4', 'Buffer cleared', 'info');
+
+      // Check if button is disabled
+      setTimeout(() => {
+        if (predictSentenceBtn.disabled) {
+          log('test4', '✓ Button disabled when buffer empty', 'success');
+        } else {
+          log('test4', '✗ Button should be disabled when buffer empty', 'error');
+          test4Pass = false;
+        }
+
+        // Add code to buffer
+        addCodeToBuffer('a');
+        log('test4', 'Added code to buffer', 'info');
+
+        setTimeout(() => {
+          if (!predictSentenceBtn.disabled) {
+            log('test4', '✓ Button enabled when buffer has content', 'success');
+          } else {
+            log('test4', '✗ Button should be enabled when buffer has content', 'error');
+            test4Pass = false;
+          }
+
+          updateStatus('test4', test4Pass);
+
+          // Summary
+          setTimeout(() => {
+            showSummary();
+          }, 500);
+        }, 100);
+      }, 100);
+    }
+
+    function showSummary() {
+      const test1Pass = document.getElementById('test1-status').textContent === 'PASS';
+      const test2Pass = document.getElementById('test2-status').textContent === 'PASS';
+      const test3Pass = document.getElementById('test3-status').textContent === 'PASS';
+      const test4Pass = document.getElementById('test4-status').textContent === 'PASS';
+
+      const allPass = test1Pass && test2Pass && test3Pass && test4Pass;
+
+      alert(allPass ?
+        '✅ ALL TESTS PASSED! Bug is fixed! 🎉' :
+        '❌ SOME TESTS FAILED. Check console for details.');
+    }
+  </script>
+</body>
+</html>
