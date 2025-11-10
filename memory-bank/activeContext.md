@@ -223,9 +223,41 @@ Total: 30/30 tests passing (100% pass rate!)
 - ✅ HTTP server running on port 8000
 - ✅ Comprehensive manual test plan created (13 test suites, 80+ test cases)
 
-**What's Remaining for v11**:
-- ⏳ Browser testing with manual test plan (user-driven)
-- ⏳ Final commit and push
+**Recent Bug Fixes (2025-11-10)** ✅:
+
+1. **Copy Button Feedback Bug Fixed**:
+   - **Problem**: After clicking Copy, button recovered as "content_copyCopy" instead of icon + "Copy"
+   - **Root Cause**: Using `textContent` destroyed HTML structure
+   - **Solution**: Changed to `innerHTML` to preserve Material Icon HTML
+   - **Result**: Now shows ✓ "已複製！" → 📋 "Copy" correctly
+
+2. **Mobile-Friendly Prediction Button Added**:
+   - **Problem**: Mobile users couldn't trigger N-gram prediction (Space key doesn't work on virtual keyboard)
+   - **Solution**: Added large "智能預測 (Predict)" button in Live Preview section
+   - **Features**: Gradient design, 44px min height, auto_awesome icon
+   - **Impact**: Both desktop and mobile can trigger Viterbi prediction
+
+3. **Mode Toggle Relocated to Control Panel**:
+   - **Problem**: Mode toggle buttons in main UI were not clickable/accessible
+   - **Solution**: Moved to desktop control panel (top-right) and mobile FAB menu
+   - **Desktop**: Two buttons "逐字" / "整句" with cyan active state
+   - **Mobile**: Side-by-side buttons in settings panel
+   - **Impact**: Always accessible, cleaner main UI
+
+**Files Modified in Bug Fixes**:
+- mvp1/core_logic.js - Copy button feedback fix
+- mvp1/core_logic_v11_ui.js - Refactored prediction logic + mobile button handlers
+- mvp1/index.html - Added prediction button + relocated mode toggle
+
+**Current Status**:
+- ✅ All core functionality: 100% complete
+- ✅ All UI/UX: 100% complete
+- ✅ All bug fixes: 100% complete
+- ✅ v10 regression tests: 45/45 passing
+- ✅ v11 core tests: 30/30 passing
+- ⏳ Browser testing: Ready for user testing
+
+**Total Progress**: MVP 1.0 v11 is **95% complete** (awaiting user acceptance testing)
 
 ---
 

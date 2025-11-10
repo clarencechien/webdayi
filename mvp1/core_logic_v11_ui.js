@@ -26,10 +26,21 @@
   // UI Element References
   // ============================================
 
+  // Main mode toggle buttons (always visible - mobile & desktop)
+  const charModeBtnMain = document.getElementById('char-mode-btn-main');
+  const sentenceModeBtnMain = document.getElementById('sentence-mode-btn-main');
+  const predictionControl = document.getElementById('prediction-control');
+  const predictSentenceBtn = document.getElementById('predict-sentence-btn');
+
+  // Desktop control panel buttons
   const charModeBtn = document.getElementById('char-mode-btn');
   const sentenceModeBtn = document.getElementById('sentence-mode-btn');
+
+  // Mobile FAB menu buttons
   const charModeBtnMobile = document.getElementById('char-mode-btn-mobile');
   const sentenceModeBtnMobile = document.getElementById('sentence-mode-btn-mobile');
+
+  // Other UI elements
   const codeBufferDisplay = document.getElementById('code-buffer-display');
   const bufferedCodesContainer = document.getElementById('buffered-codes');
   const clearBufferBtn = document.getElementById('clear-buffer-btn');
@@ -108,9 +119,28 @@
 
   function updateModeUI() {
     const mode = getInputMode();
+    const buffer = getCodeBuffer();
 
     if (mode === 'character') {
-      // Desktop buttons
+      // Main buttons (always visible)
+      if (charModeBtnMain) {
+        charModeBtnMain.style.borderColor = '#0fb8f0';
+        charModeBtnMain.style.background = '#0fb8f0';
+        charModeBtnMain.style.color = 'white';
+        charModeBtnMain.classList.add('active');
+      }
+      if (sentenceModeBtnMain) {
+        sentenceModeBtnMain.style.borderColor = '';
+        sentenceModeBtnMain.style.background = '';
+        sentenceModeBtnMain.style.color = '';
+        sentenceModeBtnMain.classList.remove('active');
+      }
+      // Hide prediction control in character mode
+      if (predictionControl) {
+        predictionControl.classList.add('hidden');
+      }
+
+      // Desktop control panel buttons
       if (charModeBtn) {
         charModeBtn.classList.add('active');
         charModeBtn.style.background = '#0fb8f0';
@@ -121,7 +151,8 @@
         sentenceModeBtn.style.background = '';
         sentenceModeBtn.style.color = '';
       }
-      // Mobile buttons
+
+      // Mobile FAB menu buttons
       if (charModeBtnMobile) {
         charModeBtnMobile.classList.add('active');
         charModeBtnMobile.style.background = '#0fb8f0';
@@ -132,6 +163,7 @@
         sentenceModeBtnMobile.style.background = '';
         sentenceModeBtnMobile.style.color = '';
       }
+
       // UI state
       if (codeBufferDisplay) {
         codeBufferDisplay.classList.add('hidden');
@@ -140,7 +172,33 @@
         livePreview.classList.add('hidden');
       }
     } else {
-      // Desktop buttons
+      // Main buttons (always visible)
+      if (charModeBtnMain) {
+        charModeBtnMain.style.borderColor = '';
+        charModeBtnMain.style.background = '';
+        charModeBtnMain.style.color = '';
+        charModeBtnMain.classList.remove('active');
+      }
+      if (sentenceModeBtnMain) {
+        sentenceModeBtnMain.style.borderColor = '#0fb8f0';
+        sentenceModeBtnMain.style.background = '#0fb8f0';
+        sentenceModeBtnMain.style.color = 'white';
+        sentenceModeBtnMain.classList.add('active');
+      }
+      // Show prediction control in sentence mode
+      if (predictionControl) {
+        predictionControl.classList.remove('hidden');
+      }
+      // Enable/disable prediction button based on buffer
+      if (predictSentenceBtn) {
+        if (buffer.length === 0) {
+          predictSentenceBtn.disabled = true;
+        } else {
+          predictSentenceBtn.disabled = false;
+        }
+      }
+
+      // Desktop control panel buttons
       if (charModeBtn) {
         charModeBtn.classList.remove('active');
         charModeBtn.style.background = '';
@@ -151,7 +209,8 @@
         sentenceModeBtn.style.background = '#0fb8f0';
         sentenceModeBtn.style.color = 'white';
       }
-      // Mobile buttons
+
+      // Mobile FAB menu buttons
       if (charModeBtnMobile) {
         charModeBtnMobile.classList.remove('active');
         charModeBtnMobile.style.background = '';
@@ -162,6 +221,7 @@
         sentenceModeBtnMobile.style.background = '#0fb8f0';
         sentenceModeBtnMobile.style.color = 'white';
       }
+
       // UI state
       if (codeBufferDisplay) {
         codeBufferDisplay.classList.remove('hidden');
@@ -179,10 +239,18 @@
 
     if (buffer.length === 0) {
       bufferedCodesContainer.innerHTML = '<span class="text-sm text-slate-400 dark:text-slate-500 italic">尚無編碼 (No codes yet)</span>';
+      // Disable prediction button when buffer is empty
+      if (predictSentenceBtn && getInputMode() === 'sentence') {
+        predictSentenceBtn.disabled = true;
+      }
     } else {
       bufferedCodesContainer.innerHTML = buffer.map(code =>
         `<span class="buffered-code-badge">${code}</span>`
       ).join('');
+      // Enable prediction button when buffer has content
+      if (predictSentenceBtn && getInputMode() === 'sentence') {
+        predictSentenceBtn.disabled = false;
+      }
     }
   }
 
@@ -284,7 +352,36 @@
   // Event Handlers
   // ============================================
 
-  // Mode toggle buttons
+  // Main mode toggle buttons (always visible - mobile & desktop)
+  if (charModeBtnMain) {
+    charModeBtnMain.addEventListener('click', () => {
+      setInputMode('character');
+      updateModeUI();
+      if (inputBox) inputBox.value = '';
+      if (candidateArea) {
+        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">請輸入大易碼</div>';
+      }
+      console.log('[v11 UI] Switched to character mode (main button)');
+    });
+  }
+
+  if (sentenceModeBtnMain) {
+    sentenceModeBtnMain.addEventListener('click', async () => {
+      setInputMode('sentence');
+      updateModeUI();
+      if (inputBox) inputBox.value = '';
+      if (candidateArea) {
+        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 Space 預測句子</div>';
+      }
+
+      // Lazy load N-gram DB
+      await loadNgramDatabase();
+
+      console.log('[v11 UI] Switched to sentence mode (main button)');
+    });
+  }
+
+  // Desktop control panel mode toggle buttons
   if (charModeBtn) {
     charModeBtn.addEventListener('click', () => {
       setInputMode('character');
@@ -356,8 +453,7 @@
     });
   }
 
-  // Predict sentence button (mobile-friendly)
-  const predictSentenceBtn = document.getElementById('predict-sentence-btn');
+  // Predict sentence button
   if (predictSentenceBtn) {
     predictSentenceBtn.addEventListener('click', async () => {
       console.log('[v11 UI] Predict button clicked');

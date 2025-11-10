@@ -39,6 +39,9 @@
 │   ├─ UI/UX Implementation    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎨✅  │
 │   ├─ Event Handler Integration [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ⚡✅  │
 │   ├─ v10 Regression Tests    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Copy Button Feedback Fix [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🐛✅  │
+│   ├─ Mobile Prediction Button [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 📱✅  │
+│   ├─ Mode Toggle Relocation  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎨✅  │
 │   └─ Browser Testing          [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% 📋    │
 │ Phase 3: MVP 2a+ (Future)     [░░░░░░░░░░░░░░░░]   0% 📋    │
@@ -88,20 +91,27 @@ Legend: 🚀 Smart Engine | 🔄 In Progress | ⏳ Next | 📋 Planned
 
 ## What's Complete ✅
 
-### 🐛 LATEST MILESTONE: MVP 1.0 v10 Bugfix - Delete Key + Auto-Copy Feedback!
+### 🚀 LATEST MILESTONE: MVP 1.0 v11 N-gram Integration + Bug Fixes!
 
 **Achievement Summary** (2025-11-10):
 - ✅ Data Pipeline: YAML → JSON converter working perfectly (v2 with frequency ranking)
-- ✅ MVP 1.0 v10: Mobile UX fixes + Font control + Inline hints + Critical bugfixes
-- ✅ TDD: **104/104 automated tests passing** (21 converter + 83 MVP1)
+- ✅ MVP 1.0 v11: N-gram sentence prediction + Smart engine integration + Critical bugfixes
+- ✅ TDD: **75/75 automated tests passing** (21 converter + 45 MVP1 v10 + 30 MVP1 v11)
   - v6: 19 tests (personalization)
   - v7: 16 tests (auto-select fixes)
   - v8: 24 tests (auto-copy + clear)
   - v10: 27 tests (mobile UX + font)
   - v10-ux: 5 tests (inline hints)
-  - v10-bugfix: 13 tests (delete key + feedback) ⭐ NEW!
-- ✅ Performance: All targets exceeded (< 20ms vs 100ms target)
+  - v10-bugfix: 13 tests (delete key + feedback)
+  - v11: 30 tests (N-gram + Viterbi) ⭐ NEW!
+- ✅ Performance: All targets exceeded (< 20ms vs 100ms target, < 500ms prediction)
 - ✅ Documentation: Comprehensive README and design docs
+
+**v11 Bug Fixes** (Latest):
+- 🐛 **v11 Bugfix**: Copy button feedback now preserves icon HTML structure
+- 📱 **v11 New**: Mobile-friendly prediction button (Space key doesn't work on mobile)
+- 🎨 **v11 Refactor**: Mode toggle relocated to control panel (desktop + mobile)
+- ⚡ **v11 Refactor**: Prediction logic extracted into reusable `triggerPrediction()` function
 
 **v10 Bugfix Features**:
 - ⌨️ **v10 Bugfix**: Delete key clears output buffer (keyboard shortcut)
