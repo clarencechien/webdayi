@@ -4,18 +4,23 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v8%20Complete%20%2B%20Auto--Copy-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v8-blue)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v9%20Complete%20%2B%20Modern%20UI-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v9-blue)]()
 [![Tests](https://img.shields.io/badge/tests-59%2F59%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
 
-**[Try WebDaYi MVP1 v8 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[Try WebDaYi MVP1 v9 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
-Experience the core Dàyì input engine in your browser with advanced features:
-- ✨ **Auto-Copy** *(v8 NEW!)*: Automatically copies to clipboard after selection, no manual clicking needed!
-- 🗑️ **Clear Button** *(v8 NEW!)*: One-click to clear output buffer!
+Experience the core Dàyì input engine with modern design and advanced features:
+- 🎨 **Modern UI** *(v9 NEW!)*: Brand new Tailwind CSS design with rounded cards!
+- 🌗 **Dark Mode** *(v9 NEW!)*: Toggle dark/light theme, auto-saves preference!
+- ✨ **Material Icons** *(v9 NEW!)*: Professional icon system for unified visuals!
+- 📐 **New Layout** *(v9 NEW!)*: Output on top, Input below - more intuitive!
+- 📱 **Enhanced RWD** *(v9 NEW!)*: Perfect for mobile/tablet/desktop!
+- ✨ **Auto-Copy** *(v8)*: Automatically copies to clipboard, no manual clicking!
+- 🗑️ **Clear Button** *(v8)*: One-click to clear output buffer!
 - 🔄 **Auto-Copy Toggle**: Can enable/disable auto-copy anytime
 - 🚀 **Auto-select**: Type 2 chars + 3rd char = auto-select first candidate (speeds up typing!)
 - 📄 **Pagination**: Press `=` to cycle through pages when there are 60+ candidates
@@ -37,13 +42,13 @@ Experience the core Dàyì input engine in your browser with advanced features:
 
 ## Project Status
 
-**Current Phase**: ✅ MVP 1.0 v8 Complete!
-**Completion**: ~52% (Phase 0 & MVP 1 v8 done, MVP 2a next)
+**Current Phase**: ✅ MVP 1.0 v9 Complete!
+**Completion**: ~55% (Phase 0 & MVP 1 v9 done, MVP 2a next)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0 v8           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v9           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Selection Keys Fix       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Pagination               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Auto-select              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
@@ -52,17 +57,24 @@ Experience the core Dàyì input engine in your browser with advanced features:
 │   ├─ User Personalization     [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Touch-Friendly UX        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Auto-Copy                [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ Clear Button             [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Clear Button             [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Tailwind CSS             [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎨✅  │
+│   ├─ Dark Mode                [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🌗✅  │
+│   └─ Modern UI Redesign       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✨✅  │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░]   0% ⏳    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 v8 with auto-copy + clear button (59/59 tests passing)
-- ✨ **Auto-Copy**: Automatically copies to clipboard after selection, no manual clicking needed! (MVP1.11)
-- 🗑️ **Clear Button**: One-click to clear output buffer (MVP1.12)
-- 🔄 **Toggleable Control**: Auto-copy feature can be enabled/disabled anytime
-- ✅ **Frequency Converter v2**: Smart sorting using Taiwan MOE's 2000 high-frequency character data
-- 🐛 **Bug Fixed**: Auto-select respects user preferences (v7)
+**Latest Achievement**: MVP 1.0 v9 with modern UI redesign (59/59 tests passing)
+- 🎨 **Tailwind CSS**: Industry-standard utility-first CSS framework
+- 🌗 **Dark Mode**: System detection + manual toggle, auto-saves preference
+- ✨ **Material Icons**: Professional icons replacing emoji
+- 📐 **New Layout**: Output on top, Input below - more intuitive
+- 📱 **Enhanced RWD**: Perfect for mobile/tablet/desktop (max-w-3xl)
+- 🎨 **Modern Design**: Card-based, rounded corners, shadows, smooth transitions
+- ✨ **Auto-Copy (v8)**: Seamless workflow, copies after selection
+- 🗑️ **Clear Button (v8)**: One-click buffer cleanup
+- ✅ **Frequency Converter v2**: Smart sorting using Taiwan MOE data
 **Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
 
 ## 💡 Core Feature: Frequency-Based Smart Sorting
@@ -100,9 +112,14 @@ This ensures the most commonly used characters appear first, making input faster
 
 ### Try It Now (Live Demo)
 
-**[Launch WebDaYi MVP1 v8 →](https://clarencechien.github.io/webdayi/)**
+**[Launch WebDaYi MVP1 v9 →](https://clarencechien.github.io/webdayi/)**
 
 No installation required! Just open the link and start typing:
+- **NEW (v9)**: 🎨 Enjoy the modern Tailwind CSS design with card-based layout!
+- **NEW (v9)**: 🌗 Toggle dark/light mode with top-right button (preference auto-saved)!
+- **NEW (v9)**: ✨ Professional Material Icons for unified visual experience!
+- **NEW (v9)**: 📐 New layout: Output on top, Input below - more intuitive!
+- **NEW (v9)**: 📱 Enhanced responsive design perfect for mobile/tablet/desktop!
 - Try `v` → 大, 夫, 禾
 - Try `a` → 人, 入
 - Try `ux` → 61 candidates, press `=` or use buttons to page through
@@ -110,11 +127,11 @@ No installation required! Just open the link and start typing:
 - **Or click** candidates directly to select (touch-friendly!)
 - Type 2 chars then continue → auto-selects first candidate!
 - Press `Backspace` to undo (deletes input, then output buffer)
-- Toggle to Express Mode (top-right) for minimal UI
+- Toggle to Focus Mode (top-right) for minimal UI
 - Select a non-default candidate → **IME learns your preference and uses it in auto-select!** [Bug Fixed ✅]
-- **New (v7)**: Use ◀ **上一頁** / **下一頁** ▶ buttons for easy paging on mobile/tablet!
-- **New (v8)**: **Auto-copies to clipboard** after selection, no manual clicking needed! (toggleable on/off)
-- **New (v8)**: Use "Clear" button to clear output buffer with one click
+- **v7**: Use ◀ **上一頁** / **下一頁** ▶ buttons for easy paging on mobile/tablet!
+- **v8**: **Auto-copies to clipboard** after selection, no manual clicking needed! (toggleable on/off)
+- **v8**: Use "Clear" button to clear output buffer with one click
 
 ### For Developers
 
@@ -249,7 +266,7 @@ webdayi/
 
 ## Features
 
-### MVP 1.0 v8: Core Engine ✅ COMPLETE
+### MVP 1.0 v9: Core Engine + Modern UI ✅ COMPLETE
 
 **Basic Features:**
 - ✅ Load Dàyì dictionary into memory (Map data structure, 1,584 codes)
@@ -322,9 +339,46 @@ webdayi/
   - Responsive layout (stacks vertically on mobile)
   - Provides temporary visual feedback
 
+**Advanced Features (v9):**
+- ✅ **Tailwind CSS Integration**: Modern utility-first CSS framework
+  - **F-9.1**: Industry-standard Tailwind CSS v3 via CDN
+  - Utility-first approach for rapid styling and maintainability
+  - Consistent design tokens (colors, spacing, border radius)
+  - Responsive breakpoints (sm:, md:, dark:) for all devices
+  - Smooth transitions and hover states
+  - Card-based design with rounded corners and shadows
+- ✅ **Dark Mode Support**: Professional theme switching
+  - **F-9.2**: Toggle between dark and light themes
+  - System preference detection (prefers-color-scheme)
+  - Manual toggle button in top-right corner
+  - Preference saved to localStorage (persists across sessions)
+  - Smooth 200ms color transitions
+  - Complete dark mode coverage for all UI elements
+- ✅ **Material Symbols Icons**: Professional icon system
+  - **F-9.3**: Google's Material Symbols Outlined font
+  - Consistent, professional icon design
+  - Replaces emoji with scalable vector icons
+  - Better visual hierarchy and clarity
+  - Icons for dark mode, focus mode, auto-copy, copy, clear, navigation
+- ✅ **New Layout**: Optimized information architecture
+  - **F-9.4**: Output section on top, Input section below
+  - More intuitive flow (see results first, then input)
+  - Fixed control buttons in top-right corner (always accessible)
+  - Better use of screen real estate
+  - Mockup-inspired modern design
+- ✅ **Enhanced Responsive Design**: Perfect for all devices
+  - **F-9.5**: Mobile-first responsive design with Tailwind breakpoints
+  - Max width 3xl (768px) for optimal readability
+  - Button labels hidden on mobile (hidden sm:inline)
+  - Flex layouts that adapt to screen size
+  - Touch-optimized spacing and sizing
+  - Vertical stacking on mobile, horizontal on desktop
+  - Perfect balance of information density across devices
+
 **Target User**: Developer (for validation) & Power Users
 **Output Method**: Auto-copy to clipboard + manual copy/clear
 **Test Coverage**: 59/59 tests passing with TDD (19 personalization + 16 bug fix + 24 auto-copy tests)
+**Design System**: Tailwind CSS v3 + Material Symbols + Dark Mode
 
 ### MVP 2a: Browser Plugin (Planned)
 
@@ -441,6 +495,7 @@ Once MVP 2a is validated, contributions welcome for:
 | ✅ MVP 1.0 v6: User Personalization | 2025-11-06 | Done |
 | ✅ MVP 1.0 v7: Touch-Friendly UX + Bug Fix | 2025-11-06 | Done |
 | ✅ MVP 1.0 v8: Auto-Copy + Clear Button | 2025-11-10 | Done |
+| ✅ MVP 1.0 v9: Modern UI Redesign (Tailwind + Dark Mode) | 2025-11-10 | Done |
 | ⏳ MVP 2a: Browser Plugin | 2025-11-20 | Planned |
 | ⏳ Public Release (Chrome Web Store) | 2025-11-25 | Planned |
 | 📋 MVP 2a+: Advanced Features | 2025-12-15 | Future |
@@ -474,5 +529,5 @@ Open source (license TBD - currently development phase)
 ---
 
 **Last Updated**: 2025-11-10
-**Status**: MVP 1.0 v8 Complete (auto-copy + clear button + Converter v2)
-**Version**: 1.0.8-alpha (MVP1 v8 with auto-copy + clear button + Converter v2 with frequency-based ranking)
+**Status**: MVP 1.0 v9 Complete (Modern UI with Tailwind CSS + Dark Mode)
+**Version**: 1.0.9-alpha (MVP1 v9 with modern UI redesign, all v8 features preserved)

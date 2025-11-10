@@ -332,6 +332,197 @@ function setupAutoCopyToggle() {
   });
 }
 
+// ============================================================================
+// Font Size Control (MVP1 v10)
+// ============================================================================
+
+// Font scale constants
+const MIN_SCALE = 0.8;
+const MAX_SCALE = 1.2;
+const SCALE_STEP = 0.1;
+let currentFontScale = 1.0;
+
+/**
+ * Load font size preference from localStorage
+ */
+function loadFontSizePreference() {
+  if (typeof localStorage === 'undefined') return;
+
+  const saved = localStorage.getItem('webdayi_font_scale');
+  if (saved) {
+    currentFontScale = parseFloat(saved);
+    applyFontScale(currentFontScale);
+  }
+}
+
+/**
+ * Save font size preference to localStorage
+ * @param {number} scale - Font scale value
+ */
+function saveFontSizePreference(scale) {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.setItem('webdayi_font_scale', scale.toString());
+}
+
+/**
+ * Apply font scale to document root
+ * @param {number} scale - Font scale value (0.8 to 1.2)
+ */
+function applyFontScale(scale) {
+  if (typeof document === 'undefined') return;
+
+  // Apply to root element
+  document.documentElement.style.fontSize = `${scale * 100}%`;
+  currentFontScale = scale;
+
+  // Update mobile display
+  const mobileDisplay = document.getElementById('font-scale-display-mobile');
+  if (mobileDisplay) {
+    mobileDisplay.textContent = `${Math.round(scale * 100)}%`;
+  }
+}
+
+/**
+ * Increase font size
+ */
+function increaseFontSize() {
+  if (currentFontScale < MAX_SCALE) {
+    const newScale = Math.min(currentFontScale + SCALE_STEP, MAX_SCALE);
+    applyFontScale(newScale);
+    saveFontSizePreference(newScale);
+    showTemporaryFeedback(`字體大小: ${Math.round(newScale * 100)}%`);
+  }
+}
+
+/**
+ * Decrease font size
+ */
+function decreaseFontSize() {
+  if (currentFontScale > MIN_SCALE) {
+    const newScale = Math.max(currentFontScale - SCALE_STEP, MIN_SCALE);
+    applyFontScale(newScale);
+    saveFontSizePreference(newScale);
+    showTemporaryFeedback(`字體大小: ${Math.round(newScale * 100)}%`);
+  }
+}
+
+/**
+ * Setup font size control buttons
+ */
+function setupFontSizeControl() {
+  if (typeof document === 'undefined') return;
+
+  // Load saved preference
+  loadFontSizePreference();
+
+  // Desktop buttons
+  const decreaseBtn = document.getElementById('font-size-decrease-btn');
+  const increaseBtn = document.getElementById('font-size-increase-btn');
+
+  if (decreaseBtn) {
+    decreaseBtn.addEventListener('click', decreaseFontSize);
+  }
+
+  if (increaseBtn) {
+    increaseBtn.addEventListener('click', increaseFontSize);
+  }
+
+  // Mobile buttons
+  const decreaseBtnMobile = document.getElementById('font-size-decrease-btn-mobile');
+  const increaseBtnMobile = document.getElementById('font-size-increase-btn-mobile');
+
+  if (decreaseBtnMobile) {
+    decreaseBtnMobile.addEventListener('click', decreaseFontSize);
+  }
+
+  if (increaseBtnMobile) {
+    increaseBtnMobile.addEventListener('click', increaseFontSize);
+  }
+}
+
+// ============================================================================
+// Mobile Control Panel (MVP1 v10)
+// ============================================================================
+
+/**
+ * Open mobile control panel
+ */
+function openMobilePanel() {
+  if (typeof document === 'undefined') return;
+
+  const panel = document.getElementById('mobile-controls-panel');
+  if (panel) {
+    panel.classList.remove('hidden');
+  }
+}
+
+/**
+ * Close mobile control panel
+ */
+function closeMobilePanel() {
+  if (typeof document === 'undefined') return;
+
+  const panel = document.getElementById('mobile-controls-panel');
+  if (panel) {
+    panel.classList.add('hidden');
+  }
+}
+
+/**
+ * Setup mobile control panel
+ */
+function setupMobileControlPanel() {
+  if (typeof document === 'undefined') return;
+
+  // FAB button
+  const fab = document.getElementById('mobile-controls-fab');
+  if (fab) {
+    fab.addEventListener('click', openMobilePanel);
+  }
+
+  // Mobile control buttons - sync with desktop
+  const darkModeToggleMobile = document.getElementById('dark-mode-toggle-mobile');
+  if (darkModeToggleMobile) {
+    darkModeToggleMobile.addEventListener('click', () => {
+      // Trigger desktop button click
+      const desktopBtn = document.getElementById('dark-mode-toggle');
+      if (desktopBtn) desktopBtn.click();
+    });
+  }
+
+  const modeToggleMobile = document.getElementById('mode-toggle-btn-mobile');
+  if (modeToggleMobile) {
+    modeToggleMobile.addEventListener('click', () => {
+      // Trigger desktop button click
+      const desktopBtn = document.getElementById('mode-toggle-btn');
+      if (desktopBtn) desktopBtn.click();
+      // Update mobile label
+      const label = document.getElementById('mode-label-mobile');
+      if (label) {
+        setTimeout(() => {
+          label.textContent = currentInputMode === 'express' ? '一般模式 (Normal Mode)' : '專注模式 (Focus Mode)';
+        }, 100);
+      }
+    });
+  }
+
+  const autoCopyToggleMobile = document.getElementById('auto-copy-toggle-btn-mobile');
+  if (autoCopyToggleMobile) {
+    autoCopyToggleMobile.addEventListener('click', () => {
+      // Trigger desktop button click
+      const desktopBtn = document.getElementById('auto-copy-toggle-btn');
+      if (desktopBtn) desktopBtn.click();
+      // Update mobile label
+      const label = autoCopyToggleMobile.querySelector('.auto-copy-label-mobile');
+      if (label) {
+        setTimeout(() => {
+          label.textContent = autoCopyEnabled ? '自動複製 ✓ (Auto-Copy ✓)' : '自動複製 (Auto-Copy)';
+        }, 100);
+      }
+    });
+  }
+}
+
 /**
  * Show temporary feedback message (MVP1.11)
  * @param {string} message - Message to show
@@ -1238,6 +1429,14 @@ async function initialize() {
     autoCopyEnabled = loadAutoCopyPreference();
     setupAutoCopyToggle();
     console.log(`[WebDaYi] Auto-copy loaded: ${autoCopyEnabled ? 'enabled' : 'disabled'}`);
+
+    // Set up font size control (MVP1 v10)
+    setupFontSizeControl();
+    console.log(`[WebDaYi] Font size control initialized: ${Math.round(currentFontScale * 100)}%`);
+
+    // Set up mobile control panel (MVP1 v10)
+    setupMobileControlPanel();
+    console.log('[WebDaYi] Mobile control panel initialized');
 
     console.log('[WebDaYi] Initialized successfully');
   } catch (error) {
