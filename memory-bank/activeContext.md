@@ -157,9 +157,60 @@ Based on PRD.md v1.3, Section 7:
 
 ---
 
-## 📋 MAIN BRANCH STATUS: MVP 1.0 v10 Complete
+## 📋 MAIN BRANCH STATUS: MVP 1.0 v11 In Progress!
 
-### ✅ LATEST: Delete Key + Auto-Copy Feedback Bugfix (MVP1 v10 Bugfix - 2025-11-10)
+### 🚀 LATEST: N-gram Sentence Prediction (MVP1 v11 - 2025-11-10) - CORE COMPLETE!
+
+**Status**: ✅ Core Functions Complete! All 30/30 New Tests Passing!
+
+**Major Achievement**: Integrated N-gram language model and Viterbi algorithm into MVP1 static webpage!
+
+**What's Complete (v11 Core)**:
+- ✅ Browser-compatible Viterbi module (viterbi_module.js - 173 lines)
+- ✅ N-gram database (ngram_db.json - 10.4MB, 18K unigrams, 279K bigrams)
+- ✅ Core v11 functions (core_logic_v11.js - 313 lines)
+- ✅ Complete TDD test suite (test-node-v11.js - 30 tests, 711 lines)
+- ✅ **All 30/30 tests passing** on first implementation! (TDD success)
+- ✅ Two input modes: Character (existing) + Sentence (new)
+- ✅ Code buffering system (accumulate up to 10 codes)
+- ✅ Live preview generation (first candidates)
+- ✅ Viterbi sentence prediction working
+- ✅ Complete design document (DESIGN-v11.md - 643 lines)
+
+**Test Results Summary**:
+```
+Category 1: N-gram Database Loading     (5/5 passing) ✅
+Category 2: Input Mode Management       (6/6 passing) ✅
+Category 3: Code Buffering              (8/8 passing) ✅
+Category 4: Live Preview                (3/3 passing) ✅
+Category 5: Viterbi Integration         (6/6 passing) ✅
+Category 6: Event Handling              (2/2 passing) ✅
+
+Total: 30/30 tests passing (100% pass rate!)
+```
+
+**Viterbi Predictions Validated**:
+- Input codes: ["4jp", "ad"] → Prediction: "易在" (score: -5.298) ✅
+- Input codes: ["4jp", "ad", "v"] → Prediction: "易在大" (score: -5.809) ✅
+
+**Files Created**:
+- mvp1/viterbi_module.js - Browser-compatible Viterbi (173 lines)
+- mvp1/core_logic_v11.js - v11 functions (313 lines)
+- mvp1/test-node-v11.js - TDD tests (711 lines, 30 tests)
+- mvp1/DESIGN-v11.md - Design doc (643 lines)
+- mvp1/ngram_db.json - N-gram DB (10.4MB, copied from mvp3)
+
+**What's Remaining for v11**:
+- ⏳ UI/UX implementation (mode toggle, buffer display, preview)
+- ⏳ Event handler integration (Space key, backspace, ESC)
+- ⏳ Full browser testing
+- ⏳ v10 regression testing (ensure 104 existing tests still pass)
+- ⏳ Update index.html with sentence mode UI
+- ⏳ Update style.css with v11 styles
+
+---
+
+### ✅ PREVIOUS: Delete Key + Auto-Copy Feedback Bugfix (MVP1 v10 Bugfix - 2025-11-10)
 
 **Status**: ✅ Complete! All 104 tests passing (104/104 = 100%)
 
