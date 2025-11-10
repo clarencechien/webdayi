@@ -4,16 +4,20 @@
 
 > 輕量、透明、網頁優先的大易中文輸入法引擎
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v10%20Complete%20%2B%20Bugfix-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v10-blue)]()
-[![Tests](https://img.shields.io/badge/tests-104%2F104%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v11%20N--gram%2095%25-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v11%20(Smart%20Engine)-blue)]()
+[![Tests](https://img.shields.io/badge/tests-75%2F75%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 線上展示
 
-**[立即試用 WebDaYi MVP1 v10 →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[立即試用 WebDaYi MVP1 v11 →](https://clarencechien.github.io/webdayi/)** (GitHub Pages) 🚀 **NEW: N-gram 智能預測！**
 
 在瀏覽器中體驗核心大易輸入引擎，具備現代化設計與進階功能：
+- 🧠 **N-gram 智能預測** *(v11 NEW!)*：整句模式一次輸入多個編碼，按 Space 預測最佳句子！
+- 👁️ **即時預覽** *(v11 NEW!)*：輸入時即時顯示首選字，盲打更有信心！
+- ⚡ **Viterbi 演算法** *(v11 NEW!)*：基於真實語料庫（rime-essay）的機率預測！
+- 🎯 **雙模式輸入** *(v11 NEW!)*：逐字模式 ↔ 整句模式，自由切換！
 - ⌨️ **Delete 鍵清除** *(v10 Bugfix)*：按 Delete 鍵快速清空輸出區！
 - ✅ **正確的回饋訊息** *(v10 Bugfix)*：自動複製顯示「已複製到剪貼簿」，不再搞混！
 - 💡 **內嵌按鍵提示** *(v10 NEW!)*：候選字直接顯示按鍵，學習更快速！
@@ -47,8 +51,8 @@
 
 ## 專案狀態
 
-**目前階段**：✅ MVP 1.0 v10 完成 + 錯誤修正！
-**完成度**：~58%（Phase 0 與 MVP 1 v10 完成，MVP 2a 下一步）
+**目前階段**：🚀 MVP 1.0 v11 N-gram 智能預測（95% 完成！）
+**完成度**：~70%（Phase 0、MVP 1 v10、v11 完成，MVP 2a 下一步）
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -70,27 +74,36 @@
 │   ├─ 字體大小控制           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🔤✅  │
 │   ├─ 內嵌按鍵提示 UX        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 💡✅  │
 │   └─ Delete 鍵 + 回饋修正   [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🐛✅  │
-│ Phase 2: MVP 2a            [░░░░░░░░░░░░]   0% ⏳    │
+│ Phase 1.5: MVP 1.0 v11     [▓▓▓▓▓▓▓▓▓▓▓▓]  95% 🚀🧠  │
+│   ├─ N-gram 核心整合        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🧠✅  │
+│   ├─ Viterbi 演算法         [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ⚡✅  │
+│   ├─ 編碼緩衝系統           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ 即時預覽               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 👁️✅  │
+│   ├─ UI/UX 整合             [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎨✅  │
+│   ├─ 事件處理器整合         [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ⚡✅  │
+│   ├─ TDD 測試 (30 tests)    [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ 瀏覽器測試             [░░░░░░░░░░░░]   0% ⏳    │
+│ Phase 2: MVP 2a            [░░░░░░░░░░░░]   0% 📋    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**最新成就**：MVP 1.0 v10 錯誤修正（104/104 測試通過）
-- ⌨️ **Delete 鍵功能 (v10 Bugfix)**：按 Delete 鍵快速清空輸出區，鍵盤操作更完整
-- ✅ **修正回饋訊息 (v10 Bugfix)**：自動複製正確顯示「已複製到剪貼簿」，不再顯示「已清除」
-- 🔧 **保留圖示結構 (v10 Bugfix)**：所有回饋訊息正確顯示圖示，UI 更一致
-- 💡 **內嵌按鍵提示 (v10)**：候選字直接顯示按鍵（如「1. 保 Space」），認知負荷降低 50%！
+**最新成就**：🚀 MVP 1.0 v11 N-gram 智能預測（75/75 測試通過，95% 完成！）
+- 🧠 **N-gram 語言模型 (v11)**：整合 rime-essay 語料庫（18K unigrams, 279K bigrams）
+- ⚡ **Viterbi 演算法 (v11)**：動態規劃找出最佳句子路徑，速度 <500ms
+- 🎯 **雙模式輸入 (v11)**：逐字模式（傳統）↔ 整句模式（智能預測）自由切換
+- 👁️ **即時預覽 (v11)**：顯示首選字，盲打更有信心（如「易 在 大」）
+- 💾 **延遲載入 (v11)**：N-gram 資料庫（10.4MB）僅在需要時載入，不影響初始性能
+- 📦 **編碼緩衝 (v11)**：可累積最多 10 個編碼，按 Space 一次預測完整句子
+- ⌫ **智能清除 (v11)**：Backspace 移除最後一碼 / ESC 清空緩衝區
+- 🎨 **現代 UI (v11)**：漸層卡片、動畫徽章、載入指示器
+- 🧪 **TDD 成功 (v11)**：30 個測試在實作前撰寫，首次實作即 100% 通過！
+- 📖 **完整測試計畫 (v11)**：13 個測試套件，80+ 測試案例
+- ⌨️ **Delete 鍵功能 (v10)**：按 Delete 鍵快速清空輸出區
+- ✅ **修正回饋訊息 (v10)**：自動複製正確顯示「已複製到剪貼簿」
+- 💡 **內嵌按鍵提示 (v10)**：候選字直接顯示按鍵（如「1. 保 Space」）
 - 📱 **響應式控制面板 (v10)**：桌面固定按鈕 / 手機 FAB + 側拉選單
-- 🔤 **字體大小控制 (v10)**：A−/A+ 按鈕調整 80%-120%，適應各種裝置
-- 📱 **手機按鈕不重疊 (v10)**：完美解決 Android 網頁按鈕重疊問題
-- 🎨 **Tailwind CSS (v9)**：採用業界標準的 utility-first CSS 框架
-- 🌗 **深色模式 (v9)**：系統偵測 + 手動切換，偏好自動儲存
-- ✨ **Material Icons (v9)**：取代 emoji，視覺更專業統一
-- 📐 **新版面 (v9)**：輸出在上、輸入在下，符合使用習慣
-- 📱 **增強 RWD (v9)**：完美支援手機/平板/桌面（max-w-3xl）
-- ✨ **自動複製 (v8)**：選字後自動複製，無縫工作流程
-- 🗑️ **清除按鈕 (v8)**：一鍵清空輸出緩衝區
-- ✅ **頻率轉換器 v2**：使用台灣教育部 2000 高頻字資料
-**下個里程碑**：開始 MVP 2a（瀏覽器外掛）實作
+- 🔤 **字體大小控制 (v10)**：A−/A+ 按鈕調整 80%-120%
+**下個里程碑**：v11 瀏覽器測試完成後，開始 MVP 2a（瀏覽器外掛）實作
 
 ## 💡 核心特色：頻率導向的智慧排序
 
@@ -159,17 +172,28 @@ WebDaYi 使用真實世界的字元使用頻率資料，而非任意排序：
 git clone https://github.com/clarencechien/webdayi.git
 cd webdayi
 
-# 執行測試（全部 59 個測試應通過）
+# 執行測試（全部 75 個測試應通過）
 cd mvp1
-node test-node-v6.js  # 使用者個人化測試 (19/19)
-node test-node-v7.js  # 自動選字 bug 修復測試 (16/16)
-node test-node-v8.js  # 自動複製與清除按鈕測試 (24/24)
 
-# 在瀏覽器中本地開啟
+# v10 測試套件（45 個測試）
+node test-node-v10.js          # 手機 UX + 字體控制 (27/27)
+node test-node-v10-ux.js       # 內嵌提示 UX (5/5)
+node test-node-v10-bugfix.js   # Delete 鍵 + 回饋修正 (13/13)
+
+# v11 測試套件（30 個測試）🚀 NEW!
+node test-node-v11.js          # N-gram 智能預測 (30/30)
+
+# 在瀏覽器中本地開啟（含 v11 N-gram 功能）
 open index.html
-# 或使用本地伺服器：
+# 或使用本地伺服器（推薦，用於測試 N-gram 載入）：
 python3 -m http.server 8000
 # 造訪：http://localhost:8000
+
+# 測試 v11 N-gram 功能：
+# 1. 點擊「整句模式」按鈕
+# 2. 輸入 4jp → ad → v
+# 3. 按 Space 鍵
+# 4. 觀察 Viterbi 預測：「易在大」！
 
 # 資料處理管線：重新產生資料庫（如有需要）
 cd ../converter
@@ -254,13 +278,19 @@ webdayi/
 │   └── test-data/
 │       └── freq-sample.yaml    # 測試頻率資料（20 字範例）
 ├── mvp1/                       # Phase 1：靜態網頁
-│   ├── index.html              # 主要使用者介面
+│   ├── index.html              # 主要使用者介面（含 v11 UI）
 │   ├── core_logic.js           # 核心查詢引擎（v8）
+│   ├── core_logic_v11.js       # v11 N-gram 核心功能（313 行）✅ NEW!
+│   ├── core_logic_v11_ui.js    # v11 UI 整合（395 行）✅ NEW!
+│   ├── viterbi_module.js       # Viterbi 演算法（173 行）✅ NEW!
 │   ├── style.css               # 樣式表
 │   ├── dayi_db.json            # 產生的資料庫（頻率排序）
+│   ├── ngram_db.json           # N-gram 機率資料庫（10.4MB）✅ NEW!
 │   ├── README.md               # MVP1 文件（正體中文）
 │   ├── README.en.md            # MVP1 文件（英文）
 │   ├── DESIGN-auto-copy.md     # 自動複製功能設計文件（v8）
+│   ├── DESIGN-v11.md           # v11 N-gram 整合設計（643 行）✅ NEW!
+│   ├── TEST-PLAN-v11-ui.md     # v11 手動測試計畫（550+ 行）✅ NEW!
 │   ├── test.html               # 瀏覽器測試執行器
 │   ├── test-node.js            # Node.js 測試執行器（v1）
 │   ├── test-node-v2.js         # 選字鍵測試（v2）
@@ -269,7 +299,11 @@ webdayi/
 │   ├── test-node-v5.js         # 輸入模式切換測試（v5）
 │   ├── test-node-v6.js         # 使用者個人化測試（19 個測試）
 │   ├── test-node-v7.js         # 自動選字 bug 修復測試（16 個測試）
-│   └── test-node-v8.js         # 自動複製與清除按鈕測試（24 個測試）
+│   ├── test-node-v8.js         # 自動複製與清除按鈕測試（24 個測試）
+│   ├── test-node-v10.js        # v10 手機 UX + 字體控制測試（27 個測試）
+│   ├── test-node-v10-ux.js     # v10 內嵌提示測試（5 個測試）
+│   ├── test-node-v10-bugfix.js # v10 bug 修復測試（13 個測試）
+│   └── test-node-v11.js        # v11 N-gram 測試（30 個測試）✅ NEW!
 ├── mvp2a-plugin/               # Phase 2：瀏覽器擴充套件（規劃中）
 │   ├── manifest.json           # Chrome 擴充套件設定
 │   ├── background.js           # Service Worker
@@ -513,6 +547,9 @@ open mvp1/test.html
 | ✅ MVP 1.0 v7：觸控友善 UX + Bug 修復 | 2025-11-06 | 完成 |
 | ✅ MVP 1.0 v8：自動複製 + 清除按鈕 | 2025-11-10 | 完成 |
 | ✅ MVP 1.0 v9：Tailwind CSS + 深色模式 | 2025-11-10 | 完成 |
+| ✅ MVP 1.0 v10：手機 UX + 字體控制 + 錯誤修正 | 2025-11-10 | 完成 |
+| 🚀 MVP 1.0 v11：N-gram 智能預測（核心 + UI） | 2025-11-10 | 95% 完成 |
+| 📋 MVP 3.0：N-gram 資料管線 + Viterbi | 2025-11-10 | 已整合至 v11 |
 | ⏳ MVP 2a：瀏覽器外掛 | 2025-11-20 | 規劃中 |
 | ⏳ 公開發布（Chrome 線上應用程式商店） | 2025-11-25 | 規劃中 |
 | 📋 MVP 2a+：進階功能 | 2025-12-15 | 未來 |
@@ -534,7 +571,8 @@ open mvp1/test.html
 
 ## 致謝
 
-- **Rime 專案**：高品質大易字典資料來源
+- **Rime 專案**：高品質大易字典資料來源（dayi.dict.yaml）
+- **Rime Essay**：正體中文語料庫（essay.txt，442K 條目，用於 N-gram 訓練）
 - **大易輸入法**：經典中文輸入系統
 - **開源社群**：靈感與工具
 
@@ -546,5 +584,6 @@ open mvp1/test.html
 ---
 
 **最後更新**：2025-11-10
-**狀態**：MVP 1.0 v9 完成（Tailwind CSS + 深色模式 + 現代 UI + 頻率轉換器 v2）
-**版本**：1.0.9-alpha（MVP1 v9 with Tailwind CSS + dark mode + modern UI + auto-copy + Converter v2）
+**狀態**：🚀 MVP 1.0 v11 N-gram 智能預測（95% 完成 - 核心 + UI 完整，瀏覽器測試待執行）
+**版本**：1.0.11-alpha（MVP1 v11 with N-gram Sentence Prediction + Viterbi Algorithm + Dual-Mode Input）
+**資料來源**：Rime Dàyì Dictionary + Rime Essay Corpus (rime-essay/essay.txt)
