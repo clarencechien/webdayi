@@ -1,12 +1,100 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-06 (Updated after Converter v2 implementation)
-**Current Phase**: ✅ MVP 1.0 v7 + Enhanced Converter COMPLETED!
+**Last Updated**: 2025-11-10 (GitHub Pages deployment fix + README accuracy update)
+**Current Phase**: ✅ MVP 1.0 v7 + Enhanced Converter v2 + Documentation COMPLETED!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### 🎉 LATEST UPDATE: Enhanced Converter v2 with Frequency Ranking COMPLETE!
+### 🔧 LATEST UPDATE: GitHub Pages Deployment Fix + README Accuracy (2025-11-10)
+
+**Issue Reported**: User found GitHub Pages showing README.md instead of the WebDaYi application
+
+**Root Cause Analysis**:
+- **Problem**: No `index.html` in root directory
+- **Behavior**: GitHub Pages defaults to rendering README.md when no index.html exists
+- **Impact**: Users visiting https://clarencechien.github.io/webdayi/ saw documentation instead of the app
+- **MVP1 location**: Application exists at `mvp1/index.html` (correct project structure)
+- **Missing piece**: No redirect from root to mvp1/
+
+**Solution Implemented**:
+1. ✅ **Created root redirect** (`index.html`):
+   - Triple-layer redirect strategy for maximum compatibility
+   - JavaScript redirect: `window.location.href = "mvp1/index.html"` (fastest)
+   - Meta refresh fallback: For JS-disabled browsers
+   - Manual link: For ultimate fallback
+   - Loading UI: Smooth user experience during redirect
+
+2. ✅ **Created comprehensive test suite** (`test-github-pages.js`):
+   - 20 automated tests to prevent regression
+   - Test Groups:
+     - Root Redirect Configuration (5 tests)
+     - MVP1 Application Validation (4 tests)
+     - Express Mode Feature Validation (3 tests)
+     - Core UI Elements Validation (4 tests)
+     - Related Files Validation (4 tests)
+   - All 20/20 tests passing ✅
+
+3. ✅ **Verified Express Mode already exists** (v5 feature):
+   - User asked to "add input mode switch"
+   - **Finding**: Express Mode toggle was already implemented in MVP1 v5!
+   - Button exists: `<button id="mode-toggle-btn">切換至專注模式</button>`
+   - Functionality working: Hides header/instructions, shows only input/candidates/output
+   - **Why user didn't see it**: GitHub Pages was broken, so they couldn't access the app!
+
+4. ✅ **Updated README files for accuracy**:
+   - Project Structure: Added all converter v2 files, test files, memory bank structure
+   - Testing Section: Updated to 56/56 tests (21 converter + 35 MVP1)
+   - Roadmap: Added v5, v6, v7 milestones and Converter v2
+   - Footer: Updated from v4 to v7 status
+   - Badges: Updated test count to 56/56
+   - New Section: Added prominent "頻率導向的智慧排序" / "Frequency-Based Smart Sorting"
+   - Alignment: Both Chinese and English READMEs are 449 lines, perfectly aligned
+
+**Prevention Strategy**:
+- ✅ Automated test validates root index.html exists
+- ✅ Automated test validates redirect configuration
+- ✅ Automated test validates Express Mode toggle exists
+- ✅ Automated test validates all core UI elements
+- ✅ CI can run this test before deployment
+
+**Files Created/Modified**:
+- `index.html` (new) - Root redirect with triple-layer strategy
+- `test-github-pages.js` (new) - 20 comprehensive deployment tests
+- `README.md` (updated) - Accurate codebase mapping, Chinese version
+- `README.en.md` (updated) - Accurate codebase mapping, English version
+- `memory-bank/activeContext.md` (this file) - Updated with GitHub Pages fix
+
+**Verification**:
+- ✅ 20/20 deployment tests passing
+- ✅ Root index.html redirects to mvp1/index.html
+- ✅ Express Mode toggle exists and is documented
+- ✅ README files accurately reflect codebase
+- ✅ Chinese-English documentation aligned (449 lines each)
+
+**User Impact**:
+- ✅ GitHub Pages now loads the WebDaYi application correctly
+- ✅ Users can immediately access the live demo
+- ✅ Express Mode feature (v5) is now accessible
+- ✅ Documentation is complete and accurate
+- ✅ No more confusion about missing features
+
+**Technical Insight - "Ultrathinking" Prevention**:
+This bug demonstrates importance of deployment testing:
+1. **Root Cause**: Missing deployment artifact (root index.html)
+2. **Why it wasn't caught**: No deployment validation tests
+3. **How to prevent**: Automated deployment tests in CI/CD
+4. **Lesson**: Test the deployment environment, not just the code
+
+The test suite (`test-github-pages.js`) now ensures:
+- All necessary files exist in correct locations
+- Redirect mechanism works with multiple fallbacks
+- Features are documented and accessible
+- Prevents "works locally, broken on production" scenarios
+
+---
+
+### 🎉 PREVIOUS UPDATE: Enhanced Converter v2 with Frequency Ranking COMPLETE!
 
 **Achievement**: Implemented frequency-based converter with real-world character usage data!
 

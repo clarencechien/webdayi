@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebDaYi - Redirecting...</title>
+
+  <!-- Immediate JavaScript redirect (fastest) -->
+  <script>
+    window.location.href = "mvp1/index.html";
+  </script>
+
+  <!-- Meta refresh fallback (for JS-disabled browsers) -->
+  <meta http-equiv="refresh" content="0; url=mvp1/index.html">
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-align: center;
+    }
+    .loader {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <h1>🚀 WebDaYi</h1>
+    <p>正在跳轉至輸入法引擎...</p>
+    <p><small>Redirecting to MVP1...</small></p>
+    <p><a href="mvp1/index.html" style="color: white;">Click here if not redirected automatically</a></p>
+  </div>
+</body>
+</html>
