@@ -10,13 +10,14 @@
  * - viterbi_module.js (Viterbi algorithm)
  */
 
-(function() {
+(function initV11UI() {
   'use strict';
 
   // Wait for DOM and dayiMap to be ready
+  // FIX: Use named function instead of arguments.callee (strict mode compatible)
   if (typeof dayiMap === 'undefined' || !dayiMap) {
     console.error('[v11 UI] dayiMap not loaded yet, retrying...');
-    setTimeout(arguments.callee, 100);
+    setTimeout(initV11UI, 100);
     return;
   }
 
@@ -562,8 +563,14 @@
   // Initialize UI
   updateModeUI();
 
-  console.log('[v11 UI] Initialized successfully');
+  console.log('[v11 UI] ===== Initialization Complete =====');
   console.log('[v11 UI] Mode:', getInputMode());
   console.log('[v11 UI] N-gram DB:', getNgramDb() ? 'loaded' : 'not loaded (lazy)');
+  console.log('[v11 UI] Event Listeners Bound:');
+  console.log('[v11 UI]   - Main buttons:', charModeBtnMain ? '✓' : '✗', sentenceModeBtnMain ? '✓' : '✗');
+  console.log('[v11 UI]   - Desktop buttons:', charModeBtn ? '✓' : '✗', sentenceModeBtn ? '✓' : '✗');
+  console.log('[v11 UI]   - Mobile buttons:', charModeBtnMobile ? '✓' : '✗', sentenceModeBtnMobile ? '✓' : '✗');
+  console.log('[v11 UI]   - Prediction button:', predictSentenceBtn ? '✓' : '✗');
+  console.log('[v11 UI] =====================================');
 
 })();
