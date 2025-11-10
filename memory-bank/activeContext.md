@@ -1,12 +1,150 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-10 (Auto-Copy + Clear Buffer features - MVP1 v8)
-**Current Phase**: ✅ MVP 1.0 v8 + Enhanced Converter v2 + Documentation COMPLETED!
+**Last Updated**: 2025-11-10 (Modern UI Redesign with Tailwind CSS + Dark Mode - MVP1 v9)
+**Current Phase**: ✅ MVP 1.0 v9 + Modern UI + Dark Mode COMPLETED!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### 🎉 LATEST UPDATE: Auto-Copy + Clear Buffer Features (MVP1 v8 - 2025-11-10)
+### 🎨 LATEST UPDATE: Modern UI Redesign with Tailwind CSS + Dark Mode (MVP1 v9 - 2025-11-10)
+
+**Achievement**: Complete UI overhaul with modern design system and dark mode support!
+
+**What was completed in v9**:
+- ✅ **Tailwind CSS Integration** - Utility-first CSS framework for modern styling
+- ✅ **Dark Mode Support** - Toggle with system preference detection and localStorage persistence
+- ✅ **Material Symbols Icons** - Professional icon system replacing emoji
+- ✅ **New Layout** - Output section on top, Input section below (mockup-inspired)
+- ✅ **Modern Design** - Card-based, rounded corners, shadows, smooth transitions
+- ✅ **Responsive Design** - Optimized for mobile/tablet/desktop (max-w-3xl)
+- ✅ **Space Grotesk Font** - Modern typography for better readability
+- ✅ **Primary Color** - Cyan/turquoise (#0fb8f0) for vibrant, modern look
+- ✅ **Control Buttons** - Top-right: Dark mode, Focus mode, Auto-copy toggle
+- ✅ **All v8 Features Preserved** - Auto-copy, clear, personalization all working
+
+**User Request**:
+> "請參考以下的mockup 調整layout與風格 並且有更好的ux for RWD"
+
+**Technologies Added**:
+1. **Tailwind CSS v3**: Utility-first CSS framework via CDN
+2. **Material Symbols Outlined**: Google's icon font
+3. **Space Grotesk**: Modern geometric sans-serif font
+4. **Dark Mode**: CSS class-based with localStorage persistence
+
+**UI/UX Improvements**:
+
+**1. Layout Changes**:
+- **New Order**: Output → Input (reversed from v8)
+- **Centered Header**: Logo + Title + Subtitle
+- **Card Design**: All sections in rounded cards with borders
+- **Max Width**: 3xl container for optimal readability
+- **Spacing**: Consistent 8-unit spacing (space-y-8)
+
+**2. Dark Mode Implementation**:
+- **Toggle Button**: Top-right corner with icon
+- **System Detection**: Uses `prefers-color-scheme: dark`
+- **Persistence**: Saves preference to localStorage
+- **Colors**:
+  - Light: `#f5f8f8` background, slate text
+  - Dark: `#101e22` background, slate-200 text
+- **Transitions**: Smooth 200ms color transitions
+
+**3. Visual Design**:
+- **Primary Color**: `#0fb8f0` (cyan/turquoise)
+- **Buttons**: Modern pill-style with hover/active states
+- **Candidates**: Highlighted first option, gradient on hover
+- **Pagination**: Material icons for prev/next arrows
+- **Toast**: Updated with icon + text format
+- **Shadows**: Subtle shadows for depth (shadow-md, shadow-lg)
+
+**4. Control Buttons (Fixed Top-Right)**:
+```html
+<!-- Dark Mode Toggle -->
+<button id="dark-mode-toggle">
+  <span class="material-symbols-outlined">dark_mode</span>
+  <span>Dark</span>
+</button>
+
+<!-- Focus Mode Toggle -->
+<button id="mode-toggle-btn">
+  <span class="material-symbols-outlined">center_focus_strong</span>
+  <span>Focus</span>
+</button>
+
+<!-- Auto-Copy Toggle -->
+<button id="auto-copy-toggle-btn">
+  <span class="material-symbols-outlined">content_copy</span>
+  <span>Auto ✓</span>
+</button>
+```
+
+**5. Responsive Behavior**:
+- **Mobile (<640px)**: Button labels hidden, icons only
+- **Tablet (640px-1024px)**: Responsive padding and spacing
+- **Desktop (>1024px)**: Full layout with labels
+
+**6. Material Icons Used**:
+- `dark_mode` / `light_mode` - Dark mode toggle
+- `center_focus_strong` / `fullscreen_exit` - Focus mode
+- `content_copy` - Copy/Auto-copy
+- `delete` - Clear button
+- `check_circle` - Success feedback
+- `chevron_left` / `chevron_right` - Pagination
+- `chevron_right` (rotated) - Collapsible sections
+- `info` / `cloud_done` - Status messages
+
+**Code Changes**:
+
+**index.html** (Complete Rewrite):
+- Removed: Old HTML structure and inline styles
+- Added: Tailwind CSS CDN, Material Symbols, Space Grotesk font
+- Layout: New component-based structure with Tailwind utilities
+- Dark Mode: `<html class="dark">` with toggle script
+- Responsive: Tailwind responsive classes (sm:, md:, dark:)
+
+**core_logic.js** (Updated Rendering):
+- `renderCandidatesHTML()`: Updated for Tailwind button classes
+- `updateCandidateArea()`: Updated no-candidates message styling
+- `applyInputMode()`: Updated for new element IDs and Tailwind classes
+- `setupAutoCopyToggle()`: Updated for Tailwind state classes
+- `showCopyFeedback()`: Updated for Tailwind display classes
+
+**Design System**:
+```javascript
+// Tailwind Config
+colors: {
+  primary: "#0fb8f0",
+  "background-light": "#f5f8f8",
+  "background-dark": "#101e22"
+},
+fontFamily: {
+  display: ["Space Grotesk", "sans-serif"]
+},
+borderRadius: {
+  DEFAULT: "0.25rem",
+  lg: "0.5rem",
+  xl: "0.75rem",
+  full: "9999px"
+}
+```
+
+**Backwards Compatibility**:
+- ✅ All event handlers preserved
+- ✅ All data-* attributes maintained
+- ✅ LocalStorage keys unchanged
+- ✅ All v8 features working (auto-copy, clear, personalization, etc.)
+- ✅ Test suite compatible (59/59 tests still pass)
+
+**Files Modified**:
+- `mvp1/index.html`: Complete redesign with Tailwind CSS
+- `mvp1/core_logic.js`: Updated rendering functions for new classes
+
+**Files No Longer Used**:
+- `mvp1/style.css`: Replaced by Tailwind CSS utilities
+
+---
+
+### 🎉 PREVIOUS UPDATE: Auto-Copy + Clear Buffer Features (MVP1 v8 - 2025-11-10)
 
 **Achievement**: Implemented seamless auto-copy workflow with user control!
 
