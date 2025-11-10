@@ -237,43 +237,78 @@ def calculate_bigram_probabilities(
 def generate_ngram_db(
     unigram_probs: Dict[str, float],
     bigram_probs: Dict[str, float],
-    metadata: Dict
+    unigram_counts: Dict[str, int],
+    bigram_counts: Dict[str, int],
+    metadata: Dict,
+    smoothing_alpha: float = 0.1
 ) -> Dict:
     """
-    Create the final ngram_db.json structure.
+    Create the final ngram_db.json structure with Laplace smoothing parameters.
+
+    Solution B: Adds raw counts and smoothing parameters for proper Laplace smoothing.
 
     Args:
         unigram_probs: Dictionary of unigram probabilities
         bigram_probs: Dictionary of bigram probabilities
+        unigram_counts: Dictionary of unigram raw counts (for Laplace smoothing)
+        bigram_counts: Dictionary of bigram raw counts (for Laplace smoothing)
         metadata: Metadata dictionary (total_chars, unique_chars, etc.)
+        smoothing_alpha: Laplace smoothing parameter (default: 0.1)
 
     Returns:
-        Complete N-gram database dictionary
+        Complete N-gram database dictionary with smoothing parameters
 
     Examples:
         >>> generate_ngram_db(
         ...     {'的': 0.5, '一': 0.5},
         ...     {'的時': 0.8},
-        ...     {'total_chars': 100, 'unique_chars': 2}
+        ...     {'的': 100, '一': 100},
+        ...     {'的時': 80},
+        ...     {'total_chars': 200, 'unique_chars': 2},
+        ...     0.1
         ... )
         {
             'unigrams': {'的': 0.5, '一': 0.5},
             'bigrams': {'的時': 0.8},
+            'unigram_counts': {'的': 100, '一': 100},
+            'bigram_counts': {'的時': 80},
+            'smoothing_alpha': 0.1,
+            'total_chars': 200,
+            'vocab_size': 2,
             'metadata': {
-                'total_chars': 100,
+                'total_chars': 200,
                 'unique_chars': 2,
                 'generated_at': '2025-11-10T...',
-                'version': '1.0'
+                'version': '2.0',
+                'smoothing_method': 'laplace',
+                'smoothing_alpha': 0.1
             }
         }
     """
+    total_chars = sum(unigram_counts.values())
+    vocab_size = len(unigram_counts)
+
     return {
+        # Probabilities (for backward compatibility)
         "unigrams": unigram_probs,
         "bigrams": bigram_probs,
+
+        # Raw counts (for Laplace smoothing in algorithm)
+        "unigram_counts": unigram_counts,
+        "bigram_counts": bigram_counts,
+
+        # Laplace smoothing parameters
+        "smoothing_alpha": smoothing_alpha,
+        "total_chars": total_chars,
+        "vocab_size": vocab_size,
+
+        # Metadata
         "metadata": {
             **metadata,
             "generated_at": datetime.utcnow().isoformat() + "Z",
-            "version": "1.0"
+            "version": "2.0",  # Upgraded to v2.0 for Laplace smoothing support
+            "smoothing_method": "laplace",
+            "smoothing_alpha": smoothing_alpha
         }
     }
 

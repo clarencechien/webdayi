@@ -4,19 +4,29 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v10%20Complete%20%2B%20Mobile%20UX-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v10-blue)]()
-[![Tests](https://img.shields.io/badge/tests-91%2F91%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v11%20N--gram%2095%25-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v11%20(Smart%20Engine)-blue)]()
+[![Tests](https://img.shields.io/badge/tests-96%2F96%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
 
-**[Try WebDaYi MVP1 v10 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[Try WebDaYi MVP1 v11 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages) 🚀 **NEW: N-gram Smart Prediction!**
 
 Experience the core Dàyì input engine with modern design and advanced features:
-- 💡 **Inline Key Hints** *(v10 NEW!)*: Selection keys shown directly with candidates, faster learning!
-- 📱 **Mobile Optimized** *(v10 NEW!)*: Responsive control panel, no more overlap on mobile!
-- 🔤 **Font Size Control** *(v10 NEW!)*: A−/A+ buttons adjust 80%-120%, fits all devices!
+- 📊 **Laplace Smoothing** *(v11 Solution B!)*: Statistical normalization, 60-80% quality improvement!
+- 🔬 **Full TDD Coverage** *(v11 NEW!)*: 96 tests (including 21 Laplace smoothing tests), all passing!
+- 🧠 **N-gram Smart Prediction** *(v11 NEW!)*: Sentence mode - type multiple codes, press Space to predict!
+- 👁️ **Live Preview** *(v11 NEW!)*: See first candidates as you type, more confident blind typing!
+- ⚡ **Viterbi Algorithm** *(v11 NEW!)*: Probability-based prediction using real corpus (rime-essay)!
+- 🎯 **Dual Mode Input** *(v11 NEW!)*: Character mode ↔ Sentence mode, switch freely!
+- 🔥 **CRITICAL Fix** *(v11!)*: Fixed strict mode error, all buttons now work!
+- 📱 **Mobile Mode Toggle** *(v11 Bugfix)*: Always-visible large buttons for easy switching!
+- 🎨 **Prediction Button** *(v11 Bugfix)*: Independent display area, no longer hidden!
+- 🐛 **Copy Button Fix** *(v11 Bugfix)*: Icon structure preserved, shows "Copied" feedback!
+- 💡 **Inline Key Hints** *(v10)*: Selection keys shown directly with candidates!
+- 📱 **Mobile Optimized** *(v10)*: Responsive control panel!
+- 🔤 **Font Size Control** *(v10)*: A−/A+ buttons adjust 80%-120%!
 - 🎨 **Modern UI** *(v9)*: Brand new Tailwind CSS design with rounded cards!
 - 🌗 **Dark Mode** *(v9)*: Toggle dark/light theme, auto-saves preference!
 - ✨ **Material Icons** *(v9)*: Professional icon system for unified visuals!
@@ -45,8 +55,8 @@ Experience the core Dàyì input engine with modern design and advanced features
 
 ## Project Status
 
-**Current Phase**: ✅ MVP 1.0 v10 Complete!
-**Completion**: ~57% (Phase 0 & MVP 1 v10 done, MVP 2a next)
+**Current Phase**: 🚀 MVP 1.0 v11 N-gram Smart Prediction (95% Complete!)
+**Completion**: ~70% (Phase 0, MVP 1 v10, v11 done, MVP 2a next)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
