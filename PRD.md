@@ -1,10 +1,10 @@
 # **產品需求文件 (PRD)：WebDaYi (網頁大易輸入法)**
 
-| 文件版本 | 1.1 (MVP 2a 路線) |
+| 文件版本 | 1.3 (N-gram 智能引擎詳述) |
 | :---- | :---- |
-| **建立日期** | 2025-11-06 |
+| **建立日期** | 2025-11-10 |
 | **專案負責人** | (您的名字) |
-| **狀態** | 草案 |
+| **狀態** | 已批准 (Approved) |
 
 ## **1\. 概述 (Overview)**
 
@@ -41,18 +41,21 @@
 
 ## **3\. 專案路線圖 (Project Roadmap)**
 
-本專案將拆分為兩個緊密相連的 MVP 階段，以分離「核心邏輯」與「瀏覽器整合」的複雜性。
+本專案將拆分為三個 MVP 階段，逐步增加複雜性。
 
-1. **MVP 1：純網站核心引擎 (The Core Engine)**  
-   * **目標：** 在瀏覽器沙盒中，100% 驗證與除錯「輸入-查詢-排序-組字」的核心演算法。  
-   * **交付物：** 一個靜態網頁 (index.html \+ core\_logic.js)。  
-2. **MVP 2a：「瀏覽器整合」外掛 (The Browser Plugin)**  
-   * **目標：** 重用 MVP 1 的**全部**核心程式碼，將其打包成一個「Chrome 擴充功能」，在瀏覽器內提供無縫的「就地」輸入體驗。  
-   * **交付物：** 一個可上架的 Chrome 擴充功能 .zip 檔。
+1. **MVP 1：純網站核心引擎 (The Core Engine)**
+   * **目標：** 驗證「逐字」輸入-查詢-排序-組字的核心演算法。
+   * **交付物：** 一個靜態網頁 (index.html \+ core\_logic.js)。
+2. **MVP 2a：「瀏覽器整合」外掛 (The Browser Plugin)**
+   * **目標：** 重用 MVP 1 核心，提供「逐字」的「就地」輸入體驗。
+   * **交付物：** 一個 Chrome 擴充功能 .zip 檔。
+3. **MVP 3：N-gram 智能引擎 (The Smart Engine)**
+   * **目標：** 重構 MVP 2a，從「逐字」選擇進化為「整句預測（盲打）」，並包含個人化學習功能。
+   * **交付物：** Chrome 擴充功能的 v2.0 更新。
 
 ## **4\. 共通架構：資料管線 (Data Pipeline)**
 
-此為兩個 MVP 的**共同依賴項**，必須最先完成。
+此為所有 MVP 的**共同依賴項**，必須最先完成。
 
 | ID | 需求 | 備註 |
 | :---- | :---- | :---- |
@@ -60,6 +63,9 @@
 | **C.2** | **讀取 Rime 碼表** | 腳本必須能讀取 Rime 的 dayi.dict.yaml (大易詞典檔)。 |
 | **C.3** | **輸出 dayi\_db.json** | 腳本必須輸出一份 json 檔案，作為 Web App 的核心資料庫。 |
 | **C.4** | **JSON 資料結構** | 輸出的 JSON 必須採用「**以碼為 Key**」的結構，以實現 O(1) 查詢。 **格式範例：** { "4jp": \[ { "char": "易", "freq": 80 }, { "char": "義", "freq": 70 } \], "a": \[ { "char": "大", "freq": 100 } \] ... } |
+| **C.5** | **N-gram 轉換器 (MVP 3)** | 必須使用 build\_ngram.py 腳本（已提供）。 |
+| **C.6** | **N-gram 來源 (MVP 3)** | **(已確認)** 腳本必須讀取 **rime-essay** (https://github.com/rime/rime-essay) 中的 **essay.txt** (約 6MB)。 |
+| **C.7** | **輸出 ngram\_db.json (MVP 3)** | 腳本必須輸出一份 N-gram 機率檔 (e.g., { "unigram\_counts": {...}, "bigram\_counts": {...} })。 |
 
 ## **5\. MVP 1：「純網站」核心引擎 PRD**
 
@@ -100,10 +106,33 @@
 * **相容性：** content.js 必須能正確應對**富文本編輯器** (如 Google Docs, Notion) 和**Shadow DOM** (某些網頁元件)。  
 * **穩定性：** content.js 注入的 CSS 和 JS **不得**與宿主網頁的樣式或功能衝突 (需使用 CSS 隔離策略)。
 
-## **7\. 未來展望 (MVP 2a+ 路線)**
+## **7\. MVP 3：N-gram 智能引擎 PRD (v1.3 詳述)**
 
-MVP 2a 的架構為我們解鎖了獨特的「超能力」，這些將是 MVP 2 (Electron) 路線永遠無法實現的。
+**目標：** 重構 MVP 2a，實現「盲打」功能，並整合「N-gram 個人化學習」。這將徹底改變 content.js 和 background.js 的運作方式。
 
-* **MVP2a.plus.1 (領域感知)：** content.js 偵測 window.location.hostname，並通知 background.js 動態加權或載入**特定領域的 N-gram 表** (例如在 github.com 優先顯示程式碼相關詞彙)。  
-* **MVP2a.plus.2 (雲同步個人詞庫)：** background.js 使用 chrome.storage.sync API 來儲存使用者的動態詞庫。使用者在 A 電腦學會的新詞，會自動同步到 B 電腦的 Chrome。  
-* **MVP2a.plus.3 (動態學習)：** 實現完整的 N-gram 統計與個人化機率調整，並將結果存入 chrome.storage.sync。
+### **7.1. 功能需求 (Functional Requirements)**
+
+| ID | 功能 | 使用者故事 (User Story) | 驗收標準 (AC) |
+| :---- | :---- | :---- | :---- |
+| **MVP3.1** | **N-gram 資料庫** | 作為開發者，我需要 ngram\_db.json 檔案。 | 1\. 必須使用 build\_ngram.py 成功處理 rime-essay (6MB) 的 essay.txt。<br>2\. 產生的 ngram\_db.json 必須打包到 Chrome 外掛中。 |
+| **MVP3.2** | **Viterbi 演算法** | 作為開發者，我需要一個 Viterbi.js 模組來計算最佳句子路徑。 | 1\. 必須實作一個維特比演算法。<br>2\. 輸入為 Lattice (候選字格狀圖)。<br>3\. 輸出為機率最高的「句子」(字元陣列)。 |
+| **MVP3.3** | **背景核心升級** | 作為輸入法大腦，background.js 需要載入 N-gram 模型。 | 1\. background.js 必須在啟動時，同時載入 dayi\_db.json 和 ngram\_db.json 到記憶體中。 |
+| **MVP3.4** | **背景 API (盲打)** | background.js 需要一個 API 來處理句子預測。 | 1\. 必須新增一個訊息監聽器 querySentence。<br>2\. 此 API 接收一個「編碼陣列」(e.g., ['4jp', 'ad'])。<br>3\. 必須使用 Viterbi 演算法、碼表、N-gram 模型，計算出最佳句子 (e.g., "易 在")。<br>4\. 回傳該句子。 |
+| **MVP3.5** | **內容腳本 (盲打)** | 作為使用者，我希望可以「盲打」一串編碼。 | 1\. content.js 不再於 4jp 時就去查詢。<br>2\. content.js 必須在本機緩存 (buffer) 使用者的編碼 (e.g., ['4jp', 'ad'])。 |
+| **MVP3.6** | **整句注入** | 作為使用者，我按下 空白鍵 後，希望能看到預測的整句話。 | 1\. content.js 監聽到 Spacebar (空白鍵) 或其他觸發鍵。<br>2\. 將緩存的編碼陣列 ['4jp', 'ad'] 透過 querySentence API 發送到 background.js。<br>3\. (AC 詳述) 此時應顯示「候選字視窗」，第一候選為 Viterbi 算出的最佳句子。<br>4\. 使用者按 Enter 或 1 選中該句，並使用 document.execCommand('insertText', ...) 將整句話一次性注入。 |
+| **MVP3.7** | **N-gram 學習 (偵測)** | 作為使用者，如果系統預測「台灣」，但我手動將其修改為「大灣」，我希望系統能記住我的偏好。 | 1\. content.js 必須有能力偵測到「手動修正」事件 (例如，使用者在盲打後，按 Shift+Left 選取了 "台"，然後按 2 將其改為 "大")。 |
+| **MVP3.8** | **N-gram 學習 (儲存)** | 作為開發者，background.js 必須能儲存使用者的 N-gram 偏好。 | 1\. 當 content.js 偵測到修正 (e.g., P("灣" \| "大"))，必須發送一個新訊息 (e.g., learnNgram: {prev: "大", next: "灣"})。<br>2\. background.js 必須將這個「使用者偏好」的 N-gram 組合 (e.g., {"大": {"灣": 1000}}) 儲存到 chrome.storage.sync 中。 |
+| **MVP3.9** | **N-gram 學習 (應用)** | 作為使用者，我希望我教過輸入法的詞，下次能優先出現。 | 1\. background.js 在啟動時，除了載入靜態模型，還必須載入 chrome.storage.sync 中的「使用者 N-gram 模型」。<br>2\. Viterbi 演算法在計算 P(B\|A) 機率時，必須優先查詢「使用者模型」，如果找不到，才回退 (fallback) 到靜態的 ngram\_db.json。 |
+
+### **7.2. 非功能需求 (Non-Functional)**
+
+* **效能：** querySentence (Viterbi 運算) 必須在 200ms 內完成，以實現即時回應。
+* **大小：** 包含 ngram\_db.json 的外掛總大小應控制在 5-10MB (gzipped) 以內。
+
+## **8\. 未來展望 (MVP 3.1+ 路線)**
+
+MVP 3 的 N-gram 架構為我們解鎖了獨特的「超能力」：
+
+* **MVP3.1+ (領域感知)：** content.js 偵測 window.location.hostname，並通知 background.js 動態加權或載入**特定領域的 N-gram 表** (例如在 github.com 優先顯示程式碼相關詞彙)。
+* **MVP3.1+ (雲同步個人詞庫)：** background.js 使用 chrome.storage.sync API 來儲存使用者的動態詞庫。使用者在 A 電腦學會的新詞，會自動同步到 B 電腦的 Chrome。
+* **MVP3.1+ (動態學習)：** 實現完整的 N-gram 統計與個人化機率調整，並將結果存入 chrome.storage.sync。

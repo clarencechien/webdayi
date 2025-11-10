@@ -10,30 +10,69 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 It replaces complex, monolithic "all-in-one" IME frameworks (like Rime) by providing a simple, minimal, and transparent solution. It abstracts the complexity of code table lookups into a standalone tool, "parasiting" (piggybacking) on Rime's open-source Dàyì dictionary data.
 
-* **MVP 1.0 (Core Engine):** Delivers the core lookup logic as a **static webpage (index.html)**. It validates the query/sort algorithm. Output is handled via **Copy/Paste**. The target user is the **Developer** (for validation).  
+* **MVP 1.0 (Core Engine):** Delivers the core lookup logic as a **static webpage (index.html)**. It validates the query/sort algorithm. Output is handled via **Copy/Paste**. The target user is the **Developer** (for validation).
 * **MVP 2a (Browser Plugin):** Builds on 1.0 by refactoring the *exact same core logic* into a **Chrome Extension**. It replaces Copy/Paste with **in-place DOM injection** for a seamless, native-like input experience **inside the browser**. The target user is the **End User** (initially the developer).
+* **MVP 3.0 (Smart Engine):** Upgrades MVP 2a from "character-by-character" to **"sentence prediction (blind typing)"** using **N-gram language models** and **Viterbi algorithm**. Includes personalized learning capabilities. The target user is the **Power User** seeking intelligent, context-aware input.
 
-This repository contains the implementation for MVP 1.0 and MVP 2a, as defined in the PRD **"WebDaYi (網頁大易輸入法)" (v1.1)**.
+This repository contains the implementation for MVP 1.0, MVP 2a, and MVP 3.0, as defined in the PRD **"WebDaYi (網頁大易輸入法)" (v1.3)**.
 
 ## **Project Status**
 
-* **PRD finalized** (based on WebDaYi\_PRD.md v1.1, **MVP 2a Track**).  
-* **Data Pipeline (PRD C.1-C.4)** is the first required step (converting Rime data).  
-* **MVP 1.0 (Core Engine)** is the current focus of implementation.  
-* **MVP 2a (Browser Plugin)** is the next planned phase.
+* **PRD finalized** (based on WebDaYi\_PRD.md v1.3, **includes MVP 3.0 N-gram Track**).
+* **Data Pipeline (PRD C.1-C.4)** completed - converting Rime dictionary data.
+* **N-gram Pipeline (PRD C.5-C.7)** planned - will process rime-essay data (6MB essay.txt).
+* **MVP 1.0 (Core Engine)** ✅ COMPLETE - Static webpage with character-by-character input.
+* **MVP 2a (Browser Plugin)** ⏳ PLANNED - Chrome extension with in-place injection.
+* **MVP 3.0 (Smart Engine)** 🚀 IN PARALLEL DEVELOPMENT on **feature/ngram-engine** branch.
+
+### **Branch Strategy**
+
+This project uses a **parallel development** strategy:
+
+* **`main` branch:**
+  - Focus: MVP 1.0 (✅ Complete) and MVP 2a (⏳ Planned)
+  - Purpose: Stable, production-ready character-by-character input method
+  - Status: Currently at MVP 1.0 v10 (with mobile UX, font control, bugfixes)
+
+* **`feature/ngram-engine` branch:**
+  - Focus: MVP 3.0 (Smart Engine) and MVP 3.1+ (N-gram Learning)
+  - Purpose: Experimental smart engine with sentence prediction and learning
+  - All N-gram, Viterbi, and learning-related commits go here
+  - Will eventually merge back to `main` when MVP 3.0 is stable
+
+**Current Phase:**
+- `main`: Preparing for MVP 2a implementation
+- `feature/ngram-engine`: Implementing MVP 3.0 N-gram engine in parallel
 
 ## **Key Concepts**
 
-* **Rime:** The external open-source project from which we source our data.  
-* **dayi.dict.yaml:** Rime's Dàyì dictionary file. This is the **raw data source**.  
-* **dayi\_db.json:** Our project's compiled, O(1)-queryable **JSON database**. This is the project's "Code Table (碼表)".  
-* **Data Pipeline:** The **offline script** (Python or Node.js) that performs the one-time conversion from Rime's .yaml to our .json database.  
-* **Core Engine (MVP 1):** The core\_logic.js file. Contains all client-side logic (fetch, query, sort, render).  
-* **Plugin Shell (MVP 2a):** The Chrome Extension wrapper (manifest.json, background.js, content.js).  
-* **Background Script (background.js):** The plugin's "brain". It's a Service Worker that holds the dayi\_db.json data in memory (as a Map) and answers query requests.  
-* **Content Script (content.js):** The plugin's "hands". It's injected into web pages (like Gmail) to **intercept** keyboard events, **dynamically create** the candidate UI \<div\>, and **inject** the chosen text.  
-* **In-Place Injection:** The use of document.execCommand('insertText', ...) in content.js to insert the character directly into the target \<textarea\> or contentEditable element.  
-* **chrome.storage.sync:** The API for **Cloud Sync** of the user's personal dictionary (a feature for MVP 2a+).
+### **Core Data & Pipeline**
+* **Rime:** The external open-source project from which we source our data.
+* **dayi.dict.yaml:** Rime's Dàyì dictionary file. This is the **raw data source** for character mappings.
+* **dayi\_db.json:** Our project's compiled, O(1)-queryable **JSON database**. This is the project's "Code Table (碼表)".
+* **Data Pipeline:** The **offline script** (Python or Node.js) that performs the one-time conversion from Rime's .yaml to our .json database.
+
+### **N-gram & Smart Engine (MVP 3.0)**
+* **rime-essay:** External corpus source (https://github.com/rime/rime-essay). Contains **essay.txt** (~6MB) with real-world Chinese text for N-gram training.
+* **ngram\_db.json:** Our compiled N-gram probability database. Contains unigram and bigram counts derived from rime-essay.
+* **N-gram Pipeline:** The **offline script** (build\_ngram.py) that processes essay.txt and generates ngram\_db.json.
+* **Viterbi Algorithm:** Dynamic programming algorithm used to find the most probable sentence path given a sequence of codes and N-gram probabilities.
+* **Lattice:** A graph structure of candidate characters. Each node represents a character, edges represent transition probabilities (N-gram scores).
+* **Blind Typing (盲打):** User types a sequence of codes (e.g., "4jp ad") without selecting characters, then presses Space to get the most probable sentence prediction.
+
+### **MVP 1.0 Architecture**
+* **Core Engine (MVP 1):** The core\_logic.js file. Contains all client-side logic (fetch, query, sort, render).
+
+### **MVP 2a Architecture**
+* **Plugin Shell (MVP 2a):** The Chrome Extension wrapper (manifest.json, background.js, content.js).
+* **Background Script (background.js):** The plugin's "brain". It's a Service Worker that holds the dayi\_db.json data in memory (as a Map) and answers query requests.
+* **Content Script (content.js):** The plugin's "hands". It's injected into web pages (like Gmail) to **intercept** keyboard events, **dynamically create** the candidate UI \<div\>, and **inject** the chosen text.
+* **In-Place Injection:** The use of document.execCommand('insertText', ...) in content.js to insert the character directly into the target \<textarea\> or contentEditable element.
+
+### **MVP 3.0 Architecture**
+* **Enhanced background.js:** Loads both dayi\_db.json AND ngram\_db.json. Provides querySentence API for sentence prediction.
+* **Enhanced content.js:** Buffers user's code sequence. On Space key, sends code array to background.js for Viterbi processing.
+* **chrome.storage.sync:** The API for **Cloud Sync** of the user's personal dictionary and learned N-gram preferences (feature for MVP 3.0+).
 
 ## **Architecture Requirements (MVP 1.0 \- Core Engine)**
 
@@ -139,25 +178,58 @@ Based on the PRD:
 
 ## **Development Guidelines**
 
-* **Language & Style:** JavaScript (ES6+) for all logic. Plain HTML/CSS.  
-* **Structure (Suggested):**  
-  /converter/             \# C.1-C.4: The offline Python/Node.js script  
-    /convert.js  
-    /raw\_data/dayi.dict.yaml  
-  /mvp1/                  \# MVP 1 Core (Static Page)  
-    /index.html  
-    /core\_logic.js  
-    /style.css  
-    /dayi\_db.json       (This is generated by /converter/)  
-  /mvp2a-plugin/          \# MVP 2a Shell  
-    /manifest.json  
-    /background.js  
-    /content.js  
-    /style.css            (For the injected candidate div)  
-    /core\_logic\_module.js (Refactored from mvp1/core\_logic.js)  
-    /dayi\_db.json       (Copied from /mvp1/)
+### **Branch Strategy**
 
-* **Testing:** Manual testing is sufficient.  
+This project uses **parallel development** to allow MVP 3.0 work without blocking MVP 2a progress:
+
+* **`main` branch:**
+  - **Stability:** Should remain stable at all times
+  - **Focus:** MVP 1.0 (Complete) and MVP 2a (In Progress)
+  - **Commits:** All MVP 1.0 and MVP 2a related code, bugfixes, and documentation
+  - **Current State:** MVP 1.0 v10 (complete with mobile UX, font control, bugfixes)
+  - **Next Steps:** Begin MVP 2a (Chrome Extension) implementation
+
+* **`feature/ngram-engine` branch:**
+  - **Purpose:** Experimental branch for MVP 3.0 N-gram Smart Engine
+  - **Focus:** MVP 3.0 (Smart Engine) and MVP 3.1+ (N-gram Learning)
+  - **Commits:** All N-gram, Viterbi, learning algorithm, and essay.txt processing code
+  - **Data Source:** rime-essay (https://github.com/rime/rime-essay) - essay.txt (~6MB)
+  - **Merge Strategy:** Will merge back to `main` when MVP 3.0 is stable and tested
+  - **Independence:** Can be developed in parallel without affecting main branch stability
+
+**Commit Guidelines:**
+- MVP 1.0 bugfixes, MVP 2a work → commit to `main`
+- N-gram models, Viterbi algorithm, build\_ngram.py, ngram\_db.json → commit to `feature/ngram-engine`
+- Documentation updates affecting both → update on both branches or current working branch
+
+### **Code Structure**
+
+* **Language & Style:** JavaScript (ES6+) for all logic. Plain HTML/CSS. Python for N-gram pipeline.
+* **Structure (Suggested):**
+  /converter/             \# C.1-C.4: The offline Python/Node.js script
+    /convert.js
+    /build\_ngram.py     (MVP 3.0: N-gram pipeline)
+    /raw\_data/dayi.dict.yaml
+    /raw\_data/essay.txt  (MVP 3.0: from rime-essay, 6MB)
+  /mvp1/                  \# MVP 1 Core (Static Page)
+    /index.html
+    /core\_logic.js
+    /style.css
+    /dayi\_db.json       (Generated by /converter/)
+  /mvp2a-plugin/          \# MVP 2a Shell
+    /manifest.json
+    /background.js
+    /content.js
+    /style.css            (For the injected candidate div)
+    /core\_logic\_module.js (Refactored from mvp1/core\_logic.js)
+    /dayi\_db.json       (Copied from /mvp1/)
+  /mvp3-smart-engine/     \# MVP 3.0 Smart Engine (on feature/ngram-engine branch)
+    /viterbi.js           (Viterbi algorithm implementation)
+    /ngram\_db.json      (Generated by build\_ngram.py from essay.txt)
+    /background\_smart.js (Enhanced background script with N-gram)
+    /content\_smart.js    (Enhanced content script with buffering)
+
+* **Testing:** Manual testing is sufficient for MVP 1.0. TDD recommended for MVP 3.0 Viterbi algorithm.
 * **Error Handling:** console.log and console.error are sufficient.
 
 ## **Example "API" Contracts**
