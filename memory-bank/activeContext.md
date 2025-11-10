@@ -1,10 +1,110 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-10 (MVP1 v10 Bugfix - Delete Key + Auto-Copy Feedback COMPLETED!)
-**Current Phase**: ✅ MVP 1.0 v10 + Bugfixes COMPLETE!
-**Next Milestone**: MVP 2a - Browser Plugin
+**Last Updated**: 2025-11-10 (MVP 3.0 N-gram Smart Engine - STARTED!)
+**Current Phase**: 🚀 MVP 3.0 - N-gram Smart Engine (Parallel Development Track)
+**Main Branch Status**: ✅ MVP 1.0 v10 Complete | ⏳ MVP 2a Planned
+**Feature Branch**: feature/ngram-engine (MVP 3.0 implementation)
+**Next Milestone**: MVP 3.0 - Smart Engine with Sentence Prediction
 
-## Current Work Focus
+---
+
+## 🚀 NEW DEVELOPMENT TRACK: MVP 3.0 N-gram Smart Engine
+
+**Status**: 🔄 In Progress - Branch Setup & Design Phase
+**Branch**: claude/init-memory-bank-readme-011CUqoiGKdFk7wf79JNuW1h (implementing feature/ngram-engine track)
+**PRD Version**: v1.3 (N-gram 智能引擎詳述)
+
+### Context & Strategy
+
+**This is NOT a strategic pivot**:
+- Main branch (MVP 1.0 + MVP 2a) remains the primary production track
+- MVP 3.0 is a **parallel experimental development** of smart engine features
+- Development happens independently, will merge when stable
+
+### Branch Strategy
+
+**Main Branch (`main`):**
+- Focus: MVP 1.0 (✅ Complete v10) and MVP 2a (⏳ Planned)
+- Status: Stable, production-ready character-by-character input
+- Features: All v10 features including mobile UX, font control, inline hints, bugfixes
+
+**Feature Branch (`feature/ngram-engine` - currently on session branch):**
+- Focus: MVP 3.0 (Smart Engine) and MVP 3.1+ (N-gram Learning)
+- Status: Experimental, sentence prediction with N-gram language model
+- All N-gram, Viterbi, and learning-related commits go here
+
+### MVP 3.0 Scope
+
+Based on PRD.md v1.3, Section 7:
+
+**Core Components:**
+1. **MVP3.1**: N-gram database (ngram_db.json from rime-essay/essay.txt)
+2. **MVP3.2**: Viterbi algorithm (Viterbi.js module)
+3. **MVP3.3**: Enhanced background.js (loads dayi_db.json + ngram_db.json)
+4. **MVP3.4**: querySentence API (accepts code array, returns best sentence)
+5. **MVP3.5**: Enhanced content.js (buffers codes, not immediate query)
+6. **MVP3.6**: Sentence injection (Space key triggers Viterbi prediction)
+7. **MVP3.7**: N-gram learning detection (manual correction detection)
+8. **MVP3.8**: N-gram learning storage (chrome.storage.sync)
+9. **MVP3.9**: N-gram learning application (user model priority)
+
+**Data Source (Confirmed):**
+- **rime-essay**: https://github.com/rime/rime-essay
+- **essay.txt**: ~6MB Chinese text corpus for N-gram training
+- Taiwan real-world usage data
+
+### Current Work Focus (MVP 3.0)
+
+**Phase 1: N-gram Data Pipeline (In Progress)**
+
+**Objective**: Build the N-gram language model from rime-essay corpus
+
+**Tasks:**
+1. ✅ Documentation updated (PRD v1.3, CLAUDE.md with MVP 3.0 specs)
+2. 🔄 Memory bank updated (activeContext.md, progress.md)
+3. ⏳ Directory structure created (converter/, mvp3-smart-engine/)
+4. ⏳ Download essay.txt from rime-essay repository
+5. ⏳ Design N-gram database schema (unigram + bigram counts)
+6. ⏳ Implement build_ngram.py (TDD approach)
+   - Parse essay.txt (6MB Chinese text)
+   - Count character frequencies (unigram)
+   - Count character transitions (bigram)
+   - Generate ngram_db.json with probabilities
+7. ⏳ Test N-gram pipeline (comprehensive test suite)
+
+**Phase 2: Viterbi Algorithm (Next)**
+
+**Objective**: Implement dynamic programming for sentence prediction
+
+**Tasks:**
+1. Design Viterbi.js module interface
+2. Write TDD tests for Viterbi algorithm
+3. Implement Lattice graph construction
+4. Implement forward pass (probability calculation)
+5. Implement backtracking (best path extraction)
+6. Test with real dayi_db.json + ngram_db.json
+
+**Phase 3: Chrome Extension Integration (Future)**
+
+**Objective**: Enhance MVP 2a with smart engine capabilities
+
+**Tasks:**
+1. Enhance background.js to load both databases
+2. Implement querySentence message handler
+3. Enhance content.js with code buffering
+4. Implement Space key sentence prediction
+5. Test in real web applications
+
+**Success Criteria (MVP 3.0):**
+- ✅ essay.txt successfully processed into ngram_db.json
+- ✅ Viterbi algorithm returns most probable sentence
+- ✅ querySentence API responds within 200ms
+- ✅ Blind typing works in browser extension
+- ✅ Smart predictions improve typing efficiency
+
+---
+
+## 📋 MAIN BRANCH STATUS: MVP 1.0 v10 Complete
 
 ### ✅ LATEST: Delete Key + Auto-Copy Feedback Bugfix (MVP1 v10 Bugfix - 2025-11-10)
 
