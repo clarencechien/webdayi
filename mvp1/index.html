@@ -266,7 +266,7 @@
         </details>
       </section>
 
-      <main class="w-full space-y-6">
+      <main class="w-full space-y-4">
 
         <!-- Output Section (Top) -->
         <div class="space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 sm:p-6 transition-colors">
@@ -286,77 +286,45 @@
             </div>
           </div>
           <textarea id="output-buffer"
-                    class="form-textarea w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 text-base text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                    class="form-textarea w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 text-base text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
                     placeholder="選好的文字會出現在這裡... (Selected text appears here)"
-                    rows="6"></textarea>
+                    rows="3"></textarea>
         </div>
 
-        <!-- v11: Input Mode Control (Always Visible - Mobile & Desktop) -->
-        <div class="space-y-4 rounded-xl border-2 border-primary/20 dark:border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10 p-4 sm:p-6 transition-colors">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="material-symbols-outlined text-lg text-primary">tune</span>
-            <h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">輸入模式 (Input Mode)</h3>
-          </div>
-
-          <!-- Mode Toggle Buttons (Large, Touch-Friendly) -->
-          <div class="flex gap-3">
-            <button id="char-mode-btn-main"
-                    class="flex-1 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-4 text-slate-700 dark:text-slate-300 hover:border-primary hover:bg-primary/5 transition-all shadow-sm hover:shadow-md v11-mode-btn-main"
-                    style="min-height: 80px;"
-                    aria-label="切換逐字模式">
-              <span class="material-symbols-outlined text-3xl">text_fields</span>
-              <span class="text-sm font-semibold">逐字模式</span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">Character</span>
-            </button>
-            <button id="sentence-mode-btn-main"
-                    class="flex-1 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-4 text-slate-700 dark:text-slate-300 hover:border-primary hover:bg-primary/5 transition-all shadow-sm hover:shadow-md v11-mode-btn-main"
-                    style="min-height: 80px;"
-                    aria-label="切換整句模式">
-              <span class="material-symbols-outlined text-3xl">auto_awesome</span>
-              <span class="text-sm font-semibold">整句模式</span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">Sentence</span>
-            </button>
-          </div>
-
-          <!-- Prediction Button (only visible in sentence mode) -->
-          <div id="prediction-control" class="hidden">
-            <button id="predict-sentence-btn"
-                    class="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white font-bold text-lg transition-all shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style="min-height: 60px;">
-              <span class="material-symbols-outlined text-2xl">auto_awesome</span>
-              <span>智能預測句子 (Predict Sentence)</span>
-            </button>
-            <p class="mt-2 text-xs text-center text-slate-600 dark:text-slate-400">
-              <span class="material-symbols-outlined text-sm align-middle">info</span>
-              輸入編碼後按 <kbd class="px-2 py-0.5 rounded bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-mono text-xs">Space</kbd> 或點擊按鈕預測
-            </p>
-          </div>
-        </div>
-
-        <!-- v11: Code Buffer Display (hidden by default, shown in sentence mode) -->
-        <div id="code-buffer-display" class="hidden space-y-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-4 transition-colors">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-              <span class="material-symbols-outlined text-base">code</span>
-              <span>已輸入編碼 (Buffered Codes)</span>
+        <!-- v11: Sentence Mode Panel (shown in sentence mode) -->
+        <div id="sentence-mode-panel" class="hidden space-y-3 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10 p-3 transition-colors">
+          <!-- Live Preview -->
+          <div id="live-preview-container" class="hidden">
+            <div class="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
+              <span class="material-symbols-outlined text-sm">visibility</span>
+              <span>即時預覽</span>
             </div>
-            <button id="clear-buffer-btn" class="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="清除緩衝區 (ESC)">
-              <span class="material-symbols-outlined text-sm">backspace</span>
-              <span>清除</span>
-            </button>
+            <div id="preview-text" class="text-2xl font-bold text-center text-slate-800 dark:text-slate-100 tracking-wider py-2"></div>
           </div>
-          <div id="buffered-codes" class="flex flex-wrap gap-2 min-h-12 items-center">
-            <span class="text-sm text-slate-400 dark:text-slate-500 italic">尚無編碼 (No codes yet)</span>
-          </div>
-        </div>
 
-        <!-- v11: Live Preview (hidden by default, shown when buffer not empty) -->
-        <div id="live-preview" class="hidden space-y-3 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10 p-4 transition-colors">
-          <div class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-            <span class="material-symbols-outlined text-base">visibility</span>
-            <span>即時預覽 (Live Preview)</span>
+          <!-- Code Buffer Display -->
+          <div id="code-buffer-container">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+                <span class="material-symbols-outlined text-sm">code</span>
+                <span>已輸入編碼</span>
+              </div>
+              <button id="clear-buffer-btn" class="flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="清除緩衝區 (ESC)">
+                <span class="material-symbols-outlined text-sm">backspace</span>
+                <span>清除</span>
+              </button>
+            </div>
+            <div id="buffered-codes" class="flex flex-wrap gap-2 min-h-10 items-center">
+              <span class="text-sm text-slate-400 dark:text-slate-500 italic">尚無編碼</span>
+            </div>
           </div>
-          <div id="preview-text" class="text-3xl font-bold text-center text-slate-800 dark:text-slate-100 tracking-widest py-3"></div>
+
+          <!-- Prediction Button -->
+          <button id="predict-sentence-btn"
+                  class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white font-semibold text-sm transition-all shadow-md hover:shadow-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span class="material-symbols-outlined text-lg">auto_awesome</span>
+            <span>智能預測 (Press Space)</span>
+          </button>
         </div>
 
         <!-- Input Section (Bottom) -->
@@ -379,16 +347,16 @@
               候選字 (Candidates)
             </label>
             <div id="candidate-area"
-                 class="flex min-h-20 flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-3 transition-colors">
-              <div class="w-full text-center text-sm text-slate-400 py-4">請輸入大易碼</div>
+                 class="flex min-h-16 flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-2 transition-colors">
+              <div class="w-full text-center text-sm text-slate-400 py-2">請輸入大易碼</div>
             </div>
           </div>
         </div>
 
         <!-- Status Message -->
         <div id="status-message"
-             class="flex items-center justify-center gap-2 rounded-full bg-slate-200 dark:bg-slate-800 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 transition-colors">
-          <span class="material-symbols-outlined text-base">info</span>
+             class="flex items-center justify-center gap-2 rounded-full bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-400 transition-colors">
+          <span class="material-symbols-outlined text-sm">info</span>
           <span>載入中... (Loading...)</span>
         </div>
 

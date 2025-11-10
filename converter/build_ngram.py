@@ -21,6 +21,7 @@ import os
 from typing import Dict
 from build_ngram_lib import (
     parse_essay_txt,
+    parse_terra_pinyin_dict,
     count_unigrams,
     count_bigrams,
     calculate_unigram_probabilities,
@@ -77,6 +78,13 @@ Examples:
         help='Print detailed progress information'
     )
 
+    parser.add_argument(
+        '--format',
+        choices=['essay', 'terra_pinyin'],
+        default='essay',
+        help='Input file format (default: essay). Use "terra_pinyin" for Rime dict.yaml format'
+    )
+
     return parser.parse_args()
 
 
@@ -99,18 +107,29 @@ def main():
     """Main entry point."""
     args = parse_args()
 
-    print("Building N-gram database from rime-essay...")
+    # Display appropriate title based on format
+    if args.format == 'terra_pinyin':
+        print("Building N-gram database from terra_pinyin.dict.yaml (Taiwan localized)...")
+        format_name = "terra_pinyin.dict.yaml"
+    else:
+        print("Building N-gram database from rime-essay...")
+        format_name = "essay.txt"
+
     print("=" * 70)
 
     total_steps = 5 if not args.dry_run else 4
 
     # ========================================================================
-    # Step 1: Parse essay.txt
+    # Step 1: Parse input file
     # ========================================================================
-    print_step(1, total_steps, "Parsing essay.txt")
+    print_step(1, total_steps, f"Parsing {format_name}")
 
     try:
-        entries = parse_essay_txt(args.input)
+        if args.format == 'terra_pinyin':
+            entries = parse_terra_pinyin_dict(args.input)
+        else:
+            entries = parse_essay_txt(args.input)
+
         print_success(f"Parsed {format_number(len(entries))} entries")
         print_success(f"Total phrases: {format_number(len(entries))}")
 

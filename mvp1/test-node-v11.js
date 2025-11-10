@@ -96,7 +96,9 @@ function assertThrows(fn, expectedMessage) {
 // ============================================================================
 
 // Mock N-gram database (small subset for testing)
+// v2.0 structure with Solution B Laplace smoothing support
 const mockNgramDb = {
+  // Probabilities (for backward compatibility)
   unigrams: {
     '易': 0.01,
     '義': 0.008,
@@ -115,10 +117,40 @@ const mockNgramDb = {
     '灰大': 0.3,
     '灰夫': 0.1
   },
+
+  // Raw counts (for Laplace smoothing - Solution B)
+  unigram_counts: {
+    '易': 10000,
+    '義': 8000,
+    '在': 15000,
+    '灰': 2000,
+    '大': 20000,
+    '夫': 5000
+  },
+  bigram_counts: {
+    '易在': 5000,
+    '易灰': 1000,
+    '義在': 4000,
+    '義灰': 500,
+    '在大': 6000,
+    '在夫': 2000,
+    '灰大': 3000,
+    '灰夫': 1000
+  },
+
+  // Laplace smoothing parameters (Solution B)
+  smoothing_alpha: 0.1,
+  total_chars: 1000000,
+  vocab_size: 6,
+
   metadata: {
     total_chars: 1000000,
     unique_chars: 6,
-    version: '1.0'
+    total_bigrams: 22500,
+    unique_bigrams: 8,
+    version: '2.0',
+    smoothing_method: 'laplace',
+    smoothing_alpha: 0.1
   }
 };
 
