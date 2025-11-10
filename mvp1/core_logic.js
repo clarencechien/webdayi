@@ -12,6 +12,7 @@ let currentPage = 0;  // Current page index for pagination
 let currentCandidates = [];  // Current candidates array (for pagination)
 let currentInputMode = 'normal';  // Current input mode: 'normal' or 'express'
 let userModel = null;  // User personalization model (Map of code -> char order)
+let autoCopyEnabled = true;  // Auto-copy enabled state (v8 - MVP1.11) - default: true
 
 // ============================================
 // User Personalization Functions (v6 - MVP1.7, MVP1.8, MVP1.9)
@@ -180,6 +181,172 @@ function saveUserModel(model) {
   const key = getUserModelStorageKey();
   const jsonString = formatUserModelForStorage(model);
   localStorage.setItem(key, jsonString);
+}
+
+// ============================================
+// Auto-Copy Functions (v8 - MVP1.11)
+// ============================================
+
+/**
+ * Get localStorage key for auto-copy preference
+ * @returns {string} - Storage key
+ */
+function getAutoCopyStorageKey() {
+  return 'webDayi_AutoCopy';
+}
+
+/**
+ * Load auto-copy preference from localStorage (MVP1.11)
+ * Default: enabled (true) for seamless workflow
+ * @returns {boolean} - Auto-copy enabled state
+ */
+function loadAutoCopyPreference() {
+  // Handle Node.js test environment (no localStorage)
+  if (typeof localStorage === 'undefined') {
+    return true;  // Default: enabled
+  }
+
+  const key = getAutoCopyStorageKey();
+  const stored = localStorage.getItem(key);
+
+  // Default to enabled if no preference exists
+  if (stored === null || stored === undefined) {
+    return true;  // Default: enabled
+  }
+
+  return stored === 'true';
+}
+
+/**
+ * Save auto-copy preference to localStorage (MVP1.11)
+ * @param {boolean} enabled - Auto-copy enabled state
+ */
+function saveAutoCopyPreference(enabled) {
+  // Handle Node.js test environment (no localStorage)
+  if (typeof localStorage === 'undefined') return;
+
+  const key = getAutoCopyStorageKey();
+  localStorage.setItem(key, enabled.toString());
+}
+
+/**
+ * Perform auto-copy to clipboard (MVP1.11)
+ * Automatically copies output buffer after character selection
+ * @param {string} text - Text to copy
+ * @returns {boolean} - True if copy succeeded, false otherwise
+ */
+function performAutoCopy(text) {
+  // Don't copy if auto-copy is disabled
+  if (!autoCopyEnabled) {
+    return false;
+  }
+
+  // Don't copy empty or null/undefined text
+  if (!text || text.trim() === '') {
+    return false;
+  }
+
+  // Use clipboard API directly (async, but we don't wait)
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        console.log('[WebDaYi] Auto-copied to clipboard:', text);
+      }).catch((error) => {
+        console.error('[WebDaYi] Auto-copy failed:', error);
+      });
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('[WebDaYi] Auto-copy failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Show visual feedback after auto-copy (MVP1.11)
+ * Displays brief toast notification
+ */
+function showCopyFeedback() {
+  // Handle Node.js test environment (no document)
+  if (typeof document === 'undefined') return;
+
+  const toast = document.getElementById('copy-toast');
+  if (!toast) return;  // Gracefully handle missing element
+
+  // Show toast
+  toast.classList.remove('hidden');
+  toast.classList.add('show');
+
+  // Hide after 2 seconds
+  setTimeout(() => {
+    toast.classList.add('hidden');
+    toast.classList.remove('show');
+  }, 2000);
+}
+
+/**
+ * Setup auto-copy toggle button (MVP1.11)
+ * Initializes toggle button event handlers and UI state
+ */
+function setupAutoCopyToggle() {
+  // Handle Node.js test environment (no document)
+  if (typeof document === 'undefined') return;
+
+  const toggleBtn = document.getElementById('auto-copy-toggle-btn');
+  if (!toggleBtn) return;  // Gracefully handle missing element
+
+  /**
+   * Update toggle button UI state
+   */
+  function updateToggleUI() {
+    if (autoCopyEnabled) {
+      toggleBtn.textContent = '🔄 自動複製: 開啟';
+      toggleBtn.classList.add('active');
+      toggleBtn.setAttribute('aria-label', '關閉自動複製');
+    } else {
+      toggleBtn.textContent = '🔄 自動複製: 關閉';
+      toggleBtn.classList.remove('active');
+      toggleBtn.setAttribute('aria-label', '開啟自動複製');
+    }
+  }
+
+  // Initialize UI
+  updateToggleUI();
+
+  // Toggle on click
+  toggleBtn.addEventListener('click', () => {
+    autoCopyEnabled = !autoCopyEnabled;
+    saveAutoCopyPreference(autoCopyEnabled);
+    updateToggleUI();
+
+    // Show feedback
+    const feedbackText = autoCopyEnabled ? '自動複製已開啟' : '自動複製已關閉';
+    showTemporaryFeedback(feedbackText);
+  });
+}
+
+/**
+ * Show temporary feedback message (MVP1.11)
+ * @param {string} message - Message to show
+ */
+function showTemporaryFeedback(message) {
+  // Handle Node.js test environment (no document)
+  if (typeof document === 'undefined') return;
+
+  const toast = document.getElementById('copy-toast');
+  if (!toast) return;
+
+  const originalText = toast.textContent;
+  toast.textContent = message;
+  toast.classList.remove('hidden');
+  toast.classList.add('show');
+
+  setTimeout(() => {
+    toast.classList.add('hidden');
+    toast.classList.remove('show');
+    toast.textContent = originalText;  // Restore
+  }, 2000);
 }
 
 // ============================================
@@ -681,6 +848,15 @@ function handleInput(value, previousValue = '') {
     const result = performAutoSelect(previousValue, dayiMap, userModel);
     if (result.success) {
       appendToOutputBuffer(result.selectedChar);
+
+      // Auto-copy after auto-select (MVP1.11 - v8)
+      if (autoCopyEnabled) {
+        const outputBuffer = document.getElementById('output-buffer');
+        if (outputBuffer && performAutoCopy(outputBuffer.value)) {
+          showCopyFeedback();
+        }
+      }
+
       // Update input to show only the new character
       const inputBox = document.getElementById('input-box');
       if (inputBox) {
@@ -758,6 +934,14 @@ function handleSelection(index) {
     }
 
     clearInputBox();
+
+    // Auto-copy after selection (MVP1.11 - v8)
+    if (autoCopyEnabled) {
+      const outputBuffer = document.getElementById('output-buffer');
+      if (outputBuffer && performAutoCopy(outputBuffer.value)) {
+        showCopyFeedback();
+      }
+    }
   }
 }
 
@@ -939,6 +1123,18 @@ async function initialize() {
       copyButton.addEventListener('click', copyToClipboard);
     }
 
+    // Set up clear button (MVP1.11 - v8)
+    const clearButton = document.getElementById('clear-button');
+    if (clearButton) {
+      clearButton.addEventListener('click', () => {
+        const outputBuffer = document.getElementById('output-buffer');
+        if (outputBuffer) {
+          outputBuffer.value = '';
+          showTemporaryFeedback('已清除');
+        }
+      });
+    }
+
     // Set up candidate area click handlers (event delegation)
     const candidateArea = document.getElementById('candidate-area');
     if (candidateArea) {
@@ -988,6 +1184,11 @@ async function initialize() {
 
       console.log(`[WebDaYi] Input mode loaded: ${savedMode}`);
     }
+
+    // Set up auto-copy toggle (MVP1.11 - v8)
+    autoCopyEnabled = loadAutoCopyPreference();
+    setupAutoCopyToggle();
+    console.log(`[WebDaYi] Auto-copy loaded: ${autoCopyEnabled ? 'enabled' : 'disabled'}`);
 
     console.log('[WebDaYi] Initialized successfully');
   } catch (error) {

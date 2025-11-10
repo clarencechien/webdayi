@@ -12,6 +12,16 @@
     切換至專注模式
   </button>
 
+  <!-- Auto-Copy Toggle Button (Fixed Position, below mode toggle) -->
+  <button id="auto-copy-toggle-btn" class="feature-toggle" aria-label="自動複製">
+    🔄 自動複製: 開啟
+  </button>
+
+  <!-- Copy Feedback Toast -->
+  <div id="copy-toast" class="copy-toast hidden">
+    ✓ 已複製
+  </div>
+
   <div class="container">
     <!-- Header -->
     <header class="header">
@@ -102,9 +112,14 @@
         ></textarea>
       </div>
 
-      <button id="copy-button" class="copy-button">
-        📋 複製到剪貼簿 (Copy to Clipboard)
-      </button>
+      <div class="button-group">
+        <button id="copy-button" class="copy-button">
+          📋 複製 (Copy)
+        </button>
+        <button id="clear-button" class="clear-button">
+          🗑️ 清除 (Clear)
+        </button>
+      </div>
     </section>
 
     <!-- Debug Info -->
