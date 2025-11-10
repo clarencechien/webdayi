@@ -28,7 +28,8 @@
 
   const charModeBtn = document.getElementById('char-mode-btn');
   const sentenceModeBtn = document.getElementById('sentence-mode-btn');
-  const modeDescription = document.getElementById('mode-description');
+  const charModeBtnMobile = document.getElementById('char-mode-btn-mobile');
+  const sentenceModeBtnMobile = document.getElementById('sentence-mode-btn-mobile');
   const codeBufferDisplay = document.getElementById('code-buffer-display');
   const bufferedCodesContainer = document.getElementById('buffered-codes');
   const clearBufferBtn = document.getElementById('clear-buffer-btn');
@@ -109,11 +110,29 @@
     const mode = getInputMode();
 
     if (mode === 'character') {
-      charModeBtn.classList.add('active');
-      sentenceModeBtn.classList.remove('active');
-      if (modeDescription) {
-        modeDescription.textContent = '逐字模式: 每輸入一個編碼即選字 (Character-by-character input)';
+      // Desktop buttons
+      if (charModeBtn) {
+        charModeBtn.classList.add('active');
+        charModeBtn.style.background = '#0fb8f0';
+        charModeBtn.style.color = 'white';
       }
+      if (sentenceModeBtn) {
+        sentenceModeBtn.classList.remove('active');
+        sentenceModeBtn.style.background = '';
+        sentenceModeBtn.style.color = '';
+      }
+      // Mobile buttons
+      if (charModeBtnMobile) {
+        charModeBtnMobile.classList.add('active');
+        charModeBtnMobile.style.background = '#0fb8f0';
+        charModeBtnMobile.style.color = 'white';
+      }
+      if (sentenceModeBtnMobile) {
+        sentenceModeBtnMobile.classList.remove('active');
+        sentenceModeBtnMobile.style.background = '';
+        sentenceModeBtnMobile.style.color = '';
+      }
+      // UI state
       if (codeBufferDisplay) {
         codeBufferDisplay.classList.add('hidden');
       }
@@ -121,11 +140,29 @@
         livePreview.classList.add('hidden');
       }
     } else {
-      charModeBtn.classList.remove('active');
-      sentenceModeBtn.classList.add('active');
-      if (modeDescription) {
-        modeDescription.textContent = '整句模式: 輸入多個編碼，按 Space 預測句子 (Sentence prediction mode)';
+      // Desktop buttons
+      if (charModeBtn) {
+        charModeBtn.classList.remove('active');
+        charModeBtn.style.background = '';
+        charModeBtn.style.color = '';
       }
+      if (sentenceModeBtn) {
+        sentenceModeBtn.classList.add('active');
+        sentenceModeBtn.style.background = '#0fb8f0';
+        sentenceModeBtn.style.color = 'white';
+      }
+      // Mobile buttons
+      if (charModeBtnMobile) {
+        charModeBtnMobile.classList.remove('active');
+        charModeBtnMobile.style.background = '';
+        charModeBtnMobile.style.color = '';
+      }
+      if (sentenceModeBtnMobile) {
+        sentenceModeBtnMobile.classList.add('active');
+        sentenceModeBtnMobile.style.background = '#0fb8f0';
+        sentenceModeBtnMobile.style.color = 'white';
+      }
+      // UI state
       if (codeBufferDisplay) {
         codeBufferDisplay.classList.remove('hidden');
       }
@@ -273,6 +310,35 @@
       await loadNgramDatabase();
 
       console.log('[v11 UI] Switched to sentence mode');
+    });
+  }
+
+  // Mobile mode toggle buttons
+  if (charModeBtnMobile) {
+    charModeBtnMobile.addEventListener('click', () => {
+      setInputMode('character');
+      updateModeUI();
+      if (inputBox) inputBox.value = '';
+      if (candidateArea) {
+        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">請輸入大易碼</div>';
+      }
+      console.log('[v11 UI] Switched to character mode (mobile)');
+    });
+  }
+
+  if (sentenceModeBtnMobile) {
+    sentenceModeBtnMobile.addEventListener('click', async () => {
+      setInputMode('sentence');
+      updateModeUI();
+      if (inputBox) inputBox.value = '';
+      if (candidateArea) {
+        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 Space 預測句子</div>';
+      }
+
+      // Lazy load N-gram DB
+      await loadNgramDatabase();
+
+      console.log('[v11 UI] Switched to sentence mode (mobile)');
     });
   }
 
