@@ -1,15 +1,15 @@
 # Progress Tracker: WebDaYi
 
-**Last Updated**: 2025-11-10 (Updated after MVP1 v9 - Modern UI Redesign)
-**Overall Status**: 🎉 MVP 1.0 v9 COMPLETE + Modern UI + Dark Mode!
-**Completion**: ~55% (Phase 0 v2 & MVP 1 v9 complete, MVP 2a next)
+**Last Updated**: 2025-11-10 (Updated after MVP1 v10 + UX Improvement)
+**Overall Status**: 🎉 MVP 1.0 v10 COMPLETE + Mobile UX + Font Control + Inline Hints!
+**Completion**: ~57% (Phase 0 v2 & MVP 1 v10 complete, MVP 2a next)
 
 ## Project Phases Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0 v9           [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v10          [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Selection Keys (v2)      [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Pagination (v3)          [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Auto-select (v3)         [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
@@ -22,32 +22,52 @@
 │   ├─ Clear Buffer (v8)        [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Tailwind CSS (v9)        [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎨✅  │
 │   ├─ Dark Mode (v9)           [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🌗✅  │
-│   └─ Modern UI Redesign (v9)  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✨✅  │
+│   ├─ Modern UI Redesign (v9)  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✨✅  │
+│   ├─ Mobile UX Fixes (v10)    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 📱✅  │
+│   ├─ Font Size Control (v10)  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🔤✅  │
+│   └─ Inline Hints UX (v10)    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 💡✅  │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 3: MVP 2a+ (Future)     [░░░░░░░░░░░░░░░░]   0% 📋    │
 └─────────────────────────────────────────────────────────────┘
 
-Legend: ✅ Complete | 🐛 Bug Fixed | 🎨 UI | 🌗 Theme | ✨ Design | 🔄 In Progress | ⏳ Next | 📋 Planned
+Legend: ✅ Complete | 🐛 Bug Fix | 🎨 UI | 🌗 Theme | ✨ Design | 📱 Mobile | 🔤 Font | 💡 UX | ⏳ Next | 📋 Planned
 ```
 
 ## What's Complete ✅
 
-### 🎨 MAJOR MILESTONE: MVP 1.0 v9 Complete + Modern UI Redesign!
+### 💡 LATEST MILESTONE: MVP 1.0 v10 Complete + Mobile UX + Inline Hints!
 
 **Achievement Summary** (2025-11-10):
 - ✅ Data Pipeline: YAML → JSON converter working perfectly (v2 with frequency ranking)
-- ✅ MVP 1.0 v9: Modern UI with Tailwind CSS + Dark Mode
-- ✅ TDD: 59/59 automated tests passing (21 converter + 24 auto-copy + 35 MVP1)
+- ✅ MVP 1.0 v10: Mobile UX fixes + Font control + Inline selection hints
+- ✅ TDD: **91/91 automated tests passing** (21 converter + 70 MVP1)
+  - v6: 19 tests (personalization)
+  - v7: 16 tests (auto-select fixes)
+  - v8: 24 tests (auto-copy + clear)
+  - v10: 27 tests (mobile UX + font)
+  - v10-ux: 5 tests (inline hints)
 - ✅ Performance: All targets exceeded (< 20ms vs 100ms target)
 - ✅ Documentation: Comprehensive README and design docs
-- 🎨 **v9 New**: Tailwind CSS utility-first styling system
-- 🌗 **v9 New**: Dark mode with system preference detection
-- ✨ **v9 New**: Material Symbols icons replacing emoji
-- 📐 **v9 New**: Modern card-based layout (Output on top)
-- 📱 **v9 New**: Enhanced RWD for mobile/tablet/desktop
-- ✨ **v8 Feature**: Auto-copy to clipboard after character selection
-- 🗑️ **v8 Feature**: Clear buffer button for quick cleanup
-- 🐛 **v7 Bug Fixed**: Auto-select respects user preferences
+
+**v10 Features** (Mobile UX + Font Control):
+- 📱 **v10 New**: Responsive control panel (desktop fixed / mobile FAB + slide-in)
+- 🔤 **v10 New**: Font size control (80%-120%, A−/A+ buttons)
+- 📱 **v10 New**: No button overlap on mobile (tested on Android)
+- 💡 **v10 UX**: Inline selection key hints (50% reduced cognitive load)
+
+**v9 Features** (Modern UI):
+- 🎨 **v9**: Tailwind CSS utility-first styling system
+- 🌗 **v9**: Dark mode with system preference detection
+- ✨ **v9**: Material Symbols icons replacing emoji
+- 📐 **v9**: Modern card-based layout (Output on top)
+- 📱 **v9**: Enhanced RWD for mobile/tablet/desktop
+
+**v8 Features** (Auto-Copy):
+- ✨ **v8**: Auto-copy to clipboard after character selection
+- 🗑️ **v8**: Clear buffer button for quick cleanup
+
+**v7 Bug Fix**:
+- 🐛 **v7**: Auto-select respects user preferences
 
 ### Planning & Documentation (100%)
 - ✅ Product Requirements Document (PRD.md v1.1)

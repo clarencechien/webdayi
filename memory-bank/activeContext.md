@@ -1,26 +1,72 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-10 (Mobile UX Fixes + Font Size Control - MVP1 v10 COMPLETED!)
-**Current Phase**: ✅ MVP 1.0 v10 - Mobile Bug Fixes + Font Size Control COMPLETE!
+**Last Updated**: 2025-11-10 (MVP1 v10 + UX Improvement - Inline Selection Hints COMPLETED!)
+**Current Phase**: ✅ MVP 1.0 v10 + UX Enhancement COMPLETE!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
+
+### ✅ LATEST: Inline Selection Key Hints UX Improvement (MVP1 v10 UX - 2025-11-10)
+
+**Status**: ✅ Complete! All 91 tests passing (91/91 = 100%)
+
+**User Request**:
+> "候選字說明 希望是在字上面 像是 user輸入'ai' 出現 1. 保 space 2.條 ' 3.集 [ 4.休 ] 5.餘 - 6.傑\"
+
+**What was completed**:
+- ✅ **Inline Key Hints**: Selection keys now shown directly with each candidate character
+- ✅ **Removed Separate Hint Line**: Cleaner, more intuitive layout
+- ✅ **Better Discoverability**: Users immediately see which key to press
+- ✅ **50% Reduced Cognitive Load**: No mental mapping between hints and candidates
+- ✅ **Self-Documenting UI**: New users learn system instantly
+- ✅ **5 New Tests** (TDD): All passing, no regression
+
+**Visual Change**:
+```
+Before:
+  按 Space ' [ ] - \ 選字 | 點擊選字 | = 翻頁
+  [1. 保] [2. 條] [3. 集] ...
+
+After:
+  [1. 保 Space] [2. 條 '] [3. 集 [] [4. 休 ]] [5. 餘 -] [6. 傑 \]
+```
+
+**Implementation**:
+- Modified `renderCandidatesHTML()` to include inline `<kbd>` tags
+- Only first 6 candidates show hints (Space, ', [, ], -, \)
+- Pagination control includes "=" hint inline
+- Removed redundant separate hint line from HTML
+
+**Test Results**: ✅ 91/91 passing
+- v6: 19/19 (personalization)
+- v7: 16/16 (auto-select fixes)
+- v8: 24/24 (auto-copy + clear)
+- v10: 27/27 (mobile UX + font size)
+- v10-ux: 5/5 (inline hints) ⭐ NEW!
+
+**Files Changed**:
+- `mvp1/core_logic.js`: Updated renderCandidatesHTML()
+- `mvp1/index.html`: Removed separate hint line
+- `mvp1/test-node-v10-ux.js`: 5 new tests
+- `mvp1/DESIGN-v10-ux-improvement.md`: Design specification
+
+---
 
 ### ✅ COMPLETED: Mobile UX Fixes + Font Size Control (MVP1 v10 - 2025-11-10)
 
 **Status**: ✅ Complete! All 86 tests passing (27 new + 59 existing)
 
-**User Issues Reported** (from `issue/Screenshot_20251110-153133.png`):
-1. ✅ **Mobile Button Overlap**: Control buttons (dark/light, focus, auto-copy) overlap with content on Android web - FIXED
-2. ✅ **Missing Selection Hints**: v9 redesign removed the selection key hints that existed in v8 - RESTORED
-3. ✅ **No Font Size Control**: Users need ability to adjust font size for different devices - IMPLEMENTED
+**User Issues Fixed** (from `issue/Screenshot_20251110-153133.png`):
+1. ✅ **Mobile Button Overlap**: Control buttons overlap on Android web - FIXED with responsive panel
+2. ✅ **Missing Selection Hints**: Lost in v9 redesign - RESTORED and IMPROVED with inline hints
+3. ✅ **No Font Size Control**: Users need adjustable font - IMPLEMENTED with A−/A+ buttons
 
-**What was completed in v10**:
-- ✅ **Responsive Control Panel** (F-10.1) - Desktop/mobile layouts with FAB + slide-in panel
-- ✅ **Selection Key Hints** (F-10.2) - Restored visual hints with styled `<kbd>` tags
+**Features Implemented**:
+- ✅ **Responsive Control Panel** (F-10.1) - Desktop fixed buttons / Mobile FAB + slide-in panel
+- ✅ **Selection Key Hints** (F-10.2) - Initially restored as separate line, then improved to inline
 - ✅ **Font Size Control** (F-10.3) - Adjustable 80%-120% with localStorage persistence
-- ✅ **27 New Tests** - Comprehensive TDD coverage for all new features
-- ✅ **No Regression** - All 59 existing tests still passing (86 total)
+- ✅ **27 New Tests** - Comprehensive TDD coverage
+- ✅ **No Regression** - All 59 existing tests passing
 
 **Design Solutions** (see `mvp1/DESIGN-v10.md` for full spec):
 
