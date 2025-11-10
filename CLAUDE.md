@@ -95,9 +95,22 @@ This repository contains the implementation for MVP 1.0, MVP 2a, and MVP 3.0, as
 * **Mode Toggle**: Moved to control panel (desktop fixed buttons + mobile FAB menu)
 
 **Recent Bug Fixes (v11):**
+* **CRITICAL - Strict Mode Fix**: Fixed arguments.callee in IIFE causing ALL buttons to fail (changed to named function initV11UI)
+  - Bug: `setTimeout(arguments.callee, 100)` forbidden in strict mode
+  - Impact: Entire IIFE failed, no event listeners bound, 0/7 buttons working
+  - Fix: Changed to named function: `setTimeout(initV11UI, 100)`
+  - Files: core_logic_v11_ui.js (line 13)
+* **Mobile Mode Toggle**: Added always-visible Input Mode Control section
+  - Bug: Mode toggle hidden on mobile (`hidden sm:flex` on desktop controls)
+  - Fix: Created large touch-friendly buttons (80px height, always visible)
+  - Files: index.html (lines 294-334), core_logic_v11_ui.js (main button handlers)
+* **Prediction Button**: Relocated to independent control area
+  - Bug: Button trapped in Live Preview (only shown when buffer not empty)
+  - Fix: Moved to dedicated #prediction-control container, always visible in sentence mode
+  - Files: index.html (lines 321-333), core_logic_v11_ui.js (updateBufferDisplay logic)
 * **Copy Button**: Fixed HTML structure preservation using innerHTML instead of textContent
-* **Mobile Prediction**: Added large touch-friendly button to trigger prediction
-* **Mode Toggle**: Relocated from main UI to control panel for better accessibility
+* **TDD Coverage**: Added 14 comprehensive UI initialization tests (test-v11-ui-init.js)
+* **Browser Testing**: Created visual verification test page (test-button-fix.html)
 
 ### **MVP 2a Architecture**
 * **Plugin Shell (MVP 2a):** The Chrome Extension wrapper (manifest.json, background.js, content.js).

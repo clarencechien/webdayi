@@ -40,14 +40,16 @@
 │   ├─ Event Handler Integration [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ⚡✅  │
 │   ├─ v10 Regression Tests    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Copy Button Feedback Fix [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🐛✅  │
-│   ├─ Mobile Prediction Button [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 📱✅  │
-│   ├─ Mode Toggle Relocation  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎨✅  │
+│   ├─ Mobile Mode Toggle Fix  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 📱✅  │
+│   ├─ Prediction Button Fix   [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎨✅  │
+│   ├─ Strict Mode Critical Fix [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🔥✅  │
+│   ├─ UI Init TDD Tests (14)  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   └─ Browser Testing          [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% 📋    │
 │ Phase 3: MVP 2a+ (Future)     [░░░░░░░░░░░░░░░░]   0% 📋    │
 └─────────────────────────────────────────────────────────────┘
 
-Legend: ✅ Complete | 🐛 Bug Fix | 🎨 UI | 🌗 Theme | ✨ Design | 📱 Mobile | 🔤 Font | 💡 UX | 🧠 Smart | ⚡ Fast | 👁️ Preview | 🚀 New | 🔄 In Progress | ⏳ Next | 📋 Planned
+Legend: ✅ Complete | 🐛 Bug Fix | 🔥 Critical Fix | 🎨 UI | 🌗 Theme | ✨ Design | 📱 Mobile | 🔤 Font | 💡 UX | 🧠 Smart | ⚡ Fast | 👁️ Preview | 🚀 New | 🔄 In Progress | ⏳ Next | 📋 Planned
 ```
 
 ### Feature Branch: MVP 3.0 N-gram Smart Engine (Experimental Track)
@@ -107,11 +109,14 @@ Legend: 🚀 Smart Engine | 🔄 In Progress | ⏳ Next | 📋 Planned
 - ✅ Performance: All targets exceeded (< 20ms vs 100ms target, < 500ms prediction)
 - ✅ Documentation: Comprehensive README and design docs
 
-**v11 Bug Fixes** (Latest):
-- 🐛 **v11 Bugfix**: Copy button feedback now preserves icon HTML structure
-- 📱 **v11 New**: Mobile-friendly prediction button (Space key doesn't work on mobile)
-- 🎨 **v11 Refactor**: Mode toggle relocated to control panel (desktop + mobile)
+**v11 Critical Fixes** (Latest - 2025-11-10):
+- 🔥 **v11 CRITICAL**: Fixed arguments.callee in strict mode (ALL buttons now working!)
+- 📱 **v11 Bugfix**: Mobile mode toggle visibility (always-visible Input Mode Control)
+- 🎨 **v11 Bugfix**: Prediction button accessibility (independent from Live Preview)
+- 🐛 **v11 Bugfix**: Copy button feedback preserves icon HTML structure
 - ⚡ **v11 Refactor**: Prediction logic extracted into reusable `triggerPrediction()` function
+- ✅ **v11 TDD**: 14 comprehensive UI initialization tests (test-v11-ui-init.js)
+- 🧪 **v11 Testing**: Browser verification test (test-button-fix.html)
 
 **v10 Bugfix Features**:
 - ⌨️ **v10 Bugfix**: Delete key clears output buffer (keyboard shortcut)
