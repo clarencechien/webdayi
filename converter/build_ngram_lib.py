@@ -96,6 +96,111 @@ def parse_entry(line: str) -> Optional[Tuple[str, int]]:
     return (phrase, freq)
 
 
+def parse_terra_pinyin_dict(filepath: str) -> List[Tuple[str, int]]:
+    """
+    Parse terra_pinyin.dict.yaml into (phrase, frequency) pairs.
+
+    This format doesn't have explicit frequencies, so we assign weight=1 for all entries.
+    This gives equal weight to dictionary entries, allowing N-gram to learn from
+    Taiwan-localized vocabulary and phrases.
+
+    Args:
+        filepath: Path to terra_pinyin.dict.yaml file
+
+    Returns:
+        List of (phrase, frequency) tuples
+
+    Raises:
+        FileNotFoundError: If file doesn't exist
+        ValueError: If file is empty or invalid
+
+    Format:
+        phrase<TAB>pinyin
+        Example: "台灣\ttai2 wan1"
+    """
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"Input file not found: {filepath}")
+
+    if not os.path.isfile(filepath):
+        raise ValueError(f"Input path is not a file: {filepath}")
+
+    entries = []
+    in_data_section = False
+
+    with open(filepath, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+
+            # Skip empty lines
+            if not line:
+                continue
+
+            # Skip comments
+            if line.startswith('#'):
+                continue
+
+            # Detect end of YAML header (starts with "...")
+            if line == '...':
+                in_data_section = True
+                continue
+
+            # Skip YAML header
+            if not in_data_section:
+                continue
+
+            # Parse data line: phrase<TAB>pinyin
+            entry = parse_terra_pinyin_entry(line)
+            if entry is not None:
+                entries.append(entry)
+
+    if len(entries) == 0:
+        raise ValueError("No valid entries found in file")
+
+    return entries
+
+
+def parse_terra_pinyin_entry(line: str) -> Optional[Tuple[str, int]]:
+    """
+    Parse a single line from terra_pinyin.dict.yaml.
+
+    Format: phrase<TAB>pinyin (no frequency)
+
+    We assign frequency=1 for all entries since terra_pinyin doesn't provide
+    explicit frequencies. This makes N-gram learn from phrase occurrence patterns.
+
+    Args:
+        line: Single line from terra_pinyin.dict.yaml
+
+    Returns:
+        (phrase, frequency) tuple or None if invalid
+
+    Examples:
+        >>> parse_terra_pinyin_entry("台灣\\ttai2 wan1")
+        ('台灣', 1)
+        >>> parse_terra_pinyin_entry("的\\tde5")
+        ('的', 1)
+        >>> parse_terra_pinyin_entry("invalid")
+        None
+    """
+    if not line:
+        return None
+
+    parts = line.split('\t')
+    if len(parts) < 2:  # Need at least phrase and pinyin
+        return None
+
+    phrase = parts[0].strip()
+    # pinyin = parts[1].strip()  # We don't need pinyin for N-gram counting
+
+    # Skip empty phrases
+    if not phrase:
+        return None
+
+    # Assign frequency=1 for all entries (uniform weight)
+    # This allows N-gram to learn from Taiwan-specific vocabulary
+    return (phrase, 1)
+
+
 # ============================================================================
 # Phase 2: Unigram Counting
 # ============================================================================
