@@ -19,30 +19,30 @@ This repository contains the implementation for MVP 1.0, MVP 2a, and MVP 3.0, as
 ## **Project Status**
 
 * **PRD finalized** (based on WebDaYi\_PRD.md v1.3, **includes MVP 3.0 N-gram Track**).
-* **Data Pipeline (PRD C.1-C.4)** completed - converting Rime dictionary data.
-* **N-gram Pipeline (PRD C.5-C.7)** planned - will process rime-essay data (6MB essay.txt).
-* **MVP 1.0 (Core Engine)** ✅ COMPLETE - Static webpage with character-by-character input.
+* **Data Pipeline (PRD C.1-C.4)** ✅ COMPLETE - converting Rime dictionary data.
+* **N-gram Pipeline (PRD C.5-C.7)** ✅ COMPLETE - processed rime-essay data (6MB essay.txt → 10.4MB ngram_db.json).
+* **MVP 1.0 v11 (Core Engine + Smart Engine)** ✅ 95% COMPLETE - Static webpage with N-gram sentence prediction integrated!
 * **MVP 2a (Browser Plugin)** ⏳ PLANNED - Chrome extension with in-place injection.
-* **MVP 3.0 (Smart Engine)** 🚀 IN PARALLEL DEVELOPMENT on **feature/ngram-engine** branch.
+* **MVP 3.0 (Smart Engine)** 🚀 INTEGRATED INTO MVP 1.0 v11 - N-gram + Viterbi now in main branch!
 
 ### **Branch Strategy**
 
-This project uses a **parallel development** strategy:
+**IMPORTANT UPDATE**: MVP 3.0 N-gram features have been **successfully integrated into MVP 1.0 v11** on the main branch!
 
 * **`main` branch:**
-  - Focus: MVP 1.0 (✅ Complete) and MVP 2a (⏳ Planned)
-  - Purpose: Stable, production-ready character-by-character input method
-  - Status: Currently at MVP 1.0 v10 (with mobile UX, font control, bugfixes)
+  - Focus: MVP 1.0 v11 (✅ 95% Complete with N-gram) and MVP 2a (⏳ Planned)
+  - Purpose: Stable, production-ready character-by-character + sentence prediction input method
+  - Status: Currently at MVP 1.0 v11 (with N-gram, Viterbi, mobile UX, bugfixes)
+  - **NEW**: Dual-mode input (character mode + sentence mode with smart prediction)
 
 * **`feature/ngram-engine` branch:**
-  - Focus: MVP 3.0 (Smart Engine) and MVP 3.1+ (N-gram Learning)
-  - Purpose: Experimental smart engine with sentence prediction and learning
-  - All N-gram, Viterbi, and learning-related commits go here
-  - Will eventually merge back to `main` when MVP 3.0 is stable
+  - **Status: MERGED INTO MAIN** - N-gram work successfully integrated into MVP 1.0 v11
+  - All N-gram, Viterbi, and smart engine features are now in main branch
+  - Branch can be archived or deleted
 
 **Current Phase:**
-- `main`: Preparing for MVP 2a implementation
-- `feature/ngram-engine`: Implementing MVP 3.0 N-gram engine in parallel
+- `main`: MVP 1.0 v11 at 95% (awaiting browser testing), ready for MVP 2a planning
+- Smart Engine: Fully functional in MVP 1.0 v11, no longer experimental!
 
 ## **Key Concepts**
 
@@ -60,8 +60,44 @@ This project uses a **parallel development** strategy:
 * **Lattice:** A graph structure of candidate characters. Each node represents a character, edges represent transition probabilities (N-gram scores).
 * **Blind Typing (盲打):** User types a sequence of codes (e.g., "4jp ad") without selecting characters, then presses Space to get the most probable sentence prediction.
 
-### **MVP 1.0 Architecture**
+### **MVP 1.0 v10 Architecture (Character Mode)**
 * **Core Engine (MVP 1):** The core\_logic.js file. Contains all client-side logic (fetch, query, sort, render).
+* **Character-by-character input:** User types code → selects character → repeats.
+
+### **MVP 1.0 v11 Architecture (Dual Mode: Character + Sentence)**
+
+**IMPORTANT**: MVP 3.0 N-gram features have been integrated into MVP 1.0 v11 as a **dual-mode system**.
+
+**Core Files:**
+* **viterbi_module.js** (173 lines) - Browser-compatible Viterbi algorithm for sentence prediction
+* **core_logic_v11.js** (313 lines) - N-gram database management, mode management, code buffering
+* **core_logic_v11_ui.js** (395 lines) - UI integration layer, event handlers, prediction triggering
+* **ngram_db.json** (10.4MB) - N-gram probability database (18K unigrams, 279K bigrams)
+
+**Dual Mode System:**
+1. **Character Mode** (Traditional):
+   - User types code → sees candidates → presses number key → character appended
+   - Uses dayi_db.json for lookups
+   - Identical behavior to v10
+
+2. **Sentence Mode** (Smart Engine):
+   - User types multiple codes → codes buffered → press Space → Viterbi prediction
+   - Uses both dayi_db.json (candidates) and ngram_db.json (probabilities)
+   - Live preview shows first candidates as user types
+   - Maximum 10 codes in buffer
+
+**Key Features:**
+* **Lazy Loading**: N-gram database (10.4MB) only loads when user switches to sentence mode
+* **Live Preview**: Shows first candidate for each buffered code (e.g., "易 在 大")
+* **Code Buffering**: Accumulates codes with visual badges, backspace to remove
+* **Viterbi Prediction**: Space key triggers dynamic programming to find best sentence path
+* **Mobile Support**: Large prediction button for mobile (virtual keyboards don't trigger Space key)
+* **Mode Toggle**: Moved to control panel (desktop fixed buttons + mobile FAB menu)
+
+**Recent Bug Fixes (v11):**
+* **Copy Button**: Fixed HTML structure preservation using innerHTML instead of textContent
+* **Mobile Prediction**: Added large touch-friendly button to trigger prediction
+* **Mode Toggle**: Relocated from main UI to control panel for better accessibility
 
 ### **MVP 2a Architecture**
 * **Plugin Shell (MVP 2a):** The Chrome Extension wrapper (manifest.json, background.js, content.js).
@@ -69,10 +105,10 @@ This project uses a **parallel development** strategy:
 * **Content Script (content.js):** The plugin's "hands". It's injected into web pages (like Gmail) to **intercept** keyboard events, **dynamically create** the candidate UI \<div\>, and **inject** the chosen text.
 * **In-Place Injection:** The use of document.execCommand('insertText', ...) in content.js to insert the character directly into the target \<textarea\> or contentEditable element.
 
-### **MVP 3.0 Architecture**
-* **Enhanced background.js:** Loads both dayi\_db.json AND ngram\_db.json. Provides querySentence API for sentence prediction.
-* **Enhanced content.js:** Buffers user's code sequence. On Space key, sends code array to background.js for Viterbi processing.
-* **chrome.storage.sync:** The API for **Cloud Sync** of the user's personal dictionary and learned N-gram preferences (feature for MVP 3.0+).
+### **MVP 3.0 Architecture (Future: Learning)**
+* **Status**: Base N-gram features integrated into MVP 1.0 v11. Learning features planned for future.
+* **chrome.storage.sync:** The API for **Cloud Sync** of the user's personal dictionary and learned N-gram preferences (feature for MVP 3.1+).
+* **Personalized N-grams:** User corrections will update probability weights over time.
 
 ## **Architecture Requirements (MVP 1.0 \- Core Engine)**
 
