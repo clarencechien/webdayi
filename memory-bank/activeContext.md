@@ -55,22 +55,36 @@ Based on PRD.md v1.3, Section 7:
 
 ### Current Work Focus (MVP 3.0)
 
-**Phase 1: N-gram Data Pipeline (In Progress)**
+**Phase 1: N-gram Data Pipeline (In Progress - 60% Complete)**
 
 **Objective**: Build the N-gram language model from rime-essay corpus
 
-**Tasks:**
+**Completed:**
 1. ✅ Documentation updated (PRD v1.3, CLAUDE.md with MVP 3.0 specs)
-2. 🔄 Memory bank updated (activeContext.md, progress.md)
-3. ⏳ Directory structure created (converter/, mvp3-smart-engine/)
-4. ⏳ Download essay.txt from rime-essay repository
-5. ⏳ Design N-gram database schema (unigram + bigram counts)
-6. ⏳ Implement build_ngram.py (TDD approach)
-   - Parse essay.txt (6MB Chinese text)
-   - Count character frequencies (unigram)
-   - Count character transitions (bigram)
-   - Generate ngram_db.json with probabilities
-7. ⏳ Test N-gram pipeline (comprehensive test suite)
+2. ✅ Memory bank updated (activeContext.md, progress.md)
+3. ✅ Directory structure created (mvp3-smart-engine/ with README)
+4. ✅ Downloaded essay.txt from rime-essay repository (5.7MB, 442,717 entries)
+5. ✅ Designed N-gram database schema (DESIGN-ngram.md, 800+ lines)
+   - Unigram and bigram probability model
+   - Laplace smoothing for unseen events
+   - Complete algorithm specifications
+   - 25-test TDD plan across 6 categories
+6. ✅ Committed and pushed to remote (2 commits, 443,766+ insertions)
+
+**In Progress:**
+7. 🔄 Writing TDD test suite for N-gram pipeline (25 tests)
+   - Category 1: Parsing (5 tests)
+   - Category 2: Unigram Counting (4 tests)
+   - Category 3: Bigram Counting (5 tests)
+   - Category 4: Probability Calculation (6 tests)
+   - Category 5: JSON Generation (3 tests)
+   - Category 6: Integration (2 tests)
+
+**Next:**
+8. ⏳ Implement build_ngram_lib.py (library functions)
+9. ⏳ Implement build_ngram.py (command-line tool)
+10. ⏳ Generate ngram_db.json from essay.txt
+11. ⏳ Validate output (probabilities sum to 1, coverage metrics)
 
 **Phase 2: Viterbi Algorithm (Next)**
 
