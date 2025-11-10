@@ -86,7 +86,11 @@ function forwardPass(lattice, dp, backpointer, ngramDb) {
       // Try all previous characters
       for (const prevChar in dp[t-1]) {
         const bigram = prevChar + char2;
-        const bigramProb = ngramDb.bigrams[bigram] || 1e-10;
+        // Quick Fix: Use unigram fallback instead of extreme penalty
+        // Original: || 1e-10 (too punitive for unseen bigrams)
+        // Improved: Use unigram probability as fallback, gives unseen bigrams reasonable score
+        const bigramProb = ngramDb.bigrams[bigram] ||
+                           (ngramDb.unigrams[char2] || 1e-5);
         const prob = dp[t-1][prevChar] + Math.log(bigramProb);
 
         if (prob > maxProb) {
