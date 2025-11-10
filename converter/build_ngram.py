@@ -176,7 +176,7 @@ def main():
 
     print_success(f"Unigram probabilities: {format_number(len(unigram_probs))}")
     print_success(f"Bigram probabilities: {format_number(len(bigram_probs))}")
-    print_success("Smoothing: Laplace (α=1)")
+    print_success("Smoothing: Laplace (α=0.1) - Solution B")
 
     # Validate probabilities sum to 1.0
     unigram_sum = sum(unigram_probs.values())
@@ -195,8 +195,16 @@ def main():
         # Calculate metadata
         metadata = calculate_metadata(entries, unigram_counts, bigram_counts)
 
-        # Generate N-gram database
-        ngram_db = generate_ngram_db(unigram_probs, bigram_probs, metadata)
+        # Generate N-gram database (Solution B: with counts and smoothing params)
+        smoothing_alpha = 0.1  # Laplace smoothing parameter
+        ngram_db = generate_ngram_db(
+            unigram_probs,
+            bigram_probs,
+            unigram_counts,  # NEW: for Laplace smoothing
+            bigram_counts,   # NEW: for Laplace smoothing
+            metadata,
+            smoothing_alpha  # NEW: smoothing parameter
+        )
 
         # Validate before writing
         try:

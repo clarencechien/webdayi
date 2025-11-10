@@ -7,6 +7,8 @@
  * This is a browser-compatible version of the Viterbi algorithm.
  * All functions are exposed globally for use in MVP 1.0 v11.
  *
+ * Version 2.0: Implements full Laplace smoothing (Solution B)
+ *
  * Original: mvp3-smart-engine/viterbi.js
  * Design Document: mvp1/DESIGN-v11.md
  *
@@ -15,6 +17,48 @@
  *   console.log(result.sentence);  // "易在大"
  *   console.log(result.score);     // -5.809
  */
+
+/**
+ * Calculate Laplace-smoothed unigram probability.
+ *
+ * Solution B: Full Laplace smoothing implementation
+ *
+ * Formula: P(char) = (count(char) + alpha) / (total_chars + alpha * vocab_size)
+ *
+ * @param {string} char - Character to get probability for
+ * @param {Object} ngramDb - N-gram database with smoothing parameters
+ * @returns {number} Smoothed unigram probability
+ */
+function getLaplaceUnigram(char, ngramDb) {
+  const count = ngramDb.unigram_counts[char] || 0;
+  const alpha = ngramDb.smoothing_alpha;
+  const totalChars = ngramDb.total_chars;
+  const vocabSize = ngramDb.vocab_size;
+
+  return (count + alpha) / (totalChars + alpha * vocabSize);
+}
+
+/**
+ * Calculate Laplace-smoothed bigram probability.
+ *
+ * Solution B: Full Laplace smoothing implementation
+ *
+ * Formula: P(c2|c1) = (count(c1,c2) + alpha) / (count(c1) + alpha * vocab_size)
+ *
+ * @param {string} char1 - First character (context)
+ * @param {string} char2 - Second character (prediction)
+ * @param {Object} ngramDb - N-gram database with smoothing parameters
+ * @returns {number} Smoothed bigram conditional probability
+ */
+function getLaplaceBigram(char1, char2, ngramDb) {
+  const bigram = char1 + char2;
+  const bigramCount = ngramDb.bigram_counts[bigram] || 0;
+  const unigramCount = ngramDb.unigram_counts[char1] || 0;
+  const alpha = ngramDb.smoothing_alpha;
+  const vocabSize = ngramDb.vocab_size;
+
+  return (bigramCount + alpha) / (unigramCount + alpha * vocabSize);
+}
 
 /**
  * Build lattice of candidates from input codes.
@@ -41,21 +85,24 @@ function buildLattice(codes, dayiDb) {
 }
 
 /**
- * Initialize DP table for first position using unigram probabilities.
+ * Initialize DP table for first position using Laplace-smoothed unigram probabilities.
+ *
+ * Solution B: Uses full Laplace smoothing for initialization
  *
  * @param {Array[]} lattice - Candidate lattice
- * @param {Object} ngramDb - N-gram database
+ * @param {Object} ngramDb - N-gram database with smoothing parameters
  * @returns {Object[]} Initialized DP table
  */
 function initializeDP(lattice, ngramDb) {
   const dp = [];
   const numPositions = lattice.length;
 
-  // Initialize first position with unigram probabilities
+  // Initialize first position with Laplace-smoothed unigram probabilities
   const firstDP = {};
   for (const candidate of lattice[0]) {
     const char = candidate.char;
-    const unigramProb = ngramDb.unigrams[char] || 1e-10;
+    // Solution B: Use full Laplace smoothing instead of fallback
+    const unigramProb = getLaplaceUnigram(char, ngramDb);
     firstDP[char] = Math.log(unigramProb);
   }
   dp.push(firstDP);
@@ -85,12 +132,9 @@ function forwardPass(lattice, dp, backpointer, ngramDb) {
 
       // Try all previous characters
       for (const prevChar in dp[t-1]) {
-        const bigram = prevChar + char2;
-        // Quick Fix: Use unigram fallback instead of extreme penalty
-        // Original: || 1e-10 (too punitive for unseen bigrams)
-        // Improved: Use unigram probability as fallback, gives unseen bigrams reasonable score
-        const bigramProb = ngramDb.bigrams[bigram] ||
-                           (ngramDb.unigrams[char2] || 1e-5);
+        // Solution B: Use full Laplace smoothing for bigrams
+        // Replaces Quick Fix (unigram fallback) with proper statistical smoothing
+        const bigramProb = getLaplaceBigram(prevChar, char2, ngramDb);
         const prob = dp[t-1][prevChar] + Math.log(bigramProb);
 
         if (prob > maxProb) {
@@ -187,4 +231,4 @@ function viterbi(codes, dayiDb, ngramDb) {
 
 // Functions are now globally available in browser context
 // No module.exports needed - browser version
-console.log('✓ Viterbi module loaded (browser-compatible)');
+console.log('✓ Viterbi module loaded (v2.0 with Laplace smoothing - Solution B)');
