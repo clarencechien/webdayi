@@ -1,169 +1,317 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html class="dark" lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebDaYi (網頁大易輸入法) - MVP 1.0</title>
-  <link rel="stylesheet" href="style.css">
+  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v8</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <style type="text/tailwindcss">
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+    }
+  </style>
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#0fb8f0",
+            "background-light": "#f5f8f8",
+            "background-dark": "#101e22",
+          },
+          fontFamily: {
+            "display": ["Space Grotesk", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
 </head>
-<body>
-  <!-- Mode Toggle Button (Fixed Position) -->
-  <button id="mode-toggle-btn" class="mode-toggle" aria-label="切換至專注模式">
-    切換至專注模式
-  </button>
 
-  <!-- Auto-Copy Toggle Button (Fixed Position, below mode toggle) -->
-  <button id="auto-copy-toggle-btn" class="feature-toggle" aria-label="自動複製">
-    🔄 自動複製: 開啟
-  </button>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 transition-colors duration-200">
 
-  <!-- Copy Feedback Toast -->
-  <div id="copy-toast" class="copy-toast hidden">
-    ✓ 已複製
+  <!-- Fixed Control Buttons -->
+  <div class="fixed top-4 right-4 z-50 flex flex-col gap-2">
+    <!-- Dark Mode Toggle -->
+    <button id="dark-mode-toggle"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg"
+            aria-label="切換深色模式">
+      <span class="material-symbols-outlined text-base">dark_mode</span>
+      <span class="hidden sm:inline">Dark</span>
+    </button>
+
+    <!-- Express Mode Toggle -->
+    <button id="mode-toggle-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary px-4 text-sm font-medium text-primary hover:bg-primary/20 dark:hover:bg-primary/30 shadow-md transition-all hover:shadow-lg"
+            aria-label="切換專注模式">
+      <span class="material-symbols-outlined text-base">center_focus_strong</span>
+      <span class="hidden sm:inline">Focus</span>
+    </button>
+
+    <!-- Auto-Copy Toggle -->
+    <button id="auto-copy-toggle-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border-2 px-4 text-sm font-medium shadow-md transition-all hover:shadow-lg"
+            aria-label="自動複製">
+      <span class="material-symbols-outlined text-base">content_copy</span>
+      <span class="hidden sm:inline auto-copy-label">Auto</span>
+    </button>
   </div>
 
-  <div class="container">
-    <!-- Header -->
-    <header class="header">
-      <h1>WebDaYi <span class="chinese">網頁大易輸入法</span></h1>
-      <p class="subtitle">MVP 1.0 - Core Engine Validation</p>
-    </header>
+  <!-- Copy Toast Notification -->
+  <div id="copy-toast"
+       class="fixed bottom-6 right-6 z-50 hidden rounded-lg bg-green-500 px-6 py-3 text-white font-medium shadow-lg animate-slide-in">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">check_circle</span>
+      <span>已複製到剪貼簿</span>
+    </div>
+  </div>
 
-    <!-- Instructions -->
-    <section class="instructions">
-      <h2>使用說明 (Instructions)</h2>
-      <ol>
-        <li>在「輸入碼」框中輸入大易碼（包含 0-9, a-z 等字碼）</li>
-        <li>候選字會即時顯示在下方</li>
-        <li>使用快速選字鍵：
-          <ul>
-            <li><kbd>Space</kbd> 第 1 個字（最快！）</li>
-            <li><kbd>'</kbd> 第 2 個字</li>
-            <li><kbd>[</kbd> 第 3 個字</li>
-            <li><kbd>]</kbd> 第 4 個字</li>
-            <li><kbd>-</kbd> 第 5 個字</li>
-            <li><kbd>\</kbd> 第 6 個字</li>
-          </ul>
-        </li>
-        <li>選中的字會出現在「輸出緩衝區」</li>
-        <li>組完句子後，點擊「複製」按鈕</li>
-        <li>貼到其他應用程式使用</li>
-      </ol>
-      <div class="note">
-        <strong>新功能：</strong>
-        <ul>
-          <li><strong>自動選字：</strong>輸入兩碼後，繼續打第三碼會自動選擇第一個候選字（加速打字速度）</li>
-          <li><strong>換頁功能：</strong>當候選字超過 6 個時，按 <kbd>=</kbd> 可循環切換頁面</li>
-          <li><strong>智能 Backspace：</strong>按 <kbd>Backspace</kbd> 會依序刪除輸入碼，輸入碼清空後會刪除輸出緩衝區的最後一個字，連續按可一路清空</li>
-          <li><strong>個人化學習（v6）：</strong>輸入法會記住你的選字習慣！當你選擇非預設候選字時（例如選了第 2 個字），下次輸入相同字碼時，你偏好的字會自動排到第一位。偏好設定會自動儲存在瀏覽器中，下次開啟時自動載入</li>
-          <li><strong>觸控友好 UX（v7 最新！）：</strong>
-            <ul>
-              <li>📱 <strong>點擊選字：</strong>可以直接點擊候選字來選擇（不只是鍵盤）</li>
-              <li>◀▶ <strong>上下頁按鈕：</strong>使用「上一頁」/「下一頁」按鈕輕鬆翻頁（手機/平板友好）</li>
-              <li>所有按鈕都有觸控優化的大小（最小 44px）和視覺回饋</li>
-            </ul>
-          </li>
-          <li><strong>注意：</strong>0-9 是字碼的一部分（如 t0, t1），不再用於選字</li>
-        </ul>
-      </div>
-    </section>
+  <!-- Main Container -->
+  <div class="flex min-h-screen w-full flex-col items-center p-4 sm:p-6 md:p-8">
+    <div class="w-full max-w-3xl space-y-8">
 
-    <!-- Input Section -->
-    <section class="input-section">
-      <div class="input-group">
-        <label for="input-box">
-          輸入碼 (Input Code)
-          <span class="hint">Type Dàyì code here</span>
-        </label>
-        <input
-          type="text"
-          id="input-box"
-          class="input-box"
-          placeholder="輸入大易碼..."
-          autocomplete="off"
-          spellcheck="false"
-        />
-      </div>
-
-      <!-- Candidate Area -->
-      <div class="candidate-section">
-        <div class="candidate-header">
-          候選字 (Candidates)
-          <span class="hint">Press keys or click to select, = or buttons to page</span>
+      <!-- Header -->
+      <header class="flex flex-col items-center gap-2 text-center" id="app-header">
+        <div class="flex items-center gap-3">
+          <div class="size-8 text-primary">
+            <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path clip-rule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
+            </svg>
+          </div>
+          <h1 class="text-3xl font-bold tracking-tighter text-slate-900 dark:text-white">WebDaYi</h1>
         </div>
-        <div id="candidate-area" class="candidate-area">
-          <div class="no-candidates">請輸入大易碼</div>
+        <p class="text-lg text-slate-600 dark:text-slate-400">網頁大易輸入法 Core Engine v8</p>
+      </header>
+
+      <!-- Instructions Section (hidden in express mode) -->
+      <section id="instructions-section"
+               class="space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 sm:p-6 transition-colors">
+        <details class="group">
+          <summary class="cursor-pointer select-none text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-base group-open:rotate-90 transition-transform">chevron_right</span>
+            <span>使用說明 (Quick Guide)</span>
+          </summary>
+          <div class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-400 pl-6">
+            <div class="space-y-2">
+              <p class="font-medium text-slate-700 dark:text-slate-300">基本操作：</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li>在「輸入碼」框中輸入大易碼（a-z, 0-9）</li>
+                <li>候選字會即時顯示</li>
+                <li>選字後會**自動複製**到剪貼簿（可切換關閉）</li>
+                <li>使用「清除」按鈕快速清空輸出</li>
+              </ul>
+            </div>
+            <div class="space-y-2">
+              <p class="font-medium text-slate-700 dark:text-slate-300">選字方式：</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li>按 <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">Space</kbd> 選第 1 個字</li>
+                <li>按 <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">'</kbd> <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">[</kbd> <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">]</kbd> <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">-</kbd> <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">\</kbd> 選第 2-6 個字</li>
+                <li>點擊候選字直接選取（觸控友善）</li>
+                <li>輸入 2 碼後繼續打第 3 碼會自動選取第 1 個字</li>
+              </ul>
+            </div>
+            <div class="space-y-2">
+              <p class="font-medium text-slate-700 dark:text-slate-300">進階功能：</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li>按 <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">=</kbd> 或使用「上一頁/下一頁」按鈕翻頁</li>
+                <li>輸入法會學習你的選字習慣並自動調整順序</li>
+                <li>按 <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">Backspace</kbd> 智慧刪除（先刪輸入碼，再刪輸出字元）</li>
+              </ul>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <main class="w-full space-y-6">
+
+        <!-- Output Section (Top) -->
+        <div class="space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 sm:p-6 transition-colors">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">輸出 (Output)</h2>
+            <div class="flex items-center gap-2">
+              <button id="copy-button"
+                      class="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary/10 dark:bg-primary/20 px-4 text-sm font-medium text-primary hover:bg-primary/20 dark:hover:bg-primary/30 transition-all hover:shadow-md">
+                <span class="material-symbols-outlined text-base">content_copy</span>
+                <span>Copy</span>
+              </button>
+              <button id="clear-button"
+                      class="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-rose-500/10 dark:bg-rose-500/20 px-4 text-sm font-medium text-rose-500 dark:text-rose-400 hover:bg-rose-500/20 dark:hover:bg-rose-500/30 transition-all hover:shadow-md">
+                <span class="material-symbols-outlined text-base">delete</span>
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+          <textarea id="output-buffer"
+                    class="form-textarea w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 text-base text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                    placeholder="選好的文字會出現在這裡... (Selected text appears here)"
+                    rows="6"></textarea>
         </div>
-      </div>
-    </section>
 
-    <!-- Output Section -->
-    <section class="output-section">
-      <div class="output-group">
-        <label for="output-buffer">
-          輸出緩衝區 (Output Buffer)
-          <span class="hint">Composed text appears here</span>
-        </label>
-        <textarea
-          id="output-buffer"
-          class="output-buffer"
-          placeholder="組好的文字會出現在這裡..."
-          rows="6"
-        ></textarea>
-      </div>
+        <!-- Input Section (Bottom) -->
+        <div class="space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 sm:p-6 transition-colors">
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700 dark:text-slate-300" for="input-box">
+              輸入碼 (Dayi Input)
+            </label>
+            <input id="input-box"
+                   type="text"
+                   autofocus
+                   autocomplete="off"
+                   spellcheck="false"
+                   class="form-input h-12 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 text-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono transition-colors"
+                   placeholder="輸入大易碼... (e.g., 'f' for '你')"/>
+          </div>
 
-      <div class="button-group">
-        <button id="copy-button" class="copy-button">
-          📋 複製 (Copy)
-        </button>
-        <button id="clear-button" class="clear-button">
-          🗑️ 清除 (Clear)
-        </button>
-      </div>
-    </section>
-
-    <!-- Debug Info -->
-    <section class="debug-section">
-      <details>
-        <summary>Debug Information</summary>
-        <div id="debug-info" class="debug-info">
-          <p>Database loading...</p>
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700 dark:text-slate-300">
+              候選字 (Candidates)
+            </label>
+            <div id="candidate-area"
+                 class="flex min-h-20 flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-3 transition-colors">
+              <div class="w-full text-center text-sm text-slate-400 py-4">請輸入大易碼</div>
+            </div>
+          </div>
         </div>
-      </details>
-    </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <p>
-        WebDaYi MVP 1.0 - Core Engine Validation Tool
-        <br>
-        <small>
-          Data source: <a href="https://github.com/rime/rime-dayi" target="_blank">Rime Dàyì Dictionary</a>
-        </small>
-      </p>
-    </footer>
+        <!-- Status Message -->
+        <div id="status-message"
+             class="flex items-center justify-center gap-2 rounded-full bg-slate-200 dark:bg-slate-800 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 transition-colors">
+          <span class="material-symbols-outlined text-base">info</span>
+          <span>載入中... (Loading...)</span>
+        </div>
+
+        <!-- Debug Section (hidden in express mode) -->
+        <div id="debug-section"
+             class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 p-4 transition-colors">
+          <details class="group">
+            <summary class="cursor-pointer select-none text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-base group-open:rotate-90 transition-transform">chevron_right</span>
+              <span>Debug Information</span>
+            </summary>
+            <div id="debug-info" class="mt-3 text-xs font-mono text-slate-500 dark:text-slate-500 space-y-1">
+              <p>Database loading...</p>
+            </div>
+          </details>
+        </div>
+      </main>
+
+      <!-- Footer (hidden in express mode) -->
+      <footer id="app-footer"
+              class="text-center text-sm text-slate-500 dark:text-slate-500 pb-4 transition-colors">
+        <p>
+          WebDaYi MVP 1.0 v8 - Core Engine Validation Tool
+          <br>
+          <span class="text-xs">
+            Data source: <a href="https://github.com/rime/rime-dayi" target="_blank" class="text-primary hover:underline">Rime Dàyì Dictionary</a>
+          </span>
+        </p>
+      </footer>
+
+    </div>
   </div>
 
   <!-- Core Logic -->
   <script src="core_logic.js"></script>
 
-  <!-- Update debug info after loading -->
+  <!-- Dark Mode Toggle Script -->
   <script>
-    // Wait for database to load and update debug info
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const htmlElement = document.documentElement;
+
+    // Check saved preference or system preference
+    const darkModePreference = localStorage.getItem('darkMode');
+    if (darkModePreference === 'false') {
+      htmlElement.classList.remove('dark');
+    } else if (darkModePreference === null) {
+      // Default to system preference
+      if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        htmlElement.classList.remove('dark');
+      }
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+      htmlElement.classList.toggle('dark');
+      const isDark = htmlElement.classList.contains('dark');
+      localStorage.setItem('darkMode', isDark);
+
+      // Update icon
+      const icon = darkModeToggle.querySelector('.material-symbols-outlined');
+      icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+      const label = darkModeToggle.querySelector('span:not(.material-symbols-outlined)');
+      if (label) label.textContent = isDark ? 'Light' : 'Dark';
+    });
+
+    // Set initial icon
+    const isDark = htmlElement.classList.contains('dark');
+    const icon = darkModeToggle.querySelector('.material-symbols-outlined');
+    icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    const label = darkModeToggle.querySelector('span:not(.material-symbols-outlined)');
+    if (label) label.textContent = isDark ? 'Light' : 'Dark';
+  </script>
+
+  <!-- Update debug info and status after loading -->
+  <script>
     setTimeout(() => {
       const debugInfo = document.getElementById('debug-info');
-      if (debugInfo && dayiMap) {
+      const statusMessage = document.getElementById('status-message');
+
+      if (debugInfo && typeof dayiMap !== 'undefined' && dayiMap) {
         debugInfo.innerHTML = `
           <p><strong>Database Status:</strong> ✓ Loaded</p>
           <p><strong>Total Codes:</strong> ${dayiMap.size.toLocaleString()}</p>
           <p><strong>Sample Queries:</strong></p>
-          <ul>
-            <li><code>v</code> → ${queryCandidates(dayiMap, 'v').slice(0, 3).map(c => c.char).join(', ')}</li>
-            <li><code>a</code> → ${queryCandidates(dayiMap, 'a').slice(0, 3).map(c => c.char).join(', ')}</li>
+          <ul class="ml-4 mt-1 space-y-0.5">
+            <li><code class="text-primary">'v'</code> → ${queryCandidates(dayiMap, 'v').slice(0, 3).map(c => c.char).join(', ')}</li>
+            <li><code class="text-primary">'a'</code> → ${queryCandidates(dayiMap, 'a').slice(0, 3).map(c => c.char).join(', ')}</li>
           </ul>
+        `;
+      }
+
+      if (statusMessage && typeof dayiMap !== 'undefined' && dayiMap) {
+        statusMessage.innerHTML = `
+          <span class="material-symbols-outlined text-base text-green-500">check_circle</span>
+          <span>字典載入完成！已載入 ${dayiMap.size.toLocaleString()} 個字碼</span>
         `;
       }
     }, 1000);
   </script>
+
+  <!-- Add custom animation -->
+  <style>
+    @keyframes slide-in {
+      from {
+        transform: translateY(1rem);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .animate-slide-in {
+      animation: slide-in 0.3s ease-out;
+    }
+  </style>
+
 </body>
 </html>

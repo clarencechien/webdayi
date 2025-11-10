@@ -264,7 +264,7 @@ function performAutoCopy(text) {
 }
 
 /**
- * Show visual feedback after auto-copy (MVP1.11)
+ * Show visual feedback after auto-copy (MVP1.11) - Updated for Tailwind CSS
  * Displays brief toast notification
  */
 function showCopyFeedback() {
@@ -274,19 +274,19 @@ function showCopyFeedback() {
   const toast = document.getElementById('copy-toast');
   if (!toast) return;  // Gracefully handle missing element
 
-  // Show toast
+  // Show toast (Tailwind CSS)
   toast.classList.remove('hidden');
-  toast.classList.add('show');
+  toast.classList.add('flex');
 
   // Hide after 2 seconds
   setTimeout(() => {
     toast.classList.add('hidden');
-    toast.classList.remove('show');
+    toast.classList.remove('flex');
   }, 2000);
 }
 
 /**
- * Setup auto-copy toggle button (MVP1.11)
+ * Setup auto-copy toggle button (MVP1.11) - Updated for Tailwind CSS
  * Initializes toggle button event handlers and UI state
  */
 function setupAutoCopyToggle() {
@@ -297,16 +297,22 @@ function setupAutoCopyToggle() {
   if (!toggleBtn) return;  // Gracefully handle missing element
 
   /**
-   * Update toggle button UI state
+   * Update toggle button UI state (Tailwind CSS classes)
    */
   function updateToggleUI() {
+    const label = toggleBtn.querySelector('.auto-copy-label');
+
     if (autoCopyEnabled) {
-      toggleBtn.textContent = '🔄 自動複製: 開啟';
-      toggleBtn.classList.add('active');
+      // Active state: primary color with filled background
+      toggleBtn.classList.remove('bg-white', 'dark:bg-slate-800', 'border-slate-200', 'dark:border-slate-700', 'text-slate-700', 'dark:text-slate-300');
+      toggleBtn.classList.add('bg-primary', 'border-primary', 'text-white');
+      if (label) label.textContent = 'Auto ✓';
       toggleBtn.setAttribute('aria-label', '關閉自動複製');
     } else {
-      toggleBtn.textContent = '🔄 自動複製: 關閉';
-      toggleBtn.classList.remove('active');
+      // Inactive state: white background with border
+      toggleBtn.classList.remove('bg-primary', 'border-primary', 'text-white');
+      toggleBtn.classList.add('bg-white', 'dark:bg-slate-800', 'border-slate-200', 'dark:border-slate-700', 'text-slate-700', 'dark:text-slate-300');
+      if (label) label.textContent = 'Auto';
       toggleBtn.setAttribute('aria-label', '開啟自動複製');
     }
   }
@@ -446,27 +452,45 @@ function getToggleButtonText(currentMode) {
 }
 
 /**
- * Apply input mode to UI
+ * Apply input mode to UI (updated for Tailwind CSS)
  * @param {string} mode - Mode to apply
  */
 function applyInputMode(mode) {
   if (typeof document === 'undefined') return;
 
-  const bodyClass = getBodyClassForMode(mode);
-
-  if (bodyClass) {
-    document.body.classList.add(bodyClass);
-  } else {
-    document.body.classList.remove('express-mode');
-  }
-
   currentInputMode = mode;
+
+  // Hide/show elements for express mode (using new element IDs)
+  const elementsToHide = [
+    'app-header',
+    'instructions-section',
+    'debug-section',
+    'app-footer'
+  ];
+
+  elementsToHide.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      if (mode === 'express') {
+        element.classList.add('hidden');
+      } else {
+        element.classList.remove('hidden');
+      }
+    }
+  });
 
   // Update toggle button text if it exists
   const toggleButton = document.getElementById('mode-toggle-btn');
   if (toggleButton) {
-    toggleButton.textContent = getToggleButtonText(mode);
-    toggleButton.setAttribute('aria-label', getToggleButtonText(mode));
+    const label = toggleButton.querySelector('span:not(.material-symbols-outlined)');
+    if (label) {
+      label.textContent = mode === 'normal' ? 'Focus' : 'Normal';
+    }
+    const icon = toggleButton.querySelector('.material-symbols-outlined');
+    if (icon) {
+      icon.textContent = mode === 'normal' ? 'center_focus_strong' : 'fullscreen_exit';
+    }
+    toggleButton.setAttribute('aria-label', mode === 'normal' ? '切換至專注模式' : '切換至正常模式');
   }
 }
 
@@ -772,7 +796,7 @@ function getSelectionKeyLabel(index) {
  * @param {Array} candidates - Array of { char, freq } objects
  * @param {number} pageIndex - Current page index
  * @param {number} totalPages - Total pages
- * @returns {string} - HTML string with new selection keys
+ * @returns {string} - HTML string with new selection keys (Tailwind CSS)
  */
 function renderCandidatesHTML(candidates, pageIndex = 0, totalPages = 1) {
   if (!candidates || candidates.length === 0) {
@@ -785,23 +809,48 @@ function renderCandidatesHTML(candidates, pageIndex = 0, totalPages = 1) {
   const candidatesHtml = pageCandidates
     .map((candidate, index) => {
       const keyLabel = getSelectionKeyLabel(index);
-      const displayKey = index === 0 ? '<kbd>Space</kbd>' : `<kbd>${keyLabel}</kbd>`;
-      return `<div class="candidate-item clickable" data-index="${index}" role="button" tabindex="0" aria-label="選擇 ${candidate.char}">
-        <span class="candidate-key">${displayKey}</span>
-        <span class="candidate-char">${candidate.char}</span>
-      </div>`;
+      const displayKey = index === 0 ? 'Space' : keyLabel;
+      // Use Tailwind CSS classes for modern styling
+      const highlightClass = index === 0 ?
+        'bg-primary text-white ring-2 ring-primary' :
+        'bg-slate-200 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700';
+
+      return `<button class="candidate-item flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-md px-3 transition-all ${highlightClass}"
+                      data-index="${index}"
+                      role="button"
+                      tabindex="0"
+                      aria-label="選擇 ${candidate.char}">
+        <p class="text-sm font-medium">${index + 1}. ${candidate.char}</p>
+      </button>`;
     })
     .join('');
 
   // Add pagination controls if needed
   if (totalPages > 1) {
-    const prevDisabled = pageIndex === 0 ? 'disabled' : '';
-    const nextDisabled = pageIndex === totalPages - 1 ? 'disabled' : '';
+    const prevDisabled = pageIndex === 0;
+    const nextDisabled = pageIndex === totalPages - 1;
 
-    const pageControls = `<div class="page-controls">
-      <button class="page-btn prev-page" ${prevDisabled} aria-label="上一頁">◀ 上一頁</button>
-      <span class="page-indicator">第 ${pageIndex + 1}/${totalPages} 頁</span>
-      <button class="page-btn next-page" ${nextDisabled} aria-label="下一頁">下一頁 ▶</button>
+    const prevClass = prevDisabled ?
+      'opacity-40 cursor-not-allowed' :
+      'cursor-pointer hover:bg-primary/20 dark:hover:bg-primary/30';
+    const nextClass = nextDisabled ?
+      'opacity-40 cursor-not-allowed' :
+      'cursor-pointer hover:bg-primary/20 dark:hover:bg-primary/30';
+
+    const pageControls = `<div class="w-full mt-3 flex items-center justify-center gap-3 p-3 bg-primary/10 dark:bg-primary/20 border border-primary/30 rounded-lg">
+      <button class="flex h-9 items-center gap-2 px-4 rounded-md bg-white dark:bg-slate-800 text-sm font-medium text-primary transition-all prev-page ${prevClass}"
+              ${prevDisabled ? 'disabled' : ''}
+              aria-label="上一頁">
+        <span class="material-symbols-outlined text-base">chevron_left</span>
+        <span>上一頁</span>
+      </button>
+      <span class="text-sm font-medium text-slate-700 dark:text-slate-300">第 ${pageIndex + 1}/${totalPages} 頁</span>
+      <button class="flex h-9 items-center gap-2 px-4 rounded-md bg-white dark:bg-slate-800 text-sm font-medium text-primary transition-all next-page ${nextClass}"
+              ${nextDisabled ? 'disabled' : ''}
+              aria-label="下一頁">
+        <span>下一頁</span>
+        <span class="material-symbols-outlined text-base">chevron_right</span>
+      </button>
     </div>`;
     return candidatesHtml + pageControls;
   }
@@ -904,7 +953,7 @@ function updateCandidateArea(candidates, pageIndex = 0) {
   if (!candidateArea) return;
 
   if (candidates.length === 0) {
-    candidateArea.innerHTML = '<div class="no-candidates">沒有候選字</div>';
+    candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">沒有候選字</div>';
   } else {
     const totalPages = getTotalPages(candidates);
     candidateArea.innerHTML = renderCandidatesHTML(candidates, pageIndex, totalPages);
