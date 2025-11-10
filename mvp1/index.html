@@ -260,6 +260,56 @@
                     rows="6"></textarea>
         </div>
 
+        <!-- v11: Mode Toggle -->
+        <div class="space-y-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 sm:p-6 transition-colors">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium text-slate-700 dark:text-slate-300">輸入模式 (Input Mode)</h3>
+          </div>
+          <div class="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+            <button id="char-mode-btn" class="mode-btn active flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-medium text-sm transition-all">
+              <span class="material-symbols-outlined text-base">text_fields</span>
+              <span>逐字模式</span>
+            </button>
+            <button id="sentence-mode-btn" class="mode-btn flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-medium text-sm transition-all">
+              <span class="material-symbols-outlined text-base">auto_awesome</span>
+              <span>整句模式</span>
+            </button>
+          </div>
+          <div id="mode-description" class="text-xs text-center text-slate-500 dark:text-slate-400">
+            逐字模式: 每輸入一個編碼即選字 (Character-by-character input)
+          </div>
+        </div>
+
+        <!-- v11: Code Buffer Display (hidden by default, shown in sentence mode) -->
+        <div id="code-buffer-display" class="hidden space-y-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-4 transition-colors">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+              <span class="material-symbols-outlined text-base">code</span>
+              <span>已輸入編碼 (Buffered Codes)</span>
+            </div>
+            <button id="clear-buffer-btn" class="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="清除緩衝區 (ESC)">
+              <span class="material-symbols-outlined text-sm">backspace</span>
+              <span>清除</span>
+            </button>
+          </div>
+          <div id="buffered-codes" class="flex flex-wrap gap-2 min-h-12 items-center">
+            <span class="text-sm text-slate-400 dark:text-slate-500 italic">尚無編碼 (No codes yet)</span>
+          </div>
+        </div>
+
+        <!-- v11: Live Preview (hidden by default, shown when buffer not empty) -->
+        <div id="live-preview" class="hidden space-y-3 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10 p-4 transition-colors">
+          <div class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+            <span class="material-symbols-outlined text-base">visibility</span>
+            <span>預覽 (Preview)</span>
+          </div>
+          <div id="preview-text" class="text-3xl font-bold text-center text-slate-800 dark:text-slate-100 tracking-widest py-3"></div>
+          <div class="text-xs text-center text-slate-500 dark:text-slate-400">
+            <span class="material-symbols-outlined text-sm align-middle">keyboard</span>
+            按 <kbd class="px-2 py-0.5 rounded bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 font-mono text-xs">Space</kbd> 鍵以智能預測最佳句子
+          </div>
+        </div>
+
         <!-- Input Section (Bottom) -->
         <div class="space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 sm:p-6 transition-colors">
           <div class="space-y-2">
@@ -312,10 +362,11 @@
       <footer id="app-footer"
               class="text-center text-sm text-slate-500 dark:text-slate-500 pb-4 transition-colors">
         <p>
-          WebDaYi MVP 1.0 v8 - Core Engine Validation Tool
+          WebDaYi MVP 1.0 v11 - N-gram Sentence Prediction
           <br>
           <span class="text-xs">
-            Data source: <a href="https://github.com/rime/rime-dayi" target="_blank" class="text-primary hover:underline">Rime Dàyì Dictionary</a>
+            Data source: <a href="https://github.com/rime/rime-dayi" target="_blank" class="text-primary hover:underline">Rime Dàyì Dictionary</a> +
+            <a href="https://github.com/rime/rime-essay" target="_blank" class="text-primary hover:underline">Rime Essay (N-gram)</a>
           </span>
         </p>
       </footer>
@@ -323,8 +374,22 @@
     </div>
   </div>
 
+  <!-- v11: N-gram Loading Indicator -->
+  <div id="ngram-loading" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-2xl max-w-sm mx-4 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+      <div class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">載入 N-gram 資料庫</div>
+      <div class="text-sm text-slate-500 dark:text-slate-400">首次使用需載入 10MB 資料...</div>
+    </div>
+  </div>
+
   <!-- Core Logic -->
   <script src="core_logic.js"></script>
+
+  <!-- v11: N-gram Sentence Prediction -->
+  <script src="viterbi_module.js"></script>
+  <script src="core_logic_v11.js"></script>
+  <script src="core_logic_v11_ui.js"></script>
 
   <!-- Dark Mode Toggle Script -->
   <script>
@@ -404,6 +469,87 @@
     }
     .animate-slide-in {
       animation: slide-in 0.3s ease-out;
+    }
+
+    /* v11: Mode Toggle Styles */
+    .mode-btn {
+      background: transparent;
+      color: var(--tw-text-opacity);
+    }
+    .mode-btn:hover {
+      background: rgba(15, 184, 240, 0.1);
+    }
+    .mode-btn.active {
+      background: #0fb8f0;
+      color: white;
+      box-shadow: 0 2px 8px rgba(15, 184, 240, 0.3);
+    }
+
+    /* v11: Buffered Code Badges */
+    .buffered-code-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.375rem 0.75rem;
+      background: #0fb8f0;
+      color: white;
+      border-radius: 0.375rem;
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      font-size: 0.875rem;
+      animation: slide-in 0.2s ease-out;
+    }
+    .dark .buffered-code-badge {
+      background: #0fb8f0;
+    }
+
+    /* v11: Sentence Prediction Result */
+    .sentence-prediction {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      animation: slide-in 0.3s ease-out;
+    }
+    .prediction-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+    }
+    .predicted-sentence {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.2em;
+      margin: 1rem 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    .prediction-details {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 0.875rem;
+    }
+    .char-breakdown {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .prediction-score {
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 640px) {
+      .mode-btn span:not(.material-symbols-outlined) {
+        display: none;
+      }
+      .predicted-sentence {
+        font-size: 1.5rem;
+      }
     }
   </style>
 
