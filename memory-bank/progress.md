@@ -1,8 +1,8 @@
 # Progress Tracker: WebDaYi
 
-**Last Updated**: 2025-11-10 (Updated after MVP1 v10 + UX Improvement)
-**Overall Status**: 🎉 MVP 1.0 v10 COMPLETE + Mobile UX + Font Control + Inline Hints!
-**Completion**: ~57% (Phase 0 v2 & MVP 1 v10 complete, MVP 2a next)
+**Last Updated**: 2025-11-10 (Updated after MVP1 v10 Bugfix - Delete Key + Auto-Copy Feedback)
+**Overall Status**: 🎉 MVP 1.0 v10 COMPLETE + Mobile UX + Font Control + Inline Hints + Bugfixes!
+**Completion**: ~58% (Phase 0 v2 & MVP 1 v10 complete, MVP 2a next)
 
 ## Project Phases Overview
 
@@ -25,7 +25,8 @@
 │   ├─ Modern UI Redesign (v9)  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✨✅  │
 │   ├─ Mobile UX Fixes (v10)    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 📱✅  │
 │   ├─ Font Size Control (v10)  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🔤✅  │
-│   └─ Inline Hints UX (v10)    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 💡✅  │
+│   ├─ Inline Hints UX (v10)    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 💡✅  │
+│   └─ Delete Key + Feedback (v10) [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🐛✅  │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 3: MVP 2a+ (Future)     [░░░░░░░░░░░░░░░░]   0% 📋    │
 └─────────────────────────────────────────────────────────────┘
@@ -35,19 +36,26 @@ Legend: ✅ Complete | 🐛 Bug Fix | 🎨 UI | 🌗 Theme | ✨ Design | 📱 M
 
 ## What's Complete ✅
 
-### 💡 LATEST MILESTONE: MVP 1.0 v10 Complete + Mobile UX + Inline Hints!
+### 🐛 LATEST MILESTONE: MVP 1.0 v10 Bugfix - Delete Key + Auto-Copy Feedback!
 
 **Achievement Summary** (2025-11-10):
 - ✅ Data Pipeline: YAML → JSON converter working perfectly (v2 with frequency ranking)
-- ✅ MVP 1.0 v10: Mobile UX fixes + Font control + Inline selection hints
-- ✅ TDD: **91/91 automated tests passing** (21 converter + 70 MVP1)
+- ✅ MVP 1.0 v10: Mobile UX fixes + Font control + Inline hints + Critical bugfixes
+- ✅ TDD: **104/104 automated tests passing** (21 converter + 83 MVP1)
   - v6: 19 tests (personalization)
   - v7: 16 tests (auto-select fixes)
   - v8: 24 tests (auto-copy + clear)
   - v10: 27 tests (mobile UX + font)
   - v10-ux: 5 tests (inline hints)
+  - v10-bugfix: 13 tests (delete key + feedback) ⭐ NEW!
 - ✅ Performance: All targets exceeded (< 20ms vs 100ms target)
 - ✅ Documentation: Comprehensive README and design docs
+
+**v10 Bugfix Features**:
+- ⌨️ **v10 Bugfix**: Delete key clears output buffer (keyboard shortcut)
+- ✅ **v10 Bugfix**: Fixed auto-copy feedback showing wrong message
+- 🔧 **v10 Bugfix**: Toast HTML structure preserved across all feedback
+- 🎯 **v10 Bugfix**: Correct messages for all actions (copy, clear, font size)
 
 **v10 Features** (Mobile UX + Font Control):
 - 📱 **v10 New**: Responsive control panel (desktop fixed / mobile FAB + slide-in)

@@ -525,6 +525,7 @@ function setupMobileControlPanel() {
 
 /**
  * Show temporary feedback message (MVP1.11)
+ * Preserves HTML structure (icon + text) - v10 bugfix
  * @param {string} message - Message to show
  */
 function showTemporaryFeedback(message) {
@@ -534,15 +535,34 @@ function showTemporaryFeedback(message) {
   const toast = document.getElementById('copy-toast');
   if (!toast) return;
 
-  const originalText = toast.textContent;
-  toast.textContent = message;
+  // Find the text span (second span element) to preserve HTML structure
+  const textSpan = toast.querySelector('div > span:last-child');
+
+  if (!textSpan) {
+    // Fallback: if structure doesn't exist, use plain text (backward compatibility)
+    const originalText = toast.textContent;
+    toast.textContent = message;
+    toast.classList.remove('hidden');
+    toast.classList.add('flex');
+
+    setTimeout(() => {
+      toast.classList.add('hidden');
+      toast.classList.remove('flex');
+      toast.textContent = originalText;
+    }, 2000);
+    return;
+  }
+
+  // Update only the text span, preserving HTML structure (icon remains)
+  const originalText = textSpan.textContent;
+  textSpan.textContent = message;
   toast.classList.remove('hidden');
-  toast.classList.add('show');
+  toast.classList.add('flex');
 
   setTimeout(() => {
     toast.classList.add('hidden');
-    toast.classList.remove('show');
-    toast.textContent = originalText;  // Restore
+    toast.classList.remove('flex');
+    textSpan.textContent = originalText;  // Restore original text
   }, 2000);
 }
 
@@ -1328,9 +1348,20 @@ async function initialize() {
         previousValue = e.target.value.trim().toLowerCase();
       });
 
-      // Handle selection keys (Space, ', [, ], -, \), pagination (=), and backspace
+      // Handle selection keys (Space, ', [, ], -, \), pagination (=), backspace, and delete
       inputBox.addEventListener('keydown', (e) => {
         const key = e.key;
+
+        // Handle Delete key for clearing output buffer (v10 bugfix)
+        if (key === 'Delete') {
+          e.preventDefault();
+          const outputBuffer = document.getElementById('output-buffer');
+          if (outputBuffer && outputBuffer.value) {
+            outputBuffer.value = '';
+            showTemporaryFeedback('已清除');
+          }
+          return;
+        }
 
         // Handle backspace key for output buffer deletion
         if (key === 'Backspace') {

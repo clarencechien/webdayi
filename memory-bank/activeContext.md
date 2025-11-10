@@ -1,12 +1,111 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-10 (MVP1 v10 + UX Improvement - Inline Selection Hints COMPLETED!)
-**Current Phase**: ✅ MVP 1.0 v10 + UX Enhancement COMPLETE!
+**Last Updated**: 2025-11-10 (MVP1 v10 Bugfix - Delete Key + Auto-Copy Feedback COMPLETED!)
+**Current Phase**: ✅ MVP 1.0 v10 + Bugfixes COMPLETE!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### ✅ LATEST: Inline Selection Key Hints UX Improvement (MVP1 v10 UX - 2025-11-10)
+### ✅ LATEST: Delete Key + Auto-Copy Feedback Bugfix (MVP1 v10 Bugfix - 2025-11-10)
+
+**Status**: ✅ Complete! All 104 tests passing (104/104 = 100%)
+
+**User Issues Fixed**:
+1. ✅ **Missing Delete Key**: Added Delete key to clear output buffer
+2. ✅ **Wrong Auto-Copy Feedback**: Fixed feedback showing "已清除" instead of copy message
+
+**Root Cause Analysis**:
+
+**Bug 1 - Missing Delete Key**:
+- **Problem**: Only Clear button existed, no keyboard shortcut
+- **User Request**: "加入delete鍵 可以清除output區文字"
+- **Solution**: Added Delete key handler to clear entire output buffer
+
+**Bug 2 - Auto-Copy Feedback Bug**:
+- **Problem**: Auto-copy showed "已清除" (Cleared) instead of "已複製到剪貼簿" (Copied to clipboard)
+- **User Report**: "當自動複制時 提示訊息是'已清除' 檢查一下 是不是亂掉了"
+- **Root Cause**:
+  - `showTemporaryFeedback()` used `toast.textContent = message`, destroying HTML structure
+  - Toast has HTML: `<span class="icon">check_circle</span><span>已複製到剪貼簿</span>`
+  - Setting `textContent` removed icon and structure, left only plain text
+  - After Clear button called `showTemporaryFeedback('已清除')`, toast had "已清除" as plain text
+  - Auto-copy then called `showCopyFeedback()` which didn't update text, just showed existing "已清除"
+
+**Fixes Implemented**:
+
+**1. Delete Key Functionality** (core_logic.js:1355-1364):
+```javascript
+// Handle Delete key for clearing output buffer (v10 bugfix)
+if (key === 'Delete') {
+  e.preventDefault();
+  const outputBuffer = document.getElementById('output-buffer');
+  if (outputBuffer && outputBuffer.value) {
+    outputBuffer.value = '';
+    showTemporaryFeedback('已清除');
+  }
+  return;
+}
+```
+
+**2. Fixed showTemporaryFeedback()** (core_logic.js:531-567):
+```javascript
+function showTemporaryFeedback(message) {
+  const toast = document.getElementById('copy-toast');
+  if (!toast) return;
+
+  // Find the text span to preserve HTML structure
+  const textSpan = toast.querySelector('div > span:last-child');
+
+  if (!textSpan) {
+    // Fallback for backward compatibility
+    // ... (plain text mode)
+    return;
+  }
+
+  // Update only the text span, preserving HTML structure (icon remains)
+  const originalText = textSpan.textContent;
+  textSpan.textContent = message;
+  toast.classList.remove('hidden');
+  toast.classList.add('flex');
+
+  setTimeout(() => {
+    toast.classList.add('hidden');
+    toast.classList.remove('flex');
+    textSpan.textContent = originalText;  // Restore original text
+  }, 2000);
+}
+```
+
+**Key Fix**: Uses `querySelector('div > span:last-child')` to find text span, updates only `textSpan.textContent` instead of `toast.textContent`, preserving icon and HTML structure.
+
+**TDD Approach**:
+- Created `mvp1/test-node-v10-bugfix.js` (13 new tests)
+- Red phase: 7/13 tests failing (as expected)
+- Implemented fixes
+- Green phase: 13/13 tests passing ✅
+
+**Test Results**: ✅ 104/104 passing (100% pass rate)
+- v6: 19/19 (personalization)
+- v7: 16/16 (auto-select fixes)
+- v8: 24/24 (auto-copy + clear)
+- v10: 27/27 (mobile UX + font)
+- v10-ux: 5/5 (inline hints)
+- v10-bugfix: 13/13 (delete key + feedback) ⭐ NEW!
+
+**Files Changed**:
+- `mvp1/core_logic.js`: Fixed showTemporaryFeedback(), added Delete key handler
+- `mvp1/test-node-v10-bugfix.js`: 13 new tests
+- `mvp1/DESIGN-v10-bugfix.md`: Design specification
+
+**User Benefits**:
+- ✅ **Delete key shortcut**: Quick clear with keyboard (no mouse needed)
+- ✅ **Correct feedback**: Auto-copy shows "已複製到剪貼簿", Clear shows "已清除"
+- ✅ **Toast icon preserved**: Check icon always visible with all feedback messages
+- ✅ **Consistent UX**: All feedback messages work correctly
+
+---
+
+### ✅ PREVIOUS: Inline Selection Key Hints UX Improvement (MVP1 v10 UX - 2025-11-10)
 
 **Status**: ✅ Complete! All 91 tests passing (91/91 = 100%)
 
