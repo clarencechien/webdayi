@@ -1,12 +1,288 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-06 (Updated after Converter v2 implementation)
-**Current Phase**: ✅ MVP 1.0 v7 + Enhanced Converter COMPLETED!
+**Last Updated**: 2025-11-10 (Auto-Copy + Clear Buffer features - MVP1 v8)
+**Current Phase**: ✅ MVP 1.0 v8 + Enhanced Converter v2 + Documentation COMPLETED!
 **Next Milestone**: MVP 2a - Browser Plugin
 
 ## Current Work Focus
 
-### 🎉 LATEST UPDATE: Enhanced Converter v2 with Frequency Ranking COMPLETE!
+### 🎉 LATEST UPDATE: Auto-Copy + Clear Buffer Features (MVP1 v8 - 2025-11-10)
+
+**Achievement**: Implemented seamless auto-copy workflow with user control!
+
+**What was completed in v8**:
+- ✅ **MVP1.11: Auto-Copy Feature** - Automatically copies to clipboard after character selection
+- ✅ **MVP1.12: Clear Buffer Button** - One-click buffer clearing
+- ✅ **TDD Approach**: 24 new tests written first, all passing
+- ✅ **No Regression**: All 35 existing tests still passing (59/59 total)
+- ✅ **User Control**: Toggle button to enable/disable auto-copy
+- ✅ **Visual Feedback**: Toast notifications for copy/clear actions
+- ✅ **Mobile-Friendly**: Touch-optimized buttons and responsive layout
+- ✅ **Persistent Settings**: Auto-copy preference saved to localStorage
+
+**User Request** (translated):
+> "加上自動複製的邏輯...應該是在選字後自動複製到user的剪貼簿...也有可能是自動選字的...請再加上清除按鈕以便清除緩衝區"
+
+**Features Implemented**:
+
+**1. Auto-Copy (MVP1.11)**:
+- **Trigger**: Automatically copies output buffer after EVERY character selection
+- **Selection Methods Supported**:
+  - Space key (1st candidate)
+  - Quick selection keys (' [ ] - \)
+  - Click selection (touch/mouse) - v7 feature
+  - Auto-select (3rd character) - v3 feature
+- **User Control**: Toggle button 🔄 (fixed position, below mode toggle)
+- **Default**: Enabled (seamless workflow)
+- **Feedback**: Toast notification "✓ 已複製" (Copied)
+- **Persistence**: Preference saved to localStorage
+
+**2. Clear Buffer Button (MVP1.12)**:
+- **Location**: Next to copy button in button group
+- **Icon**: 🗑️ 清除 (Clear)
+- **Action**: Clears output buffer with one click
+- **Feedback**: Toast notification "已清除" (Cleared)
+
+**Design Decision - "Copy After Every Selection"**:
+
+**User's Request Interpretation**:
+- "選最後一個字時 自動複製" (auto-copy when selecting the last character)
+
+**Challenge**:
+- How does system know which is the "last" character?
+- User might continue typing or might be done
+
+**Our Solution**: Copy after EVERY selection (not just "last")
+
+**Rationale**:
+1. ✅ **Immediate access**: User has clipboard ready anytime
+2. ✅ **Predictable**: No guessing when copy happens
+3. ✅ **User control**: Can toggle off if preferred
+4. ✅ **Seamless workflow**: No extra clicks needed
+5. ✅ **Simple & reliable**: No complex timing logic
+
+**Alternatives Considered**:
+- ❌ **Time-based delay**: Unpredictable, doesn't match intent
+- ❌ **Smart detection**: Over-engineering, unreliable
+- ❌ **Explicit signal** (Enter/Tab): Adds extra step, not intuitive
+
+See `mvp1/DESIGN-auto-copy.md` for comprehensive analysis (800+ lines).
+
+**Implementation Details**:
+
+**Functions Added** (core_logic.js):
+```javascript
+// Storage
+getAutoCopyStorageKey()           // Returns 'webDayi_AutoCopy'
+loadAutoCopyPreference()          // Load from localStorage (default: true)
+saveAutoCopyPreference(enabled)   // Save to localStorage
+
+// Execution
+performAutoCopy(text)             // Copy to clipboard via navigator.clipboard
+showCopyFeedback()                // Show toast notification
+
+// UI Setup
+setupAutoCopyToggle()             // Initialize toggle button
+showTemporaryFeedback(message)    // Show custom toast message
+
+// Clear Button Handler (in initialize)
+clearButton.addEventListener('click', () => {
+  outputBuffer.value = '';
+  showTemporaryFeedback('已清除');
+});
+```
+
+**Global State**:
+```javascript
+let autoCopyEnabled = true;  // Default: enabled
+```
+
+**Auto-Copy Triggers** (integrated into existing functions):
+```javascript
+// 1. After manual selection (Space, quick keys)
+handleSelection(index) {
+  // ... existing selection logic ...
+  if (autoCopyEnabled) {
+    performAutoCopy(outputBuffer.value);
+    showCopyFeedback();
+  }
+}
+
+// 2. After click selection (v7 feature)
+// Already integrated via handleSelection()
+
+// 3. After auto-select (v3 feature)
+handleInput(value, previousValue) {
+  // ... auto-select logic ...
+  if (autoSelectTriggered && autoCopyEnabled) {
+    performAutoCopy(outputBuffer.value);
+    showCopyFeedback();
+  }
+}
+```
+
+**UI Elements** (index.html):
+```html
+<!-- Auto-Copy Toggle Button -->
+<button id="auto-copy-toggle-btn" class="feature-toggle">
+  🔄 自動複製: 開啟
+</button>
+
+<!-- Copy Feedback Toast -->
+<div id="copy-toast" class="copy-toast hidden">
+  ✓ 已複製
+</div>
+
+<!-- Button Group (Copy + Clear) -->
+<div class="button-group">
+  <button id="copy-button">📋 複製 (Copy)</button>
+  <button id="clear-button">🗑️ 清除 (Clear)</button>
+</div>
+```
+
+**Styling** (style.css):
+- Feature toggle button (active/inactive states)
+- Copy toast with slide-in animation
+- Button group layout (horizontal on desktop, vertical on mobile)
+- Clear button with hover effects
+- Touch-optimized sizes (44px minimum)
+
+**Test Coverage**:
+- **Auto-Copy Tests**: 24/24 passing ✅
+  - Settings: Storage key, load, save (6 tests)
+  - Execution: Core logic, edge cases (5 tests)
+  - Visual Feedback: Toast display (2 tests)
+  - Integration: Selection methods (3 tests)
+  - User Preferences: Works with v6 personalization (1 test)
+  - Toggle: Setup function (2 tests)
+  - Edge Cases: Long text, special chars, rapid selections (3 tests)
+  - Clipboard API: Compatibility (2 tests)
+
+- **Existing Tests**: 35/35 passing ✅ (no regression)
+  - v6 tests: 19/19 (user personalization)
+  - v7 tests: 16/16 (auto-select bug fix)
+
+- **Total**: 59/59 tests (100% pass rate) ✅
+
+**Verification**:
+- ✅ Auto-copy triggers after all 4 selection methods
+- ✅ Toggle button works (enable/disable)
+- ✅ Preference persists across page reloads
+- ✅ Visual feedback shows on copy/clear
+- ✅ Works without localStorage/document (Node.js tests)
+- ✅ Mobile-responsive layout
+- ✅ No console errors
+- ✅ All existing tests pass (no breaking changes)
+
+**User Benefits**:
+- ✅ **Seamless workflow**: Type → select → paste (no manual copy!)
+- ✅ **Immediate clipboard access**: Content ready to paste anywhere
+- ✅ **User controllable**: Can toggle auto-copy on/off
+- ✅ **Clear visual feedback**: Toast shows when actions occur
+- ✅ **Easy cleanup**: One-click buffer clearing
+- ✅ **Professional UX**: Non-intrusive notifications
+- ✅ **Mobile-friendly**: Works great on touch devices
+
+**Files Created**:
+- `mvp1/DESIGN-auto-copy.md` - Comprehensive design document (800+ lines)
+- `mvp1/test-node-v8.js` - 24 auto-copy tests
+
+**Files Modified**:
+- `mvp1/core_logic.js` - Auto-copy functions + clear button handler
+- `mvp1/index.html` - Toggle button, toast, clear button
+- `mvp1/style.css` - Styles for new UI elements
+
+---
+
+### 🔧 PREVIOUS UPDATE: GitHub Pages Deployment Fix + README Accuracy (2025-11-10)
+
+**Issue Reported**: User found GitHub Pages showing README.md instead of the WebDaYi application
+
+**Root Cause Analysis**:
+- **Problem**: No `index.html` in root directory
+- **Behavior**: GitHub Pages defaults to rendering README.md when no index.html exists
+- **Impact**: Users visiting https://clarencechien.github.io/webdayi/ saw documentation instead of the app
+- **MVP1 location**: Application exists at `mvp1/index.html` (correct project structure)
+- **Missing piece**: No redirect from root to mvp1/
+
+**Solution Implemented**:
+1. ✅ **Created root redirect** (`index.html`):
+   - Triple-layer redirect strategy for maximum compatibility
+   - JavaScript redirect: `window.location.href = "mvp1/index.html"` (fastest)
+   - Meta refresh fallback: For JS-disabled browsers
+   - Manual link: For ultimate fallback
+   - Loading UI: Smooth user experience during redirect
+
+2. ✅ **Created comprehensive test suite** (`test-github-pages.js`):
+   - 20 automated tests to prevent regression
+   - Test Groups:
+     - Root Redirect Configuration (5 tests)
+     - MVP1 Application Validation (4 tests)
+     - Express Mode Feature Validation (3 tests)
+     - Core UI Elements Validation (4 tests)
+     - Related Files Validation (4 tests)
+   - All 20/20 tests passing ✅
+
+3. ✅ **Verified Express Mode already exists** (v5 feature):
+   - User asked to "add input mode switch"
+   - **Finding**: Express Mode toggle was already implemented in MVP1 v5!
+   - Button exists: `<button id="mode-toggle-btn">切換至專注模式</button>`
+   - Functionality working: Hides header/instructions, shows only input/candidates/output
+   - **Why user didn't see it**: GitHub Pages was broken, so they couldn't access the app!
+
+4. ✅ **Updated README files for accuracy**:
+   - Project Structure: Added all converter v2 files, test files, memory bank structure
+   - Testing Section: Updated to 56/56 tests (21 converter + 35 MVP1)
+   - Roadmap: Added v5, v6, v7 milestones and Converter v2
+   - Footer: Updated from v4 to v7 status
+   - Badges: Updated test count to 56/56
+   - New Section: Added prominent "頻率導向的智慧排序" / "Frequency-Based Smart Sorting"
+   - Alignment: Both Chinese and English READMEs are 449 lines, perfectly aligned
+
+**Prevention Strategy**:
+- ✅ Automated test validates root index.html exists
+- ✅ Automated test validates redirect configuration
+- ✅ Automated test validates Express Mode toggle exists
+- ✅ Automated test validates all core UI elements
+- ✅ CI can run this test before deployment
+
+**Files Created/Modified**:
+- `index.html` (new) - Root redirect with triple-layer strategy
+- `test-github-pages.js` (new) - 20 comprehensive deployment tests
+- `README.md` (updated) - Accurate codebase mapping, Chinese version
+- `README.en.md` (updated) - Accurate codebase mapping, English version
+- `memory-bank/activeContext.md` (this file) - Updated with GitHub Pages fix
+
+**Verification**:
+- ✅ 20/20 deployment tests passing
+- ✅ Root index.html redirects to mvp1/index.html
+- ✅ Express Mode toggle exists and is documented
+- ✅ README files accurately reflect codebase
+- ✅ Chinese-English documentation aligned (449 lines each)
+
+**User Impact**:
+- ✅ GitHub Pages now loads the WebDaYi application correctly
+- ✅ Users can immediately access the live demo
+- ✅ Express Mode feature (v5) is now accessible
+- ✅ Documentation is complete and accurate
+- ✅ No more confusion about missing features
+
+**Technical Insight - "Ultrathinking" Prevention**:
+This bug demonstrates importance of deployment testing:
+1. **Root Cause**: Missing deployment artifact (root index.html)
+2. **Why it wasn't caught**: No deployment validation tests
+3. **How to prevent**: Automated deployment tests in CI/CD
+4. **Lesson**: Test the deployment environment, not just the code
+
+The test suite (`test-github-pages.js`) now ensures:
+- All necessary files exist in correct locations
+- Redirect mechanism works with multiple fallbacks
+- Features are documented and accessible
+- Prevents "works locally, broken on production" scenarios
+
+---
+
+### 🎉 PREVIOUS UPDATE: Enhanced Converter v2 with Frequency Ranking COMPLETE!
 
 **Achievement**: Implemented frequency-based converter with real-world character usage data!
 

@@ -4,16 +4,19 @@
 
 > A lightweight, transparent, Web-First Input Method Engine for Dàyì (大易) Chinese Input
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v7%20Complete%20%2B%20Converter%20v2-brightgreen)]()
-[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v7-blue)]()
-[![Tests](https://img.shields.io/badge/tests-56%2F56%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v8%20Complete%20%2B%20Auto--Copy-brightgreen)]()
+[![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v8-blue)]()
+[![Tests](https://img.shields.io/badge/tests-59%2F59%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 Live Demo
 
-**[Try WebDaYi MVP1 v7 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
+**[Try WebDaYi MVP1 v8 Now →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
 Experience the core Dàyì input engine in your browser with advanced features:
+- ✨ **Auto-Copy** *(v8 NEW!)*: Automatically copies to clipboard after selection, no manual clicking needed!
+- 🗑️ **Clear Button** *(v8 NEW!)*: One-click to clear output buffer!
+- 🔄 **Auto-Copy Toggle**: Can enable/disable auto-copy anytime
 - 🚀 **Auto-select**: Type 2 chars + 3rd char = auto-select first candidate (speeds up typing!)
 - 📄 **Pagination**: Press `=` to cycle through pages when there are 60+ candidates
 - ⌨️ **Smart Selection**: Use Space/' /[/]/- /\ to select candidates (0-9 are now part of codes!)
@@ -34,28 +37,32 @@ Experience the core Dàyì input engine in your browser with advanced features:
 
 ## Project Status
 
-**Current Phase**: ✅ MVP 1.0 v7 Complete!
-**Completion**: ~48% (Phase 0 & MVP 1 v7 done, MVP 2a next)
+**Current Phase**: ✅ MVP 1.0 v8 Complete!
+**Completion**: ~52% (Phase 0 & MVP 1 v8 done, MVP 2a next)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Phase 0: Data Pipeline        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1: MVP 1.0 v7           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1: MVP 1.0 v8           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Selection Keys Fix       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Pagination               [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Auto-select              [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Smart Backspace          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Input Mode Toggle        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ User Personalization     [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ Touch-Friendly UX        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Touch-Friendly UX        [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Auto-Copy                [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Clear Button             [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░]   0% ⏳    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Latest Achievement**: MVP 1.0 v7 with touch-friendly UX + critical bug fix (56/56 tests passing)
-- ✅ Touch-friendly UX implemented (MVP1.10)
-- 🐛 Fixed: Auto-select now respects user preferences (MVP1.9 bug fix)
+**Latest Achievement**: MVP 1.0 v8 with auto-copy + clear button (59/59 tests passing)
+- ✨ **Auto-Copy**: Automatically copies to clipboard after selection, no manual clicking needed! (MVP1.11)
+- 🗑️ **Clear Button**: One-click to clear output buffer (MVP1.12)
+- 🔄 **Toggleable Control**: Auto-copy feature can be enabled/disabled anytime
 - ✅ **Frequency Converter v2**: Smart sorting using Taiwan MOE's 2000 high-frequency character data
+- 🐛 **Bug Fixed**: Auto-select respects user preferences (v7)
 **Next Milestone**: Begin MVP 2a (Browser Plugin) implementation
 
 ## 💡 Core Feature: Frequency-Based Smart Sorting
@@ -93,7 +100,7 @@ This ensures the most commonly used characters appear first, making input faster
 
 ### Try It Now (Live Demo)
 
-**[Launch WebDaYi MVP1 v7 →](https://clarencechien.github.io/webdayi/)**
+**[Launch WebDaYi MVP1 v8 →](https://clarencechien.github.io/webdayi/)**
 
 No installation required! Just open the link and start typing:
 - Try `v` → 大, 夫, 禾
@@ -105,8 +112,9 @@ No installation required! Just open the link and start typing:
 - Press `Backspace` to undo (deletes input, then output buffer)
 - Toggle to Express Mode (top-right) for minimal UI
 - Select a non-default candidate → **IME learns your preference and uses it in auto-select!** [Bug Fixed ✅]
-- **New**: Use ◀ **上一頁** / **下一頁** ▶ buttons for easy paging on mobile/tablet!
-- Click "Copy" when done
+- **New (v7)**: Use ◀ **上一頁** / **下一頁** ▶ buttons for easy paging on mobile/tablet!
+- **New (v8)**: **Auto-copies to clipboard** after selection, no manual clicking needed! (toggleable on/off)
+- **New (v8)**: Use "Clear" button to clear output buffer with one click
 
 ### For Developers
 
@@ -115,10 +123,11 @@ No installation required! Just open the link and start typing:
 git clone https://github.com/clarencechien/webdayi.git
 cd webdayi
 
-# Run tests (all 35 tests should pass)
+# Run tests (all 59 tests should pass)
 cd mvp1
 node test-node-v6.js  # User personalization tests (19/19)
 node test-node-v7.js  # Auto-select bug fix tests (16/16)
+node test-node-v8.js  # Auto-copy & clear button tests (24/24)
 
 # Open locally in browser
 open index.html
@@ -210,11 +219,12 @@ webdayi/
 │       └── freq-sample.yaml    # Test frequency data (20 char sample)
 ├── mvp1/                       # Phase 1: Static Webpage
 │   ├── index.html              # Main user interface
-│   ├── core_logic.js           # Core query engine (v7)
+│   ├── core_logic.js           # Core query engine (v8)
 │   ├── style.css               # Stylesheet
 │   ├── dayi_db.json            # Generated database (frequency-sorted)
 │   ├── README.md               # MVP1 documentation (Traditional Chinese)
 │   ├── README.en.md            # MVP1 documentation (English)
+│   ├── DESIGN-auto-copy.md     # Auto-copy feature design document (v8)
 │   ├── test.html               # Browser test runner
 │   ├── test-node.js            # Node.js test runner (v1)
 │   ├── test-node-v2.js         # Selection keys tests (v2)
@@ -222,7 +232,8 @@ webdayi/
 │   ├── test-node-v4.js         # Smart backspace tests (v4)
 │   ├── test-node-v5.js         # Input mode toggle tests (v5)
 │   ├── test-node-v6.js         # User personalization tests (19 tests)
-│   └── test-node-v7.js         # Auto-select bug fix tests (16 tests)
+│   ├── test-node-v7.js         # Auto-select bug fix tests (16 tests)
+│   └── test-node-v8.js         # Auto-copy & clear button tests (24 tests)
 ├── mvp2a-plugin/               # Phase 2: Browser Extension (Planned)
 │   ├── manifest.json           # Chrome Extension config
 │   ├── background.js           # Service Worker
@@ -238,7 +249,7 @@ webdayi/
 
 ## Features
 
-### MVP 1.0 v6: Core Engine ✅ COMPLETE
+### MVP 1.0 v8: Core Engine ✅ COMPLETE
 
 **Basic Features:**
 - ✅ Load Dàyì dictionary into memory (Map data structure, 1,584 codes)
@@ -295,9 +306,25 @@ webdayi/
   - Keyboard accessibility maintained (can use Enter/Space on focused items)
   - Perfect for touch devices and trackpad users
 
+**Advanced Features (v8):**
+- ✅ **Auto-Copy to Clipboard**: Seamless output workflow
+  - **MVP1.11**: Automatically copies to clipboard after selection
+  - Works for all selection methods (quick keys, click, auto-select)
+  - Visual feedback: "✓ 已複製" toast notification
+  - Toggleable control: "🔄 自動複製" button in top-right
+  - Preference saved to localStorage (persists across sessions)
+  - Supports desktop and mobile (modern Clipboard API)
+  - Design philosophy: Copy after every selection for predictable behavior
+- ✅ **Clear Buffer Button**: Quick reset
+  - **MVP1.12**: One-click to clear output buffer
+  - Located next to "Copy" button for easy access
+  - Touch-optimized (44px minimum touch target)
+  - Responsive layout (stacks vertically on mobile)
+  - Provides temporary visual feedback
+
 **Target User**: Developer (for validation) & Power Users
-**Output Method**: Copy/Paste
-**Test Coverage**: 35/35 tests passing with TDD (19 personalization + 16 bug fix tests)
+**Output Method**: Auto-copy to clipboard + manual copy/clear
+**Test Coverage**: 59/59 tests passing with TDD (19 personalization + 16 bug fix + 24 auto-copy tests)
 
 ### MVP 2a: Browser Plugin (Planned)
 
@@ -356,7 +383,7 @@ cat ../mvp1/dayi_db.json | jq '."4jp"'
 
 ### Testing
 
-**Test Coverage**: ✅ 56/56 tests passing (with TDD)
+**Test Coverage**: ✅ 80/80 tests passing (with TDD)
 
 ```bash
 # Converter tests (21 tests)
@@ -369,10 +396,11 @@ node convert-v2.test.js
 # ✓ Integration tests (3 tests)
 # ✓ Edge cases (4 tests)
 
-# MVP1 tests (35 tests)
+# MVP1 tests (59 tests)
 cd mvp1
 node test-node-v6.js  # User personalization (19 tests)
 node test-node-v7.js  # Auto-select bug fix (16 tests)
+node test-node-v8.js  # Auto-copy & clear button (24 tests)
 
 # Browser manual testing
 open mvp1/index.html
@@ -385,8 +413,8 @@ open mvp1/test.html
 
 **Test Details**:
 - **Phase 0 (Converter)**: 21 automated tests covering frequency parsing, calculation, and database building
-- **Phase 1 (MVP1)**: 35 automated tests covering personalization, auto-select, and bug fixes
-- **Total**: 56 tests with 100% pass rate
+- **Phase 1 (MVP1)**: 59 automated tests covering personalization, auto-select, bug fixes, auto-copy, and clear functionality
+- **Total**: 80 tests with 100% pass rate
 
 ## Contributing
 
@@ -412,6 +440,7 @@ Once MVP 2a is validated, contributions welcome for:
 | ✅ MVP 1.0 v5: Input Mode Toggle | 2025-11-06 | Done |
 | ✅ MVP 1.0 v6: User Personalization | 2025-11-06 | Done |
 | ✅ MVP 1.0 v7: Touch-Friendly UX + Bug Fix | 2025-11-06 | Done |
+| ✅ MVP 1.0 v8: Auto-Copy + Clear Button | 2025-11-10 | Done |
 | ⏳ MVP 2a: Browser Plugin | 2025-11-20 | Planned |
 | ⏳ Public Release (Chrome Web Store) | 2025-11-25 | Planned |
 | 📋 MVP 2a+: Advanced Features | 2025-12-15 | Future |
@@ -444,6 +473,6 @@ Open source (license TBD - currently development phase)
 
 ---
 
-**Last Updated**: 2025-11-06
-**Status**: MVP 1.0 v7 Complete (with Converter v2)
-**Version**: 1.0.7-alpha (MVP1 v7 with touch-friendly UX + Converter v2 with frequency-based ranking)
+**Last Updated**: 2025-11-10
+**Status**: MVP 1.0 v8 Complete (auto-copy + clear button + Converter v2)
+**Version**: 1.0.8-alpha (MVP1 v8 with auto-copy + clear button + Converter v2 with frequency-based ranking)
