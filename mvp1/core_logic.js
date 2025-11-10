@@ -1312,11 +1312,11 @@ async function copyToClipboard() {
     // Visual feedback
     const copyButton = document.getElementById('copy-button');
     if (copyButton) {
-      const originalText = copyButton.textContent;
-      copyButton.textContent = '已複製！';
+      const originalHTML = copyButton.innerHTML;
+      copyButton.innerHTML = '<span class="material-symbols-outlined text-base">check_circle</span><span>已複製！</span>';
       copyButton.style.background = '#4caf50';
       setTimeout(() => {
-        copyButton.textContent = originalText;
+        copyButton.innerHTML = originalHTML;
         copyButton.style.background = '';
       }, 1500);
     }

@@ -165,6 +165,59 @@
     livePreview.classList.remove('hidden');
   }
 
+  async function triggerPrediction() {
+    const buffer = getCodeBuffer();
+
+    if (buffer.length === 0) {
+      console.warn('[v11 UI] Buffer empty, cannot predict');
+      return;
+    }
+
+    console.log(`[v11 UI] Predicting sentence for: ${buffer.join(', ')}`);
+
+    // Ensure N-gram DB is loaded
+    const ngram = await loadNgramDatabase();
+    if (!ngram) {
+      alert('N-gram 資料庫未載入，無法預測');
+      return;
+    }
+
+    // Run Viterbi prediction
+    const result = predictSentenceFromBuffer(buffer, dayiMap, ngram);
+
+    if (result) {
+      console.log(`[v11 UI] Prediction: "${result.sentence}" (score: ${result.score.toFixed(3)})`);
+
+      // Display prediction
+      displaySentencePrediction(result);
+
+      // Append to output buffer
+      const outputBuffer = document.getElementById('output-buffer');
+      if (outputBuffer) {
+        outputBuffer.value += result.sentence;
+
+        // Auto-copy if enabled
+        if (typeof autoCopyEnabled !== 'undefined' && autoCopyEnabled) {
+          if (typeof performAutoCopy === 'function') {
+            performAutoCopy(outputBuffer.value);
+          }
+          if (typeof showCopyFeedback === 'function') {
+            showCopyFeedback();
+          }
+        }
+      }
+
+      // Clear buffer and input
+      clearCodeBuffer();
+      updateBufferDisplay();
+      updateLivePreviewDisplay();
+      if (inputBox) inputBox.value = '';
+    } else {
+      console.error('[v11 UI] Prediction failed');
+      alert('預測失敗，請重試');
+    }
+  }
+
   function displaySentencePrediction(result) {
     if (!candidateArea) return;
 
@@ -237,6 +290,15 @@
     });
   }
 
+  // Predict sentence button (mobile-friendly)
+  const predictSentenceBtn = document.getElementById('predict-sentence-btn');
+  if (predictSentenceBtn) {
+    predictSentenceBtn.addEventListener('click', async () => {
+      console.log('[v11 UI] Predict button clicked');
+      await triggerPrediction();
+    });
+  }
+
   // ============================================
   // Enhanced Input Handling (v11)
   // ============================================
@@ -304,56 +366,7 @@
       // Space: Trigger prediction
       if (key === ' ') {
         e.preventDefault();
-        const buffer = getCodeBuffer();
-
-        if (buffer.length === 0) {
-          console.warn('[v11 UI] Buffer empty, cannot predict');
-          return;
-        }
-
-        console.log(`[v11 UI] Predicting sentence for: ${buffer.join(', ')}`);
-
-        // Ensure N-gram DB is loaded
-        const ngram = await loadNgramDatabase();
-        if (!ngram) {
-          alert('N-gram 資料庫未載入，無法預測');
-          return;
-        }
-
-        // Run Viterbi prediction
-        const result = predictSentenceFromBuffer(buffer, dayiMap, ngram);
-
-        if (result) {
-          console.log(`[v11 UI] Prediction: "${result.sentence}" (score: ${result.score.toFixed(3)})`);
-
-          // Display prediction
-          displaySentencePrediction(result);
-
-          // Append to output buffer
-          const outputBuffer = document.getElementById('output-buffer');
-          if (outputBuffer) {
-            outputBuffer.value += result.sentence;
-
-            // Auto-copy if enabled
-            if (typeof autoCopyEnabled !== 'undefined' && autoCopyEnabled) {
-              if (typeof performAutoCopy === 'function') {
-                performAutoCopy(outputBuffer.value);
-              }
-              if (typeof showCopyFeedback === 'function') {
-                showCopyFeedback();
-              }
-            }
-          }
-
-          // Clear buffer and input
-          clearCodeBuffer();
-          updateBufferDisplay();
-          updateLivePreviewDisplay();
-          originalInputBox.value = '';
-        } else {
-          console.error('[v11 UI] Prediction failed');
-          alert('預測失敗，請重試');
-        }
+        await triggerPrediction();
       }
 
       // Backspace on empty input: Remove last code from buffer
