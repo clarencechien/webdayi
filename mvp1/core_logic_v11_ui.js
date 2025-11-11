@@ -235,6 +235,10 @@
     livePreviewContainer.classList.remove('hidden');
   }
 
+  // Export to window for Space key handler in core_logic.js
+  window.updateBufferDisplay = updateBufferDisplay;
+  window.updateLivePreviewDisplay = updateLivePreviewDisplay;
+
   // Export to window for = key handler in core_logic.js
   window.triggerPrediction = async function triggerPrediction() {
     const buffer = getCodeBuffer();

@@ -1526,11 +1526,17 @@ async function initialize() {
 
                   // Update buffer display (NO prediction!)
                   // NOTE: Space should ONLY buffer, = key triggers prediction
-                  if (typeof updateBufferDisplay === 'function') {
-                    updateBufferDisplay();
+                  if (typeof window !== 'undefined' && typeof window.updateBufferDisplay === 'function') {
+                    console.log('[Space Handler] Calling updateBufferDisplay...');
+                    window.updateBufferDisplay();
+                  } else {
+                    console.warn('[Space Handler] updateBufferDisplay not found!');
                   }
-                  if (typeof updateLivePreviewDisplay === 'function') {
-                    updateLivePreviewDisplay();
+                  if (typeof window !== 'undefined' && typeof window.updateLivePreviewDisplay === 'function') {
+                    console.log('[Space Handler] Calling updateLivePreviewDisplay...');
+                    window.updateLivePreviewDisplay();
+                  } else {
+                    console.warn('[Space Handler] updateLivePreviewDisplay not found!');
                   }
                   console.log('[Space Handler] Code added to buffer successfully');
                 } else {
