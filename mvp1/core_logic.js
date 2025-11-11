@@ -1397,6 +1397,9 @@ async function initialize() {
         previousValue = e.target.value.trim().toLowerCase();
       });
 
+      // Mobile space key fix: Flag to prevent duplicate handling
+      let spaceHandledByKeydown = false;
+
       // Handle selection keys (Space, ', [, ], -, \), pagination (=), backspace, and delete
       inputBox.addEventListener('keydown', (e) => {
         const key = e.key;
@@ -1510,6 +1513,12 @@ async function initialize() {
           console.log(`[Space Handler] Running - Sentence mode: ${isInSentenceMode}, Input: "${inputBox.value}"`);
           e.preventDefault();
 
+          // Mobile fix: Set flag to prevent duplicate handling in input event
+          spaceHandledByKeydown = true;
+          setTimeout(() => {
+            spaceHandledByKeydown = false;
+          }, 100);
+
           if (isInSentenceMode) {
             const inputValue = inputBox.value.trim();
             console.log(`[Space Handler] Input value: "${inputValue}", Length: ${inputValue.length}`);
@@ -1579,6 +1588,69 @@ async function initialize() {
         }
         // Note: 0-9 and other chars will naturally go into the input
         // because they're not prevented
+      });
+
+      // Mobile space key fix: Handle space insertion via input event
+      // This catches cases where virtual keyboards insert space without triggering keydown
+      inputBox.addEventListener('input', (e) => {
+        // Skip if already handled by keydown (desktop/physical keyboard)
+        if (spaceHandledByKeydown) {
+          console.log('[Mobile Space] Skipping - already handled by keydown');
+          return;
+        }
+
+        // Check if in sentence mode
+        const isInSentenceMode = (typeof isSentenceMode === 'function' && isSentenceMode());
+        if (!isInSentenceMode) return;
+
+        // Check if in English mode
+        if (languageMode === 'english') return;
+
+        const value = inputBox.value;
+
+        // Check if space was inserted at the end (mobile virtual keyboard behavior)
+        if (value.endsWith(' ')) {
+          console.log('[Mobile Space] Detected space insertion:', value);
+
+          const codeWithoutSpace = value.trim();
+
+          if (codeWithoutSpace.length > 0) {
+            // Valid code, add to buffer
+            console.log('[Mobile Space] Attempting to buffer code:', codeWithoutSpace);
+
+            if (typeof addToCodeBuffer === 'function') {
+              const added = addToCodeBuffer(codeWithoutSpace, dayiMap);
+
+              if (added) {
+                // Clear input
+                clearInputBox();
+
+                // Update buffer display
+                if (typeof window !== 'undefined' && typeof window.updateBufferDisplay === 'function') {
+                  console.log('[Mobile Space] Calling updateBufferDisplay...');
+                  window.updateBufferDisplay();
+                } else {
+                  console.warn('[Mobile Space] updateBufferDisplay not found!');
+                }
+                if (typeof window !== 'undefined' && typeof window.updateLivePreviewDisplay === 'function') {
+                  console.log('[Mobile Space] Calling updateLivePreviewDisplay...');
+                  window.updateLivePreviewDisplay();
+                } else {
+                  console.warn('[Mobile Space] updateLivePreviewDisplay not found!');
+                }
+
+                console.log('[Mobile Space] Code buffered successfully:', codeWithoutSpace);
+              } else {
+                console.warn('[Mobile Space] addToCodeBuffer failed - invalid code?');
+                // Leave the space in so user sees "v " as invalid code (current behavior)
+              }
+            }
+          } else {
+            // Just remove the space if input was empty
+            console.log('[Mobile Space] Empty input, removing space');
+            inputBox.value = codeWithoutSpace;
+          }
+        }
       });
 
       // Auto-focus input box
