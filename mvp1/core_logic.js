@@ -1473,19 +1473,24 @@ async function initialize() {
         // - Sentence mode: Confirm prediction and output
         // - Character mode: Pagination (unchanged)
         if (key === '=') {
+          console.log(`[= Handler] Running - Sentence mode: ${isInSentenceMode}`);
           e.preventDefault();
 
           if (isInSentenceMode) {
             // NEW: Trigger prediction + output (ONE step!)
             // NOTE: Function is defined as window.triggerPrediction in core_logic_v11_ui.js
+            console.log(`[= Handler] Calling triggerPrediction, window.triggerPrediction exists: ${typeof window !== 'undefined' && typeof window.triggerPrediction === 'function'}`);
             if (typeof window !== 'undefined' && typeof window.triggerPrediction === 'function') {
               window.triggerPrediction();
             } else if (typeof triggerPrediction === 'function') {
               // Fallback for Node.js tests (but async, so won't work perfectly)
               triggerPrediction();
+            } else {
+              console.error('[= Handler] triggerPrediction function not found!');
             }
           } else {
             // Character mode: Pagination (unchanged)
+            console.log('[= Handler] Character mode - pagination');
             if (currentCode) {
               handlePagination();
             }
@@ -1498,15 +1503,18 @@ async function initialize() {
         // - Sentence mode: Add code to buffer + trigger prediction (NEVER select!)
         // - Character mode: Select first candidate (unchanged)
         if (key === ' ') {
+          console.log(`[Space Handler] Running - Sentence mode: ${isInSentenceMode}, Input: "${inputBox.value}"`);
           e.preventDefault();
 
           if (isInSentenceMode) {
             const inputValue = inputBox.value.trim();
+            console.log(`[Space Handler] Input value: "${inputValue}", Length: ${inputValue.length}`);
 
             if (inputValue.length > 0) {
               // Add code to buffer (works for both single and double char)
               if (typeof addToCodeBuffer === 'function') {
                 const added = addToCodeBuffer(inputValue, dayiMap);
+                console.log(`[Space Handler] addToCodeBuffer returned: ${added}`);
 
                 if (added) {
                   // Clear input
@@ -1520,8 +1528,13 @@ async function initialize() {
                   if (typeof updateLivePreviewDisplay === 'function') {
                     updateLivePreviewDisplay();
                   }
+                  console.log('[Space Handler] Code added to buffer successfully');
+                } else {
+                  console.warn('[Space Handler] addToCodeBuffer failed - invalid code?');
                 }
               }
+            } else {
+              console.log('[Space Handler] Input empty, ignoring');
             }
             return;
           }

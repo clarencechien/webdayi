@@ -604,9 +604,12 @@
         return;
       }
 
-      // Space key: Let core_logic.js handle it
+      // Space key: Return early and let core_logic.js handle it
       // NOTE: core_logic.js will add to buffer WITHOUT prediction
-      // DO NOT call triggerPrediction here!
+      // DO NOT handle Space here - just let it propagate to core_logic.js
+      if (key === ' ') {
+        return; // Let core_logic.js handler do all the work
+      }
 
       // Backspace on empty input: Remove last code from buffer
       if (key === 'Backspace' && originalInputBox.value === '') {
