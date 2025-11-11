@@ -6,7 +6,7 @@
 
 [![Status](https://img.shields.io/badge/status-MVP%201%20v11%20Complete-brightgreen)]()
 [![Phase](https://img.shields.io/badge/phase-MVP%201.0%20v11%20(100%25)-blue)]()
-[![Tests](https://img.shields.io/badge/tests-165%2F165%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-187%2B%2F187%2B%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ## 🎉 線上展示
@@ -14,13 +14,16 @@
 **[立即試用 WebDaYi MVP1 v11 →](https://clarencechien.github.io/webdayi/)** (GitHub Pages) 🚀 **NEW: N-gram 智慧預測！**
 
 在瀏覽器中體驗核心大易輸入引擎，具備現代化設計與進階功能：
-- 🎯 **關鍵 UX 改善** *(v11 Latest!)*：修復 4 個關鍵問題，165 個測試全數通過！
-- 🇹🇼 **台灣在地化** *(v11 NEW!)*：智能 → 智慧，使用正確台灣術語！
-- 🐛 **重複字元修復** *(v11 CRITICAL!)*：修復「dj ev」產生「天明天」而非「明天」的問題！
-- ⌨️ **Space 鍵優化** *(v11 UX!)*：逐字模式下「v + Space」正確選取「大」！
-- 🗑️ **Delete 鍵增強** *(v11 UX!)*：一鍵清除輸出+候選+緩衝區所有內容！
+- 🎯 **UX Round 2 完成** *(v11 Latest!)*：修復 3 個新關鍵問題，187+ 個測試全數通過！
+- 🔥 **整句單碼修復** *(v11 CRITICAL Round 2!)*：修復整句模式下「v + Space」無反應的阻斷性問題！
+- 💬 **英文混打模式** *(v11 NEW Round 2!)*：按 Shift 切換中英文輸入，完美混合輸入！
+- 🗑️ **Delete 鍵驗證** *(v11 Round 2!)*：確認刪除鍵正確清除所有區域（輸出+預測+緩衝）！
+- 🇹🇼 **台灣在地化** *(v11 Round 1)*：智能 → 智慧，使用正確台灣術語！
+- 🐛 **重複字元修復** *(v11 CRITICAL Round 1)*：修復「dj ev」產生「天明天」而非「明天」的問題！
+- ⌨️ **Space 鍵優化** *(v11 UX Round 1)*：逐字模式下「v + Space」正確選取「大」！
+- 🗑️ **Delete 鍵增強** *(v11 UX Round 1)*：一鍵清除輸出+候選+緩衝區所有內容！
 - 📊 **Laplace 平滑法** *(v11 Solution B!)*：統計正規化處理，預測品質提升 60-80%！
-- 🔬 **完整 TDD 覆蓋** *(v11 NEW!)*：165 個測試（含 31 個 UX 測試），全數通過！
+- 🔬 **完整 TDD 覆蓋** *(v11 NEW!)*：187+ 個測試（含 61 個 UX 測試），全數通過！
 - 🧠 **N-gram 智慧預測** *(v11 NEW!)*：整句模式一次輸入多個編碼，按 Space 預測最佳句子！
 - 👁️ **即時預覽** *(v11 NEW!)*：輸入時即時顯示首選字，盲打更有信心！
 - ⚡ **Viterbi 演算法** *(v11 NEW!)*：基於真實語料庫（rime-essay）的機率預測！
@@ -107,14 +110,30 @@
 │   ├─ 重複字元修復           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🐛✅  │
 │   ├─ Space 鍵優化           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ⌨️✅  │
 │   ├─ Delete 鍵增強          [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🗑️✅  │
-│   └─ UX TDD (31 tests)      [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ UX Round 1 TDD (31)    [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ UX Round 2 - 整句單碼  [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🔥✅  │
+│   ├─ UX Round 2 - 英文混打  [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 💬✅  │
+│   ├─ UX Round 2 - 刪除驗證  [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ UX Round 2 TDD (30)    [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 2: MVP 2a            [░░░░░░░░░░░░]   0% 📋    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**最新成就**：🎉 MVP 1.0 v11 完整版（165/165 測試通過，100% 完成！）
+**最新成就**：🎉 MVP 1.0 v11 完整版（187+ 測試全數通過，100% 完成！）
 
-**v11 關鍵 UX 改善** (2025-11-11):
+**v11 UX Round 2 修復** (2025-11-11):
+- 🔥 **整句單碼修復 (CRITICAL)**：修復整句模式下單碼 "v" + Space 無反應的阻斷性問題
+  - 根本原因：整句模式輸入處理器只處理 2 字元碼，單字元完全被忽略
+  - 解決方案：新增單字元候選顯示邏輯 (core_logic_v11_ui.js:410-438)
+  - 影響：使用者終於可以在整句模式下使用單碼輸入！
+- 💬 **英文混打模式 (NEW FEATURE)**：按 Shift 切換中英文輸入
+  - 實作：languageMode 狀態 + Shift 切換 + 視覺指示器
+  - 英文模式直接輸出文字，不經過中文處理邏輯
+  - 支援英數字、空格、標點符號混合輸入
+- ✅ **Delete 鍵驗證**：確認刪除鍵正確清除所有區域（輸出+候選+預測+緩衝）
+- 🧪 **測試覆蓋**：187+ 個測試（157 回歸測試 + 30 新 Round 2 測試）全數通過
+
+**v11 UX Round 1 修復** (2025-11-11):
 - 🇹🇼 **台灣在地化**：智能 → 智慧，使用正確台灣術語
 - 🐛 **重複字元修復 (CRITICAL)**：修復「dj ev」產生「天明天」而非「明天」的問題
   - 根本原因：逐字模式處理器干擾整句模式
@@ -123,7 +142,7 @@
   - 桌面：實體鍵盤 Space 鍵完美運作
   - 手機：預測按鈕可用（虛擬鍵盤限制）
 - 🗑️ **Delete 鍵增強**：一鍵清除輸出+候選+緩衝區所有內容
-- 🧪 **測試覆蓋**：165 個測試（134 回歸測試 + 31 新 UX 測試）全數通過
+- 🧪 **測試覆蓋**：31 個 UX Round 1 測試全數通過
 
 **v11 N-gram 智慧引擎**:
 - 📊 **Laplace 平滑法 (Solution B)**：完整統計平滑實作，預測品質提升 60-80%
@@ -139,6 +158,46 @@
 - 🎨 **現代 UI**：漸層卡片、動畫徽章、載入指示器
 
 **下個里程碑**：開始 MVP 2a（Chrome 瀏覽器外掛）實作
+
+## 📚 文件結構
+
+專案文件已組織到 `docs/` 資料夾中，以便更好地管理：
+
+### 🗂️ docs/project/ - 專案文件
+- **PRD.md** - 產品需求文件 (Product Requirements Document)
+- **VERIFICATION.md** - 驗證測試清單
+- **DOCUMENTATION-MAPPING.md** - 文件對應指南
+- **FINAL-VERIFICATION.md** - 最終驗證報告
+
+### 🎨 docs/design/ - 設計文件
+- **DESIGN-v2.md** - 轉換器 v2 設計（頻率排序系統）
+- **DESIGN-ngram.md** - N-gram 資料管線設計
+- **DESIGN-viterbi.md** - Viterbi 演算法設計
+- **DESIGN-auto-copy.md** - 自動複製功能設計 (v8)
+- **DESIGN-v10.md** - 手機 UX 修復設計 (v10)
+- **DESIGN-v10-ux-improvement.md** - 內嵌提示 UX 設計 (v10)
+- **DESIGN-v10-bugfix.md** - Delete 鍵 + 回饋修正設計 (v10)
+- **DESIGN-v11.md** - N-gram 整合設計 (v11)
+- **DESIGN-v11-ux-improvements.md** - v11 UX 改善設計
+
+### 🧪 docs/testing/ - 測試文件
+- **BROWSER-TESTING-v11.md** - 瀏覽器測試計畫
+- **TEST-RESULTS-v11.md** - 測試結果報告
+- **TEST-PLAN-v11-ui.md** - UI 整合測試計畫
+
+### 💡 docs/ux/ - UX 文件
+- **TAIWAN-LOCALIZATION.md** - 台灣在地化指南
+- **UX-IMPROVEMENTS-v11.md** - v11 UX 改善總覽
+- **UX-FIXES-SUMMARY.md** - UX 修復摘要
+- **UX-IMPLEMENTATION-STATUS.md** - UX 實作狀態
+- **UX-ISSUES-ROUND2.md** - UX Round 2 問題分析
+- **SESSION-SUMMARY-v11-ux.md** - v11 UX 工作階段摘要
+- **NGRAM-DIAGNOSIS.md** - N-gram 品質診斷報告
+
+### 📖 其他重要文件
+- **CLAUDE.md** (根目錄) - AI 助手專案指南
+- **README.md** (根目錄) - 本文件
+- **memory-bank/** - 專案記憶庫（activeContext, progress, systemPatterns 等）
 
 ## 💡 核心特色：頻率導向的智慧排序
 
