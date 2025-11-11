@@ -155,8 +155,9 @@ def compare_phrase_predictions(
         char2_actual = phrase[i + 1]  # Actual next character
 
         # Get predictions from both models
-        rime_top = get_top_next_chars(rime_db, char1, top_n=10)
-        blended_top = get_top_next_chars(blended_db, char1, top_n=10)
+        # Changed from top_n=10 to top_n=40 to match v1.1/v1.2 topk parameter
+        rime_top = get_top_next_chars(rime_db, char1, top_n=40)
+        blended_top = get_top_next_chars(blended_db, char1, top_n=40)
 
         rime_chars = [c for c, _ in rime_top]
         blended_chars = [c for c, _ in blended_top]

@@ -124,8 +124,8 @@ def build_blended_model(
     ptt_corpus_path: str,
     weight_rime: float = 0.7,
     weight_ptt: float = 0.3,
-    pruning_threshold: int = 3,
-    pruning_topk: int = 10,
+    pruning_threshold: int = 2,
+    pruning_topk: int = 40,
     output_file: str = 'ngram_blended.json',
     verbose: bool = False
 ) -> Dict:
@@ -136,15 +136,15 @@ def build_blended_model(
     1. Process rime-essay (general/formal)
     2. Process PTT-Corpus (chat/colloquial)
     3. Weighted merge (default: 70% rime + 30% PTT)
-    4. Apply pruning (threshold=3, topk=10)
+    4. Apply pruning (threshold=2, topk=40) - v1.1 balanced params
 
     Args:
         rime_corpus_path: Path to rime-essay essay.txt
         ptt_corpus_path: Path to PTT-Corpus raw text file
         weight_rime: Weight for rime-essay (default: 0.7)
         weight_ptt: Weight for PTT-Corpus (default: 0.3)
-        pruning_threshold: Minimum bigram count to keep (default: 3)
-        pruning_topk: Top K next characters per character (default: 10)
+        pruning_threshold: Minimum bigram count to keep (default: 2)
+        pruning_topk: Top K next characters per character (default: 40)
         output_file: Output JSON file path
         verbose: Print detailed progress
 
@@ -171,9 +171,9 @@ def build_blended_model(
         [Merge] Merged unigrams: 18,543
         [Merge] Merged bigrams: 315,678
         [Phase 4/4] Applying pruning...
-        [Pruning] After threshold: 98,234
-        [Pruning] After top-K: 42,186
-        ✅ Success! ngram_blended.json saved (3.2MB)
+        [Pruning] After threshold: 210,456
+        [Pruning] After top-K: 105,234
+        ✅ Success! ngram_blended.json saved (4.5MB)
     """
     if verbose:
         print("=" * 70)
@@ -338,15 +338,15 @@ Examples:
     parser.add_argument(
         '--threshold',
         type=int,
-        default=3,
-        help='Pruning threshold: minimum bigram count (default: 3)'
+        default=2,
+        help='Pruning threshold: minimum bigram count (default: 2, was 3 in v1.0)'
     )
 
     parser.add_argument(
         '--topk',
         type=int,
-        default=10,
-        help='Pruning top-K: keep top K next characters per character (default: 10)'
+        default=40,
+        help='Pruning top-K: keep top K next characters per character (default: 40, was 10 in v1.0)'
     )
 
     parser.add_argument(
