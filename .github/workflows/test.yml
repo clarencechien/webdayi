@@ -1,0 +1,84 @@
+name: Run Tests
+
+on:
+  # Run on all pushes and pull requests
+  push:
+    branches:
+      - main
+      - 'claude/**'
+    paths:
+      - 'mvp1/**'
+      - '.github/workflows/test.yml'
+
+  pull_request:
+    branches:
+      - main
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Display version information
+        run: |
+          echo "=== WebDaYi Version Information ==="
+          if [ -f mvp1/version.json ]; then
+            cat mvp1/version.json | grep -E '"version"|"build"|"commit"|"releaseName"'
+          else
+            echo "version.json not found"
+          fi
+          echo ""
+          echo "Latest commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: Run v11 core tests
+        working-directory: mvp1
+        run: |
+          echo "Running v11 core tests..."
+          node test-node-v11.js
+
+      - name: Run Laplace smoothing tests
+        working-directory: mvp1
+        run: |
+          echo "Running Laplace smoothing tests..."
+          node test-laplace-smoothing.js
+
+      - name: Run sentence mode tests
+        working-directory: mvp1
+        run: |
+          echo "Running sentence mode Space/= key tests..."
+          node test-sentence-mode-space-key.js
+
+      - name: Run correct behavior tests
+        working-directory: mvp1
+        run: |
+          echo "Running correct Space/= behavior tests..."
+          node test-correct-space-equal-behavior.js
+
+      - name: Run v11 UX tests
+        working-directory: mvp1
+        run: |
+          echo "Running v11 UX Round 1 tests..."
+          node test-v11-ux-fixes.js
+          echo ""
+          echo "Running v11 UX Round 2 tests..."
+          node test-v11-ux-round2.js
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "=== Test Summary ==="
+          echo "All tests completed. Check individual steps for results."
+          echo "Version: $(cat mvp1/version.json | grep '"version"' | cut -d'"' -f4)"
+          echo "Build: $(cat mvp1/version.json | grep '"build"' | cut -d'"' -f4)"

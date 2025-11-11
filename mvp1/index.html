@@ -3,7 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v10</title>
+  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.2</title>
+
+  <!-- Version Information (for testing verification) -->
+  <meta name="app-version" content="11.2.0">
+  <meta name="app-build" content="20251111-001">
+  <meta name="app-commit" content="22c263d">
+  <meta name="app-release" content="Blind Typing Fix">
+  <!--
+    WebDaYi MVP 1.0 - Version 11.2.0
+    Build: 20251111-001
+    Release: Blind Typing Fix
+    Commit: 22c263d
+
+    Latest Changes:
+    - CRITICAL FIX: Space key now ONLY buffers (no prediction)
+    - = key triggers prediction + output (one step)
+    - Fixed mobile prediction button
+    - True blind typing workflow enabled
+
+    How to verify version:
+    1. Open browser DevTools console
+    2. Check window.WEBDAYI_VERSION
+    3. Or check meta tags in <head>
+  -->
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -233,7 +256,7 @@
           </div>
           <h1 class="text-3xl font-bold tracking-tighter text-slate-900 dark:text-white">WebDaYi</h1>
         </div>
-        <p class="text-lg text-slate-600 dark:text-slate-400">網頁大易輸入法 <span class="font-semibold text-primary">v11.0</span> (N-gram 智慧預測)</p>
+        <p class="text-lg text-slate-600 dark:text-slate-400">網頁大易輸入法 <span class="font-semibold text-primary">v11.2.0</span> (盲打修復版)</p>
       </header>
 
       <!-- Instructions Section (hidden in express mode) -->
@@ -408,6 +431,38 @@
       <div class="text-sm text-slate-500 dark:text-slate-400">首次使用需載入 10MB 資料...</div>
     </div>
   </div>
+
+  <!-- Version Information Script -->
+  <script>
+    // Version information (for testing verification)
+    window.WEBDAYI_VERSION = {
+      version: '11.2.0',
+      build: '20251111-001',
+      buildDate: '2025-11-11T02:30:00Z',
+      commit: '22c263d',
+      releaseName: 'Blind Typing Fix',
+      changes: [
+        'CRITICAL FIX: Space key now ONLY buffers (no prediction)',
+        '= key triggers prediction + output (one step)',
+        'Fixed mobile prediction button',
+        'True blind typing workflow enabled'
+      ]
+    };
+
+    // Display version in console for easy verification
+    console.log('%c🚀 WebDaYi MVP 1.0', 'font-size: 16px; font-weight: bold; color: #3b82f6;');
+    console.log('%cVersion: ' + window.WEBDAYI_VERSION.version, 'font-size: 14px; color: #10b981;');
+    console.log('%cBuild: ' + window.WEBDAYI_VERSION.build, 'font-size: 12px; color: #6b7280;');
+    console.log('%cCommit: ' + window.WEBDAYI_VERSION.commit, 'font-size: 12px; color: #6b7280;');
+    console.log('%cRelease: ' + window.WEBDAYI_VERSION.releaseName, 'font-size: 12px; color: #6b7280;');
+    console.log('%c' + '-'.repeat(50), 'color: #d1d5db;');
+    console.log('%cLatest Changes:', 'font-size: 12px; font-weight: bold; color: #f59e0b;');
+    window.WEBDAYI_VERSION.changes.forEach((change, i) => {
+      console.log('%c  ' + (i + 1) + '. ' + change, 'font-size: 11px; color: #9ca3af;');
+    });
+    console.log('%c' + '-'.repeat(50), 'color: #d1d5db;');
+    console.log('%cTo check version: window.WEBDAYI_VERSION', 'font-size: 11px; color: #6b7280; font-style: italic;');
+  </script>
 
   <!-- Core Logic -->
   <script src="core_logic.js"></script>
