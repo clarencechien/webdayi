@@ -1477,7 +1477,11 @@ async function initialize() {
 
           if (isInSentenceMode) {
             // NEW: Confirm prediction and output
-            if (typeof confirmPrediction === 'function') {
+            // NOTE: Function is defined as window.confirmPrediction in core_logic_v11_ui.js
+            if (typeof window !== 'undefined' && typeof window.confirmPrediction === 'function') {
+              window.confirmPrediction();
+            } else if (typeof confirmPrediction === 'function') {
+              // Fallback for Node.js tests
               confirmPrediction();
             }
           } else {
@@ -1509,7 +1513,11 @@ async function initialize() {
                   clearInputBox();
 
                   // Trigger prediction with current buffer
-                  if (typeof triggerSentencePrediction === 'function') {
+                  // NOTE: Function is defined as window.triggerSentencePrediction in core_logic_v11_ui.js
+                  if (typeof window !== 'undefined' && typeof window.triggerSentencePrediction === 'function') {
+                    window.triggerSentencePrediction();
+                  } else if (typeof triggerSentencePrediction === 'function') {
+                    // Fallback for Node.js tests
                     triggerSentencePrediction();
                   }
                 }
