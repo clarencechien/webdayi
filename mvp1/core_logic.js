@@ -1468,42 +1468,57 @@ async function initialize() {
           return;
         }
 
-        // Handle pagination key (=)
-        if (key === '=' && currentCode) {
+        // Handle = key (REDESIGNED - UX-SPACE-KEY-REDESIGN.md)
+        // = key behavior:
+        // - Sentence mode: Confirm prediction and output
+        // - Character mode: Pagination (unchanged)
+        if (key === '=') {
           e.preventDefault();
-          handlePagination();
+
+          if (isInSentenceMode) {
+            // NEW: Confirm prediction and output
+            if (typeof confirmPrediction === 'function') {
+              confirmPrediction();
+            }
+          } else {
+            // Character mode: Pagination (unchanged)
+            if (currentCode) {
+              handlePagination();
+            }
+          }
           return;
         }
 
-        // Handle Space key for character selection (v11 UX fix + Issue 1)
-        // Space key behavior depends on context:
-        // - Character mode: Always select first candidate
-        // - Sentence mode + single char input: Select first candidate
-        // - Sentence mode + buffer: Trigger prediction (handled by v11)
+        // Handle Space key (REDESIGNED - UX-SPACE-KEY-REDESIGN.md)
+        // Space key behavior:
+        // - Sentence mode: Add code to buffer + trigger prediction (NEVER select!)
+        // - Character mode: Select first candidate (unchanged)
         if (key === ' ') {
           e.preventDefault();
 
           if (isInSentenceMode) {
-            const buffer = (typeof getCodeBuffer === 'function') ? getCodeBuffer() : [];
             const inputValue = inputBox.value.trim();
 
-            // NEW (Issue 1 fix): Single-char with candidates → Select
-            if (buffer.length === 0 && inputValue.length === 1 && currentCandidates.length > 0) {
-              handleSelection(0);  // Select first candidate
-              previousValue = '';  // Reset after selection
-              return;
-            }
+            if (inputValue.length > 0) {
+              // Add code to buffer (works for both single and double char)
+              if (typeof addToCodeBuffer === 'function') {
+                const added = addToCodeBuffer(inputValue, dayiMap);
 
-            // Multi-code in buffer → Let v11 handler trigger prediction
-            if (buffer.length > 0) {
-              return; // v11 handler will process this
-            }
+                if (added) {
+                  // Clear input
+                  clearInputBox();
 
-            // Otherwise, do nothing (empty state)
+                  // Trigger prediction with current buffer
+                  if (typeof triggerSentencePrediction === 'function') {
+                    triggerSentencePrediction();
+                  }
+                }
+              }
+            }
             return;
           }
 
-          // Character mode: Select first candidate
+          // Character mode: Select first candidate (unchanged)
           if (currentCode && currentCandidates.length > 0) {
             handleSelection(0);  // Select first candidate
             previousValue = '';  // Reset after selection
@@ -1514,10 +1529,20 @@ async function initialize() {
         // Handle selection keys (', [, ], -, \)
         // Note: Space is handled separately above
         const selectionIndex = getSelectionIndexFromKey(key);
-        if (selectionIndex !== -1 && currentCode) {
+        if (selectionIndex !== -1) {
           e.preventDefault();
-          handleSelection(selectionIndex);
-          previousValue = '';  // Reset after selection
+
+          // NEW: Disable selection in sentence mode (UX-SPACE-KEY-REDESIGN.md)
+          if (isInSentenceMode) {
+            console.log('[Sentence Mode] Selection keys disabled - use Space to buffer, = to confirm');
+            return;
+          }
+
+          // Character mode: Selection (unchanged)
+          if (currentCode) {
+            handleSelection(selectionIndex);
+            previousValue = '';  // Reset after selection
+          }
         }
         // Note: 0-9 and other chars will naturally go into the input
         // because they're not prevented

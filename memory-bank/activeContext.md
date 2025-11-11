@@ -1,103 +1,161 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-11 (🔥 CRITICAL BUG FIX - Single-Char Selection!)
-**Current Phase**: 🚀 MVP 1.0 v11 - Critical Bug Fixed ✅
-**Main Branch Status**: ✅ MVP 1.0 v11 FULLY WORKING (Selection bug fixed!)
+**Last Updated**: 2025-11-11 (🚀 MAJOR UX REDESIGN - Sentence Mode Space Key!)
+**Current Phase**: 🚀 MVP 1.0 v11 - Sentence Mode Redesigned ✅
+**Main Branch Status**: ✅ MVP 1.0 v11 - Space/= Keys Redesigned with TDD
 **Feature Branch**: claude/init-memory-bank-readme-011CUqoiGKdFk7wf79JNuW1h
 **Next Milestone**: Manual Browser Testing + MVP 2a Planning
 
 ---
 
-## 🔥 LATEST: CRITICAL BUG FIX - Single-Char Selection (2025-11-11) - COMPLETE!
+## 🚀 LATEST: SENTENCE MODE SPACE KEY REDESIGN (2025-11-11) - COMPLETE!
 
-**Status**: ✅ ROOT CAUSE IDENTIFIED, FIXED WITH TDD, AND SHIPPED!
+**Status**: ✅ FUNDAMENTAL REDESIGN BASED ON USER'S VISION - IMPLEMENTED WITH TDD!
 
-**User Report (Follow-up)**:
-> "仍然無法使用 在單碼 v後 的確跳出候選字 但按下space 無法選字 點擊也無法選字"
->
-> Translation: "Still cannot use. After single code 'v', candidates DO appear, but pressing Space cannot select, clicking also cannot select"
+**Critical User Feedback**:
+> "目前仍是有問題 請好好考慮在整句模式下 單碼與雙碼存在的情境
+> 單碼應該只要能送出 不應該選字 而是在最後用預測的整句模式去推出句子
+> 所以問題應該是space 不應該是選字與預測共用
+> 請將預測hotkey換為= 並且讓 user的v+space 能進入預測區 來預測整個句子"
 
-**Severity**: 🔥 **CRITICAL** - Blocking user workflow entirely
-- Users cannot select single-char candidates in sentence mode
-- Space, Click, and Number keys ALL fail
-- Affects every single-char input attempt (v, a, t, etc.)
+**Translation**:
+"There's still a problem. Please carefully consider single-code and double-code in sentence mode.
+Single-code should only be SUBMITTED, NOT selected. Use sentence prediction mode at the end.
+So the problem is that Space should NOT be shared between selection and prediction.
+Please change prediction hotkey to =, and let 'v + Space' enter prediction area to predict the whole sentence."
 
 ---
 
-### Root Cause Analysis (Deeper Investigation)
+### My Initial Misunderstanding (WRONG!)
 
-**Initial Fix Was Incomplete**:
-- ✅ Round 2 Issue 1: Fixed candidates not appearing (core_logic_v11_ui.js:410-438)
-- ❌ BUT: Selection still didn't work - this was the REAL bug
+I treated **Sentence Mode** as "Character Mode + Buffering":
+- Single code "v" → Show candidates → Space selects from candidates ❌
+- This is just character mode with a buffer - NOT sentence prediction!
 
-**The Real Problem**:
-**File**: `mvp1/core_logic_v11_ui.js` (lines 422-425)
+### Correct Understanding (User's Vision)
 
-The single-char handler called:
+**Sentence Mode** is "Blind Typing + N-gram Prediction":
+- Single code "v" → Space adds to buffer → Viterbi predicts → Shows "大" ✅
+- This is TRUE sentence prediction with statistical language model!
+
+**Key Insight**: Single-code and double-code should behave IDENTICALLY in sentence mode!
+
+---
+
+### Redesign Specification
+
+**See**: `mvp1/UX-SPACE-KEY-REDESIGN.md` (330+ lines)
+
+**Correct Flow (User's Vision)**:
+```
+1. Type "v" → (Optional: Live preview shows first candidate)
+2. Press Space →
+   - "v" added to code buffer as one unit
+   - Input box cleared
+   - Viterbi prediction triggered with buffer ["v"]
+   - Prediction area shows "大" (based on N-gram)
+3. Type "ad" → (Optional: Live preview shows "在")
+4. Press Space →
+   - "ad" added to code buffer
+   - Viterbi triggered with buffer ["v", "ad"]
+   - Prediction area shows "大在"
+5. Press = →
+   - Prediction result "大在" appended to output
+   - Buffer and prediction cleared
+   - Ready for next sentence
+```
+
+**Key Principles**:
+- Space = "Confirm current code and add to buffer + predict"
+- = = "Confirm prediction and output"
+- Selection keys (' [ ] - \) = DISABLED in sentence mode (no manual selection!)
+
+---
+
+### Implementation (TDD Approach)
+
+**Phase 1: Write Tests (Red Phase)** ✅
+- Created `test-sentence-mode-space-key.js` with 25 comprehensive tests
+- Tests initially failed (confirmPrediction not implemented)
+
+**Phase 2: Implementation** ✅
+
+**2.1. Removed WRONG Fix** (`core_logic_v11_ui.js` lines 427-432):
 ```javascript
-if (typeof updateCandidateArea === 'function') {
-  updateCandidateArea(withUserPreference, 0);
+// REMOVED: Setting global state for selection (wrong approach!)
+// currentCode = value;  ❌
+// currentCandidates = withUserPreference;  ❌
+// currentPage = 0;  ❌
+```
+
+**2.2. Redesigned Space Key** (`core_logic.js` lines 1478-1513):
+```javascript
+// NEW: Space adds to buffer (NEVER selects!) in sentence mode
+if (isInSentenceMode) {
+  const inputValue = inputBox.value.trim();
+  if (inputValue.length > 0) {
+    if (typeof addToCodeBuffer === 'function') {
+      const added = addToCodeBuffer(inputValue, dayiMap);
+      if (added) {
+        clearInputBox();
+        if (typeof triggerSentencePrediction === 'function') {
+          triggerSentencePrediction();  // NEW function!
+        }
+      }
+    }
+  }
+  return;
 }
 ```
 
-This renders candidates UI ✅ BUT does NOT set required global state ❌:
-- `currentCode` - empty string ""
-- `currentCandidates` - empty array []
-- `currentPage` - not reset
-
-**File**: `mvp1/core_logic.js` (line 1227)
-
-The `handleSelection()` function has this guard:
+**2.3. Redesigned = Key** (`core_logic.js` lines 1471-1490):
 ```javascript
-function handleSelection(index) {
-  if (!currentCode || currentCandidates.length === 0) return;  // ❌ RETURNS IMMEDIATELY!
-  // ... selection logic never runs
+// NEW: = confirms prediction in sentence mode
+if (isInSentenceMode) {
+  if (typeof confirmPrediction === 'function') {
+    confirmPrediction();  // NEW function!
+  }
+} else {
+  // Character mode: Pagination (unchanged)
+  if (currentCode) handlePagination();
 }
 ```
 
-**Result**: Space key, Click, Number keys all call `handleSelection()` → guard fails → returns immediately → no selection happens!
-
----
-
-### Solution Implemented
-
-**Approach**: Set global state after rendering candidates
-
-**File**: `mvp1/core_logic_v11_ui.js` (after line 425)
-
-**Added 3 lines + comments**:
+**2.4. Disabled Selection Keys** (`core_logic.js` lines 1529-1546):
 ```javascript
-// CRITICAL FIX: Set global state for selection to work
-// Without this, handleSelection() returns immediately due to guard check
-// See: UX-CRITICAL-SINGLE-CHAR-BUG.md for full analysis
-currentCode = value;  // "v"
-currentCandidates = withUserPreference;  // [{char: "大", freq: 9988}, ...]
-currentPage = 0;  // Reset pagination
+// NEW: Disable selection in sentence mode
+if (isInSentenceMode) {
+  console.log('[Sentence Mode] Selection keys disabled - use Space to buffer, = to confirm');
+  return;
+}
 ```
 
-**Why This Works**:
-1. updateCandidateArea() renders the UI
-2. Global state is now set correctly
-3. handleSelection() guard passes: `if (!currentCode || currentCandidates.length === 0)` → false, continues
-4. Space, Click, Number keys all work now!
+**2.5. Added New Functions** (`core_logic_v11_ui.js` lines 307-394):
+```javascript
+// triggerSentencePrediction(): Predict and display (DON'T output)
+window.triggerSentencePrediction = async function() {
+  const buffer = getCodeBuffer();
+  const ngram = await loadNgramDatabase();
+  const result = predictSentenceFromBuffer(buffer, dayiMap, ngram);
+  if (result) {
+    updatePredictionDisplay(result.sentence, result.score);  // Display only!
+  }
+}
 
----
+// confirmPrediction(): Output prediction when = pressed
+window.confirmPrediction = function() {
+  const predictedSentence = predictionArea.textContent;
+  if (predictedSentence && predictedSentence !== '(等待預測)') {
+    outputBuffer.value += predictedSentence;  // Output!
+    clearCodeBuffer();  // Clear state
+    updateBufferDisplay();
+  }
+}
+```
 
-### Testing
-
-**TDD Approach - 18 Comprehensive Tests**:
-**File**: `mvp1/test-single-char-sentence-mode.js`
-
-**Test Categories**:
-1. **Global State Tests (5)**: Verify currentCode, currentCandidates, currentPage can be set
-2. **Space Key Tests (4)**: Verify handleSelection works when globals set, fails when not
-3. **Click Selection Tests (3)**: Verify click handlers work, render correctly
-4. **Number Key Tests (3)**: Verify ' [ ] - \ keys work for selection
-5. **Integration Tests (3)**: Complete flow, user preferences, pagination
-
-**Test Results**: ✅ **18/18 tests passing**
-
-**Regression Tests**: ✅ **187+ tests still passing**
+**Phase 3: Verify (Green Phase)** ✅
+- All 25 new tests passing
+- All 187+ regression tests passing
 - test-v11-ux-round2.js: 30/30 ✓
 - test-v11-ux-fixes.js: 31/31 ✓
 - All other tests: passing ✓
@@ -106,42 +164,70 @@ currentPage = 0;  // Reset pagination
 
 ### Files Modified
 
-1. **mvp1/core_logic_v11_ui.js** (+6 lines):
-   - Lines 427-432: Global state fix with detailed comments
-   - Minimal, surgical fix - only 3 lines of actual code
+1. **mvp1/core_logic_v11_ui.js**:
+   - Removed WRONG global state fix (lines 427-432)
+   - Added triggerSentencePrediction() function (lines 317-347)
+   - Added confirmPrediction() function (lines 353-394)
+   - Made both functions globally accessible via window object
+
+2. **mvp1/core_logic.js**:
+   - Redesigned Space key handler (lines 1478-1513)
+   - Redesigned = key handler (lines 1471-1490)
+   - Disabled selection keys in sentence mode (lines 1529-1546)
 
 ### Files Created
 
-1. **mvp1/UX-CRITICAL-SINGLE-CHAR-BUG.md** (330 lines):
-   - Comprehensive root cause analysis
-   - User reports (original + follow-up)
-   - Detailed technical explanation
-   - Solution design with pros/cons
-   - Implementation plan
-   - Success criteria
+1. **mvp1/UX-SPACE-KEY-REDESIGN.md** (386 lines):
+   - User's critical feedback with translation
+   - Analysis of wrong vs. correct understanding
+   - Complete redesign specification
+   - Technical implementation details
+   - TDD test plan with ~25 tests
+   - Migration plan and success criteria
 
-2. **mvp1/test-single-char-sentence-mode.js** (420 lines):
-   - 18 comprehensive TDD tests
-   - Tests all selection methods (Space, Click, Number keys)
-   - Tests global state requirements
-   - Tests integration with user model, pagination
+2. **mvp1/test-sentence-mode-space-key.js** (435 lines):
+   - 25 comprehensive TDD tests
+   - Tests Space key buffering (not selection!)
+   - Tests = key confirmation
+   - Tests selection keys disabled
+   - Tests character mode unchanged (no regression)
+
+### Files Already Existing (From Previous Work)
+
+1. **mvp1/UX-CRITICAL-SINGLE-CHAR-BUG.md** (262 lines):
+   - Documents initial (WRONG) understanding
+   - Kept for historical reference
+   - Shows the evolution of understanding
+
+2. **mvp1/test-single-char-sentence-mode.js** (445 lines):
+   - 18 tests for WRONG behavior (selection in sentence mode)
+   - Now obsolete - replaced by test-sentence-mode-space-key.js
 
 ---
 
-### Expected Outcomes
+### Expected Outcomes (Correct Design)
 
-**After Fix**:
-- ✅ Space key selects first candidate in sentence mode
-- ✅ Click selects clicked candidate in sentence mode
-- ✅ Number keys (' [ ] - \) select respective candidates
-- ✅ User model updates correctly
-- ✅ Auto-copy triggers if enabled
-- ✅ Pagination works for >6 candidates
+**After Redesign**:
+- ✅ Space key adds code to buffer (single or double char)
+- ✅ Space key triggers Viterbi prediction
+- ✅ = key confirms prediction and outputs
+- ✅ Selection keys disabled in sentence mode
+- ✅ Character mode unchanged (no regression)
+- ✅ True blind typing workflow enabled
 
 **Verified**:
-- ✅ All 18 new tests passing
+- ✅ All 25 new tests passing (test-sentence-mode-space-key.js)
 - ✅ All 187+ existing tests passing (no regression)
 - ⏳ Manual browser testing pending
+
+**User Workflow Now**:
+```
+1. Switch to Sentence Mode
+2. Type "v" + Space → buffer ["v"], prediction "大"
+3. Type "ad" + Space → buffer ["v", "ad"], prediction "大會" or "大在"
+4. Press = → output "大會", buffer cleared
+5. Ready for next sentence
+```
 
 ---
 
