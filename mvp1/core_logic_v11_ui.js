@@ -469,11 +469,17 @@
     });
   }
 
-  // Predict sentence button
+  // Confirm prediction button (replaces = key for mobile)
+  // NOTE: This button confirms and outputs prediction, not just triggers it
   if (predictSentenceBtn) {
-    predictSentenceBtn.addEventListener('click', async () => {
-      console.log('[v11 UI] Predict button clicked');
-      await triggerPrediction();
+    predictSentenceBtn.addEventListener('click', () => {
+      console.log('[v11 UI] Confirm prediction button clicked');
+      // Call the new confirmPrediction function
+      if (typeof window !== 'undefined' && typeof window.confirmPrediction === 'function') {
+        window.confirmPrediction();
+      } else if (typeof confirmPrediction === 'function') {
+        confirmPrediction();
+      }
     });
   }
 
