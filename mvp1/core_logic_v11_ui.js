@@ -289,7 +289,7 @@
       <div class="sentence-prediction w-full">
         <div class="prediction-header">
           <span class="material-symbols-outlined">auto_awesome</span>
-          <span>智能預測結果 (Prediction)</span>
+          <span>智慧預測結果 (Prediction)</span>
         </div>
         <div class="predicted-sentence">${sentence}</div>
         <div class="prediction-details">
