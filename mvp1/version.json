@@ -1,8 +1,8 @@
 {
   "version": "11.2.0",
-  "build": "20251111-005",
-  "buildDate": "2025-11-11T04:00:00Z",
-  "commit": "6da4fb8",
+  "build": "20251111-006",
+  "buildDate": "2025-11-11T09:21:23Z",
+  "commit": "4c7007a",
   "releaseName": "Space/= Handlers Fix + Buffer Display",
   "changelog": [
     {
