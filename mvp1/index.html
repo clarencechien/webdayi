@@ -299,10 +299,12 @@
         </details>
       </section>
 
-      <main class="w-full space-y-4">
+      <!-- Mobile UX: Use flexbox for reordering. Desktop: preserve original order -->
+      <main class="w-full flex flex-col space-y-4">
 
-        <!-- Output Section (Top) -->
-        <div class="space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 sm:p-6 transition-colors">
+        <!-- Output Section (Top on desktop, compact on mobile) -->
+        <!-- Mobile: order-1, Desktop: order-1 (same) -->
+        <div class="order-1 space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-3 sm:p-6 transition-colors max-h-40 sm:max-h-none overflow-y-auto sm:overflow-visible">
           <div class="flex flex-wrap items-center justify-between gap-4">
             <h2 class="text-lg font-semibold text-slate-900 dark:text-white">輸出 (Output)</h2>
             <div class="flex items-center gap-2">
@@ -325,43 +327,52 @@
         </div>
 
         <!-- v11: Sentence Mode Panel (shown in sentence mode) -->
-        <div id="sentence-mode-panel" class="hidden space-y-3 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10 p-3 transition-colors">
-          <!-- Live Preview -->
-          <div id="live-preview-container" class="hidden">
-            <div class="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
-              <span class="material-symbols-outlined text-sm">visibility</span>
-              <span>即時預覽</span>
-            </div>
-            <div id="preview-text" class="text-2xl font-bold text-center text-slate-800 dark:text-slate-100 tracking-wider py-2"></div>
-          </div>
+        <!-- Mobile: order-4 (below candidates), Desktop: order-2 (above input) -->
+        <div id="sentence-mode-panel" class="hidden order-4 sm:order-2 space-y-2 sm:space-y-3 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10 p-2 sm:p-3 transition-colors">
+          <!-- Mobile: Compact inline layout, Desktop: Vertical spacious layout -->
 
-          <!-- Code Buffer Display -->
-          <div id="code-buffer-container">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-                <span class="material-symbols-outlined text-sm">code</span>
-                <span>已輸入編碼</span>
+          <!-- Live Preview & Code Buffer (inline on mobile, separate on desktop) -->
+          <div class="flex flex-col sm:flex-col gap-2">
+            <!-- Live Preview -->
+            <div id="live-preview-container" class="hidden">
+              <div class="flex items-center gap-1 sm:gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                <span class="material-symbols-outlined text-sm">visibility</span>
+                <span class="hidden sm:inline">即時預覽</span>
+                <span class="sm:hidden">預覽</span>
               </div>
-              <button id="clear-buffer-btn" class="flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="清除緩衝區 (ESC)">
-                <span class="material-symbols-outlined text-sm">backspace</span>
-                <span>清除</span>
-              </button>
+              <div id="preview-text" class="text-lg sm:text-2xl font-bold text-center sm:text-center text-slate-800 dark:text-slate-100 tracking-wider py-1 sm:py-2"></div>
             </div>
-            <div id="buffered-codes" class="flex flex-wrap gap-2 min-h-10 items-center">
-              <span class="text-sm text-slate-400 dark:text-slate-500 italic">尚無編碼</span>
+
+            <!-- Code Buffer Display -->
+            <div id="code-buffer-container">
+              <div class="flex items-center justify-between mb-1 sm:mb-2">
+                <div class="flex items-center gap-1 sm:gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+                  <span class="material-symbols-outlined text-sm">code</span>
+                  <span class="hidden sm:inline">已輸入編碼</span>
+                  <span class="sm:hidden">編碼</span>
+                </div>
+                <button id="clear-buffer-btn" class="flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="清除緩衝區 (ESC)">
+                  <span class="material-symbols-outlined text-sm">backspace</span>
+                  <span class="hidden sm:inline">清除</span>
+                </button>
+              </div>
+              <div id="buffered-codes" class="flex flex-wrap gap-1 sm:gap-2 min-h-8 sm:min-h-10 items-center">
+                <span class="text-xs sm:text-sm text-slate-400 dark:text-slate-500 italic">尚無編碼</span>
+              </div>
             </div>
           </div>
 
-          <!-- Confirm Prediction Button (for mobile - replaces = key) -->
+          <!-- Confirm Prediction Button (compact on mobile) -->
           <button id="predict-sentence-btn"
-                  class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white font-semibold text-sm transition-all shadow-md hover:shadow-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed">
-            <span class="material-symbols-outlined text-lg">check_circle</span>
-            <span>確認預測 (Press =)</span>
+                  class="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white font-semibold text-sm transition-all shadow-md hover:shadow-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span class="material-symbols-outlined text-base sm:text-lg">check_circle</span>
+            <span class="text-xs sm:text-sm">確認預測 (=)</span>
           </button>
         </div>
 
-        <!-- Input Section (Bottom) -->
-        <div class="space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 sm:p-6 transition-colors">
+        <!-- Input Section -->
+        <!-- Mobile: order-2 (above candidates), Desktop: order-3 (after sentence panel) -->
+        <div class="order-2 sm:order-3 space-y-3 sm:space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-3 sm:p-6 transition-colors">
           <div class="space-y-2">
             <label class="text-sm font-medium text-slate-700 dark:text-slate-300" for="input-box">
               輸入碼 (Dayi Input)
