@@ -226,7 +226,8 @@
     livePreviewContainer.classList.remove('hidden');
   }
 
-  async function triggerPrediction() {
+  // Export to window for = key handler in core_logic.js
+  window.triggerPrediction = async function triggerPrediction() {
     const buffer = getCodeBuffer();
 
     if (buffer.length === 0) {
@@ -469,16 +470,16 @@
     });
   }
 
-  // Confirm prediction button (replaces = key for mobile)
-  // NOTE: This button confirms and outputs prediction, not just triggers it
+  // Prediction button (replaces = key for mobile)
+  // NOTE: This triggers prediction + output (same as = key)
   if (predictSentenceBtn) {
-    predictSentenceBtn.addEventListener('click', () => {
-      console.log('[v11 UI] Confirm prediction button clicked');
-      // Call the new confirmPrediction function
-      if (typeof window !== 'undefined' && typeof window.confirmPrediction === 'function') {
-        window.confirmPrediction();
-      } else if (typeof confirmPrediction === 'function') {
-        confirmPrediction();
+    predictSentenceBtn.addEventListener('click', async () => {
+      console.log('[v11 UI] Prediction button clicked');
+      // Call triggerPrediction (same as = key)
+      if (typeof window !== 'undefined' && typeof window.triggerPrediction === 'function') {
+        await window.triggerPrediction();
+      } else if (typeof triggerPrediction === 'function') {
+        await triggerPrediction();
       }
     });
   }
