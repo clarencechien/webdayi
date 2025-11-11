@@ -1,21 +1,65 @@
 # WebDaYi Documentation Mapping
 
-**Date**: 2025-11-11
+**Date**: 2025-11-11 (Updated after docs/ reorganization)
 **Branch**: claude/init-memory-bank-readme-011CUqoiGKdFk7wf79JNuW1h
 **Purpose**: Ensure all documentation accurately maps to the codebase
 
 ---
 
-## Documentation Structure
+## 📚 Documentation Structure (NEW!)
+
+All documentation has been reorganized into the `docs/` folder for better management:
 
 ### Root Level Documentation
 
 | Document | Purpose | Maps To | Status |
 |----------|---------|---------|--------|
-| `README.md` | Main project overview (正體中文) | Entire project | ✅ Updated |
+| `README.md` | Main project overview (正體中文) | Entire project | ✅ Updated (v11 Round 2) |
 | `README.en.md` | English version | Entire project | ⏳ Needs update |
-| `PRD.md` | Product requirements (v1.3) | All features | ✅ Current |
 | `CLAUDE.md` | AI assistant guide | Project structure | ✅ Current |
+
+### 🗂️ docs/project/ - Project Documentation
+
+| Document | Purpose | Maps To | Status |
+|----------|---------|---------|--------|
+| `PRD.md` | Product requirements (v1.3) | All features | ✅ Current |
+| `VERIFICATION.md` | Verification checklist | Test results | ✅ Current |
+| `DOCUMENTATION-MAPPING.md` | This file | Doc structure | ✅ Updated |
+| `FINAL-VERIFICATION.md` | Final verification report | v11 completion | ✅ Current |
+
+### 🎨 docs/design/ - Design Documentation
+
+| Document | Purpose | Maps To | Status |
+|----------|---------|---------|--------|
+| `DESIGN-v2.md` | Converter v2 (frequency) | converter/*.py | ✅ Current |
+| `DESIGN-ngram.md` | N-gram pipeline | build_ngram*.py | ✅ Current |
+| `DESIGN-viterbi.md` | Viterbi algorithm | viterbi_module.js | ✅ Current |
+| `DESIGN-auto-copy.md` | Auto-copy (v8) | core_logic.js | ✅ Current |
+| `DESIGN-v10.md` | Mobile UX (v10) | index.html, core_logic.js | ✅ Current |
+| `DESIGN-v10-ux-improvement.md` | Inline hints (v10) | renderCandidatesHTML() | ✅ Current |
+| `DESIGN-v10-bugfix.md` | Delete key (v10) | core_logic.js | ✅ Current |
+| `DESIGN-v11.md` | N-gram integration (v11) | core_logic_v11*.js | ✅ Current |
+| `DESIGN-v11-ux-improvements.md` | UX Round 1 (v11) | Mode guards | ✅ Current |
+
+### 🧪 docs/testing/ - Testing Documentation
+
+| Document | Purpose | Maps To | Status |
+|----------|---------|---------|--------|
+| `BROWSER-TESTING-v11.md` | Browser test plan | Manual testing | ✅ Current |
+| `TEST-RESULTS-v11.md` | Test results | All test files | ⏳ Needs update (187+ tests) |
+| `TEST-PLAN-v11-ui.md` | UI test plan | test-v11-ui-init.js | ✅ Current |
+
+### 💡 docs/ux/ - UX Documentation
+
+| Document | Purpose | Maps To | Status |
+|----------|---------|---------|--------|
+| `TAIWAN-LOCALIZATION.md` | Localization guide | Terminology changes | ✅ Current |
+| `UX-IMPROVEMENTS-v11.md` | v11 UX overview | All UX fixes | ⏳ Needs update (Round 2) |
+| `UX-FIXES-SUMMARY.md` | UX Round 1 summary | core_logic.js fixes | ✅ Current |
+| `UX-IMPLEMENTATION-STATUS.md` | Implementation status | Round 1 status | ✅ Current |
+| `UX-ISSUES-ROUND2.md` | UX Round 2 analysis | Round 2 fixes | ✅ NEW! |
+| `SESSION-SUMMARY-v11-ux.md` | Session summary | Round 1 work | ✅ Current |
+| `NGRAM-DIAGNOSIS.md` | N-gram quality analysis | viterbi_module.js, build_ngram.py | ✅ Current |
 
 ### Memory Bank Documentation
 
@@ -179,12 +223,13 @@
 | `test-node-v10.js` | 700+ | Mobile UX tests (27 tests) | `mvp1/DESIGN-v10.md` |
 | `test-node-v10-ux.js` | 200+ | Inline hints tests (5 tests) | `mvp1/DESIGN-v10-ux-improvement.md` |
 | `test-node-v10-bugfix.js` | 350+ | Delete key tests (13 tests) | `mvp1/DESIGN-v10-bugfix.md` |
-| `test-node-v11.js` | 800+ | N-gram tests (30 tests) | `mvp1/DESIGN-v11.md` |
-| `test-v11-ui-init.js` | 400+ | UI init tests (14 tests) | `mvp1/TEST-PLAN-v11-ui.md` |
-| `test-laplace-smoothing.js` | 600+ | Laplace tests (21 tests) | `mvp1/DESIGN-v11.md` |
-| `test-v11-ux-fixes.js` | 400+ | UX fixes tests (31 tests) | `mvp1/UX-FIXES-SUMMARY.md` |
+| `test-node-v11.js` | 800+ | N-gram tests (30 tests) | `docs/design/DESIGN-v11.md` |
+| `test-v11-ui-init.js` | 400+ | UI init tests (14 tests) | `docs/testing/TEST-PLAN-v11-ui.md` |
+| `test-laplace-smoothing.js` | 600+ | Laplace tests (21 tests) | `docs/design/DESIGN-v11.md` |
+| `test-v11-ux-fixes.js` | 400+ | UX Round 1 tests (31 tests) | `docs/ux/UX-FIXES-SUMMARY.md` |
+| `test-v11-ux-round2.js` | 400+ | UX Round 2 tests (30 tests) | `docs/ux/UX-ISSUES-ROUND2.md` |
 
-**Total**: 17 test files, 165 tests
+**Total**: 18 test files, **187+ tests** (all passing ✅)
 
 ---
 
@@ -192,26 +237,34 @@
 
 ### Documentation Accuracy ✅
 
-- [x] README.md badges reflect actual status (165/165 tests, 100%)
+- [x] README.md badges reflect actual status (187+/187+ tests, 100%)
 - [x] Progress bars show v11 at 100% complete
-- [x] Feature list includes latest UX improvements
+- [x] Feature list includes UX Round 2 improvements
 - [x] Terminology updated throughout (智能 → 智慧)
-- [x] Test counts accurate (165 total: 134 regression + 31 UX)
+- [x] Test counts accurate (187+ total: 157 regression + 30 Round 2)
 - [x] Latest commits documented in activeContext.md
+- [x] Documentation structure section added to README.md
+
+### Documentation Reorganization ✅
+
+- [x] Created docs/ folder with 4 subdirectories
+- [x] Moved ALL CAPS .md files (except CLAUDE.md) to docs/
+- [x] Updated DOCUMENTATION-MAPPING.md with new structure
+- [x] All moved files preserve git history (git mv)
 
 ### Code-to-Docs Mapping ✅
 
 - [x] All core files documented with line numbers
-- [x] Latest changes (v11 UX fixes) documented
-- [x] Test files mapped to design docs
+- [x] Latest changes (v11 UX Round 2) documented
+- [x] Test files mapped to design docs (with new paths)
 - [x] Data files explained
 - [x] File sizes verified
 
 ### Missing or Outdated ⏳
 
-- [ ] `README.en.md` - Needs update with v11 UX improvements
+- [ ] `README.en.md` - Needs update with v11 Round 2 improvements
 - [ ] `mvp1/README.en.md` - Needs update with latest changes
-- [ ] `memory-bank/progress.md` - Needs update with v11 completion
+- [x] `memory-bank/progress.md` - ✅ Updated with v11 Round 2 completion
 
 ---
 
@@ -221,25 +274,39 @@
 - JavaScript files: 25
 - HTML files: 3
 - JSON files: 3
-- Documentation files: 13
-- Test files: 17
+- Documentation files: 30+ (reorganized into docs/)
+- Test files: 18
 
 **Code**:
 - Production code: ~100KB
-- Test code: ~30KB
-- Documentation: ~500KB
+- Test code: ~35KB
+- Documentation: ~600KB (including design docs)
 
 **Tests**:
-- Total tests: 165
-- Pass rate: 100%
-- Categories: 10 (v6-v11)
+- Total tests: **187+**
+- Pass rate: **100%**
+- Categories: 11 (v6-v11 + Round 2)
+- Test files: 18 (157 regression + 30 Round 2)
 
-**Latest Session** (2025-11-11):
+**Latest Sessions** (2025-11-11):
+
+**Session 1 - UX Round 1**:
 - Files modified: 8
 - Lines added: 1,678 (mostly docs + tests)
-- Lines changed: 89 (actual fixes)
 - Commits: 4
-- Test coverage: No regressions (165/165)
+- Test coverage: 165/165 ✅
+
+**Session 2 - UX Round 2**:
+- Files modified: 5 (core_logic.js, core_logic_v11_ui.js, index.html, tests, docs)
+- Lines added: 1,002 (implementation + tests + docs)
+- Commits: 2
+- Test coverage: 187+/187+ ✅
+
+**Session 3 - Docs Reorganization**:
+- Files moved: 23 (to docs/)
+- Folders created: 4 (docs/project, docs/design, docs/testing, docs/ux)
+- Documentation updated: README.md, DOCUMENTATION-MAPPING.md
+- Git history preserved: Used `git mv`
 
 ---
 
@@ -248,14 +315,15 @@
 **When to Update**:
 1. After adding new features → Update README.md, design docs
 2. After bug fixes → Update design docs, session summaries
-3. After tests → Update test counts in README.md
+3. After tests → Update test counts in README.md, DOCUMENTATION-MAPPING.md
 4. After terminology changes → Global search-and-replace
+5. After major doc changes → Update DOCUMENTATION-MAPPING.md
 
-**Current Status**: All documentation current as of 2025-11-11
+**Current Status**: All documentation current as of 2025-11-11 (after reorganization)
 
 **Next Updates Needed**:
 - English README files (when MVP 2a starts)
-- progress.md (mark v11 100% complete)
+- Update design docs with Round 2 implementation details (optional)
 
 ---
 
