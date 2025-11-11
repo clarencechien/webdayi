@@ -230,12 +230,13 @@ Release: Space/= Handlers Fix + Buffer Display
 
 ## 📚 文件結構
 
-專案文件已組織到 `docs/` 資料夾中，以便更好地管理：
+專案文件已組織到 `docs/` 資料夾中，以便更好地管理（Build 007 完全重組）：
 
 ### 🗂️ docs/project/ - 專案文件
-- **PRD.md** - 產品需求文件 (Product Requirements Document)
+- **PRD.md** - 產品需求文件 (Product Requirements Document v1.3)
+- **VERSION-GUIDE.md** - 版本檢查指南 (v11.2 NEW!)
 - **VERIFICATION.md** - 驗證測試清單
-- **DOCUMENTATION-MAPPING.md** - 文件對應指南
+- **DOCUMENTATION-MAPPING.md** - 文件對應指南 (Build 007 更新)
 - **FINAL-VERIFICATION.md** - 最終驗證報告
 
 ### 🎨 docs/design/ - 設計文件
@@ -257,9 +258,13 @@ Release: Space/= Handlers Fix + Buffer Display
 ### 💡 docs/ux/ - UX 文件
 - **TAIWAN-LOCALIZATION.md** - 台灣在地化指南
 - **UX-IMPROVEMENTS-v11.md** - v11 UX 改善總覽
-- **UX-FIXES-SUMMARY.md** - UX 修復摘要
+- **UX-FIXES-SUMMARY.md** - UX Round 1 修復摘要
 - **UX-IMPLEMENTATION-STATUS.md** - UX 實作狀態
 - **UX-ISSUES-ROUND2.md** - UX Round 2 問題分析
+- **UX-SPACE-KEY-REDESIGN.md** - Space/= 鍵重新設計 (Build 005)
+- **UX-CRITICAL-SINGLE-CHAR-BUG.md** - 單字元 bug 分析 (Build 006)
+- **MOBILE-SPACE-KEY-FIX.md** - 手機 Space 鍵修復 (Build 005)
+- **MOBILE-UX-IMPROVEMENTS.md** - 手機 UX 三階段設計 (Build 007 NEW!)
 - **SESSION-SUMMARY-v11-ux.md** - v11 UX 工作階段摘要
 - **NGRAM-DIAGNOSIS.md** - N-gram 品質診斷報告
 
@@ -267,6 +272,8 @@ Release: Space/= Handlers Fix + Buffer Display
 - **CLAUDE.md** (根目錄) - AI 助手專案指南
 - **README.md** (根目錄) - 本文件
 - **memory-bank/** - 專案記憶庫（activeContext, progress, systemPatterns 等）
+
+**完整文件映射**：參見 [docs/project/DOCUMENTATION-MAPPING.md](docs/project/DOCUMENTATION-MAPPING.md)
 
 ## 💡 核心特色：頻率導向的智慧排序
 
@@ -428,56 +435,81 @@ node convert-v2.js  # 使用頻率資料建立 mvp1/dayi_db.json（推薦）
 
 ```
 webdayi/
-├── converter/                   # Phase 0：資料處理管線
-│   ├── convert.js              # YAML → JSON 轉換器（基礎版本）
-│   ├── convert-v2.js           # 增強轉換器（頻率排序）✅
-│   ├── convert-v2-lib.js       # 轉換器函式庫
-│   ├── convert-v2.test.js      # 轉換器測試套件（21 個測試）
-│   ├── DESIGN-v2.md            # 轉換器 v2 設計文件
-│   ├── README.md               # 轉換器文件
-│   ├── raw_data/
-│   │   ├── dayi.dict.yaml      # Rime 大易字典來源
-│   │   └── freq.yaml           # 字元頻率資料（2000 字，台灣教育部）
-│   └── test-data/
-│       └── freq-sample.yaml    # 測試頻率資料（20 字範例）
-├── mvp1/                       # Phase 1：靜態網頁
-│   ├── index.html              # 主要使用者介面（含 v11 UI）
-│   ├── core_logic.js           # 核心查詢引擎（v8）
-│   ├── core_logic_v11.js       # v11 N-gram 核心功能（313 行）✅ NEW!
-│   ├── core_logic_v11_ui.js    # v11 UI 整合（395 行）✅ NEW!
-│   ├── viterbi_module.js       # Viterbi 演算法（173 行）✅ NEW!
-│   ├── style.css               # 樣式表
-│   ├── dayi_db.json            # 產生的資料庫（頻率排序）
-│   ├── ngram_db.json           # N-gram 機率資料庫（10.4MB）✅ NEW!
-│   ├── README.md               # MVP1 文件（正體中文）
-│   ├── README.en.md            # MVP1 文件（英文）
-│   ├── DESIGN-auto-copy.md     # 自動複製功能設計文件（v8）
-│   ├── DESIGN-v11.md           # v11 N-gram 整合設計（643 行）✅ NEW!
-│   ├── TEST-PLAN-v11-ui.md     # v11 手動測試計畫（550+ 行）✅ NEW!
-│   ├── test.html               # 瀏覽器測試執行器
-│   ├── test-node.js            # Node.js 測試執行器（v1）
-│   ├── test-node-v2.js         # 選字鍵測試（v2）
-│   ├── test-node-v3.js         # 翻頁與自動選字測試（v3）
-│   ├── test-node-v4.js         # 智慧倒退測試（v4）
-│   ├── test-node-v5.js         # 輸入模式切換測試（v5）
-│   ├── test-node-v6.js         # 使用者個人化測試（19 個測試）
-│   ├── test-node-v7.js         # 自動選字 bug 修復測試（16 個測試）
-│   ├── test-node-v8.js         # 自動複製與清除按鈕測試（24 個測試）
-│   ├── test-node-v10.js        # v10 手機 UX + 字體控制測試（27 個測試）
-│   ├── test-node-v10-ux.js     # v10 內嵌提示測試（5 個測試）
-│   ├── test-node-v10-bugfix.js # v10 bug 修復測試（13 個測試）
-│   └── test-node-v11.js        # v11 N-gram 測試（30 個測試）✅ NEW!
-├── mvp2a-plugin/               # Phase 2：瀏覽器擴充套件（規劃中）
-│   ├── manifest.json           # Chrome 擴充套件設定
-│   ├── background.js           # Service Worker
-│   └── content.js              # DOM 注入
-└── memory-bank/                # 專案文件
-    ├── projectbrief.md         # 專案簡介
-    ├── productContext.md       # 產品脈絡
-    ├── systemPatterns.md       # 系統模式
-    ├── techContext.md          # 技術脈絡
-    ├── activeContext.md        # 活躍脈絡
-    └── progress.md             # 進度追蹤
+├── 📄 根目錄文件
+│   ├── CLAUDE.md                    # AI 助手專案指南
+│   ├── README.md                    # 主要專案概述（正體中文）
+│   ├── README.en.md                 # 英文版本
+│   └── index.html                   # 重定向到 mvp1/（用於 GitHub Pages）
+│
+├── 📚 docs/                         # 組織化文件（Build 007 NEW!）
+│   ├── project/                     # 專案層級文件
+│   │   ├── PRD.md                   # 產品需求 (v1.3)
+│   │   ├── VERSION-GUIDE.md         # 版本檢查指南
+│   │   ├── VERIFICATION.md          # 驗證檢查清單
+│   │   ├── DOCUMENTATION-MAPPING.md # 文件結構映射
+│   │   └── FINAL-VERIFICATION.md    # 最終驗證報告
+│   ├── design/                      # 設計規格
+│   │   ├── DESIGN-v2.md             # 轉換器 v2（頻率）
+│   │   ├── DESIGN-ngram.md          # N-gram 管線
+│   │   ├── DESIGN-viterbi.md        # Viterbi 演算法
+│   │   ├── DESIGN-auto-copy.md      # 自動複製 (v8)
+│   │   ├── DESIGN-v10*.md           # v10 功能（3 個檔案）
+│   │   ├── DESIGN-v11.md            # N-gram 整合 (v11)
+│   │   └── DESIGN-v11-ux-improvements.md # UX 修復
+│   ├── testing/                     # 測試文件
+│   │   ├── BROWSER-TESTING-v11.md   # 瀏覽器測試計畫
+│   │   ├── TEST-RESULTS-v11.md      # 測試結果
+│   │   └── TEST-PLAN-v11-ui.md      # UI 測試計畫
+│   └── ux/                          # UX 文件
+│       ├── TAIWAN-LOCALIZATION.md   # 台灣在地化
+│       ├── UX-IMPROVEMENTS-v11.md   # v11 UX 概述
+│       ├── UX-FIXES-SUMMARY.md      # UX Round 1
+│       ├── UX-ISSUES-ROUND2.md      # UX Round 2
+│       ├── UX-SPACE-KEY-REDESIGN.md # Space/= 鍵重新設計
+│       ├── UX-CRITICAL-SINGLE-CHAR-BUG.md # 單字元 bug
+│       ├── MOBILE-SPACE-KEY-FIX.md  # 手機 Space 鍵修復
+│       ├── MOBILE-UX-IMPROVEMENTS.md # 手機 UX 三階段 ✅ NEW!
+│       ├── SESSION-SUMMARY-v11-ux.md # 工作階段摘要
+│       └── NGRAM-DIAGNOSIS.md       # N-gram 品質分析
+│
+├── 🧠 memory-bank/                  # AI 助手專案記憶
+│   ├── projectbrief.md              # 專案簡介
+│   ├── productContext.md            # 產品脈絡
+│   ├── activeContext.md             # 活躍脈絡（Session 6 更新）
+│   ├── systemPatterns.md            # 系統模式
+│   ├── techContext.md               # 技術脈絡
+│   └── progress.md                  # 進度追蹤
+│
+├── 🔄 converter/                    # Phase 0：資料處理管線
+│   ├── convert.js                   # 基礎 YAML → JSON
+│   ├── convert-v2.js                # 頻率增強轉換器
+│   ├── convert-v2-lib.js            # 轉換器函式
+│   ├── convert-v2.test.js           # 21 個測試
+│   └── README.md                    # 轉換器文件
+│
+├── 🚀 mvp1/                         # MVP 1.0 核心引擎 (v11.2.0 Build 007)
+│   ├── index.html                   # 主要 UI（手機 UX 優化）✅
+│   ├── version.json                 # 版本追蹤 + 變更日誌
+│   ├── core_logic.js                # v8 邏輯 (46KB)
+│   ├── core_logic_v11.js            # N-gram 函式 (7KB)
+│   ├── core_logic_v11_ui.js         # UI 整合 (16KB)
+│   ├── viterbi_module.js            # Viterbi v2.0 with Laplace (7KB)
+│   ├── dayi_db.json                 # 字元資料庫 (760KB)
+│   ├── ngram_db.json                # N-gram 機率 (16.5MB)
+│   ├── README.md / README.en.md     # MVP1 文件
+│   ├── test*.js                     # 21 個測試檔（212+ 測試）
+│   └── diagnose*.js                 # 診斷工具
+│
+├── 📦 mvp3-smart-engine/            # 舊版 N-gram 實驗
+│   └── (已被 viterbi_module.js 取代)
+│
+├── 📖 reference/                    # 參考資料
+│   └── issue234.md
+│
+└── ⚙️ .github/workflows/            # CI/CD
+    ├── test.yml                     # 自動化測試
+    ├── deploy-pages.yml             # GitHub Pages 部署
+    └── auto-bump-build.yml          # 自動版本號碼（Build 007 修復）✅
 ```
 
 ## 功能

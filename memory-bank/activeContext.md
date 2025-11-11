@@ -1,11 +1,60 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-11 (🎉 Mobile UX Improvements - ALL 3 PHASES COMPLETE!)
-**Current Phase**: 🚀 MVP 1.0 v11.2.0 - Mobile UX Complete! Ready for MVP 2a
-**Current Version**: 11.2.0 (Build: 20251111-007, Commit: 326684c)
-**Main Branch Status**: ✅ All mobile UX improvements implemented and committed
+**Last Updated**: 2025-11-11 (📚 Documentation Organization - Build 007 Complete!)
+**Current Phase**: 🚀 MVP 1.0 v11.2.0 Build 007 - All features complete! Docs organized!
+**Current Version**: 11.2.0 (Build: 20251111-007, Commit: db46c15)
+**Main Branch Status**: ✅ Mobile UX + Documentation organization complete
 **Feature Branch**: claude/version-update-buffer-diagnostics-011CUqoiGKdFk7wf79JNuW1h
 **Next Milestone**: MVP 2a Planning (Chrome Extension)
+
+---
+
+## 📚 SESSION 7: Documentation Organization (2025-11-11) - ✅ COMPLETE!
+
+**Status**: ✅ All CAPS docs moved to docs/ | DOCUMENTATION-MAPPING updated | README updated
+
+### User Request
+
+> update memory bank and readme and make sure all docs mapping to codebase
+> then move/merge ALL CAPS docs into docs folders (except CLAUDE.md)
+> review project structure and update readme to reflect project status
+
+### Actions Taken
+
+**Documentation Reorganization**:
+1. **Reviewed all ALL CAPS docs**: Found VERSION-GUIDE.md (root), UX-*.md (mvp1/)
+2. **Moved files** (using `git mv` to preserve history):
+   - `VERSION-GUIDE.md` → `docs/project/VERSION-GUIDE.md`
+   - `mvp1/UX-CRITICAL-SINGLE-CHAR-BUG.md` → `docs/ux/UX-CRITICAL-SINGLE-CHAR-BUG.md`
+   - `mvp1/UX-SPACE-KEY-REDESIGN.md` → `docs/ux/UX-SPACE-KEY-REDESIGN.md`
+3. **Updated DOCUMENTATION-MAPPING.md**:
+   - Updated header to Build 007, Commit 326684c
+   - Added VERSION-GUIDE.md to docs/project/ section
+   - Added mobile UX docs to docs/ux/ section
+   - Created "MVP1 Legacy Design Documents" section showing old → new paths
+   - Added Session 5 & 6 to session history
+   - Updated completion status
+
+**README Updates**:
+4. **Updated project structure section**:
+   - Replaced old structure with new organized structure
+   - Shows docs/ folder with 4 subdirectories (project, design, testing, ux)
+   - Includes memory-bank, converter, mvp1 with Build 007 notes
+   - Added CI/CD section showing auto-bump-build.yml fix
+5. **Updated documentation structure section**:
+   - Added VERSION-GUIDE.md (v11.2 NEW!)
+   - Added mobile UX docs (Build 007 NEW!)
+   - Added link to DOCUMENTATION-MAPPING.md at bottom
+   - Updated status messages to Build 007
+
+**Files Modified**:
+- `docs/project/DOCUMENTATION-MAPPING.md` - Comprehensive updates
+- `README.md` - Project structure + docs structure sections
+- `memory-bank/activeContext.md` - This section
+
+**Commits**: Pending (will commit after memory bank update)
+
+**Impact**: Complete documentation organization! All docs are now in logical folders with clear structure.
 
 ---
 
