@@ -1,9 +1,9 @@
 {
   "version": "11.2.0",
-  "build": "20251111-004",
-  "buildDate": "2025-11-11T03:20:00Z",
-  "commit": "1f3b06a",
-  "releaseName": "Event Handler Conflict Fix + Diagnostics",
+  "build": "20251111-005",
+  "buildDate": "2025-11-11T04:00:00Z",
+  "commit": "6da4fb8",
+  "releaseName": "Space/= Handlers Fix + Buffer Display",
   "changelog": [
     {
       "version": "11.2.0",

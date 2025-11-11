@@ -189,20 +189,29 @@
   }
 
   function updateBufferDisplay() {
-    if (!bufferedCodesContainer) return;
+    console.log('[updateBufferDisplay] Called');
+
+    if (!bufferedCodesContainer) {
+      console.warn('[updateBufferDisplay] bufferedCodesContainer not found!');
+      return;
+    }
 
     const buffer = getCodeBuffer();
+    console.log(`[updateBufferDisplay] Buffer: [${buffer.join(', ')}], Length: ${buffer.length}`);
 
     if (buffer.length === 0) {
       bufferedCodesContainer.innerHTML = '<span class="text-sm text-slate-400 dark:text-slate-500 italic">尚無編碼 (No codes yet)</span>';
+      console.log('[updateBufferDisplay] Display cleared (empty buffer)');
       // Disable prediction button when buffer is empty
       if (predictSentenceBtn && getInputMode() === 'sentence') {
         predictSentenceBtn.disabled = true;
       }
     } else {
-      bufferedCodesContainer.innerHTML = buffer.map(code =>
+      const html = buffer.map(code =>
         `<span class="buffered-code-badge">${code}</span>`
       ).join('');
+      bufferedCodesContainer.innerHTML = html;
+      console.log(`[updateBufferDisplay] Display updated: ${html}`);
       // Enable prediction button when buffer has content
       if (predictSentenceBtn && getInputMode() === 'sentence') {
         predictSentenceBtn.disabled = false;

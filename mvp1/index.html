@@ -7,21 +7,21 @@
 
   <!-- Version Information (for testing verification) -->
   <meta name="app-version" content="11.2.0">
-  <meta name="app-build" content="20251111-004">
-  <meta name="app-commit" content="1f3b06a">
-  <meta name="app-release" content="Event Handler Conflict Fix + Diagnostics">
+  <meta name="app-build" content="20251111-005">
+  <meta name="app-commit" content="6da4fb8">
+  <meta name="app-release" content="Space/= Handlers Fix + Buffer Display">
   <!--
     WebDaYi MVP 1.0 - Version 11.2.0
-    Build: 20251111-004
-    Release: Event Handler Conflict Fix + Diagnostics
-    Commit: 1f3b06a
+    Build: 20251111-005
+    Release: Space/= Handlers Fix + Buffer Display
+    Commit: 6da4fb8
 
     Latest Changes:
-    - CRITICAL FIX: Resolved duplicate event handler conflict
-    - Space handler no longer calls triggerPrediction
-    - = key handler added to prevent default behavior
-    - Input handler now ignores = character
-    - Added diagnostic logging for Space/= handlers
+    - CRITICAL FIX: Moved Space/= handlers before sentence mode early return
+    - Space and = handlers now execute correctly in sentence mode
+    - Added diagnostic logs for buffer display
+    - Fixed handler execution order issue
+    - Core functionality working: Space buffers, = predicts
 
     How to verify version:
     1. Open browser DevTools console
@@ -438,16 +438,16 @@
     // Version information (for testing verification)
     window.WEBDAYI_VERSION = {
       version: '11.2.0',
-      build: '20251111-004',
-      buildDate: '2025-11-11T03:20:00Z',
-      commit: '1f3b06a',
-      releaseName: 'Event Handler Conflict Fix + Diagnostics',
+      build: '20251111-005',
+      buildDate: '2025-11-11T04:00:00Z',
+      commit: '6da4fb8',
+      releaseName: 'Space/= Handlers Fix + Buffer Display',
       changes: [
-        'CRITICAL FIX: Resolved duplicate event handler conflict',
-        'Space handler no longer calls triggerPrediction',
-        '= key handler added to prevent default behavior',
-        'Input handler now ignores = character',
-        'Added diagnostic logging for Space/= handlers'
+        'CRITICAL FIX: Moved Space/= handlers before sentence mode early return',
+        'Space and = handlers now execute correctly in sentence mode',
+        'Added diagnostic logs for buffer display',
+        'Fixed handler execution order issue',
+        'Core functionality working: Space buffers, = predicts'
       ]
     };
 
