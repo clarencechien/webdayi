@@ -417,7 +417,7 @@
       updateModeUI();
       if (inputBox) inputBox.value = '';
       if (candidateArea) {
-        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 Space 預測句子</div>';
+        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 = 預測句子</div>';
       }
 
       // Lazy load N-gram DB
@@ -446,7 +446,7 @@
       updateModeUI();
       if (inputBox) inputBox.value = '';
       if (candidateArea) {
-        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 Space 預測句子</div>';
+        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 = 預測句子</div>';
       }
 
       // Lazy load N-gram DB
@@ -464,7 +464,7 @@
       updateLivePreviewDisplay();
       if (inputBox) inputBox.value = '';
       if (candidateArea) {
-        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 Space 預測句子</div>';
+        candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 = 預測句子</div>';
       }
       console.log('[v11 UI] Buffer cleared');
     });
@@ -502,6 +502,15 @@
 
       // Sentence mode: Handle both single-char and 2-char codes
       const value = originalInputBox.value.toLowerCase();
+
+      // CRITICAL: Ignore = character (handled by keydown, not input)
+      // If = appears in input, it means keydown didn't prevent it
+      // This prevents "無效編碼: =" error
+      if (value === '=' || value.includes('=')) {
+        // Clear the input box to remove the = character
+        originalInputBox.value = '';
+        return; // Don't process as Dayi code
+      }
 
       // NEW (Issue 1 fix): Handle single-char input - show candidates
       if (value.length === 1) {
@@ -551,7 +560,7 @@
           if (candidateArea) {
             candidateArea.innerHTML = `
               <div class="w-full text-center text-sm text-slate-500 dark:text-slate-400 py-4">
-                已加入編碼 "${value}"，繼續輸入或按 Space 預測
+                已加入編碼 "${value}"，繼續輸入或按 = 預測
               </div>
             `;
           }
@@ -567,7 +576,7 @@
           setTimeout(() => {
             originalInputBox.value = '';
             if (candidateArea) {
-              candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 Space 預測句子</div>';
+              candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 = 預測句子</div>';
             }
           }, 1000);
         }
@@ -577,6 +586,8 @@
     });
 
     // Enhanced keydown handler for v11
+    // NOTE: Space and = keys are handled by core_logic.js
+    // This handler only adds sentence-mode-specific features
     originalInputBox.addEventListener('keydown', async (e) => {
       if (getInputMode() !== 'sentence') {
         return; // Let original handler in core_logic.js handle it
@@ -584,11 +595,18 @@
 
       const key = e.key;
 
-      // Space: Trigger prediction
-      if (key === ' ') {
+      // = key: Trigger prediction (handled here to prevent default)
+      // NOTE: Actual prediction logic is in core_logic.js, but we need
+      // to prevent = from being added to input box
+      if (key === '=') {
         e.preventDefault();
-        await triggerPrediction();
+        // Let core_logic.js handler do the prediction
+        return;
       }
+
+      // Space key: Let core_logic.js handle it
+      // NOTE: core_logic.js will add to buffer WITHOUT prediction
+      // DO NOT call triggerPrediction here!
 
       // Backspace on empty input: Remove last code from buffer
       if (key === 'Backspace' && originalInputBox.value === '') {
@@ -607,7 +625,7 @@
         updateLivePreviewDisplay();
         originalInputBox.value = '';
         if (candidateArea) {
-          candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 Space 預測句子</div>';
+          candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 = 預測句子</div>';
         }
         console.log('[v11 UI] Buffer cleared via ESC');
       }
