@@ -242,8 +242,26 @@ def build_blended_model(
     vocab_size = len(merged_uni_int)
     smoothing_alpha = 0.1  # Standard Laplace smoothing parameter
 
-    # Build output structure (includes Laplace smoothing parameters)
+    # Calculate probabilities for core_logic_v11.js compatibility
+    # Unigram probabilities: P(char) = count(char) / total_count
+    unigram_probs = {}
+    for char, count in merged_uni_int.items():
+        unigram_probs[char] = count / total_unigram_count
+
+    # Bigram probabilities: P(c2|c1) = count(c1,c2) / count(c1)
+    bigram_probs = {}
+    for bigram, count in pruned_bigrams.items():
+        if len(bigram) >= 2:
+            char1 = bigram[0]
+            char1_count = merged_uni_int.get(char1, 1)  # Avoid division by zero
+            bigram_probs[bigram] = count / char1_count
+
+    # Build output structure (includes probabilities + counts + Laplace smoothing)
     output_data = {
+        # Probabilities (for core_logic_v11.js validateNgramDb)
+        "unigrams": unigram_probs,
+        "bigrams": bigram_probs,
+        # Counts (for viterbi_module.js Laplace smoothing)
         "unigram_counts": merged_uni_int,
         "bigram_counts": pruned_bigrams,
         # Session 8 Laplace smoothing parameters (required by viterbi_module.js v2.0)
