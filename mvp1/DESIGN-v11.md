@@ -398,7 +398,7 @@ function displaySentencePrediction(result) {
     <div class="sentence-prediction">
       <div class="prediction-header">
         <span class="material-symbols-outlined">auto_awesome</span>
-        <span>智能預測</span>
+        <span>智慧預測</span>
       </div>
       <div class="predicted-sentence">${sentence}</div>
       <div class="prediction-details">
@@ -610,7 +610,7 @@ function handleInput(value, previousValue) {
   </div>
   <div id="preview-text" class="preview-text"></div>
   <div class="preview-hint">
-    按 Space 鍵以智能預測最佳句子
+    按 Space 鍵以智慧預測最佳句子
   </div>
 </div>
 ```

@@ -276,7 +276,7 @@ function formatPredictionResult(result, codes) {
     <div class="sentence-prediction">
       <div class="prediction-header">
         <span class="material-symbols-outlined">auto_awesome</span>
-        <span>智能預測</span>
+        <span>智慧預測</span>
       </div>
       <div class="predicted-sentence">${sentence}</div>
       <div class="prediction-details">

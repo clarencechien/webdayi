@@ -874,6 +874,12 @@ function isValidInputChar(char) {
  * @returns {boolean} - True if should trigger auto-select
  */
 function shouldAutoSelectOnInput(previousValue, newValue) {
+  // CRITICAL FIX (v11 UX): Disable auto-select in sentence mode
+  // Sentence mode buffers codes instead of auto-selecting
+  if (typeof isSentenceMode === 'function' && isSentenceMode()) {
+    return false;
+  }
+
   // Only trigger auto-select if value is getting longer (not backspace)
   if (newValue.length <= previousValue.length) {
     return false;
@@ -1114,6 +1120,12 @@ async function loadDatabase() {
  * @param {string} previousValue - Previous input value (for auto-select detection)
  */
 function handleInput(value, previousValue = '') {
+  // CRITICAL FIX (v11 UX): Skip in sentence mode to prevent interference
+  // Sentence mode has its own input handler in core_logic_v11_ui.js
+  if (typeof isSentenceMode === 'function' && isSentenceMode()) {
+    return;  // Let v11 handler manage sentence mode
+  }
+
   const newCode = value.trim().toLowerCase();
 
   // Check for auto-select (2 chars → 3rd char)
@@ -1352,15 +1364,39 @@ async function initialize() {
       inputBox.addEventListener('keydown', (e) => {
         const key = e.key;
 
-        // Handle Delete key for clearing output buffer (v10 bugfix)
+        // Check if in sentence mode (v11 UX fix)
+        const isInSentenceMode = (typeof isSentenceMode === 'function' && isSentenceMode());
+
+        // Handle Delete key for clearing all areas (v11 UX enhancement)
         if (key === 'Delete') {
           e.preventDefault();
+
+          // Clear output buffer
           const outputBuffer = document.getElementById('output-buffer');
-          if (outputBuffer && outputBuffer.value) {
+          if (outputBuffer) {
             outputBuffer.value = '';
-            showTemporaryFeedback('已清除');
           }
+
+          // Clear candidate area
+          const candidateArea = document.getElementById('candidate-area');
+          if (candidateArea) {
+            candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">已清除所有內容</div>';
+          }
+
+          // Clear sentence mode buffer if in sentence mode
+          if (isInSentenceMode) {
+            if (typeof clearCodeBuffer === 'function') clearCodeBuffer();
+            if (typeof updateBufferDisplay === 'function') updateBufferDisplay();
+            if (typeof updateLivePreviewDisplay === 'function') updateLivePreviewDisplay();
+          }
+
+          showTemporaryFeedback('已清除所有區域');
           return;
+        }
+
+        // Skip character mode logic if in sentence mode (v11 UX fix)
+        if (isInSentenceMode) {
+          return;  // Let v11 handler manage sentence mode
         }
 
         // Handle backspace key for output buffer deletion
@@ -1388,7 +1424,19 @@ async function initialize() {
           return;
         }
 
-        // Handle selection keys
+        // Handle Space key for character selection (v11 UX fix)
+        // Space key selects first candidate in character mode
+        if (key === ' ') {
+          e.preventDefault();
+          if (currentCode && currentCandidates.length > 0) {
+            handleSelection(0);  // Select first candidate
+            previousValue = '';  // Reset after selection
+          }
+          return;
+        }
+
+        // Handle selection keys (', [, ], -, \)
+        // Note: Space is handled separately above
         const selectionIndex = getSelectionIndexFromKey(key);
         if (selectionIndex !== -1 && currentCode) {
           e.preventDefault();

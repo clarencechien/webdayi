@@ -193,7 +193,7 @@ This document provides a comprehensive manual testing checklist for MVP 1.0 v11 
 - [ ] **Expected:** Preview text shows: "易 在 大" (first candidates)
 - [ ] **Expected:** Preview has gradient background
 - [ ] **Expected:** Preview text is large (3xl) and bold
-- [ ] **Expected:** Shows hint: "按 Space 鍵以智能預測最佳句子"
+- [ ] **Expected:** Shows hint: "按 Space 鍵以智慧預測最佳句子"
 
 ### Test 5.2: Preview Updates on Add
 - [ ] Add another code `a`
@@ -217,7 +217,7 @@ This document provides a comprehensive manual testing checklist for MVP 1.0 v11 
 - [ ] **Expected:**
   - Candidate area shows prediction card:
     - Gradient background (purple/blue)
-    - Header: "智能預測結果 (Prediction)"
+    - Header: "智慧預測結果 (Prediction)"
     - Predicted sentence: "易在" (large, bold, letter-spaced)
     - Char breakdown: "易 (4jp) → 在 (ad)"
     - Prediction score: "機率分數: -5.298" (approximately)
