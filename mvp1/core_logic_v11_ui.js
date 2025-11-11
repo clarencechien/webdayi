@@ -305,6 +305,95 @@
   }
 
   // ============================================
+  // New Functions for Redesigned Space/= Keys
+  // (See: UX-SPACE-KEY-REDESIGN.md)
+  // ============================================
+
+  /**
+   * Trigger sentence prediction based on current code buffer
+   * Called when Space is pressed in sentence mode
+   * ONLY displays prediction - does NOT output (that's done by confirmPrediction)
+   */
+  window.triggerSentencePrediction = async function triggerSentencePrediction() {
+    const buffer = getCodeBuffer();
+
+    if (buffer.length === 0) {
+      console.log('[Prediction] No codes in buffer');
+      return;
+    }
+
+    console.log(`[Prediction] Triggering for buffer: ${buffer.join(', ')}`);
+
+    // Ensure N-gram DB is loaded
+    const ngram = await loadNgramDatabase();
+    if (!ngram) {
+      console.warn('[Prediction] N-gram DB not loaded');
+      return;
+    }
+
+    // Run Viterbi prediction
+    if (typeof predictSentenceFromBuffer === 'function') {
+      const result = predictSentenceFromBuffer(buffer, dayiMap, ngram);
+
+      if (result) {
+        console.log(`[Prediction] Result: "${result.sentence}" (score: ${result.score.toFixed(3)})`);
+
+        // Update prediction display ONLY (don't output yet)
+        updatePredictionDisplay(result.sentence, result.score);
+      } else {
+        console.warn('[Prediction] No result from Viterbi');
+      }
+    }
+  }
+
+  /**
+   * Confirm prediction and output to buffer
+   * Called when = is pressed in sentence mode
+   */
+  window.confirmPrediction = function confirmPrediction() {
+    const predictionArea = document.getElementById('prediction-result-text');
+    if (!predictionArea) {
+      console.warn('[Confirm] Prediction area not found');
+      return;
+    }
+
+    const predictedSentence = predictionArea.textContent;
+
+    if (predictedSentence && predictedSentence !== '(等待預測)') {
+      console.log(`[Confirm] Outputting prediction: "${predictedSentence}"`);
+
+      // Append to output
+      const outputBuffer = document.getElementById('output-buffer');
+      if (outputBuffer) {
+        outputBuffer.value += predictedSentence;
+
+        // Auto-copy if enabled
+        if (typeof autoCopyEnabled !== 'undefined' && autoCopyEnabled) {
+          if (typeof performAutoCopy === 'function') {
+            performAutoCopy(outputBuffer.value);
+          }
+          if (typeof showCopyFeedback === 'function') {
+            showCopyFeedback();
+          }
+        }
+      }
+
+      // Clear buffer and prediction
+      clearCodeBuffer();
+      updateBufferDisplay();
+      updateLivePreviewDisplay();
+      predictionArea.textContent = '(等待預測)';
+
+      // Clear input box
+      if (inputBox) inputBox.value = '';
+
+      console.log('[Confirm] Prediction confirmed and output');
+    } else {
+      console.log('[Confirm] No prediction to confirm');
+    }
+  }
+
+  // ============================================
   // Event Handlers
   // ============================================
 
@@ -424,14 +513,11 @@
             updateCandidateArea(withUserPreference, 0);
           }
 
-          // CRITICAL FIX: Set global state for selection to work
-          // Without this, handleSelection() returns immediately due to guard check
-          // See: UX-CRITICAL-SINGLE-CHAR-BUG.md for full analysis
-          currentCode = value;  // "v"
-          currentCandidates = withUserPreference;  // [{char: "大", freq: 9988}, ...]
-          currentPage = 0;  // Reset pagination
+          // Note: In sentence mode, single-char is NOT selected
+          // Instead, it's added to buffer when Space is pressed
+          // See: UX-SPACE-KEY-REDESIGN.md for full specification
 
-          console.log(`[v11 UI] Single-char "${value}" showing ${sorted.length} candidates`);
+          console.log(`[v11 UI] Single-char "${value}" showing ${sorted.length} candidates (live preview only)`);
         } else {
           // No candidates for this single char
           if (candidateArea) {
