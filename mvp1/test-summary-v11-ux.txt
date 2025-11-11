@@ -1,0 +1,33 @@
+MVP 1.0 v11 UX Improvements - Test Summary
+==========================================
+Date: 2025-11-11
+Session: claude/init-memory-bank-readme-011CUqoiGKdFk7wf79JNuW1h
+
+REGRESSION TESTS (All Passing):
+- v6 (Personalization): 19/19 ✓
+- v7 (Auto-select fix): 16/16 ✓
+- v8 (Auto-copy): 24/24 ✓
+- v10 (Mobile UX): 27/27 ✓
+- v10-ux (Inline hints): 5/5 ✓
+- v10-bugfix (Delete key): 13/13 ✓
+- v11 (N-gram core): 30/30 ✓
+
+NEW TESTS (All Passing):
+- v11-ux (UX improvements): 31/31 ✓
+
+TOTAL: 165/165 tests passing ✅
+
+FIXES IMPLEMENTED:
+1. ✅ Terminology: 智能 → 智慧
+2. ✅ Mode guards in handleInput()
+3. ✅ Mode guards in shouldAutoSelectOnInput()
+4. ✅ Mode isolation in keydown handler
+5. ✅ Space key mode-aware selection
+6. ✅ Enhanced Delete key (clear all areas)
+
+CRITICAL BUGS FIXED:
+- Duplication bug (dj ev → 明天, not 天明天)
+- Single-code UX (v + Space → 大 in character mode)
+- Delete key now clears output + candidates + buffer
+
+STATUS: All automated tests passing, ready for manual verification
