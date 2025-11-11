@@ -22,41 +22,49 @@ from typing import Dict, Tuple
 
 def clean_ptt_text(text: str) -> str:
     """
-    Clean PTT post text by removing noise while preserving colloquial patterns.
+    Clean PTT post text by removing ALL noise (Strict Mode - Action 2).
+
+    Analysis of 50K lines showed 13.81% noise contamination with lenient mode.
+    Strict mode removes ALL non-Chinese characters except 5 basic punctuation marks.
 
     Noise to remove:
     - PTT metadata markers (※ 發信站, ◆ From)
     - URLs (https://, http://)
     - Reply headers (Re: [標題])
-    - English text (we only need Chinese N-grams)
-    - Special characters (except basic punctuation)
+    - English text (XDDD, lol)
+    - Numbers (123, 456)
+    - Bopomofo (注音符號: ㄅㄆㄇㄈ, 好ㄉ, ㄎㄎ)
+    - Spaces (all spaces removed)
+    - Full-width punctuation (「」『』（）【】)
 
     Patterns to preserve:
     - Chinese characters (我, 你, 他, 好, 的, etc.)
-    - Basic punctuation (，。！？)
-    - Colloquial markers (好ㄉ, ㄎㄎ, etc.)
+    - ONLY 5 basic punctuation marks: ，。！？、
 
     Args:
         text: Raw PTT post text
 
     Returns:
-        Cleaned text with only Chinese characters and basic punctuation
+        Cleaned text with ONLY Chinese characters + 5 punctuation marks
 
-    Examples:
+    Examples (Strict Mode - Action 2):
         >>> clean_ptt_text("這真的太神啦 https://example.com 推推推")
-        '這真的太神啦 推推推'
+        '這真的太神啦推推推'  # Spaces removed
 
         >>> clean_ptt_text("※ 發信站: 批踢踢實業坊(ptt.cc)")
-        ''
+        ''  # Metadata removed
 
         >>> clean_ptt_text("Re: [問卦] 這是什麼意思")
-        ' 這是什麼意思'
+        '這是什麼意思'  # Reply header removed
 
         >>> clean_ptt_text("XDDD 超派的啦 lol")
-        ' 超派的啦 '
+        '超派的啦'  # English and spaces removed
 
         >>> clean_ptt_text("好ㄉ 我知道了")
-        '好ㄉ 我知道了'
+        '好我知道了'  # Bopomofo and spaces removed
+
+        >>> clean_ptt_text("真的嗎？ 不太確定（笑）")
+        '真的嗎？不太確定笑'  # Only ，。！？、 kept
     """
     # Remove PTT-specific metadata markers
     # ※ 發信站: 批踢踢實業坊(ptt.cc), 來自: 123.456.789.0
@@ -74,17 +82,18 @@ def clean_ptt_text(text: str) -> str:
     # Remove email addresses
     text = re.sub(r"\S+@\S+", " ", text)
 
-    # Keep only Chinese characters + basic punctuation
+    # 【嚴格模式 - Action 2】只保留漢字 + 5個基本標點
+    # Removes: Bopomofo (注音), English, numbers, spaces, other punctuation
+    # Reason: Analysis shows 13.81% noise contamination with current mode
+    # Expected improvement: +5-10% quality
+    #
     # Range: \u4e00-\u9fa5 (CJK Unified Ideographs)
-    # Keep: 。 ， ！ ？ 、 （ ） 「 」 『 』 【 】
-    # Keep: ㄅㄆㄇㄈ (Bopomofo, for colloquial: 好ㄉ, ㄎㄎ)
-    text = re.sub(r"[^\u4e00-\u9fa5\u3100-\u312f。，！？、（）「」『』【】\s]", " ", text)
+    # Keep ONLY: 。 ， ！ ？ 、
+    # Remove: Spaces, Bopomofo, full-width punctuation, English, numbers
+    text = re.sub(r"[^\u4e00-\u9fa5，。！？、]", "", text)
 
-    # Normalize whitespace (multiple spaces → single space)
-    text = re.sub(r"\s+", " ", text)
-
-    # Strip leading/trailing whitespace
-    text = text.strip()
+    # No whitespace normalization needed (all spaces removed)
+    # No strip needed (no leading/trailing spaces possible)
 
     return text
 
