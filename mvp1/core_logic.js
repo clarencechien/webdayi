@@ -1445,13 +1445,17 @@ async function initialize() {
           return;
         }
 
-        // Skip character mode logic if in sentence mode (v11 UX fix)
-        if (isInSentenceMode) {
-          return;  // Let v11 handler manage sentence mode
-        }
+        // CRITICAL: Handle = and Space keys BEFORE the sentence mode early return
+        // Otherwise these handlers will never execute in sentence mode!
 
-        // Handle backspace key for output buffer deletion
+        // Handle backspace key for output buffer deletion (character mode only)
         if (key === 'Backspace') {
+          // In sentence mode, let v11_ui.js handle Backspace (removes from code buffer)
+          if (isInSentenceMode) {
+            return;  // Don't handle Backspace in sentence mode
+          }
+
+          // Character mode: Handle output buffer deletion
           const outputBuffer = document.getElementById('output-buffer');
           const inputValue = inputBox.value.trim().toLowerCase();
 
@@ -1547,19 +1551,21 @@ async function initialize() {
           return;
         }
 
+        // Skip remaining character mode logic if in sentence mode
+        // (Space, =, Delete, Shift, Backspace are handled above for both modes)
+        if (isInSentenceMode) {
+          return;  // Let v11 handlers manage other sentence mode interactions
+        }
+
+        // === CHARACTER MODE LOGIC BELOW ===
+
         // Handle selection keys (', [, ], -, \)
         // Note: Space is handled separately above
         const selectionIndex = getSelectionIndexFromKey(key);
         if (selectionIndex !== -1) {
           e.preventDefault();
 
-          // NEW: Disable selection in sentence mode (UX-SPACE-KEY-REDESIGN.md)
-          if (isInSentenceMode) {
-            console.log('[Sentence Mode] Selection keys disabled - use Space to buffer, = to confirm');
-            return;
-          }
-
-          // Character mode: Selection (unchanged)
+          // Character mode: Selection
           if (currentCode) {
             handleSelection(selectionIndex);
             previousValue = '';  // Reset after selection
