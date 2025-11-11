@@ -7,20 +7,21 @@
 
   <!-- Version Information (for testing verification) -->
   <meta name="app-version" content="11.2.0">
-  <meta name="app-build" content="20251111-001">
-  <meta name="app-commit" content="22c263d">
-  <meta name="app-release" content="Blind Typing Fix">
+  <meta name="app-build" content="20251111-002">
+  <meta name="app-commit" content="63deaf9">
+  <meta name="app-release" content="Event Handler Conflict Fix + Diagnostics">
   <!--
     WebDaYi MVP 1.0 - Version 11.2.0
-    Build: 20251111-001
-    Release: Blind Typing Fix
-    Commit: 22c263d
+    Build: 20251111-002
+    Release: Event Handler Conflict Fix + Diagnostics
+    Commit: 63deaf9
 
     Latest Changes:
-    - CRITICAL FIX: Space key now ONLY buffers (no prediction)
-    - = key triggers prediction + output (one step)
-    - Fixed mobile prediction button
-    - True blind typing workflow enabled
+    - CRITICAL FIX: Resolved duplicate event handler conflict
+    - Space handler no longer calls triggerPrediction
+    - = key handler added to prevent default behavior
+    - Input handler now ignores = character
+    - Added diagnostic logging for Space/= handlers
 
     How to verify version:
     1. Open browser DevTools console
@@ -437,15 +438,16 @@
     // Version information (for testing verification)
     window.WEBDAYI_VERSION = {
       version: '11.2.0',
-      build: '20251111-001',
-      buildDate: '2025-11-11T02:30:00Z',
-      commit: '22c263d',
-      releaseName: 'Blind Typing Fix',
+      build: '20251111-002',
+      buildDate: '2025-11-11T03:00:00Z',
+      commit: '63deaf9',
+      releaseName: 'Event Handler Conflict Fix + Diagnostics',
       changes: [
-        'CRITICAL FIX: Space key now ONLY buffers (no prediction)',
-        '= key triggers prediction + output (one step)',
-        'Fixed mobile prediction button',
-        'True blind typing workflow enabled'
+        'CRITICAL FIX: Resolved duplicate event handler conflict',
+        'Space handler no longer calls triggerPrediction',
+        '= key handler added to prevent default behavior',
+        'Input handler now ignores = character',
+        'Added diagnostic logging for Space/= handlers'
       ]
     };
 

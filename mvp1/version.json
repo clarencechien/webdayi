@@ -1,12 +1,33 @@
 {
   "version": "11.2.0",
-  "build": "20251111-001",
-  "buildDate": "2025-11-11T02:30:00Z",
-  "commit": "22c263d",
-  "releaseName": "Blind Typing Fix",
+  "build": "20251111-002",
+  "buildDate": "2025-11-11T03:00:00Z",
+  "commit": "63deaf9",
+  "releaseName": "Event Handler Conflict Fix + Diagnostics",
   "changelog": [
     {
       "version": "11.2.0",
+      "build": "002",
+      "date": "2025-11-11",
+      "type": "critical-fix",
+      "title": "CRITICAL FIX: Resolve duplicate event handler conflict",
+      "changes": [
+        "Fixed duplicate keydown handlers in core_logic_v11_ui.js",
+        "Space handler no longer calls triggerPrediction",
+        "= key handler added to prevent default input behavior",
+        "Input handler now ignores = character",
+        "All UI text updated to '按 = 預測'",
+        "Added diagnostic logging for Space/= handlers"
+      ],
+      "fixes": [
+        "v + space no longer shows 'Invalid code: v '",
+        "= key no longer treated as invalid input",
+        "Space does NOT trigger prediction (only buffers)"
+      ]
+    },
+    {
+      "version": "11.2.0",
+      "build": "001",
       "date": "2025-11-11",
       "type": "critical-fix",
       "title": "CRITICAL FIX: Correct Space/= key behavior",
