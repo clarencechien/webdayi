@@ -16,6 +16,10 @@ jobs:
   bump-build:
     runs-on: ubuntu-latest
 
+    # Grant write permissions to push commits
+    permissions:
+      contents: write
+
     # Prevent infinite loops by checking commit message
     if: "!contains(github.event.head_commit.message, '[auto-bump]')"
 
