@@ -424,6 +424,13 @@
             updateCandidateArea(withUserPreference, 0);
           }
 
+          // CRITICAL FIX: Set global state for selection to work
+          // Without this, handleSelection() returns immediately due to guard check
+          // See: UX-CRITICAL-SINGLE-CHAR-BUG.md for full analysis
+          currentCode = value;  // "v"
+          currentCandidates = withUserPreference;  // [{char: "大", freq: 9988}, ...]
+          currentPage = 0;  // Reset pagination
+
           console.log(`[v11 UI] Single-char "${value}" showing ${sorted.length} candidates`);
         } else {
           // No candidates for this single char
