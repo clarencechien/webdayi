@@ -604,12 +604,9 @@
         return;
       }
 
-      // Space key: Return early and let core_logic.js handle it
-      // NOTE: core_logic.js will add to buffer WITHOUT prediction
-      // DO NOT handle Space here - just let it propagate to core_logic.js
-      if (key === ' ') {
-        return; // Let core_logic.js handler do all the work
-      }
+      // Space key: DO NOT handle it here at all
+      // Let it propagate to core_logic.js keydown handler
+      // (If we return early, we need to check that core_logic.js handler runs first)
 
       // Backspace on empty input: Remove last code from buffer
       if (key === 'Backspace' && originalInputBox.value === '') {
