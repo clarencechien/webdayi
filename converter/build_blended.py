@@ -237,12 +237,21 @@ def build_blended_model(
     # Convert merged unigrams to integers (unigrams don't need pruning)
     merged_uni_int = convert_to_int_counts(merged_uni)
 
-    # Build output structure (simplified - counts only, no probabilities)
+    # Calculate statistics for Laplace smoothing (Session 8 compatibility)
+    total_unigram_count = sum(merged_uni_int.values())
+    vocab_size = len(merged_uni_int)
+    smoothing_alpha = 0.1  # Standard Laplace smoothing parameter
+
+    # Build output structure (includes Laplace smoothing parameters)
     output_data = {
         "unigram_counts": merged_uni_int,
         "bigram_counts": pruned_bigrams,
+        # Session 8 Laplace smoothing parameters (required by viterbi_module.js v2.0)
+        "smoothing_alpha": smoothing_alpha,
+        "total_chars": total_unigram_count,
+        "vocab_size": vocab_size,
         "metadata": {
-            "version": "1.0-blended",
+            "version": "1.1-blended",  # v1.1 with smoothing params
             "source_corpora": [
                 {"name": "rime-essay", "weight": weight_rime},
                 {"name": "PTT-Corpus", "weight": weight_ptt}
@@ -251,10 +260,14 @@ def build_blended_model(
                 "threshold": pruning_threshold,
                 "topk": pruning_topk
             },
+            "smoothing": {
+                "method": "laplace",
+                "alpha": smoothing_alpha
+            },
             "statistics": {
-                "unique_unigrams": len(merged_uni_int),
+                "unique_unigrams": vocab_size,
                 "unique_bigrams": len(pruned_bigrams),
-                "total_unigram_count": sum(merged_uni_int.values()),
+                "total_unigram_count": total_unigram_count,
                 "total_bigram_count": sum(pruned_bigrams.values())
             }
         }
