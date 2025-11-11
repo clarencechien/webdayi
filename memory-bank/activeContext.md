@@ -1,11 +1,96 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-11 (✨ Early Return Bug Fixed + Buffer Display Working!)
-**Current Phase**: 🚀 MVP 1.0 v11.2.0 - Space/= Handlers Fully Working ✅
-**Current Version**: 11.2.0 (Build: 20251111-005, Commit: caef860)
-**Main Branch Status**: ✅ Tested on GitHub Pages - Core functionality working!
+**Last Updated**: 2025-11-11 (🎯 Mobile UX Improvements - Phase 1 & 2 Complete!)
+**Current Phase**: 🚀 MVP 1.0 v11.2.0 - Mobile UX Improvements in Progress
+**Current Version**: 11.2.0 (Build: 20251111-007, Commit: 05ae9a8)
+**Main Branch Status**: ✅ Core functionality working, mobile improvements added
 **Feature Branch**: claude/version-update-buffer-diagnostics-011CUqoiGKdFk7wf79JNuW1h
-**Next Milestone**: Create GitHub Action for auto build numbering → MVP 2a Planning
+**Next Milestone**: Phase 3 Mobile UX Redesign (Layout optimization) → MVP 2a Planning
+
+---
+
+## 🎯 SESSION 6: Mobile UX Improvements (2025-11-11) - Phase 1 & 2 COMPLETE!
+
+**Status**: ✅ Phase 1 & 2 Complete | ⏳ Phase 3 Pending
+
+### User Feedback (Chinese)
+
+> 1. mobile 版整句模式已經可以使用 空格 請先移除"緩衝編碼" 按鈕
+> 2. 請套用相同的邏輯在逐字模式中 讓mobile版可以用空格當作space 選第一個字
+> 3. 請重新考慮mobile 的ux 因為虛擬鍵盤就會佔畫面的一半 如果在整句模式 還要拉上拉下 請讓mobile 與laptop版都有更好的ux 讓輸入的介面更為順暢
+
+### Phase 1: Remove Space Buffer Button ✅ DONE
+
+**Reason**: Input event handler (Layer 2) now reliably handles mobile Space key, making Layer 3 (button) redundant.
+
+**Changes (Commit: 05ae9a8)**:
+1. **index.html**: Removed Space buffer button (line 355-360)
+2. **core_logic_v11_ui.js**:
+   - Removed `spaceBufferBtn` reference (line 44)
+   - Removed button event handler (lines 486-522)
+   - Removed button state updates (lines 187-189, 644-645)
+
+**Impact**: Cleaner UI, no functionality loss
+
+### Phase 2: Character Mode Space Selection (Mobile) ✅ DONE
+
+**Problem**: Mobile virtual keyboards don't trigger keydown reliably in character mode
+- User types "v" → taps Space → sees "v " (invalid) instead of selecting "大"
+
+**Solution**: Extend input event handler to handle both modes
+
+**Changes (Commit: 05ae9a8)**:
+
+**core_logic.js (lines 1593-1682)**: Unified input event handler
+```javascript
+if (value.endsWith(' ')) {
+  const codeWithoutSpace = value.trim();
+  const isInSentenceMode = isSentenceMode();
+
+  if (isInSentenceMode) {
+    // Sentence mode: Buffer code (existing)
+    addToCodeBuffer(codeWithoutSpace, dayiMap);
+  } else {
+    // Character mode: Select first candidate (NEW)
+    const candidates = dayiMap.get(codeWithoutSpace);
+    if (candidates && candidates.length > 0) {
+      currentCode = codeWithoutSpace;
+      currentCandidates = applyUserPreference(...);
+      handleSelection(0);  // Select first
+    }
+  }
+}
+```
+
+**Testing**:
+- ✅ Mobile sentence mode: "v + Space" → Buffer "v"
+- ✅ Mobile character mode: "v + Space" → Select "大"
+- ✅ Desktop: No regression (keydown still works)
+
+**Impact**: Mobile users can now use Space key in both modes
+
+### Phase 3: Mobile UX Redesign ⏳ PENDING
+
+**Problem**: Virtual keyboard takes 50% of screen, requiring constant scrolling:
+- Type code → see candidates ✅
+- Want to see sentence preview → **must scroll up** ❌
+- Want to see output → **must scroll up more** ❌
+- Want to continue typing → **must scroll down** ❌
+
+**Design Document**: `docs/ux/MOBILE-UX-IMPROVEMENTS.md`
+
+**Proposed Solution**: Reorder layout on mobile using CSS `order` property
+- Desktop: Output → Sentence Panel → Input → Candidates (current)
+- Mobile: Output (compact, scrollable) → Input → Candidates → Sentence Panel (inline)
+
+**Key Changes**:
+1. Use CSS flexbox `order` property for mobile reordering
+2. Compact sentence panel (horizontal layout, smaller text)
+3. Reduce padding/spacing on mobile
+4. Input box stays above virtual keyboard
+5. All active elements visible without scrolling
+
+**Status**: Design complete, implementation pending user approval
 
 ---
 

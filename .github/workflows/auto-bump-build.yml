@@ -41,9 +41,9 @@ jobs:
         run: |
           cd mvp1
 
-          # Read current version info
-          CURRENT_VERSION=$(cat version.json | grep '"version"' | cut -d'"' -f4)
-          CURRENT_BUILD=$(cat version.json | grep '"build"' | cut -d'"' -f4)
+          # Read current version info using jq (proper JSON parsing)
+          CURRENT_VERSION=$(jq -r '.version' version.json)
+          CURRENT_BUILD=$(jq -r '.build' version.json)
 
           echo "Current version: $CURRENT_VERSION"
           echo "Current build: $CURRENT_BUILD"
@@ -53,13 +53,19 @@ jobs:
           BUILD_NUM=$(echo $CURRENT_BUILD | cut -d'-' -f2)
           TODAY=$(date -u +%Y%m%d)
 
+          echo "Build date: $BUILD_DATE"
+          echo "Build number: $BUILD_NUM"
+          echo "Today: $TODAY"
+
           # Increment build number
           if [ "$BUILD_DATE" = "$TODAY" ]; then
             # Same day, increment number
             NEW_BUILD_NUM=$(printf "%03d" $((10#$BUILD_NUM + 1)))
+            echo "Same day, incrementing: $BUILD_NUM -> $NEW_BUILD_NUM"
           else
             # New day, reset to 001
             NEW_BUILD_NUM="001"
+            echo "New day, resetting to 001"
           fi
 
           NEW_BUILD="${TODAY}-${NEW_BUILD_NUM}"
@@ -83,15 +89,12 @@ jobs:
         run: |
           cd mvp1
 
-          # Use Node.js to update JSON properly
-          node -e "
-            const fs = require('fs');
-            const data = JSON.parse(fs.readFileSync('version.json', 'utf8'));
-            data.build = '${{ steps.bump.outputs.build }}';
-            data.buildDate = '${{ steps.bump.outputs.buildDate }}';
-            data.commit = '${{ steps.bump.outputs.commit }}';
-            fs.writeFileSync('version.json', JSON.stringify(data, null, 2) + '\n');
-          "
+          # Use jq to update JSON properly
+          jq --arg build "${{ steps.bump.outputs.build }}" \
+             --arg buildDate "${{ steps.bump.outputs.buildDate }}" \
+             --arg commit "${{ steps.bump.outputs.commit }}" \
+             '.build = $build | .buildDate = $buildDate | .commit = $commit' \
+             version.json > version.json.tmp && mv version.json.tmp version.json
 
           echo "Updated version.json:"
           cat version.json | head -10

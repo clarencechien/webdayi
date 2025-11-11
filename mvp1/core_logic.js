@@ -1599,10 +1599,6 @@ async function initialize() {
           return;
         }
 
-        // Check if in sentence mode
-        const isInSentenceMode = (typeof isSentenceMode === 'function' && isSentenceMode());
-        if (!isInSentenceMode) return;
-
         // Check if in English mode
         if (languageMode === 'english') return;
 
@@ -1614,9 +1610,19 @@ async function initialize() {
 
           const codeWithoutSpace = value.trim();
 
-          if (codeWithoutSpace.length > 0) {
-            // Valid code, add to buffer
-            console.log('[Mobile Space] Attempting to buffer code:', codeWithoutSpace);
+          if (codeWithoutSpace.length === 0) {
+            // Just remove the space if input was empty
+            console.log('[Mobile Space] Empty input, removing space');
+            inputBox.value = '';
+            return;
+          }
+
+          // Check mode
+          const isInSentenceMode = (typeof isSentenceMode === 'function' && isSentenceMode());
+
+          if (isInSentenceMode) {
+            // Sentence mode: Add to buffer
+            console.log('[Mobile Space] Sentence mode - attempting to buffer code:', codeWithoutSpace);
 
             if (typeof addToCodeBuffer === 'function') {
               const added = addToCodeBuffer(codeWithoutSpace, dayiMap);
@@ -1646,9 +1652,31 @@ async function initialize() {
               }
             }
           } else {
-            // Just remove the space if input was empty
-            console.log('[Mobile Space] Empty input, removing space');
-            inputBox.value = codeWithoutSpace;
+            // Character mode: Select first candidate
+            console.log('[Mobile Space] Character mode - attempting to select first candidate for:', codeWithoutSpace);
+
+            const candidates = dayiMap.get(codeWithoutSpace);
+
+            if (candidates && candidates.length > 0) {
+              // Set current state (required by handleSelection)
+              currentCode = codeWithoutSpace;
+              currentCandidates = candidates;
+
+              // Sort by frequency and apply user preference (same as regular input flow)
+              const sorted = [...candidates].sort((a, b) => b.freq - a.freq);
+              currentCandidates = applyUserPreference(codeWithoutSpace, sorted, userModel);
+
+              // Select first candidate (index 0)
+              handleSelection(0);
+
+              // Clear input (handleSelection already does this, but be explicit)
+              inputBox.value = '';
+
+              console.log('[Mobile Space] First candidate selected for:', codeWithoutSpace);
+            } else {
+              // Invalid code, leave space in to show error
+              console.warn('[Mobile Space] Invalid code, no candidates for:', codeWithoutSpace);
+            }
           }
         }
       });
