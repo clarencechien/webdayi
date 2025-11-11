@@ -635,6 +635,83 @@ def apply_pruning(
 
 
 # ============================================================================
+# Phase 6: High-Level Processing (Session 9 - For Blended Model)
+# ============================================================================
+
+def process_essay_file(
+    input_file: str,
+    verbose: bool = False
+) -> Tuple[Dict[str, int], Dict[str, int]]:
+    """
+    Process rime-essay corpus file and return raw N-gram counts.
+
+    This is a high-level function that orchestrates Phases 1-3 (parsing and counting)
+    and returns raw counts BEFORE pruning and probability calculation.
+
+    Designed for Session 9 blended model pipeline where multiple corpora need to be
+    merged before pruning.
+
+    Args:
+        input_file: Path to essay.txt corpus file
+        verbose: Print progress messages
+
+    Returns:
+        Tuple of (unigram_counts, bigram_counts)
+        - unigram_counts: Dict[str, int] - character → count
+        - bigram_counts: Dict[str, int] - bigram string → count
+
+    Raises:
+        FileNotFoundError: If input file doesn't exist
+        ValueError: If file is empty or invalid
+
+    Example:
+        >>> uni, bi = process_essay_file('essay.txt', verbose=True)
+        [Essay] Parsing essay.txt...
+        [Essay] Parsed 442,252 entries
+        [Essay] Counting unigrams...
+        [Essay] Found 18,215 unique characters
+        [Essay] Counting bigrams...
+        [Essay] Found 279,220 unique bigrams
+        >>> len(uni)
+        18215
+        >>> len(bi)
+        279220
+        >>> uni['的']
+        191829476
+        >>> bi['的時']
+        8901
+    """
+    if verbose:
+        print(f"[Essay] Parsing {input_file}...")
+
+    # Phase 1: Parse entries
+    entries = parse_essay_txt(input_file)
+
+    if verbose:
+        print(f"[Essay] Parsed {len(entries):,} entries")
+
+    # Phase 2: Count unigrams
+    if verbose:
+        print(f"[Essay] Counting unigrams...")
+
+    unigram_counts = count_unigrams(entries)
+
+    if verbose:
+        print(f"[Essay] Found {len(unigram_counts):,} unique characters")
+
+    # Phase 3: Count bigrams
+    if verbose:
+        print(f"[Essay] Counting bigrams...")
+
+    bigram_counts = count_bigrams(entries)
+
+    if verbose:
+        print(f"[Essay] Found {len(bigram_counts):,} unique bigrams")
+
+    return unigram_counts, bigram_counts
+
+
+# ============================================================================
 # Utilities
 # ============================================================================
 

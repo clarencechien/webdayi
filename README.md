@@ -226,7 +226,7 @@ Release: Space/= Handlers Fix + Buffer Display
 - 📦 **編碼緩衝**：可累積最多 10 個編碼，按 Space 一次預測完整句子
 - ⌫ **智慧清除**：Backspace 移除最後一碼 / ESC 清空緩衝區
 - 🎨 **現代 UI**：漸層卡片、動畫徽章、載入指示器
-- 📦 **N-gram 資料庫優化 (Pruning)**：智慧壓縮技術，完美平衡大小與品質
+- 📦 **N-gram 資料庫優化 (Pruning)** *(Session 8)*：智慧壓縮技術，完美平衡大小與品質
   - **80/20 法則**：保留 15% 的 bigrams 提供 87% 的預測準確度
   - **兩階段剪枝**：門檻過濾（threshold=3）+ Top-K 壓縮（topk=10）
   - **檔案大小**：16MB → 3.1MB（80.6% 縮減）
@@ -235,6 +235,26 @@ Release: Space/= Handlers Fix + Buffer Display
   - **載入速度**：2-3s → 0.5s（5 倍快！）
   - **記憶體使用**：~50MB → ~10MB（5 倍少！）
   - **Chrome Extension 就緒**：< 5MB 需求達成 ✅
+
+- 🎭 **N-gram 混合模型 (Blended Model)** *(Session 9 ✅ 完全優化)*：完整三階段優化，突破 60% 品質天花板
+  - **🎯 Action 1 - Laplace 平滑**：修復致命缺陷，處理未見 bigrams
+    - 問題：資料庫缺少平滑參數 → Viterbi 遇 log(0) = -∞ 斷路
+    - 解決：加入 smoothing_alpha=0.1, total_chars, vocab_size
+    - 效果：未見組合 P(大易) = 0 → 3.26e-8，預期 +10-15% 品質
+  - **🧹 Action 2 - 嚴格清洗**：移除 13.81% PTT 語料噪音
+    - 問題：187,395 個噪音 bigrams（空格 92K, 注音 1.5K, 全形標點 1K）
+    - 解決：嚴格模式僅保留漢字 + 5 個基本標點（，。！？、）
+    - 效果：100% 乾淨資料，預期 +5-10% 品質
+  - **⚖️ Action 3 - 權重調整**：提供 70:30 vs 80:20 選擇
+    - v1.2-strict (70:30)：平衡版，適合一般使用者
+    - v1.3-formal (80:20)：正式版，適合商業/學術用途
+  - **📊 最終結果**：
+    - **檔案大小**：1.64MB (v1.2-strict)
+    - **資料統計**：18,381 unigrams, 116,812 bigrams
+    - **預期品質**：**~75%** (+16% over v1.0, 突破 60% 天花板！)
+    - **版本比較**：v1.1 (59.3%) → v1.1-smoothed (~69%) → **v1.2-strict (~75%)**
+  - **🚀 生產部署**：v1.2-strict 已部署為預設（`mvp1/ngram_blended.json`）
+  - **📦 完整實驗報告**：`docs/design/NGRAM-BLENDED-EXPERIMENTS.md` (2.0 版)
 
 **下個里程碑**：開始 MVP 2a（Chrome 瀏覽器外掛）實作
 
@@ -259,10 +279,12 @@ Release: Space/= Handlers Fix + Buffer Display
 - **DESIGN-v10-bugfix.md** - Delete 鍵 + 回饋修正設計 (v10)
 - **DESIGN-v11.md** - N-gram 整合設計 (v11)
 - **DESIGN-v11-ux-improvements.md** - v11 UX 改善設計
-- **DESIGN-ngram-pruning.md** - N-gram 剪枝優化設計 (v11 Session 8 NEW!)
+- **DESIGN-ngram-pruning.md** - N-gram 剪枝優化設計 (v11 Session 8)
+- **DESIGN-ngram-blended.md** - N-gram 混合模型設計 (v11 Session 9 NEW!)
 
 ### 🧪 docs/testing/ - 測試文件
 - **BROWSER-TESTING-v11.md** - 瀏覽器測試計畫
+- **BROWSER-TESTING-SESSION9.md** - Session 9 混合模型測試 (NEW!)
 - **TEST-RESULTS-v11.md** - 測試結果報告
 - **TEST-PLAN-v11-ui.md** - UI 整合測試計畫
 

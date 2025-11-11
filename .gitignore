@@ -50,3 +50,4 @@ htmlcov/
 # Generated files (keep in git for now, but mark for reference)
 # mvp1/dayi_db.json
 # mvp3-smart-engine/ngram_db.json
+converter/raw_data/Gossiping-QA-Dataset.txt
