@@ -29,7 +29,8 @@ from build_ngram_lib import (
     generate_ngram_db,
     write_ngram_db,
     validate_ngram_db,
-    calculate_metadata
+    calculate_metadata,
+    apply_pruning  # NEW: for N-gram pruning
 )
 
 
@@ -85,6 +86,27 @@ Examples:
         help='Input file format (default: essay). Use "terra_pinyin" for Rime dict.yaml format'
     )
 
+    # Pruning parameters (N-gram optimization)
+    parser.add_argument(
+        '--enable-pruning',
+        action='store_true',
+        help='Enable N-gram pruning for smaller database size'
+    )
+
+    parser.add_argument(
+        '--threshold',
+        type=int,
+        default=3,
+        help='Threshold pruning: minimum bigram count to keep (default: 3)'
+    )
+
+    parser.add_argument(
+        '--topk',
+        type=int,
+        default=10,
+        help='Top-K pruning: keep top K next characters per character (default: 10)'
+    )
+
     return parser.parse_args()
 
 
@@ -117,7 +139,12 @@ def main():
 
     print("=" * 70)
 
-    total_steps = 5 if not args.dry_run else 4
+    # Calculate total steps (add 1 if pruning is enabled)
+    base_steps = 5 if not args.dry_run else 4
+    total_steps = base_steps + (1 if args.enable_pruning else 0)
+
+    if args.enable_pruning:
+        print(f"Pruning enabled: threshold={args.threshold}, top-K={args.topk}")
 
     # ========================================================================
     # Step 1: Parse input file
@@ -186,9 +213,40 @@ def main():
             print(f"    {i+1}. '{bigram}': {format_number(count)} ({prob:.2f}%)")
 
     # ========================================================================
-    # Step 4: Calculate probabilities
+    # Step 3.5: Apply pruning (if enabled)
     # ========================================================================
-    print_step(4, total_steps, "Calculating probabilities")
+    if args.enable_pruning:
+        current_step = 4 if not args.dry_run else 3
+        print_step(current_step, total_steps, "Applying N-gram pruning")
+
+        original_count = len(bigram_counts)
+        bigram_counts = apply_pruning(
+            bigram_counts,
+            threshold=args.threshold,
+            topk=args.topk,
+            verbose=True
+        )
+        pruned_count = len(bigram_counts)
+
+        reduction = original_count - pruned_count
+        reduction_percent = (reduction / original_count * 100) if original_count > 0 else 0
+
+        print_success(f"Pruned bigrams: {format_number(pruned_count)} "
+                      f"(reduced {format_number(reduction)}, {reduction_percent:.1f}%)")
+
+        # Recalculate statistics with pruned data
+        total_bigrams_count = sum(bigram_counts.values())
+
+    # ========================================================================
+    # Step 4/5: Calculate probabilities
+    # ========================================================================
+    prob_step = 5 if args.enable_pruning and not args.dry_run else 4
+    if args.dry_run and args.enable_pruning:
+        prob_step = 4
+    elif args.dry_run:
+        prob_step = 3
+
+    print_step(prob_step, total_steps, "Calculating probabilities")
 
     unigram_probs = calculate_unigram_probabilities(unigram_counts)
     bigram_probs = calculate_bigram_probabilities(bigram_counts, unigram_counts)
@@ -203,13 +261,14 @@ def main():
         print(f"  ⚠ Warning: Unigram probabilities sum to {unigram_sum}, expected 1.0")
 
     # ========================================================================
-    # Step 5: Write ngram_db.json (skip if dry-run)
+    # Step 5/6: Write ngram_db.json (skip if dry-run)
     # ========================================================================
     if args.dry_run:
         print("\n✓ Dry run complete! Validation successful.")
         print("  (No output file written)")
     else:
-        print_step(5, total_steps, "Writing ngram_db.json")
+        write_step = 6 if args.enable_pruning else 5
+        print_step(write_step, total_steps, "Writing ngram_db.json")
 
         # Calculate metadata
         metadata = calculate_metadata(entries, unigram_counts, bigram_counts)

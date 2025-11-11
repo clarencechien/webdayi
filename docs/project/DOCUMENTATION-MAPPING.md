@@ -1,8 +1,8 @@
 # WebDaYi Documentation Mapping
 
-**Date**: 2025-11-11 (Updated after v11.2.0 - Version Management System)
-**Version**: 11.2.0 (Build: 20251111-001, Commit: 893177a)
-**Branch**: claude/init-memory-bank-readme-011CUqoiGKdFk7wf79JNuW1h
+**Date**: 2025-11-11 (Updated after v11.2.0 Build 007 - Mobile UX Improvements)
+**Version**: 11.2.0 (Build: 20251111-007, Commit: 326684c)
+**Branch**: claude/version-update-buffer-diagnostics-011CUqoiGKdFk7wf79JNuW1h
 **Purpose**: Ensure all documentation accurately maps to the codebase
 
 ---
@@ -15,18 +15,18 @@ All documentation has been reorganized into the `docs/` folder for better manage
 
 | Document | Purpose | Maps To | Status |
 |----------|---------|---------|--------|
-| `README.md` | Main project overview (正體中文) | Entire project | ✅ Updated (v11.2.0) |
+| `README.md` | Main project overview (正體中文) | Entire project | ✅ Updated (Build 007) |
 | `README.en.md` | English version | Entire project | ⏳ Needs update |
 | `CLAUDE.md` | AI assistant guide | Project structure | ✅ Current |
-| `VERSION-GUIDE.md` | Version checking guide | Version system | ✅ NEW! (v11.2) |
 
 ### 🗂️ docs/project/ - Project Documentation
 
 | Document | Purpose | Maps To | Status |
 |----------|---------|---------|--------|
 | `PRD.md` | Product requirements (v1.3) | All features | ✅ Current |
+| `VERSION-GUIDE.md` | Version checking guide | Version system | ✅ Current (v11.2) |
 | `VERIFICATION.md` | Verification checklist | Test results | ✅ Current |
-| `DOCUMENTATION-MAPPING.md` | This file | Doc structure | ✅ Updated |
+| `DOCUMENTATION-MAPPING.md` | This file | Doc structure | ✅ Updated (Build 007) |
 | `FINAL-VERIFICATION.md` | Final verification report | v11 completion | ✅ Current |
 
 ### 🎨 docs/design/ - Design Documentation
@@ -56,11 +56,14 @@ All documentation has been reorganized into the `docs/` folder for better manage
 | Document | Purpose | Maps To | Status |
 |----------|---------|---------|--------|
 | `TAIWAN-LOCALIZATION.md` | Localization guide | Terminology changes | ✅ Current |
-| `UX-IMPROVEMENTS-v11.md` | v11 UX overview | All UX fixes | ⏳ Needs update (v11.2) |
+| `UX-IMPROVEMENTS-v11.md` | v11 UX overview | All UX fixes | ⏳ Needs update (Build 007) |
 | `UX-FIXES-SUMMARY.md` | UX Round 1 summary | core_logic.js fixes | ✅ Current |
 | `UX-IMPLEMENTATION-STATUS.md` | Implementation status | Round 1 status | ✅ Current |
 | `UX-ISSUES-ROUND2.md` | UX Round 2 analysis | Round 2 fixes | ✅ Current |
-| `UX-SPACE-KEY-REDESIGN.md` | Space/= key redesign spec | v11.2 blind typing | ✅ NEW! (v11.2) |
+| `UX-SPACE-KEY-REDESIGN.md` | Space/= key redesign spec | v11.2 blind typing | ✅ Current (Build 005) |
+| `UX-CRITICAL-SINGLE-CHAR-BUG.md` | Single-char bug analysis | Round 2 fixes | ✅ Current (Build 006) |
+| `MOBILE-SPACE-KEY-FIX.md` | Mobile Space key fix | Build 005 handler | ✅ Current (Build 005) |
+| `MOBILE-UX-IMPROVEMENTS.md` | Mobile UX 3-phase design | Build 007 mobile UX | ✅ NEW! (Build 007) |
 | `SESSION-SUMMARY-v11-ux.md` | Session summary | Round 1 work | ✅ Current |
 | `NGRAM-DIAGNOSIS.md` | N-gram quality analysis | viterbi_module.js, build_ngram.py | ✅ Current |
 
@@ -85,23 +88,18 @@ All documentation has been reorganized into the `docs/` folder for better manage
 | `mvp1/DESIGN-v11-ux-improvements.md` | UX fixes design | core_logic.js (mode guards) | ✅ Current |
 | `mvp1/TEST-PLAN-v11-ui.md` | UI test plan | test-v11-*.js | ✅ Current |
 
-### MVP1 Design Documents
+### MVP1 Legacy Design Documents (Deprecated - Moved to docs/)
 
-| Document | Purpose | Maps To | Status |
-|----------|---------|---------|--------|
-| `mvp1/DESIGN-auto-copy.md` | Auto-copy feature (v8) | core_logic.js (auto-copy functions) | ✅ Current |
-| `mvp1/DESIGN-v10.md` | v10 features | core_logic.js (mobile UX) | ✅ Current |
-| `mvp1/DESIGN-v10-ux-improvement.md` | v10 UX improvements | index.html (responsive controls) | ✅ Current |
-| `mvp1/DESIGN-v10-bugfix.md` | v10 bug fixes | core_logic.js (Delete key) | ✅ Current |
+**Note**: These design documents have been moved to `docs/design/` and `docs/ux/` for better organization.
 
-### MVP1 UX Documentation (Latest)
-
-| Document | Purpose | Maps To | Status |
-|----------|---------|---------|--------|
-| `mvp1/UX-FIXES-SUMMARY.md` | Implementation roadmap | core_logic.js (4 fixes) | ✅ Current |
-| `mvp1/UX-IMPLEMENTATION-STATUS.md` | Current status | All UX fixes | ✅ Current |
-| `mvp1/SESSION-SUMMARY-v11-ux.md` | Session summary | Latest work | ✅ Current |
-| `mvp1/NGRAM-DIAGNOSIS.md` | N-gram analysis | viterbi_module.js, build_ngram.py | ✅ Current |
+| Old Location | New Location | Status |
+|--------------|--------------|--------|
+| `mvp1/DESIGN-auto-copy.md` | `docs/design/DESIGN-auto-copy.md` | ✅ Moved |
+| `mvp1/DESIGN-v10.md` | `docs/design/DESIGN-v10.md` | ✅ Moved |
+| `mvp1/DESIGN-v10-ux-improvement.md` | `docs/design/DESIGN-v10-ux-improvement.md` | ✅ Moved |
+| `mvp1/DESIGN-v10-bugfix.md` | `docs/design/DESIGN-v10-bugfix.md` | ✅ Moved |
+| `mvp1/UX-CRITICAL-SINGLE-CHAR-BUG.md` | `docs/ux/UX-CRITICAL-SINGLE-CHAR-BUG.md` | ✅ Moved |
+| `mvp1/UX-SPACE-KEY-REDESIGN.md` | `docs/ux/UX-SPACE-KEY-REDESIGN.md` | ✅ Moved |
 
 ---
 
@@ -325,7 +323,7 @@ All documentation has been reorganized into the `docs/` folder for better manage
 - Documentation updated: README.md, DOCUMENTATION-MAPPING.md
 - Git history preserved: Used `git mv`
 
-**Session 4 - Blind Typing Fix + Version Management** (v11.2.0):
+**Session 4 - Blind Typing Fix + Version Management** (v11.2.0 Build 001):
 - Commits: 3 (730e84c, c165da7, 22c263d redesigns → 893177a version system)
 - Files modified: 9 (core_logic.js, core_logic_v11_ui.js, index.html, tests, CI, docs)
 - Lines added: 1,200+ (fixes + tests + version system)
@@ -334,6 +332,28 @@ All documentation has been reorganized into the `docs/` folder for better manage
 - CI/CD: Added test.yml workflow
 - Documentation: VERSION-GUIDE.md, updated README.md, activeContext.md, DOCUMENTATION-MAPPING.md
 - Test coverage: 212+/212+ ✅
+
+**Session 5 - Event Handler Order Fix + Buffer Display** (v11.2.0 Build 005):
+- Commits: 2 (e37cdd0 handler order → caef860 buffer display)
+- Files modified: 2 (core_logic.js, core_logic_v11_ui.js)
+- Critical fixes:
+  - Space/= handlers moved before early return (lines 1475-1545 in core_logic.js)
+  - updateBufferDisplay exported to window object
+  - Diagnostic logging system added
+- Impact: Blind typing fully functional (v + space, ad + space, = key all working)
+- Test coverage: 212+/212+ ✅ (all regression tests passing)
+
+**Session 6 - Mobile UX Improvements** (v11.2.0 Build 007):
+- Commits: 4 (05ae9a8 Phase 1+2 → 326684c Phase 3 → 51826c8 docs → db46c15 CI fix)
+- Files modified: 5 (index.html, core_logic.js, core_logic_v11_ui.js, README.md, activeContext.md)
+- Three-phase improvements:
+  - Phase 1: Removed redundant Space button
+  - Phase 2: Character mode Space selection for mobile
+  - Phase 3: Responsive layout redesign (flexbox reordering)
+- Documentation: MOBILE-UX-IMPROVEMENTS.md design doc
+- CI/CD: Added write permissions to auto-bump workflow
+- Test coverage: 212+/212+ ✅
+- Impact: Complete mobile UX overhaul, no scrolling needed
 
 ---
 
@@ -346,11 +366,21 @@ All documentation has been reorganized into the `docs/` folder for better manage
 4. After terminology changes → Global search-and-replace
 5. After major doc changes → Update DOCUMENTATION-MAPPING.md
 
-**Current Status**: All documentation current as of 2025-11-11 (after reorganization)
+**Current Status**: All documentation current as of 2025-11-11 Build 007 (after mobile UX improvements)
+
+**Completed Improvements** (Build 007):
+- ✅ All ALL CAPS docs moved to docs/ folders (except CLAUDE.md)
+- ✅ VERSION-GUIDE.md → docs/project/
+- ✅ UX-CRITICAL-SINGLE-CHAR-BUG.md → docs/ux/
+- ✅ UX-SPACE-KEY-REDESIGN.md → docs/ux/
+- ✅ MOBILE-UX-IMPROVEMENTS.md added to docs/ux/
+- ✅ DOCUMENTATION-MAPPING.md updated with new structure
+- ✅ README.md updated with Build 007 features
+- ✅ activeContext.md updated with Session 6
 
 **Next Updates Needed**:
 - English README files (when MVP 2a starts)
-- Update design docs with Round 2 implementation details (optional)
+- Consider consolidating UX Round 2 docs into single comprehensive guide
 
 ---
 
