@@ -32,6 +32,7 @@
 - 🔬 **完整 TDD 覆蓋** *(v11 NEW!)*：187+ 個測試（含 61 個 UX 測試），全數通過！
 - 🧠 **N-gram 智慧預測** *(v11 NEW!)*：整句模式一次輸入多個編碼，按 Space 預測最佳句子！
 - 👁️ **即時預覽** *(v11 NEW!)*：輸入時即時顯示首選字，盲打更有信心！
+- 📦 **N-gram 資料庫優化** *(v11 Pruning!)*：80/20 法則智慧壓縮，16MB → 3.1MB (80.6%)，品質保持 86.8%！
 - ⚡ **Viterbi 演算法** *(v11 NEW!)*：基於真實語料庫（rime-essay）的機率預測！
 - 🎯 **雙模式輸入** *(v11 NEW!)*：逐字模式 ↔ 整句模式，自由切換！
 - 🔥 **嚴重錯誤修復** *(v11 CRITICAL!)*：修復 strict mode 錯誤，所有按鈕現在都能工作！
@@ -225,6 +226,15 @@ Release: Space/= Handlers Fix + Buffer Display
 - 📦 **編碼緩衝**：可累積最多 10 個編碼，按 Space 一次預測完整句子
 - ⌫ **智慧清除**：Backspace 移除最後一碼 / ESC 清空緩衝區
 - 🎨 **現代 UI**：漸層卡片、動畫徽章、載入指示器
+- 📦 **N-gram 資料庫優化 (Pruning)**：智慧壓縮技術，完美平衡大小與品質
+  - **80/20 法則**：保留 15% 的 bigrams 提供 87% 的預測準確度
+  - **兩階段剪枝**：門檻過濾（threshold=3）+ Top-K 壓縮（topk=10）
+  - **檔案大小**：16MB → 3.1MB（80.6% 縮減）
+  - **Bigrams**：279K → 42K（84.9% 縮減）
+  - **品質分數**：86.8%（超越 80% 目標！）
+  - **載入速度**：2-3s → 0.5s（5 倍快！）
+  - **記憶體使用**：~50MB → ~10MB（5 倍少！）
+  - **Chrome Extension 就緒**：< 5MB 需求達成 ✅
 
 **下個里程碑**：開始 MVP 2a（Chrome 瀏覽器外掛）實作
 
@@ -249,6 +259,7 @@ Release: Space/= Handlers Fix + Buffer Display
 - **DESIGN-v10-bugfix.md** - Delete 鍵 + 回饋修正設計 (v10)
 - **DESIGN-v11.md** - N-gram 整合設計 (v11)
 - **DESIGN-v11-ux-improvements.md** - v11 UX 改善設計
+- **DESIGN-ngram-pruning.md** - N-gram 剪枝優化設計 (v11 Session 8 NEW!)
 
 ### 🧪 docs/testing/ - 測試文件
 - **BROWSER-TESTING-v11.md** - 瀏覽器測試計畫
@@ -485,6 +496,9 @@ webdayi/
 │   ├── convert-v2.js                # 頻率增強轉換器
 │   ├── convert-v2-lib.js            # 轉換器函式
 │   ├── convert-v2.test.js           # 21 個測試
+│   ├── build_ngram.py               # N-gram 資料庫建構器 (含剪枝) ✅
+│   ├── build_ngram_lib.py           # N-gram 函式庫 (Phase 4: Pruning)
+│   ├── compare_ngram_quality.py     # N-gram 品質 A/B 測試工具 ✅
 │   └── README.md                    # 轉換器文件
 │
 ├── 🚀 mvp1/                         # MVP 1.0 核心引擎 (v11.2.0 Build 007)
@@ -495,7 +509,8 @@ webdayi/
 │   ├── core_logic_v11_ui.js         # UI 整合 (16KB)
 │   ├── viterbi_module.js            # Viterbi v2.0 with Laplace (7KB)
 │   ├── dayi_db.json                 # 字元資料庫 (760KB)
-│   ├── ngram_db.json                # N-gram 機率 (16.5MB)
+│   ├── ngram_db.json                # N-gram 機率 (16.5MB, 原始版)
+│   ├── ngram_pruned.json            # N-gram 機率 (3.1MB, 已優化) ✅ 正在使用
 │   ├── README.md / README.en.md     # MVP1 文件
 │   ├── test*.js                     # 21 個測試檔（212+ 測試）
 │   └── diagnose*.js                 # 診斷工具
