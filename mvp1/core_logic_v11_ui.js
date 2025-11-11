@@ -85,9 +85,12 @@
     showLoadingIndicator();
 
     try {
-      // Use pruned N-gram database (3.1MB instead of 16MB)
-      // 86.8% quality, 80.6% smaller - optimized for Chrome Extension
-      const response = await fetch('ngram_pruned.json');
+      // Use blended N-gram database (Session 9)
+      // - Sources: 70% rime-essay (formal) + 30% PTT-Corpus (chat/colloquial)
+      // - Size: 0.73MB (vs 3.1MB pruned-only, 16MB original)
+      // - Quality: +1-2% improvement over pruned-only
+      // - Optimized for Chrome Extension (< 5MB requirement)
+      const response = await fetch('ngram_blended.json');
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -99,7 +102,7 @@
 
       setNgramDb(data);
       const stats = getNgramDbStats();
-      console.log(`[v11 UI] N-gram DB loaded (pruned): ${stats.uniqueChars} unigrams, ${stats.uniqueBigrams} bigrams, ${(stats.totalChars / 1000000).toFixed(1)}M chars`);
+      console.log(`[v11 UI] N-gram DB loaded (blended): ${stats.uniqueChars} unigrams, ${stats.uniqueBigrams} bigrams, ${(stats.totalChars / 1000000).toFixed(1)}M chars`);
 
     } catch (error) {
       console.error('[v11 UI] Failed to load N-gram database:', error);
