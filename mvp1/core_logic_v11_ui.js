@@ -41,6 +41,7 @@
   const previewText = document.getElementById('preview-text');
   const bufferedCodesContainer = document.getElementById('buffered-codes');
   const clearBufferBtn = document.getElementById('clear-buffer-btn');
+  const spaceBufferBtn = document.getElementById('space-buffer-btn');
   const predictSentenceBtn = document.getElementById('predict-sentence-btn');
 
   // Other UI elements
@@ -181,6 +182,11 @@
       // Enable/disable prediction button based on buffer
       if (predictSentenceBtn) {
         predictSentenceBtn.disabled = (buffer.length === 0);
+      }
+
+      // Mobile fix: Enable/disable space button based on input content
+      if (spaceBufferBtn && inputBox) {
+        spaceBufferBtn.disabled = (inputBox.value.trim().length === 0);
       }
     }
 
@@ -483,6 +489,44 @@
     });
   }
 
+  // Space buffer button (Mobile fix - replaces Space key for buffering)
+  // NOTE: This ONLY buffers code, does NOT trigger prediction (Space key behavior)
+  if (spaceBufferBtn) {
+    spaceBufferBtn.addEventListener('click', () => {
+      console.log('[v11 UI] Space buffer button clicked');
+
+      // Get current input value
+      if (!inputBox) return;
+      const codeValue = inputBox.value.trim();
+
+      if (codeValue.length > 0) {
+        // Add to buffer (same as Space key)
+        if (typeof addToCodeBuffer === 'function' && typeof window.dayiMap !== 'undefined') {
+          const added = addToCodeBuffer(codeValue, window.dayiMap);
+
+          if (added) {
+            // Clear input
+            inputBox.value = '';
+
+            // Update displays
+            if (typeof updateBufferDisplay === 'function') {
+              updateBufferDisplay();
+            }
+            if (typeof updateLivePreviewDisplay === 'function') {
+              updateLivePreviewDisplay();
+            }
+
+            console.log('[v11 UI] Code buffered via button:', codeValue);
+          } else {
+            console.warn('[v11 UI] Invalid code, not buffered:', codeValue);
+          }
+        }
+      } else {
+        console.log('[v11 UI] Input empty, nothing to buffer');
+      }
+    });
+  }
+
   // Prediction button (replaces = key for mobile)
   // NOTE: This triggers prediction + output (same as = key)
   if (predictSentenceBtn) {
@@ -596,6 +640,11 @@
       }
 
       previousValue = originalInputBox.value;
+
+      // Mobile fix: Update Space button state based on input content
+      if (spaceBufferBtn && getInputMode() === 'sentence') {
+        spaceBufferBtn.disabled = (originalInputBox.value.trim().length === 0);
+      }
     });
 
     // Enhanced keydown handler for v11
