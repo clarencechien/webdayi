@@ -11,11 +11,12 @@
 
 ## 🎉 線上展示
 
-**[立即試用 WebDaYi MVP1 v11.2 →](https://clarencechien.github.io/webdayi/)** (GitHub Pages) 🚀 **NEW: 盲打修復 + 版本管理！**
+**[立即試用 WebDaYi MVP1 v11.2 →](https://clarencechien.github.io/webdayi/)** (GitHub Pages) 🚀 **NEW: 事件處理器修復 + 緩衝區顯示！**
 
 在瀏覽器中體驗核心大易輸入引擎，具備現代化設計與進階功能：
 - ✨ **版本管理系統** *(v11.2 NEW!)*：Console 顯示版本、Build、Commit，永遠知道測試的版本！
-- 🔧 **盲打修復** *(v11.2 CRITICAL!)*：Space 鍵**只**緩衝、= 鍵觸發預測，真正的盲打工作流！
+- 🔧 **事件處理器修復** *(v11.2 Build 005 CRITICAL!)*：Space/= 處理器執行順序修正，緩衝區顯示正常運作！
+- 🎯 **盲打完整修復** *(v11.2 VERIFIED!)*：Space 鍵緩衝、= 鍵預測、UI 即時更新，真正的盲打工作流！
 - 🎯 **UX Round 2 完成** *(v11 Latest!)*：修復 3 個新關鍵問題，212+ 個測試全數通過！
 - 💬 **英文混打模式** *(v11 NEW Round 2!)*：按 Shift 切換中英文輸入，完美混合輸入！
 - 🗑️ **Delete 鍵驗證** *(v11 Round 2!)*：確認刪除鍵正確清除所有區域（輸出+預測+緩衝）！
@@ -66,9 +67,9 @@
 
 ## 專案狀態
 
-**目前階段**：✅ MVP 1.0 v11.2.0 完成！（盲打修復 + 版本管理系統）
-**當前版本**：11.2.0 (Build: 20251111-001, Commit: 893177a)
-**完成度**：~75%（Phase 0、MVP 1 v10、v11.2 100% 完成，MVP 2a 下一步）
+**目前階段**：✅ MVP 1.0 v11.2.0 完成！（事件處理器修復 + 緩衝區顯示）
+**當前版本**：11.2.0 (Build: 20251111-005, Commit: caef860)
+**完成度**：~98%（Phase 0、MVP 1 v10、v11.2 100% 完成，瀏覽器測試驗證中）
 
 ### 如何確認版本
 
@@ -76,9 +77,9 @@
 ```
 🚀 WebDaYi MVP 1.0
 Version: 11.2.0
-Build: 20251111-001
-Commit: 893177a
-Release: Blind Typing Fix
+Build: 20251111-005
+Commit: caef860
+Release: Space/= Handlers Fix + Buffer Display
 ```
 
 或輸入：`window.WEBDAYI_VERSION`
@@ -130,6 +131,8 @@ Release: Blind Typing Fix
 │   ├─ 盲打修復 (Space/=)     [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🔧✅  │
 │   ├─ 版本管理系統           [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✨✅  │
 │   ├─ CI/CD 測試自動化       [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🤖✅  │
+│   ├─ 事件處理器順序修復     [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🔥✅  │
+│   ├─ 緩衝區顯示修復         [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎯✅  │
 │   └─ TDD 測試 (212+ tests)  [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ UX Round 1 TDD (31)    [▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ UX Round 2 - 整句單碼  [▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🔥✅  │
@@ -141,6 +144,23 @@ Release: Blind Typing Fix
 ```
 
 **最新成就**：🎉 MVP 1.0 v11 完整版（187+ 測試全數通過，100% 完成！）
+
+**v11.2 Build 005 修復** (2025-11-11) - **CRITICAL 事件處理器修復**:
+- 🔥 **事件處理器執行順序修復 (CRITICAL)**：Space/= 處理器現在正確執行
+  - 根本原因：`if (isInSentenceMode) { return; }` 早期返回阻擋了 Space/= 處理器
+  - 解決方案：將 Space 和 = 處理器移到早期返回**之前** (core_logic.js:1475-1545)
+  - 影響：v + space、ad + space、= 鍵現在完全運作！
+  - Commit: e37cdd0
+- 🎯 **緩衝區顯示修復 (CRITICAL)**：UI 現在正確即時更新
+  - 根本原因：`updateBufferDisplay` 未匯出到 window 物件，跨模組無法呼叫
+  - 解決方案：匯出到 `window.updateBufferDisplay` + 更新檢查邏輯
+  - 影響：v + space 後緩衝區徽章立即顯示，不再需要輸入第二碼才顯示
+  - Commit: caef860
+- 📊 **診斷日誌系統**：新增完整執行追蹤日誌
+  - Space 處理器：`[Space Handler] Running`, `[Space Handler] Calling updateBufferDisplay...`
+  - = 處理器：`[= Handler] Running`, `[= Handler] Calling triggerPrediction...`
+  - 緩衝區更新：`[updateBufferDisplay] Called`, `[updateBufferDisplay] Buffer: [...]`
+- ✅ **使用者驗證**：GitHub Pages 部署測試確認所有功能運作
 
 **v11 UX Round 2 修復** (2025-11-11):
 - 🔥 **整句單碼修復 (CRITICAL)**：修復整句模式下單碼 "v" + Space 無反應的阻斷性問題
@@ -663,7 +683,8 @@ open mvp1/test.html
 | ✅ MVP 1.0 v8：自動複製 + 清除按鈕 | 2025-11-10 | 完成 |
 | ✅ MVP 1.0 v9：Tailwind CSS + 深色模式 | 2025-11-10 | 完成 |
 | ✅ MVP 1.0 v10：手機 UX + 字體控制 + 錯誤修正 | 2025-11-10 | 完成 |
-| 🚀 MVP 1.0 v11：N-gram 智能預測（核心 + UI） | 2025-11-10 | 95% 完成 |
+| ✅ MVP 1.0 v11：N-gram 智能預測（核心 + UI） | 2025-11-10 | 完成 |
+| ✅ MVP 1.0 v11.2 Build 005：事件處理器 + 緩衝區修復 | 2025-11-11 | 完成 |
 | 📋 MVP 3.0：N-gram 資料管線 + Viterbi | 2025-11-10 | 已整合至 v11 |
 | ⏳ MVP 2a：瀏覽器外掛 | 2025-11-20 | 規劃中 |
 | ⏳ 公開發布（Chrome 線上應用程式商店） | 2025-11-25 | 規劃中 |
@@ -698,7 +719,7 @@ open mvp1/test.html
 
 ---
 
-**最後更新**：2025-11-10
-**狀態**：🚀 MVP 1.0 v11 N-gram 智能預測（95% 完成 - 核心 + UI 完整，瀏覽器測試待執行）
-**版本**：1.0.11-alpha（MVP1 v11 with N-gram Sentence Prediction + Viterbi Algorithm + Dual-Mode Input）
+**最後更新**：2025-11-11
+**狀態**：✅ MVP 1.0 v11.2 Build 005 完成（事件處理器修復 + 緩衝區顯示 - 所有核心功能運作正常）
+**版本**：1.0.11.2-build005（MVP1 v11.2 with N-gram Sentence Prediction + Viterbi Algorithm + Dual-Mode Input + Critical Handler Fixes）
 **資料來源**：Rime Dàyì Dictionary + Rime Essay Corpus (rime-essay/essay.txt)
