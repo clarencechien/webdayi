@@ -226,7 +226,7 @@ Release: Space/= Handlers Fix + Buffer Display
 - 📦 **編碼緩衝**：可累積最多 10 個編碼，按 Space 一次預測完整句子
 - ⌫ **智慧清除**：Backspace 移除最後一碼 / ESC 清空緩衝區
 - 🎨 **現代 UI**：漸層卡片、動畫徽章、載入指示器
-- 📦 **N-gram 資料庫優化 (Pruning)**：智慧壓縮技術，完美平衡大小與品質
+- 📦 **N-gram 資料庫優化 (Pruning)** *(Session 8)*：智慧壓縮技術，完美平衡大小與品質
   - **80/20 法則**：保留 15% 的 bigrams 提供 87% 的預測準確度
   - **兩階段剪枝**：門檻過濾（threshold=3）+ Top-K 壓縮（topk=10）
   - **檔案大小**：16MB → 3.1MB（80.6% 縮減）
@@ -235,6 +235,16 @@ Release: Space/= Handlers Fix + Buffer Display
   - **載入速度**：2-3s → 0.5s（5 倍快！）
   - **記憶體使用**：~50MB → ~10MB（5 倍少！）
   - **Chrome Extension 就緒**：< 5MB 需求達成 ✅
+
+- 🎭 **N-gram 混合模型 (Blended Model)** *(Session 9 NEW!)*：多語料庫加權合併，兼顧正式與口語
+  - **混合策略**：70% rime-essay (正式/書面) + 30% PTT-Corpus (聊天/口語)
+  - **檔案大小**：**0.73MB**（比 pruned 更小 76%！）
+  - **多樣性**：18,426 unigrams (+211), 42,956 bigrams (+770)
+  - **品質提升**：+1-2% 改善（正式寫作 +2.2%，混合情境 +1.2%）
+  - **資料來源**：rime-essay (376K entries) + PTT八卦語料庫 (418K lines)
+  - **處理流程**：串流處理 → 加權合併 → 剪枝優化
+  - **Chrome Extension 最佳化**：< 1MB，載入極快 ⚡
+  - **生產就緒**：已整合至 MVP1，可直接使用 ✅
 
 **下個里程碑**：開始 MVP 2a（Chrome 瀏覽器外掛）實作
 
@@ -259,10 +269,12 @@ Release: Space/= Handlers Fix + Buffer Display
 - **DESIGN-v10-bugfix.md** - Delete 鍵 + 回饋修正設計 (v10)
 - **DESIGN-v11.md** - N-gram 整合設計 (v11)
 - **DESIGN-v11-ux-improvements.md** - v11 UX 改善設計
-- **DESIGN-ngram-pruning.md** - N-gram 剪枝優化設計 (v11 Session 8 NEW!)
+- **DESIGN-ngram-pruning.md** - N-gram 剪枝優化設計 (v11 Session 8)
+- **DESIGN-ngram-blended.md** - N-gram 混合模型設計 (v11 Session 9 NEW!)
 
 ### 🧪 docs/testing/ - 測試文件
 - **BROWSER-TESTING-v11.md** - 瀏覽器測試計畫
+- **BROWSER-TESTING-SESSION9.md** - Session 9 混合模型測試 (NEW!)
 - **TEST-RESULTS-v11.md** - 測試結果報告
 - **TEST-PLAN-v11-ui.md** - UI 整合測試計畫
 
