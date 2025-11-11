@@ -274,6 +274,66 @@ This project uses **parallel development** to allow MVP 3.0 work without blockin
 - All MVP 1.0 v11, MVP 2a work, N-gram improvements → commit to `main`
 - Documentation updates → update in current working branch
 
+### **Version Management**
+
+**CRITICAL**: Every code change MUST update the version information to ensure users can verify they're running the correct build.
+
+**Version Format**: `MAJOR.MINOR.PATCH` (Semantic Versioning)
+- **MAJOR**: Breaking changes or major new features (e.g., 10.0.0 → 11.0.0)
+- **MINOR**: New features or significant bug fixes (e.g., 11.0.0 → 11.1.0)
+- **PATCH**: Bug fixes or minor improvements (e.g., 11.2.0 → 11.2.1)
+
+**Build Format**: `YYYYMMDD-NNN` (Date + Sequential Number)
+- **YYYYMMDD**: Date of the build (e.g., 20251111)
+- **NNN**: Sequential number for builds on the same day (001, 002, 003...)
+- **Example**: `20251111-003` = Third build on November 11, 2025
+
+**Files to Update on EVERY Commit:**
+
+1. **mvp1/version.json**:
+   ```json
+   {
+     "version": "11.2.0",
+     "build": "20251111-003",
+     "buildDate": "2025-11-11T03:15:00Z",
+     "commit": "53aa350",
+     "releaseName": "Brief description of changes"
+   }
+   ```
+
+2. **mvp1/index.html** (3 locations):
+   - Meta tags (lines 9-12)
+   - HTML comment (lines 14-17)
+   - JavaScript `window.WEBDAYI_VERSION` object (lines 440-444)
+
+**Update Process:**
+
+1. **Make code changes**
+2. **Update version information**:
+   - Increment build number (e.g., 001 → 002)
+   - Update commit hash with `git log -1 --format="%h"`
+   - Update buildDate with current timestamp
+   - Update changes list in version.json and index.html
+3. **Commit with descriptive message**
+4. **Push to remote**
+
+**Automatic Version Update (Future Enhancement):**
+- TODO: Add pre-commit hook to auto-update build number
+- TODO: Add GitHub Action to auto-update on push
+- TODO: Create version bump script in `scripts/bump-version.sh`
+
+**Version Verification (for Users):**
+Users can verify the deployed version using 4 methods:
+1. **Console**: Open DevTools → See version banner on page load
+2. **JavaScript**: Type `window.WEBDAYI_VERSION` in console
+3. **Meta Tags**: View page source → Check `<meta name="app-build">` tags
+4. **HTML Comment**: View page source → Check `<!-- WebDaYi MVP 1.0 ... -->` comment
+
+**Why This Is Critical:**
+- Prevents confusion when testing fixes (user needs to confirm they're testing the right version)
+- Enables debugging (users can report exact build + commit hash)
+- Tracks regression (if a bug reappears, we know which commit introduced it)
+
 ### **Code Structure**
 
 * **Language & Style:** JavaScript (ES6+) for all logic. Plain HTML/CSS. Python for N-gram pipeline.
