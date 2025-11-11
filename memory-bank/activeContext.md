@@ -1,14 +1,68 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-11 (Critical UX Improvements COMPLETE! 🎉)
-**Current Phase**: 🚀 MVP 1.0 v11 - Critical UX Improvements SHIPPED ✅
-**Main Branch Status**: ✅ MVP 1.0 v11 at 100% (All UX Issues Resolved!)
+**Last Updated**: 2025-11-11 (UX Round 2 COMPLETE! 🎉)
+**Current Phase**: 🚀 MVP 1.0 v11 - All Critical UX Issues Resolved ✅
+**Main Branch Status**: ✅ MVP 1.0 v11 at 100% (3 New UX Issues Fixed!)
 **Feature Branch**: claude/init-memory-bank-readme-011CUqoiGKdFk7wf79JNuW1h
 **Next Milestone**: MVP 2a Planning (Chrome Extension)
 
 ---
 
-## 🎉 LATEST: Critical UX Improvements (2025-11-11) - COMPLETE!
+## 🎉 LATEST: UX Round 2 Fixes (2025-11-11) - COMPLETE!
+
+**Status**: ✅ ALL 3 ISSUES FIXED, TESTED, AND SHIPPED!
+
+**Commit**: bcbd0b9 - "UX Fix: Resolve 3 critical UX issues (Round 2) + implement English mixed input"
+
+**User Feedback Issues Resolved**:
+
+1. **Issue 1: Single-Code in Sentence Mode (CRITICAL BUG)** ✅
+   - **Problem**: Typing "v" + Space in sentence mode produced NO response, no candidates
+   - **Impact**: Blocking - users couldn't use single-char input in sentence mode
+   - **Root Cause**: Sentence mode input handler only processed 2-char codes, single-char fell through
+   - **Fix**: Added single-char candidate display in sentence mode (core_logic_v11_ui.js:410-438)
+   - **Result**: Single-char now shows candidates, Space selects first
+
+2. **Issue 2: Delete Key Should Clear Prediction** ✅
+   - **Problem**: Delete key should clear prediction area in sentence mode
+   - **Status**: VERIFIED - Already fixed in previous session
+   - **Implementation**: Delete handler clears output, candidate area, code buffer, shows feedback
+
+3. **Issue 3: English Mixed Input Mode (NEW FEATURE)** ✅
+   - **Requirement**: Press Shift to toggle English/Chinese input
+   - **Implementation**:
+     - Added `languageMode` state ('chinese' | 'english')
+     - Shift key toggles mode with visual indicator
+     - English mode bypasses Chinese logic, goes directly to output
+     - Yellow indicator shows "English Mode (按 Shift 返回中文)"
+     - Works in both character and sentence modes
+   - **Files**:
+     - core_logic.js: State, input handler, Shift toggle, indicator function
+     - index.html: Language mode indicator element
+
+**Test Results**: ✅ 187+ tests passing (157 existing + 30 new)
+- test-node-v11.js: 30/30 ✓
+- test-laplace-smoothing.js: 21/21 ✓
+- test-v11-ux-fixes.js: 31/31 ✓ (Round 1)
+- test-v11-ux-round2.js: 30/30 ✓ (NEW - Round 2)
+- test-node-v10.js: 27/27 ✓
+- test-node-v10-ux.js: 5/5 ✓
+- test-node-v10-bugfix.js: 13/13 ✓
+
+**Files Modified**:
+- mvp1/core_logic.js (+80 lines): English mode + single-char Space fix + indicator function
+- mvp1/core_logic_v11_ui.js (+34 lines): Single-char candidate display
+- mvp1/index.html (+9 lines): Language mode indicator
+
+**Files Created**:
+- mvp1/UX-ISSUES-ROUND2.md (503 lines): Comprehensive analysis
+- mvp1/test-v11-ux-round2.js (379 lines): 30 TDD tests
+
+**Total Changes**: 1,002 insertions across 5 files
+
+---
+
+## 🎉 PREVIOUS: Critical UX Improvements (2025-11-11) - COMPLETE!
 
 **Status**: ✅ ALL FIXES IMPLEMENTED, TESTED, AND SHIPPED!
 
