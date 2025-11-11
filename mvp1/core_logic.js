@@ -13,6 +13,7 @@ let currentCandidates = [];  // Current candidates array (for pagination)
 let currentInputMode = 'normal';  // Current input mode: 'normal' or 'express'
 let userModel = null;  // User personalization model (Map of code -> char order)
 let autoCopyEnabled = true;  // Auto-copy enabled state (v8 - MVP1.11) - default: true
+let languageMode = 'chinese';  // Language mode: 'chinese' | 'english' (Issue 3 - English mixed input)
 
 // ============================================
 // User Personalization Functions (v6 - MVP1.7, MVP1.8, MVP1.9)
@@ -564,6 +565,26 @@ function showTemporaryFeedback(message) {
     toast.classList.remove('flex');
     textSpan.textContent = originalText;  // Restore original text
   }, 2000);
+}
+
+/**
+ * Update language mode indicator visibility
+ * @param {string} mode - 'chinese' or 'english'
+ */
+function updateLanguageModeIndicator(mode) {
+  // Handle Node.js test environment (no document)
+  if (typeof document === 'undefined') return;
+
+  const indicator = document.getElementById('language-mode-indicator');
+  if (!indicator) return;
+
+  if (mode === 'english') {
+    indicator.classList.remove('hidden');
+    indicator.classList.add('flex');
+  } else {
+    indicator.classList.add('hidden');
+    indicator.classList.remove('flex');
+  }
 }
 
 // ============================================
@@ -1356,6 +1377,22 @@ async function initialize() {
       let previousValue = '';
 
       inputBox.addEventListener('input', (e) => {
+        // NEW (Issue 3): English mode - direct output
+        if (languageMode === 'english') {
+          const outputBuffer = document.getElementById('output-buffer');
+          if (outputBuffer && e.target.value) {
+            outputBuffer.value += e.target.value;
+
+            // Auto-copy if enabled
+            if (autoCopyEnabled && performAutoCopy(outputBuffer.value)) {
+              showCopyFeedback();
+            }
+          }
+          inputBox.value = ''; // Clear input after appending
+          return; // Skip all Chinese logic
+        }
+
+        // Chinese mode: Normal processing
         handleInput(e.target.value, previousValue);
         previousValue = e.target.value.trim().toLowerCase();
       });
@@ -1366,6 +1403,20 @@ async function initialize() {
 
         // Check if in sentence mode (v11 UX fix)
         const isInSentenceMode = (typeof isSentenceMode === 'function' && isSentenceMode());
+
+        // NEW (Issue 3): Handle Shift key for language mode toggle
+        if (key === 'Shift') {
+          e.preventDefault();
+
+          // Toggle language mode
+          languageMode = (languageMode === 'chinese' ? 'english' : 'chinese');
+
+          // Update UI indicator
+          updateLanguageModeIndicator(languageMode);
+
+          console.log(`[Language Mode] Switched to: ${languageMode}`);
+          return;
+        }
 
         // Handle Delete key for clearing all areas (v11 UX enhancement)
         if (key === 'Delete') {
@@ -1424,10 +1475,35 @@ async function initialize() {
           return;
         }
 
-        // Handle Space key for character selection (v11 UX fix)
-        // Space key selects first candidate in character mode
+        // Handle Space key for character selection (v11 UX fix + Issue 1)
+        // Space key behavior depends on context:
+        // - Character mode: Always select first candidate
+        // - Sentence mode + single char input: Select first candidate
+        // - Sentence mode + buffer: Trigger prediction (handled by v11)
         if (key === ' ') {
           e.preventDefault();
+
+          if (isInSentenceMode) {
+            const buffer = (typeof getCodeBuffer === 'function') ? getCodeBuffer() : [];
+            const inputValue = inputBox.value.trim();
+
+            // NEW (Issue 1 fix): Single-char with candidates → Select
+            if (buffer.length === 0 && inputValue.length === 1 && currentCandidates.length > 0) {
+              handleSelection(0);  // Select first candidate
+              previousValue = '';  // Reset after selection
+              return;
+            }
+
+            // Multi-code in buffer → Let v11 handler trigger prediction
+            if (buffer.length > 0) {
+              return; // v11 handler will process this
+            }
+
+            // Otherwise, do nothing (empty state)
+            return;
+          }
+
+          // Character mode: Select first candidate
           if (currentCode && currentCandidates.length > 0) {
             handleSelection(0);  // Select first candidate
             previousValue = '';  // Reset after selection

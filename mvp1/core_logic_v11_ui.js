@@ -404,9 +404,41 @@
         return; // Let original handler in core_logic.js handle it
       }
 
-      // Sentence mode: buffer 2-char codes
+      // Sentence mode: Handle both single-char and 2-char codes
       const value = originalInputBox.value.toLowerCase();
 
+      // NEW (Issue 1 fix): Handle single-char input - show candidates
+      if (value.length === 1) {
+        const candidates = dayiMap.get(value);
+        if (candidates && candidates.length > 0) {
+          // Sort by frequency
+          const sorted = [...candidates].sort((a, b) => b.freq - a.freq);
+
+          // Apply user preference if available
+          const withUserPreference = userModel ?
+            applyUserPreference(value, sorted, userModel) :
+            sorted;
+
+          // Update candidate area (reuse existing function from core_logic.js)
+          if (typeof updateCandidateArea === 'function') {
+            updateCandidateArea(withUserPreference, 0);
+          }
+
+          console.log(`[v11 UI] Single-char "${value}" showing ${sorted.length} candidates`);
+        } else {
+          // No candidates for this single char
+          if (candidateArea) {
+            candidateArea.innerHTML = `
+              <div class="w-full text-center text-sm text-rose-500 py-4">
+                無效編碼: ${value}
+              </div>
+            `;
+          }
+        }
+        return; // Don't process further
+      }
+
+      // Existing: Handle 2-char input - buffer for prediction
       if (value.length === 2) {
         const added = addToCodeBuffer(value, dayiMap);
         if (added) {
