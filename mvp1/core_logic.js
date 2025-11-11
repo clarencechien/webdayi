@@ -1476,13 +1476,13 @@ async function initialize() {
           e.preventDefault();
 
           if (isInSentenceMode) {
-            // NEW: Confirm prediction and output
-            // NOTE: Function is defined as window.confirmPrediction in core_logic_v11_ui.js
-            if (typeof window !== 'undefined' && typeof window.confirmPrediction === 'function') {
-              window.confirmPrediction();
-            } else if (typeof confirmPrediction === 'function') {
-              // Fallback for Node.js tests
-              confirmPrediction();
+            // NEW: Trigger prediction + output (ONE step!)
+            // NOTE: Function is defined as window.triggerPrediction in core_logic_v11_ui.js
+            if (typeof window !== 'undefined' && typeof window.triggerPrediction === 'function') {
+              window.triggerPrediction();
+            } else if (typeof triggerPrediction === 'function') {
+              // Fallback for Node.js tests (but async, so won't work perfectly)
+              triggerPrediction();
             }
           } else {
             // Character mode: Pagination (unchanged)
@@ -1512,13 +1512,13 @@ async function initialize() {
                   // Clear input
                   clearInputBox();
 
-                  // Trigger prediction with current buffer
-                  // NOTE: Function is defined as window.triggerSentencePrediction in core_logic_v11_ui.js
-                  if (typeof window !== 'undefined' && typeof window.triggerSentencePrediction === 'function') {
-                    window.triggerSentencePrediction();
-                  } else if (typeof triggerSentencePrediction === 'function') {
-                    // Fallback for Node.js tests
-                    triggerSentencePrediction();
+                  // Update buffer display (NO prediction!)
+                  // NOTE: Space should ONLY buffer, = key triggers prediction
+                  if (typeof updateBufferDisplay === 'function') {
+                    updateBufferDisplay();
+                  }
+                  if (typeof updateLivePreviewDisplay === 'function') {
+                    updateLivePreviewDisplay();
                   }
                 }
               }
