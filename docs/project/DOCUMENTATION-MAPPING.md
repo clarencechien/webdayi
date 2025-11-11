@@ -1,6 +1,7 @@
 # WebDaYi Documentation Mapping
 
-**Date**: 2025-11-11 (Updated after docs/ reorganization)
+**Date**: 2025-11-11 (Updated after v11.2.0 - Version Management System)
+**Version**: 11.2.0 (Build: 20251111-001, Commit: 893177a)
 **Branch**: claude/init-memory-bank-readme-011CUqoiGKdFk7wf79JNuW1h
 **Purpose**: Ensure all documentation accurately maps to the codebase
 
@@ -14,9 +15,10 @@ All documentation has been reorganized into the `docs/` folder for better manage
 
 | Document | Purpose | Maps To | Status |
 |----------|---------|---------|--------|
-| `README.md` | Main project overview (正體中文) | Entire project | ✅ Updated (v11 Round 2) |
+| `README.md` | Main project overview (正體中文) | Entire project | ✅ Updated (v11.2.0) |
 | `README.en.md` | English version | Entire project | ⏳ Needs update |
 | `CLAUDE.md` | AI assistant guide | Project structure | ✅ Current |
+| `VERSION-GUIDE.md` | Version checking guide | Version system | ✅ NEW! (v11.2) |
 
 ### 🗂️ docs/project/ - Project Documentation
 
@@ -54,10 +56,11 @@ All documentation has been reorganized into the `docs/` folder for better manage
 | Document | Purpose | Maps To | Status |
 |----------|---------|---------|--------|
 | `TAIWAN-LOCALIZATION.md` | Localization guide | Terminology changes | ✅ Current |
-| `UX-IMPROVEMENTS-v11.md` | v11 UX overview | All UX fixes | ⏳ Needs update (Round 2) |
+| `UX-IMPROVEMENTS-v11.md` | v11 UX overview | All UX fixes | ⏳ Needs update (v11.2) |
 | `UX-FIXES-SUMMARY.md` | UX Round 1 summary | core_logic.js fixes | ✅ Current |
 | `UX-IMPLEMENTATION-STATUS.md` | Implementation status | Round 1 status | ✅ Current |
-| `UX-ISSUES-ROUND2.md` | UX Round 2 analysis | Round 2 fixes | ✅ NEW! |
+| `UX-ISSUES-ROUND2.md` | UX Round 2 analysis | Round 2 fixes | ✅ Current |
+| `UX-SPACE-KEY-REDESIGN.md` | Space/= key redesign spec | v11.2 blind typing | ✅ NEW! (v11.2) |
 | `SESSION-SUMMARY-v11-ux.md` | Session summary | Round 1 work | ✅ Current |
 | `NGRAM-DIAGNOSIS.md` | N-gram quality analysis | viterbi_module.js, build_ngram.py | ✅ Current |
 
@@ -228,8 +231,12 @@ All documentation has been reorganized into the `docs/` folder for better manage
 | `test-laplace-smoothing.js` | 600+ | Laplace tests (21 tests) | `docs/design/DESIGN-v11.md` |
 | `test-v11-ux-fixes.js` | 400+ | UX Round 1 tests (31 tests) | `docs/ux/UX-FIXES-SUMMARY.md` |
 | `test-v11-ux-round2.js` | 400+ | UX Round 2 tests (30 tests) | `docs/ux/UX-ISSUES-ROUND2.md` |
+| `test-sentence-mode-space-key.js` | 435+ | Space/= redesign tests (25 tests) | `docs/ux/UX-SPACE-KEY-REDESIGN.md` |
+| `test-correct-space-equal-behavior.js` | 370+ | Correct behavior tests (13 tests) | `docs/ux/UX-SPACE-KEY-REDESIGN.md` |
+| `diagnose-space-equal-keys.js` | 165+ | Diagnostic tool | Internal debugging |
+| `test-browser-diagnosis.html` | - | Browser testing tool | Manual testing |
 
-**Total**: 18 test files, **187+ tests** (all passing ✅)
+**Total**: 21 test files + 2 diagnostic tools, **212+ tests** (all passing ✅)
 
 ---
 
@@ -237,13 +244,14 @@ All documentation has been reorganized into the `docs/` folder for better manage
 
 ### Documentation Accuracy ✅
 
-- [x] README.md badges reflect actual status (187+/187+ tests, 100%)
-- [x] Progress bars show v11 at 100% complete
-- [x] Feature list includes UX Round 2 improvements
+- [x] README.md badges reflect actual status (212+/212+ tests, v11.2.0)
+- [x] Progress bars show v11.2 at 100% complete
+- [x] Feature list includes v11.2 blind typing fix + version management
 - [x] Terminology updated throughout (智能 → 智慧)
-- [x] Test counts accurate (187+ total: 157 regression + 30 Round 2)
+- [x] Test counts accurate (212+ total: 174 regression + 38 v11.2)
 - [x] Latest commits documented in activeContext.md
 - [x] Documentation structure section added to README.md
+- [x] Version display system documented in VERSION-GUIDE.md
 
 ### Documentation Reorganization ✅
 
@@ -283,10 +291,19 @@ All documentation has been reorganized into the `docs/` folder for better manage
 - Documentation: ~600KB (including design docs)
 
 **Tests**:
-- Total tests: **187+**
+- Total tests: **212+**
 - Pass rate: **100%**
-- Categories: 11 (v6-v11 + Round 2)
-- Test files: 18 (157 regression + 30 Round 2)
+- Categories: 13 (v6-v11 + Round 2 + v11.2)
+- Test files: 21 (174 regression + 38 v11.2)
+
+**Data Files**:
+- mvp1/version.json: Version tracking with changelog
+- mvp1/dayi_db.json: 760KB character database
+- mvp1/ngram_db.json: 16.5MB N-gram probabilities
+
+**CI/CD**:
+- GitHub Actions: test.yml (automated testing)
+- GitHub Actions: deploy-pages.yml (auto deployment)
 
 **Latest Sessions** (2025-11-11):
 
@@ -307,6 +324,16 @@ All documentation has been reorganized into the `docs/` folder for better manage
 - Folders created: 4 (docs/project, docs/design, docs/testing, docs/ux)
 - Documentation updated: README.md, DOCUMENTATION-MAPPING.md
 - Git history preserved: Used `git mv`
+
+**Session 4 - Blind Typing Fix + Version Management** (v11.2.0):
+- Commits: 3 (730e84c, c165da7, 22c263d redesigns → 893177a version system)
+- Files modified: 9 (core_logic.js, core_logic_v11_ui.js, index.html, tests, CI, docs)
+- Lines added: 1,200+ (fixes + tests + version system)
+- New tests: 38 (25 + 13 for correct Space/= behavior)
+- Features added: Version management system (4 verification methods)
+- CI/CD: Added test.yml workflow
+- Documentation: VERSION-GUIDE.md, updated README.md, activeContext.md, DOCUMENTATION-MAPPING.md
+- Test coverage: 212+/212+ ✅
 
 ---
 
