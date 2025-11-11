@@ -478,6 +478,163 @@ def validate_ngram_db(ngram_db: Dict) -> None:
 
 
 # ============================================================================
+# Phase 4: Pruning (N-gram Model Optimization)
+# ============================================================================
+
+def prune_bigrams_by_threshold(
+    bigram_counts: Dict[str, int],
+    threshold: int
+) -> Dict[str, int]:
+    """
+    Prune bigrams with counts below threshold (Threshold Pruning).
+
+    This removes low-frequency noise from the model. For example, if a bigram
+    (A, B) appears only 1-2 times in a 6MB corpus, it's likely noise and not
+    a meaningful language pattern.
+
+    Args:
+        bigram_counts: Dictionary of {(char1, char2): count}
+        threshold: Minimum count to keep (e.g., 3)
+
+    Returns:
+        Pruned bigram_counts dictionary
+
+    Example:
+        >>> bigrams = {'我的': 100, '我馬': 2, '我是': 50}
+        >>> prune_bigrams_by_threshold(bigrams, threshold=3)
+        {'我的': 100, '我是': 50}  # '我馬' removed (count < 3)
+    """
+    if threshold <= 0:
+        return bigram_counts.copy()
+
+    pruned = {
+        bigram: count
+        for bigram, count in bigram_counts.items()
+        if count >= threshold
+    }
+
+    return pruned
+
+
+def prune_bigrams_by_topk(
+    bigram_counts: Dict[str, int],
+    topk: int
+) -> Dict[str, int]:
+    """
+    Keep only top-K most frequent next characters for each character (Top-K Pruning).
+
+    This is the most powerful compression technique. For each character A, we only
+    keep the K most common characters that follow it. This implements the 80/20 rule:
+    the top 10 next characters usually provide 90% of the prediction accuracy.
+
+    Args:
+        bigram_counts: Dictionary of {(char1, char2): count}
+        topk: Number of top entries to keep per character (e.g., 10)
+
+    Returns:
+        Pruned bigram_counts dictionary
+
+    Example:
+        >>> bigrams = {
+        ...     '我的': 100, '我是': 80, '我們': 60, '我在': 40,
+        ...     '我有': 30, '我要': 20, '我說': 15, '我看': 10,
+        ...     '我想': 8, '我去': 5, '我來': 3, '我馬': 1
+        ... }
+        >>> prune_bigrams_by_topk(bigrams, topk=10)
+        # Returns top 10, removes '我來': 3, '我馬': 1
+    """
+    if topk <= 0:
+        return {}
+
+    # Group bigrams by first character
+    char_to_nexts = {}
+    for bigram, count in bigram_counts.items():
+        if len(bigram) != 2:
+            continue
+
+        char1 = bigram[0]
+        char2 = bigram[1]
+
+        if char1 not in char_to_nexts:
+            char_to_nexts[char1] = []
+
+        char_to_nexts[char1].append((char2, count))
+
+    # For each character, keep only top-K next characters
+    pruned = {}
+    for char1, nexts in char_to_nexts.items():
+        # Sort by count (descending) and take top K
+        sorted_nexts = sorted(nexts, key=lambda x: x[1], reverse=True)
+        top_k_nexts = sorted_nexts[:topk]
+
+        # Reconstruct bigram entries
+        for char2, count in top_k_nexts:
+            bigram = char1 + char2
+            pruned[bigram] = count
+
+    return pruned
+
+
+def apply_pruning(
+    bigram_counts: Dict[str, int],
+    threshold: int = 3,
+    topk: int = 10,
+    verbose: bool = False
+) -> Dict[str, int]:
+    """
+    Apply both threshold and top-K pruning to bigram counts.
+
+    This is the main pruning function that combines both techniques:
+    1. First apply threshold pruning (remove noise)
+    2. Then apply top-K pruning (compress to top patterns)
+
+    Args:
+        bigram_counts: Dictionary of {(char1, char2): count}
+        threshold: Minimum count to keep (default: 3)
+        topk: Number of top entries per character (default: 10)
+        verbose: Print pruning statistics
+
+    Returns:
+        Pruned bigram_counts dictionary
+
+    Example:
+        >>> bigrams = {...}  # 500K entries, 15MB
+        >>> pruned = apply_pruning(bigrams, threshold=3, topk=10)
+        >>> # Result: ~30K entries, ~500KB (90% reduction)
+    """
+    original_count = len(bigram_counts)
+
+    if verbose:
+        print(f"[Pruning] Original bigrams: {original_count:,}")
+
+    # Step 1: Threshold pruning
+    after_threshold = prune_bigrams_by_threshold(bigram_counts, threshold)
+    threshold_count = len(after_threshold)
+
+    if verbose:
+        removed = original_count - threshold_count
+        percent = (removed / original_count * 100) if original_count > 0 else 0
+        print(f"[Pruning] After threshold (>={threshold}): {threshold_count:,} "
+              f"(removed {removed:,}, {percent:.1f}%)")
+
+    # Step 2: Top-K pruning
+    after_topk = prune_bigrams_by_topk(after_threshold, topk)
+    final_count = len(after_topk)
+
+    if verbose:
+        removed = threshold_count - final_count
+        percent = (removed / threshold_count * 100) if threshold_count > 0 else 0
+        print(f"[Pruning] After top-K (K={topk}): {final_count:,} "
+              f"(removed {removed:,}, {percent:.1f}%)")
+
+        total_removed = original_count - final_count
+        total_percent = (total_removed / original_count * 100) if original_count > 0 else 0
+        print(f"[Pruning] Total reduction: {total_removed:,} ({total_percent:.1f}%)")
+
+    return after_topk
+
+
+# ============================================================================
 # Utilities
 # ============================================================================
 
