@@ -1,0 +1,62 @@
+{
+  "version": "11.2.0",
+  "build": "20251111-001",
+  "buildDate": "2025-11-11T02:30:00Z",
+  "commit": "22c263d",
+  "releaseName": "Blind Typing Fix",
+  "changelog": [
+    {
+      "version": "11.2.0",
+      "date": "2025-11-11",
+      "type": "critical-fix",
+      "title": "CRITICAL FIX: Correct Space/= key behavior",
+      "changes": [
+        "Space key now ONLY buffers codes (no prediction)",
+        "= key triggers Viterbi prediction and outputs result",
+        "Fixed mobile prediction button",
+        "True blind typing workflow enabled"
+      ],
+      "fixes": [
+        "= key no longer treated as invalid input",
+        "Space key no longer causes hang",
+        "Mobile prediction button now functional"
+      ]
+    },
+    {
+      "version": "11.1.0",
+      "date": "2025-11-11",
+      "type": "bug-fix",
+      "title": "Fix Space/= key activation (function scope issue)",
+      "changes": [
+        "Fixed function scope issue (window.* vs global)",
+        "Updated UI text 'Press Space' → 'Press ='",
+        "Fixed button handler to call correct function"
+      ]
+    },
+    {
+      "version": "11.0.0",
+      "date": "2025-11-11",
+      "type": "major",
+      "title": "Sentence Mode Space/= Key Redesign",
+      "changes": [
+        "Redesigned Space key behavior for sentence mode",
+        "Changed = key from pagination to prediction confirmation",
+        "Disabled selection keys in sentence mode",
+        "Added triggerSentencePrediction and confirmPrediction functions",
+        "25 new TDD tests for correct behavior"
+      ]
+    },
+    {
+      "version": "10.0.0",
+      "date": "2025-11-06",
+      "type": "major",
+      "title": "Full Laplace Smoothing + N-gram v2.0",
+      "changes": [
+        "Implemented complete Laplace smoothing",
+        "N-gram database v2.0 with raw counts",
+        "96/96 tests passing",
+        "Production-ready statistical smoothing"
+      ]
+    }
+  ]
+}
