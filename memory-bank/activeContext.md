@@ -1,14 +1,28 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-11 (🚀 MAJOR UX REDESIGN - Sentence Mode Space Key!)
-**Current Phase**: 🚀 MVP 1.0 v11 - Sentence Mode Redesigned ✅
-**Main Branch Status**: ✅ MVP 1.0 v11 - Space/= Keys Redesigned with TDD
+**Last Updated**: 2025-11-11 (✨ Version Management System + Correct Space/= Behavior!)
+**Current Phase**: 🚀 MVP 1.0 v11.2.0 - Blind Typing Fix Complete ✅
+**Current Version**: 11.2.0 (Build: 20251111-001, Commit: 893177a)
+**Main Branch Status**: ✅ Ready for browser testing
 **Feature Branch**: claude/init-memory-bank-readme-011CUqoiGKdFk7wf79JNuW1h
-**Next Milestone**: Manual Browser Testing + MVP 2a Planning
+**Next Milestone**: Manual Browser Testing → Merge to Main → Deploy
 
 ---
 
-## 🚀 LATEST: SENTENCE MODE SPACE KEY REDESIGN (2025-11-11) - COMPLETE!
+## ✨ LATEST: Version Management System + Final Fix (2025-11-11) - COMPLETE!
+
+**Status**: ✅ CRITICAL FIX APPLIED + VERSION MANAGEMENT SYSTEM ADDED!
+
+### Three Critical Commits
+
+**Commit 1 (730e84c)**: Space/= Key Redesign (WRONG - misunderstood requirement)
+**Commit 2 (c165da7)**: Function scope fix (STILL WRONG - Space still triggered prediction)
+**Commit 3 (22c263d)**: **CORRECT FIX** - Space ONLY buffers, = triggers prediction
+**Commit 4 (893177a)**: Version management system
+
+---
+
+## 🚀 FINAL CORRECT BEHAVIOR (v11.2.0)
 
 **Status**: ✅ FUNDAMENTAL REDESIGN BASED ON USER'S VISION - IMPLEMENTED WITH TDD!
 
@@ -46,29 +60,36 @@ I treated **Sentence Mode** as "Character Mode + Buffering":
 
 **See**: `mvp1/UX-SPACE-KEY-REDESIGN.md` (330+ lines)
 
-**Correct Flow (User's Vision)**:
+**CORRECT Flow (v11.2.0 - Final Fix)**:
 ```
-1. Type "v" → (Optional: Live preview shows first candidate)
-2. Press Space →
-   - "v" added to code buffer as one unit
+1. Type "v" + Press Space →
+   - "v" added to code buffer
    - Input box cleared
-   - Viterbi prediction triggered with buffer ["v"]
-   - Prediction area shows "大" (based on N-gram)
-3. Type "ad" → (Optional: Live preview shows "在")
-4. Press Space →
+   - Buffer display shows "v"
+   - NO prediction triggered! (This was the bug!)
+
+2. Type "ad" + Press Space →
    - "ad" added to code buffer
-   - Viterbi triggered with buffer ["v", "ad"]
-   - Prediction area shows "大在"
-5. Press = →
-   - Prediction result "大在" appended to output
-   - Buffer and prediction cleared
+   - Input box cleared
+   - Buffer display shows "v ad"
+   - Still NO prediction! (Only accumulating codes)
+
+3. Press = key →
+   - NOW Viterbi prediction runs with buffer ["v", "ad"]
+   - Predicts "大會" or "大在"
+   - Outputs directly to output buffer
+   - Clears code buffer
    - Ready for next sentence
 ```
 
-**Key Principles**:
-- Space = "Confirm current code and add to buffer + predict"
-- = = "Confirm prediction and output"
-- Selection keys (' [ ] - \) = DISABLED in sentence mode (no manual selection!)
+**Key Difference from v11.0.0-11.1.0 (WRONG versions)**:
+- ❌ WRONG: Space triggered prediction immediately
+- ✅ CORRECT: Space ONLY buffers, = triggers prediction
+
+**CORRECT Key Principles (v11.2.0)**:
+- Space = "ONLY add code to buffer" (NO prediction!)
+- = = "Trigger prediction + output" (ONE step!)
+- Selection keys (' [ ] - \) = DISABLED in sentence mode
 
 ---
 
@@ -217,17 +238,71 @@ window.confirmPrediction = function() {
 
 **Verified**:
 - ✅ All 25 new tests passing (test-sentence-mode-space-key.js)
+- ✅ All 13 correct behavior tests passing (test-correct-space-equal-behavior.js)
 - ✅ All 187+ existing tests passing (no regression)
 - ⏳ Manual browser testing pending
 
-**User Workflow Now**:
+**CORRECT User Workflow (v11.2.0)**:
 ```
 1. Switch to Sentence Mode
-2. Type "v" + Space → buffer ["v"], prediction "大"
-3. Type "ad" + Space → buffer ["v", "ad"], prediction "大會" or "大在"
-4. Press = → output "大會", buffer cleared
-5. Ready for next sentence
+2. Type "v" + Space → buffer ["v"], NO prediction (just displays buffer)
+3. Type "ad" + Space → buffer ["v", "ad"], NO prediction (just displays buffer)
+4. Press = → Viterbi runs, predicts "大會", outputs directly
+5. Buffer cleared, ready for next sentence
 ```
+
+---
+
+## 📦 Version Management System (v11.2.0 - Commit 893177a)
+
+**User Request**: "請調整ci/cd 加上action 與修改版號之類的 或是在index.html中有隱藏的release note 讓我確定有上對版本 才不會有改了但沒測到"
+
+### Features Added
+
+**1. Version Display (4 Methods)**
+
+- **Console Display** (auto-shown on page load):
+  ```javascript
+  🚀 WebDaYi MVP 1.0
+  Version: 11.2.0
+  Build: 20251111-001
+  Commit: 22c263d
+  Latest Changes: ...
+  ```
+
+- **JavaScript Object**:
+  ```javascript
+  window.WEBDAYI_VERSION
+  ```
+
+- **HTML Meta Tags**:
+  ```html
+  <meta name="app-version" content="11.2.0">
+  <meta name="app-build" content="20251111-001">
+  <meta name="app-commit" content="22c263d">
+  ```
+
+- **Hidden HTML Comments**: Full changelog in page source
+
+**2. CI/CD Automation**
+
+- **GitHub Actions** (`.github/workflows/test.yml`):
+  - Runs all test suites on push
+  - Displays version in CI logs
+  - Test summary with commit info
+
+**3. Version Management Tools**
+
+- **version.json**: Centralized version tracking with complete changelog
+- **bump-version.sh**: Automated version bumping script
+- **VERSION-GUIDE.md**: Complete user/developer guide
+
+### How to Verify Version
+
+1. Open WebDaYi in browser
+2. Press F12 (DevTools Console)
+3. See version displayed automatically
+4. Or type: `window.WEBDAYI_VERSION`
 
 ---
 
