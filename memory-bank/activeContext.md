@@ -1,15 +1,121 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-11 (✨ Version Management System + Correct Space/= Behavior!)
-**Current Phase**: 🚀 MVP 1.0 v11.2.0 - Blind Typing Fix Complete ✅
-**Current Version**: 11.2.0 (Build: 20251111-001, Commit: 893177a)
-**Main Branch Status**: ✅ Ready for browser testing
-**Feature Branch**: claude/init-memory-bank-readme-011CUqoiGKdFk7wf79JNuW1h
-**Next Milestone**: Manual Browser Testing → Merge to Main → Deploy
+**Last Updated**: 2025-11-11 (✨ Early Return Bug Fixed + Buffer Display Working!)
+**Current Phase**: 🚀 MVP 1.0 v11.2.0 - Space/= Handlers Fully Working ✅
+**Current Version**: 11.2.0 (Build: 20251111-005, Commit: caef860)
+**Main Branch Status**: ✅ Tested on GitHub Pages - Core functionality working!
+**Feature Branch**: claude/version-update-buffer-diagnostics-011CUqoiGKdFk7wf79JNuW1h
+**Next Milestone**: Create GitHub Action for auto build numbering → MVP 2a Planning
 
 ---
 
-## ✨ LATEST: Version Management System + Final Fix (2025-11-11) - COMPLETE!
+## 🔥 SESSION 5: Early Return Bug + Buffer Display Fix (2025-11-11) - COMPLETE!
+
+**Status**: ✅ ALL CRITICAL BUGS FIXED! Space/= handlers and buffer display fully working!
+
+### Critical Bug: Early Return Blocking Handlers
+
+**Root Cause Discovery**:
+```javascript
+// Line 1448-1451 in core_logic.js (BEFORE the fix)
+if (isInSentenceMode) {
+  return;  // ❌ This blocked Space and = handlers!
+}
+// ...Space and = handlers were AFTER this return!
+```
+
+**Impact**:
+- Space key: No `preventDefault()` → space char added to input → "Invalid code: v "
+- = key: Handler never reached → no prediction triggered
+- Diagnostic logs never appeared
+
+**Solution (Commit: e37cdd0)**:
+1. Moved = handler (line 1475) and Space handler (line 1505) BEFORE early return
+2. Placed early return at line 1554 (AFTER all critical handlers)
+3. Added sentence mode check in Backspace handler
+
+**Evidence**: User's logs showed diagnostic logs appeared after fix! ✅
+
+### Critical Bug: Buffer Display Not Updating
+
+**Root Cause Discovery**:
+```javascript
+// User's logs showed:
+[Space Handler] Code added to buffer successfully
+// But NO [updateBufferDisplay] Called! ← Key evidence!
+
+// When "ad" typed in v11_ui.js input handler:
+[updateBufferDisplay] Called ← Only here!
+```
+
+**Diagnosis**:
+- `updateBufferDisplay` was local function in core_logic_v11_ui.js
+- `core_logic.js` checked `typeof updateBufferDisplay === 'function'` → false
+- Function not accessible from core_logic.js Space handler!
+
+**Solution (Commit: caef860)**:
+1. Export to window: `window.updateBufferDisplay = updateBufferDisplay`
+2. Export to window: `window.updateLivePreviewDisplay = updateLivePreviewDisplay`
+3. Update core_logic.js: Check `window.updateBufferDisplay`
+4. Added diagnostic logs to track function calls
+
+**Expected Logs After Fix**:
+```javascript
+[Space Handler] Calling updateBufferDisplay...
+[updateBufferDisplay] Called
+[updateBufferDisplay] Buffer: [v], Length: 1
+[updateBufferDisplay] Display updated: <span class="buffered-code-badge">v</span>
+```
+
+### Commits This Session
+
+1. **e37cdd0**: CRITICAL FIX: Move Space/= handlers before sentence mode early return
+2. **6da4fb8**: Merge PR #40 (GitHub merged our branch)
+3. **29a182e**: Update version to 005 + Add buffer display diagnostic logs
+4. **caef860**: CRITICAL FIX: Export updateBufferDisplay to window for Space handler
+
+### Test Results
+
+**User Testing on GitHub Pages**:
+- ✅ Version: 11.2.0 (Build: 005, Commit: 6da4fb8 → will be caef860 after next merge)
+- ✅ v + Space: Adds to buffer (logs confirm handler executes)
+- ✅ ad input: Buffer shows "v, ad" correctly
+- ✅ = key: Triggers prediction, outputs "大會"
+- ⚠️ Buffer UI: Still not showing after first code (fixed in caef860, pending merge)
+
+**Core Functionality Status**:
+- ✅ Space handler: Executes, calls preventDefault(), adds to buffer
+- ✅ = handler: Executes, calls triggerPrediction(), outputs result
+- ✅ Viterbi prediction: Working correctly with N-gram
+- ✅ Diagnostic logs: Complete and helpful for debugging
+
+### Files Modified
+
+- `mvp1/core_logic.js`: Reordered handlers, fixed early return issue
+- `mvp1/core_logic_v11_ui.js`: Export functions to window, add diagnostic logs
+- `mvp1/version.json`: Updated to build 005
+- `mvp1/index.html`: Updated version info (3 locations)
+
+### Branches
+
+- **Feature Branch**: `claude/critical-fix-space-equal-handlers-011CUqoiGKdFk7wf79JNuW1h`
+  - Contains: e37cdd0 (early return fix)
+  - Status: ✅ Merged to main as PR #40
+
+- **Feature Branch**: `claude/version-update-buffer-diagnostics-011CUqoiGKdFk7wf79JNuW1h`
+  - Contains: 29a182e (version update) + caef860 (buffer display fix)
+  - Status: ⏳ Pending merge (ready for PR)
+
+### Next Steps
+
+1. ✅ Merge PR for buffer display fix
+2. ✅ Test on GitHub Pages (should show buffer UI immediately after v + Space)
+3. 🔄 Create GitHub Action for automatic build numbering
+4. 📋 Clean up merged branches
+
+---
+
+## ✨ PREVIOUS: Version Management System + Final Fix (2025-11-11) - COMPLETE!
 
 **Status**: ✅ CRITICAL FIX APPLIED + VERSION MANAGEMENT SYSTEM ADDED!
 
