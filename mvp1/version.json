@@ -1,9 +1,9 @@
 {
-  "version": "11.3.4",
+  "version": "11.2.1",
   "build": "20251112-008",
-  "buildDate": "2025-11-12T08:00:00Z",
-  "commit": "b1d0136",
-  "releaseName": "v2.5 Unigram Interpolation - Rare Word Trap Fix",
+  "buildDate": "2025-11-12T03:35:48Z",
+  "commit": "a237772",
+  "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
       "version": "11.3.4",
