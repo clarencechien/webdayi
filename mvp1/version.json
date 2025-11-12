@@ -6,6 +6,33 @@
   "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
+      "version": "11.2.2",
+      "build": "002",
+      "date": "2025-11-12",
+      "type": "diagnostic",
+      "title": "Add Viterbi debug tools and duplicate character checks",
+      "changes": [
+        "Created viterbi_module_debug.js with extensive console logging",
+        "Created test-viterbi-debug.html for browser-based algorithm tracing",
+        "Created diagnose-candidate-order.js to analyze candidate ordering",
+        "Created check-duplicates.js to verify no duplicate characters exist",
+        "Confirmed no duplicates in candidate lists (all 1584 codes clean)",
+        "Identified two separate bugs: test page picks wrong at pos 3, main app fails pos 4-9"
+      ],
+      "findings": [
+        "Main app systematically picks low-frequency candidates (freq=1000) at positions 4-6",
+        "Expected high-frequency candidates (freq>9000) are rank 1 but not selected",
+        "Candidates ARE sorted correctly (no sorting issue)",
+        "No duplicate characters in any candidate list",
+        "Bug appears to be in Viterbi forward pass or backtracking logic"
+      ],
+      "next_steps": [
+        "Run test-viterbi-debug.html and capture console output",
+        "Analyze DP table to find where algorithm goes wrong",
+        "Fix Viterbi algorithm based on debug trace"
+      ]
+    },
+    {
       "version": "11.2.1",
       "build": "001",
       "date": "2025-11-12",

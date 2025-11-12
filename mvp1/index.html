@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.2.1</title>
+  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.2.2</title>
 
   <!-- Version Information (for testing verification) -->
   <meta name="app-version" content="11.2.1">
@@ -17,18 +17,18 @@
     Commit: 3a7f74d
 
     Latest Changes:
-    - Created comprehensive diagnostic tools for Chinese text recognition
-    - Added diagnose-chinese-text.js for code/candidate analysis
-    - Added test-viterbi-actual.js for algorithm verification
-    - Added trace-viterbi-bug.js for detailed DP table tracing
-    - Added test-browser-version.html for browser cache verification
-    - Confirmed algorithm works correctly (Test 1: 100%, Test 2: 90%)
+    - Created viterbi_module_debug.js with extensive console logging
+    - Created test-viterbi-debug.html for browser-based algorithm tracing
+    - Created diagnose-candidate-order.js to analyze candidate ordering
+    - Created check-duplicates.js to verify no duplicate characters
+    - Identified bug: main app picks low-frequency candidates (freq=1000)
+    - Found candidates are sorted correctly, bug is in Viterbi algorithm
 
     How to verify version:
     1. Open browser DevTools console
     2. Check window.WEBDAYI_VERSION
     3. Or check meta tags in <head>
-    4. Use test-browser-version.html to verify correct version loaded
+    4. Use test-viterbi-debug.html to trace algorithm execution
   -->
 
   <!-- Google Fonts -->
@@ -456,12 +456,12 @@
       commit: '3a7f74d',
       releaseName: 'Chinese Text Recognition Diagnostics',
       changes: [
-        'Created diagnose-chinese-text.js for code/candidate analysis',
-        'Created test-viterbi-actual.js for algorithm verification',
-        'Created trace-viterbi-bug.js for detailed DP table tracing',
-        'Created test-browser-version.html for browser cache verification',
-        'Confirmed algorithm works correctly (Test 1: 100%, Test 2: 90%)',
-        'Identified browser cache as likely cause of reported issues'
+        'Created viterbi_module_debug.js with extensive console logging',
+        'Created test-viterbi-debug.html for browser-based algorithm tracing',
+        'Created diagnose-candidate-order.js to analyze candidate ordering',
+        'Created check-duplicates.js to verify no duplicate characters',
+        'Identified bug: main app picks low-frequency candidates (freq=1000)',
+        'Found candidates are sorted correctly, bug is in Viterbi algorithm'
       ]
     };
 
