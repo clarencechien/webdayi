@@ -46,34 +46,34 @@ jobs:
         working-directory: mvp1
         run: |
           echo "Running v11 core tests..."
-          node tests/node/test-node-v11.js
+          node node/test-node-v11.js
 
       - name: Run Laplace smoothing tests
         working-directory: mvp1
         run: |
           echo "Running Laplace smoothing tests..."
-          node tests/node/test-laplace-smoothing.js
+          node node/test-laplace-smoothing.js
 
       - name: Run sentence mode tests
         working-directory: mvp1
         run: |
           echo "Running sentence mode Space/= key tests..."
-          node tests/node/test-sentence-mode-space-key.js
+          node node/test-sentence-mode-space-key.js
 
       - name: Run correct behavior tests
         working-directory: mvp1
         run: |
           echo "Running correct Space/= behavior tests..."
-          node tests/node/test-correct-space-equal-behavior.js
+          node node/test-correct-space-equal-behavior.js
 
       - name: Run v11 UX tests
         working-directory: mvp1
         run: |
           echo "Running v11 UX Round 1 tests..."
-          node tests/node/test-v11-ux-fixes.js
+          node node/test-v11-ux-fixes.js
           echo ""
           echo "Running v11 UX Round 2 tests..."
-          node tests/node/test-v11-ux-round2.js
+          node node/test-v11-ux-round2.js
 
       - name: Test Summary
         if: always()
