@@ -337,13 +337,61 @@ Content/UI → Viterbi.js → ngram_db.json (靜態模型)
 
 ### **8.7. 實作排程 (Implementation Schedule)**
 
+#### 🆕 新策略：PWA POC 優先
+
+**關鍵決策**：Feature 分支的首個交付產物將是 **PWA (Progressive Web App)** 作為概念驗證 (Proof-of-Concept)。
+
+**儲存策略**：
+- **PWA 階段 (Phase 0.5-1)**: IndexedDB (本地快取) + 手動匯出/匯入同步
+- **Extension 階段 (Phase 4)**: chrome.storage.sync (雲端同步) + 自動同步
+
 | 階段 | 時程 | 交付物 | 狀態 |
 | :---- | :---- | :---- | :---- |
-| **Phase 0: 基礎** | Week 1 | 設計文件 + PRD 更新 + Memory Bank 更新 | 📋 當前 |
-| **Phase 1: F-4.0** | Week 2-3 | UserDB.js + 逐字/整句整合 + 45+ 測試 | ⏳ 待開始 |
-| **Phase 2: F-5.0** | Week 4 | ContextEngine.js + 情境整合 + 30+ 測試 | ⏳ 待開始 |
-| **Phase 3: MVP1 v12** | Week 5 | 整合至 MVP 1.0，版本 12.0.0 發布 | ⏳ 待開始 |
-| **Phase 4: MVP2a v2.0** | Week 6-8 | 移植至 Chrome Extension，Chrome Web Store 發布 | ⏳ 待開始 |
+| **Phase 0: 基礎** | Week 1 | 設計文件 + PRD 更新 + Memory Bank 更新 | ✅ 完成 |
+| **Phase 0.5: PWA POC** 🆕 | Week 2 | PWA + IndexedDB + 手動匯出/匯入 | ⏳ 下一步 |
+| **Phase 1: F-4.0 增強** | Week 3 | 基於 PWA POC 的進階學習功能 + 25+ 測試 | ⏳ 待開始 |
+| **Phase 2: F-5.0** | Week 4-5 | ContextEngine.js + 情境整合 + 30+ 測試 | ⏳ 待開始 |
+| **Phase 3: MVP1 v12** | Week 6 | 整合至 MVP 1.0，版本 12.0.0 發布 | ⏳ 待開始 |
+| **Phase 4: MVP2a v2.0** | Week 7-9 | 移植至 Chrome Extension (IndexedDB → chrome.storage.sync) | ⏳ 待開始 |
+
+**總計時程**：9 週 (原 8 週 + PWA POC 1 週)
+
+#### Phase 0.5 詳細規格 (PWA POC)
+
+**目標**：驗證 F-4.0 核心概念，無需 Chrome Extension 複雜性
+
+**核心功能**：
+1. **Progressive Web App**
+   - Service Worker 提供離線支援
+   - 可安裝為獨立應用程式 (手機 + 桌面)
+   - 響應式設計 (RWD)
+
+2. **IndexedDB 本地快取**
+   - 儲存 `user_ngram.db` (key-value pairs)
+   - Schema: `{ prevChar, currChar, weight, lastUpdated }`
+   - 非同步 API，不阻塞查詢
+
+3. **手動匯出/匯入**
+   - 匯出：下載 `user_ngram.json` (包含時間戳)
+   - 匯入：上傳 JSON 檔案至另一台裝置
+   - 格式：`{ "version": "1.0", "data": {...}, "exportDate": "..." }`
+
+4. **N-gram 引擎整合**
+   - 基於 v2.7 Hybrid 演算法 (OOP + 70/30 + Laplace)
+   - UserDB 權重應用於候選字評分
+   - 學習偵測：追蹤非預設選擇
+
+**成功標準**：
+- ✅ PWA 可在手機/桌面安裝
+- ✅ 使用者可學習偏好 (與 v2.7 相同行為)
+- ✅ 匯出/匯入跨裝置運作
+- ✅ 離線模式功能正常
+- ✅ 效能：< 10ms 總額外延遲
+
+**未來遷移路徑**：
+- Phase 1: 增強 PWA 的完整 F-4.0 功能
+- Phase 4: 將 IndexedDB 邏輯移植至 chrome.storage.sync (Extension)
+- 自動同步：以雲端同步取代手動匯出/匯入
 
 ## **9\. 未來展望 (MVP 3.1+ 路線)**
 

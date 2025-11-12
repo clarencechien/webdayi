@@ -51,14 +51,22 @@
 │   ├─ UX Round 2 - Issue 2    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ UX Round 2 - Issue 3    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 💬✅  │
 │   └─ UX Round 2 TDD Tests (30) [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│ Phase 1.6: MVP 3.0 v2 Planning [▓▓░░░░░░░░░░░░░░]  10% 📋🔄 │
-│   ├─ Design Document          [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1.6: MVP 3.0 v2 Planning [▓▓▓░░░░░░░░░░░░░]  20% 📋✅ │
+│   ├─ Design Document v1.0     [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ PRD v1.4 Update          [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   ├─ Memory Bank Update       [▓▓▓▓▓▓▓▓░░░░░░░░]  50% 🔄    │
-│   ├─ F-4.0 UserDB.js (Phase 1) [░░░░░░░░░░░░░░░]   0% ⏳    │
-│   ├─ F-5.0 ContextEngine (P2) [░░░░░░░░░░░░░░░░]   0% ⏳    │
-│   ├─ MVP 1.0 v12 Integration (P3) [░░░░░░░░░░░░]   0% ⏳    │
-│   └─ MVP 2a v2.0 Extension (P4) [░░░░░░░░░░░░░░]   0% ⏳    │
+│   ├─ PWA POC Strategy (v1.1)  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🆕✅  │
+│   ├─ Memory Bank Update       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Phase 0 Complete         [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎉✅  │
+│ Phase 1.7: PWA POC (Phase 0.5) [░░░░░░░░░░░░░░░░]   0% ⏳🆕 │
+│   ├─ PWA Infrastructure       [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│   ├─ IndexedDB Implementation [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│   ├─ Export/Import UI         [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│   ├─ Core Integration         [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│   └─ Testing & Validation     [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│ Phase 1.8: F-4.0 Enhancement   [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│ Phase 1.9: F-5.0 ContextEngine [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│ Phase 1.10: MVP 1.0 v12        [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│ Phase 1.11: MVP 2a v2.0 Ext    [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% 📋    │
 │ Phase 3: MVP 2a+ (Future)     [░░░░░░░░░░░░░░░░]   0% 📋    │
 └─────────────────────────────────────────────────────────────┘
@@ -107,19 +115,28 @@ Legend: 🚀 Smart Engine | 🔄 In Progress | ⏳ Next | 📋 Planned
 
 ## What's Complete ✅
 
-### 📋 LATEST MILESTONE: MVP 3.0 v2 Planning - Smart Upgrade!
+### 🆕 LATEST MILESTONE: MVP 3.0 v2 Planning + PWA POC Strategy!
 
 **Achievement Summary** (2025-11-12):
-- ✅ **Comprehensive Design Document**: DESIGN-v3-smart-upgrade.md (15,000+ lines)
-- ✅ **PRD Updated to v1.4**: Added Section 8 (MVP 3.0 v2) with F-4.0 and F-5.0
-- ✅ **Architecture Evolution Planned**: v2.7 → v3.0 with shared modules
-- ✅ **8-Week Implementation Roadmap**: 4 phases, 100+ tests, clear deliverables
-- ✅ **Memory Bank Updates**: activeContext.md, progress.md (in progress)
+- ✅ **Comprehensive Design Document v1.1**: DESIGN-v3-smart-upgrade.md (15,000+ lines) + PWA POC
+- ✅ **PRD Updated to v1.4**: Added Section 8 (MVP 3.0 v2) with F-4.0, F-5.0, and PWA POC
+- ✅ **Architecture Evolution Planned**: v2.7 → PWA POC → v3.0 → Chrome Extension
+- ✅ **9-Week Implementation Roadmap**: 5 phases (added Phase 0.5 PWA POC), 100+ tests
+- ✅ **Memory Bank Updates**: activeContext.md (Session 10 + 10.5), progress.md, productContext.md
 
 **Key Features Designed**:
+
+**🆕 Phase 0.5: PWA POC (New Strategy)**
+   - **Progressive Web App** as first deliverable
+   - **IndexedDB Storage**: Local cache for user_ngram.db
+   - **Manual Export/Import**: JSON file sync across devices
+   - **Service Worker**: Offline support
+   - **Cross-browser**: Works in any modern browser
+   - **Validates F-4.0 concepts** before Chrome Extension complexity
+
 1. **F-4.0: Personalized N-gram Learning (User LoRA)**
    - User-side adaptation layer on top of static N-gram model
-   - Base Model (ngram_db.json) + Adapter (chrome.storage.sync)
+   - Base Model (ngram_db.json) + Adapter (IndexedDB → chrome.storage.sync)
    - Formula: `Final Score = Base Score + User LoRA Score`
    - Solves tie-breaking problem ("天氣" vs "天真")
 
@@ -129,18 +146,20 @@ Legend: 🚀 Smart Engine | 🔄 In Progress | ⏳ Next | 📋 Planned
    - PTT: {bigram: 0.6, unigram: 0.4} (casual)
    - Default: {bigram: 0.7, unigram: 0.3} (v2.5 golden ratio)
 
-**Files Created/Updated**:
-- ✅ `docs/design/DESIGN-v3-smart-upgrade.md` (NEW, 15K+ lines)
-- ✅ `docs/project/PRD.md` (Updated to v1.4)
-- ✅ `memory-bank/activeContext.md` (Updated with Session 10)
-- ✅ `memory-bank/progress.md` (Updated with Phase 1.6)
-- ⏳ `memory-bank/productContext.md` (Pending)
+**Files Created/Updated** (Session 10 + 10.5):
+- ✅ `docs/design/DESIGN-v3-smart-upgrade.md` (v1.0 → v1.1, added PWA POC)
+- ✅ `docs/project/PRD.md` (Updated to v1.4 with PWA POC strategy)
+- ✅ `memory-bank/activeContext.md` (Session 10 + 10.5)
+- ✅ `memory-bank/progress.md` (Phase 1.6 + 1.7)
+- ✅ `memory-bank/productContext.md` (Updated)
 
-**Next Steps**:
-- Phase 1: F-4.0 UserDB.js implementation (Week 2-3)
-- Phase 2: F-5.0 ContextEngine.js implementation (Week 4)
-- Phase 3: MVP 1.0 v12 Integration (Week 5)
-- Phase 4: MVP 2a v2.0 Chrome Extension (Week 6-8)
+**Updated Roadmap** (9 weeks):
+- Phase 0: Foundation (Week 1) ✅ Complete
+- **Phase 0.5: PWA POC (Week 2)** 🆕 ← Next!
+- Phase 1: F-4.0 Enhancement (Week 3)
+- Phase 2: F-5.0 ContextEngine (Week 4-5)
+- Phase 3: MVP 1.0 v12 (Week 6)
+- Phase 4: MVP 2a v2.0 Extension (Week 7-9)
 
 ---
 

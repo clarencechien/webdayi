@@ -1,9 +1,10 @@
 # MVP 3.0 Smart Upgrade: Personalized Learning & Context-Aware Engine
 
-**Document Version**: 1.0
+**Document Version**: 1.1 (PWA POC Strategy)
 **Created**: 2025-11-12
+**Updated**: 2025-11-12 (Added Phase 0.5 PWA POC)
 **Status**: 📋 Planning Phase
-**Target**: MVP 2a Chrome Extension + MVP 1.0 Enhancement
+**Target**: PWA POC → MVP 1.0 Enhancement → Chrome Extension
 
 ---
 
@@ -15,6 +16,32 @@ MVP 3.0 represents a **fundamental shift** from static N-gram prediction to **in
 - **F-5.0: Context-Adaptive Weights (Adaptive Weights)** - Automatically adjust to website context
 
 Both modules are designed as **shared services** that work in both "character mode" and "sentence mode", automatically enhancing all Viterbi.js predictions.
+
+### 🆕 New Strategy: PWA POC First
+
+**Key Decision** (2025-11-12): The first deliverable on the feature branch will be a **Progressive Web App (PWA)** as Proof-of-Concept.
+
+**Why PWA POC?**
+- ✅ **Faster validation**: Test F-4.0 concepts without Chrome Extension complexity
+- ✅ **Cross-browser**: Works in any modern browser (not Chrome-only)
+- ✅ **Better storage**: IndexedDB more suitable for offline data than localStorage
+- ✅ **Manual sync first**: Establish export/import foundation before auto-sync
+- ✅ **Mobile-friendly**: PWA is installable on mobile devices
+
+**Core Technologies**:
+- **Storage**: IndexedDB for local cache (user_ngram.db)
+- **Sync**: Manual export/import (JSON file) for cross-device
+- **Offline**: Service Worker for offline support
+- **Future**: Migrate to chrome.storage.sync for automatic cloud sync (Extension)
+
+**Migration Path**:
+```
+Phase 0.5: PWA POC (IndexedDB + Manual Sync)
+     ↓
+Phase 1: Enhanced PWA (Full F-4.0)
+     ↓
+Phase 4: Chrome Extension (chrome.storage.sync + Auto Sync)
+```
 
 ---
 
@@ -579,43 +606,125 @@ Result: "實作" still wins, but margin smaller
 
 **Deliverable**: Complete design documentation + updated PRD
 
-### Phase 1: F-4.0 - UserDB.js Implementation (Week 2-3)
+### Phase 0.5: PWA POC with IndexedDB (Week 2) 🆕
 
-**Goal**: Implement personalized learning module
+**Goal**: Create Progressive Web App as Proof-of-Concept for F-4.0 core logic
+
+**Why PWA First?**
+- ✅ Faster iteration without Chrome Extension complexity
+- ✅ Works in any modern browser (not Chrome-only)
+- ✅ IndexedDB better suited for offline storage than localStorage
+- ✅ Validates F-4.0 concepts before full integration
+- ✅ Provides manual sync foundation for future auto-sync
+
+**Core Features**:
+1. **Progressive Web App**
+   - Service Worker for offline support
+   - Installable as standalone app
+   - Responsive design (mobile + desktop)
+
+2. **IndexedDB Storage**
+   - Store `user_ngram.db` locally (key-value pairs)
+   - Schema: `{ prevChar, currChar, weight, lastUpdated }`
+   - Async API for non-blocking queries
+
+3. **Manual Export/Import**
+   - Export: Download `user_ngram.json` (user's learned patterns)
+   - Import: Upload JSON file from another device
+   - Format: `{ "version": "1.0", "data": {...}, "exportDate": "..." }`
+
+4. **N-gram Engine Integration**
+   - Based on v2.7 Hybrid algorithm (OOP + 70/30 + Laplace)
+   - UserDB weights applied to candidate scoring
+   - Learning detection: Track non-default selections
 
 **Tasks**:
 
-**1.1. Core Module** (3 days)
-- [ ] Create `mvp1/user_db.js` for browser testing
-- [ ] Implement `UserDB` class with localStorage backend
-- [ ] Write unit tests (20+ tests)
-  - Storage: load, save, persistence
-  - Weights: get, set, update
-  - Corrections: promote, demote, boundary cases
+**0.5.1. PWA Infrastructure** (1 day)
+- [ ] Create `mvp1-pwa/` directory structure
+- [ ] Create `manifest.json` (PWA manifest)
+- [ ] Create `sw.js` (Service Worker for offline)
+- [ ] Create `index.html` (PWA entry point)
+- [ ] Configure caching strategy for offline support
 
-**1.2. Character Mode Integration** (2 days)
-- [ ] Modify `core_logic.js`: Add `sortWithUserDB()` function
-- [ ] Add learning detection: Track non-default selections
-- [ ] Add feedback UI: "✓ Learned preference" toast
-- [ ] Write integration tests (10+ tests)
+**0.5.2. IndexedDB Implementation** (1 day)
+- [ ] Create `user_db_indexeddb.js` module
+- [ ] Implement IndexedDB wrapper:
+  - `open()`: Initialize database
+  - `getWeight(prevChar, currChar)`: Query weight
+  - `setWeight(prevChar, currChar, weight)`: Update weight
+  - `getAllWeights()`: Export all data
+  - `importWeights(data)`: Import from JSON
+- [ ] Write unit tests (15+ tests)
 
-**1.3. Sentence Mode Integration** (3 days)
-- [ ] Modify `viterbi_module.js`: Add `userDB` parameter to `forwardPass()`
-- [ ] Update scoring calculation: `baseScore + await userDB.getWeights(...)`
-- [ ] Add correction detection in `core_logic_v11_ui.js`
-- [ ] Write integration tests (15+ tests)
+**0.5.3. Export/Import UI** (1 day)
+- [ ] Add "Export Learned Patterns" button
+  - Generate JSON file with timestamp
+  - Trigger download (blob + download link)
+- [ ] Add "Import Learned Patterns" button
+  - File input for JSON upload
+  - Validate format before import
+  - Merge or replace existing data (user choice)
+- [ ] Add "Clear All Data" button with confirmation
 
-**1.4. Browser Testing** (2 days)
-- [ ] Create test page: `mvp1/test-userdb.html`
-- [ ] Manual test scenarios:
-  - Learn in character mode → verify in sentence mode
-  - Learn in sentence mode → verify in character mode
-  - Cross-session persistence
-- [ ] Performance testing: < 10ms overhead per query
+**0.5.4. Core Integration** (2 days)
+- [ ] Integrate `user_db_indexeddb.js` into existing MVP 1.0
+- [ ] Modify `core_logic.js`: Use IndexedDB for scoring
+- [ ] Add learning feedback: "✓ Learned: 天氣 > 天真"
+- [ ] Test character mode + sentence mode learning
 
-**Deliverable**: Fully functional UserDB.js with 45+ passing tests
+**0.5.5. Testing & Validation** (1 day)
+- [ ] Manual testing: Learn → Export → Clear → Import → Verify
+- [ ] Cross-device testing: Export on Device A → Import on Device B
+- [ ] Offline testing: Service Worker caching works
+- [ ] Performance: IndexedDB queries < 5ms
 
-### Phase 2: F-5.0 - ContextEngine.js Implementation (Week 4)
+**Deliverable**: Working PWA POC with IndexedDB + Manual Sync
+
+**Success Criteria**:
+- ✅ PWA installable on mobile/desktop
+- ✅ User can learn preferences (same as v2.7)
+- ✅ Export/Import works across devices
+- ✅ Offline mode functional
+- ✅ Performance: < 10ms total overhead
+
+**Future Migration Path**:
+- Phase 1: Enhance PWA with full F-4.0 features
+- Phase 4: Port IndexedDB logic to chrome.storage.sync (Extension)
+- Auto-sync: Replace manual export/import with cloud sync
+
+---
+
+### Phase 1: F-4.0 - UserDB.js Enhancement (Week 3)
+
+**Goal**: Enhance PWA POC with full F-4.0 features (based on Phase 0.5 learnings)
+
+**Note**: This phase builds upon Phase 0.5 PWA POC. Many core features are already validated.
+
+**Tasks**:
+
+**1.1. Advanced Learning Features** (2 days)
+- [ ] Implement confidence-based learning
+  - Track how many times user confirms a preference
+  - Weight decay for old/uncertain patterns
+- [ ] Add learning statistics dashboard
+  - Show top learned patterns
+  - Visualization of bigram weights
+- [ ] Write unit tests (15+ tests)
+
+**1.2. Cross-Mode Synergy** (2 days)
+- [ ] Ensure character mode learning affects sentence mode
+- [ ] Ensure sentence mode corrections update UserDB
+- [ ] Add cross-mode validation tests (10+ tests)
+
+**1.3. Performance Optimization** (1 day)
+- [ ] IndexedDB query optimization (caching frequently accessed weights)
+- [ ] Batch weight updates to reduce I/O
+- [ ] Benchmark: Maintain < 5ms IndexedDB overhead
+
+**Deliverable**: Enhanced PWA with full F-4.0 features and 25+ additional tests
+
+### Phase 2: F-5.0 - ContextEngine.js Implementation (Week 4-5)
 
 **Goal**: Implement context-aware weighting
 
@@ -646,7 +755,7 @@ Result: "實作" still wins, but margin smaller
 
 **Deliverable**: Fully functional ContextEngine.js with 30+ passing tests
 
-### Phase 3: MVP 1.0 v12 Integration (Week 5)
+### Phase 3: MVP 1.0 v12 Integration (Week 6)
 
 **Goal**: Integrate F-4.0 and F-5.0 into MVP 1.0 for testing
 
@@ -680,17 +789,24 @@ Result: "實作" still wins, but margin smaller
 
 **Deliverable**: MVP 1.0 v12 with F-4.0 and F-5.0 fully integrated
 
-### Phase 4: MVP 2a Chrome Extension Port (Week 6-8)
+### Phase 4: MVP 2a Chrome Extension Port (Week 7-9)
 
-**Goal**: Port v12 features to Chrome Extension
+**Goal**: Port PWA features to Chrome Extension (IndexedDB → chrome.storage.sync)
 
 **Tasks**:
 
-**4.1. Module Migration** (3 days)
+**4.1. Storage Migration** (3 days)
 - [ ] Create `mvp2a-plugin/modules/UserDB.js`
-- [ ] Migrate from localStorage to chrome.storage.sync
+- [ ] **Key Change**: Migrate from IndexedDB to chrome.storage.sync
+  - Replace IndexedDB API calls with chrome.storage.sync API
+  - Implement automatic cloud sync (replaces manual export/import)
+  - Add sync conflict resolution strategy
 - [ ] Create `mvp2a-plugin/modules/ContextEngine.js`
 - [ ] Update imports for Chrome Extension module system
+
+**Migration Path**: IndexedDB (PWA) → chrome.storage.sync (Extension)
+- PWA: Manual export/import for cross-device sync
+- Extension: Automatic cloud sync via chrome.storage.sync API
 
 **4.2. Background Script Updates** (3 days)
 - [ ] Update `background.js`: Initialize UserDB + ContextEngine

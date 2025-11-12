@@ -9,14 +9,142 @@
 
 **Latest Achievements**:
 - ✅ Smart Engine 94.4% accuracy (17/18) - v2.7 Production Ready
-- ✅ Comprehensive v3.0 design document (DESIGN-v3-smart-upgrade.md, 100+ pages)
-- ✅ PRD updated to v1.4 with F-4.0 and F-5.0 specifications
-- ✅ Architecture evolution planned (v2.7 → v3.0)
-- ✅ Implementation roadmap defined (8-week plan)
+- ✅ Comprehensive v3.0 design document (DESIGN-v3-smart-upgrade.md v1.1 with PWA POC)
+- ✅ PRD updated to v1.4 with F-4.0, F-5.0, and PWA POC specifications
+- ✅ Architecture evolution planned (v2.7 → PWA POC → v3.0 → Extension)
+- ✅ Implementation roadmap adjusted (9-week plan with PWA POC first)
 
 ---
 
-## 📋 SESSION 10: v3.0 Smart Upgrade Planning (2025-11-12) - 🔄 IN PROGRESS!
+## 🆕 SESSION 10.5: PWA POC Strategy Adjustment (2025-11-12) - ✅ COMPLETE!
+
+**Status**: ✅ Design Updated | ✅ PRD Updated | ✅ Roadmap Adjusted
+
+### User Request (Strategy Change)
+
+> 請調整計劃 加入新的stage step:
+>
+> (新策略) feature 分支的首個交付產物將是一個 PWA (漸進式網頁應用程式) POC。
+>
+> 此 PWA 將作為核心 N-gram 引擎（v2.5 演算法）與 手動匯出/匯入 同步邏輯的概念驗證 (Proof-of-Concept)。
+>
+> Local Cache (本地快取): 將使用 IndexedDB 進行 user_ngram.db 的即時（離線）儲存。
+>
+> Manual Sync (手動同步): 使用者將能夠將 user_ngram.db 匯出 (Export) 為 json 檔案，並在另一台裝置上匯入 (Import)。
+
+### Key Decision: PWA POC First
+
+**Why PWA POC?**
+- ✅ **Faster validation**: Test F-4.0 concepts without Chrome Extension complexity
+- ✅ **Cross-browser**: Works in any modern browser (not Chrome-only)
+- ✅ **Better storage**: IndexedDB more suitable for offline data than localStorage
+- ✅ **Manual sync first**: Establish export/import foundation before auto-sync
+- ✅ **Mobile-friendly**: PWA is installable on mobile devices
+
+**Storage Strategy Evolution**:
+```
+Phase 0.5-1: IndexedDB (PWA) + Manual Export/Import
+     ↓
+Phase 4: chrome.storage.sync (Extension) + Automatic Sync
+```
+
+### Implementation Changes
+
+**New Phase Inserted**: Phase 0.5 - PWA POC (Week 2)
+
+**Core Features**:
+1. **Progressive Web App**
+   - Service Worker for offline support
+   - Installable as standalone app (mobile + desktop)
+   - Responsive design (RWD)
+
+2. **IndexedDB Storage**
+   - Store `user_ngram.db` locally
+   - Schema: `{ prevChar, currChar, weight, lastUpdated }`
+   - Async API for non-blocking queries
+
+3. **Manual Export/Import**
+   - Export: Download `user_ngram.json` (with timestamp)
+   - Import: Upload JSON file from another device
+   - Format: `{ "version": "1.0", "data": {...}, "exportDate": "..." }`
+
+4. **N-gram Engine Integration**
+   - Based on v2.7 Hybrid algorithm (OOP + 70/30 + Laplace)
+   - UserDB weights applied to candidate scoring
+   - Learning detection: Track non-default selections
+
+### Updated Roadmap
+
+**Before** (8 weeks):
+- Phase 0: Foundation (Week 1)
+- Phase 1: F-4.0 UserDB.js (Week 2-3)
+- Phase 2: F-5.0 ContextEngine (Week 4)
+- Phase 3: MVP 1.0 v12 (Week 5)
+- Phase 4: MVP 2a v2.0 Extension (Week 6-8)
+
+**After** (9 weeks):
+- Phase 0: Foundation (Week 1) ✅
+- **Phase 0.5: PWA POC (Week 2)** 🆕 ← Next!
+- Phase 1: F-4.0 Enhancement (Week 3)
+- Phase 2: F-5.0 ContextEngine (Week 4-5)
+- Phase 3: MVP 1.0 v12 (Week 6)
+- Phase 4: MVP 2a v2.0 Extension (Week 7-9)
+
+### Files Updated (Session 10.5)
+
+1. **docs/design/DESIGN-v3-smart-upgrade.md** (v1.0 → v1.1)
+   - Added Phase 0.5: PWA POC with IndexedDB (Week 2)
+   - Updated all subsequent phase timings (Week +1)
+   - Added Executive Summary section explaining PWA POC strategy
+   - Updated document version and target
+
+2. **docs/project/PRD.md** (Section 8.7)
+   - Added "新策略：PWA POC 優先" section
+   - Inserted Phase 0.5 into implementation schedule table
+   - Added detailed Phase 0.5 specifications
+   - Updated total timeline: 8 週 → 9 週
+
+3. **memory-bank/activeContext.md** (this file)
+   - Added Session 10.5 documenting strategy change
+   - Updated latest achievements to reflect PWA POC
+   - Updated implementation roadmap comparison
+
+### Success Criteria (Phase 0.5)
+
+- ✅ PWA installable on mobile/desktop
+- ✅ User can learn preferences (same as v2.7)
+- ✅ Export/Import works across devices
+- ✅ Offline mode functional
+- ✅ Performance: < 10ms total overhead
+
+### Migration Path
+
+```
+Phase 0.5: PWA POC
+  ↓ (Validate concepts)
+Phase 1: Enhanced PWA
+  ↓ (Full F-4.0 features)
+Phase 4: Chrome Extension
+  ↓ (IndexedDB → chrome.storage.sync)
+  ↓ (Manual → Auto sync)
+Final: Production Extension
+```
+
+### Next Steps
+
+**Immediate** (Complete Phase 0):
+- [ ] Update memory-bank/progress.md with Phase 0.5
+- [ ] Commit and push all changes
+
+**Next Session** (Begin Phase 0.5):
+- [ ] Create `mvp1-pwa/` directory structure
+- [ ] Implement Service Worker + PWA manifest
+- [ ] Implement IndexedDB wrapper (user_db_indexeddb.js)
+- [ ] Build Export/Import UI
+
+---
+
+## 📋 SESSION 10: v3.0 Smart Upgrade Planning (2025-11-12) - ✅ COMPLETE!
 
 **Status**: ✅ Design Complete | ✅ PRD Updated | 🔄 Memory Bank Updates
 
