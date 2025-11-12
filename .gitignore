@@ -51,3 +51,12 @@ htmlcov/
 # mvp1/dayi_db.json
 # mvp3-smart-engine/ngram_db.json
 converter/raw_data/Gossiping-QA-Dataset.txt
+
+# Test files (for local development only, not for GitHub Pages)
+# Note: Already committed test files in mvp1/tests/ are tracked in git
+# These patterns prevent new test files from being accidentally committed
+# to GitHub Pages deployment
+mvp1/test-*.html
+mvp1/test-*.js
+mvp1/diagnose-*.js
+mvp1/tests/browser/*.html

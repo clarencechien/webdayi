@@ -4,16 +4,81 @@
 
 > 輕量、透明、網頁優先的大易中文輸入法引擎
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v11.2-brightgreen)]()
-[![Version](https://img.shields.io/badge/version-11.2.0-blue)]()
+[![Status](https://img.shields.io/badge/status-MVP%201%20v11.3-brightgreen)]()
+[![Version](https://img.shields.io/badge/version-11.3.5-blue)]()
 [![Tests](https://img.shields.io/badge/tests-212%2B%2F212%2B%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
-## 🎉 線上展示
+---
 
-**[立即試用 WebDaYi MVP1 v11.2 →](https://clarencechien.github.io/webdayi/)** (GitHub Pages) 🚀 **NEW: 事件處理器修復 + 緩衝區顯示！**
+## 📖 TL;DR
+
+**WebDaYi** 是一個輕量、透明的**大易中文輸入法引擎**，採用純 JavaScript 實作，整合 N-gram 語言模型和 Viterbi 演算法，提供智慧句子預測功能。取代複雜的輸入法框架，為網頁應用程式提供原生級的輸入體驗。
+
+### 🎯 現況一覽
+
+- **版本**: v11.3.5 (Build: 20251112-009)
+- **狀態**: ✅ MVP 1.0 完成！智慧引擎生產就緒
+- **準確度**: 94.4% (v2.7 Hybrid: OOP + 70/30 + Laplace)
+- **測試**: 212+ 測試全數通過
+- **資料庫**: 16MB 完整 N-gram (279K bigrams, 90% 準確度)
+
+### 🚀 立即試用
+
+**[👉 線上展示 (GitHub Pages)](https://clarencechien.github.io/webdayi/)**
+
+**核心功能**:
+- 🧠 **雙模式輸入**: 逐字模式 ↔ 整句模式（智慧預測）
+- ⚡ **Viterbi 演算法**: 基於 rime-essay 語料庫 (717M 字元)
+- 📊 **Laplace 平滑**: 完整統計平滑處理
+- 👁️ **即時預覽**: 盲打更有信心
+- 📱 **手機優化**: 完美支援觸控與虛擬鍵盤
+- 🎨 **現代 UI**: Tailwind CSS + 深色模式
+
+### 📦 快速開始
+
+```bash
+# 給開發者
+git clone https://github.com/clarencechien/webdayi.git
+cd webdayi/mvp1
+node tests/node/test-v27-hybrid.js  # 測試 v2.7 (94.4% 準確度)
+open index.html  # 或使用 python3 -m http.server 8000
+```
+
+### 📚 重點文件
+
+| 文件 | 說明 |
+|------|------|
+| [SMART-ENGINE-JOURNEY.md](docs/SMART-ENGINE-JOURNEY.md) | 智慧引擎完整技術演進 (v2.1 → v2.7) |
+| [PRD.md](docs/project/PRD.md) | 產品需求文件 (v1.3) |
+| [activeContext.md](memory-bank/activeContext.md) | 當前開發狀態與技術脈絡 |
+
+### 🏆 最新成就 (v11.3.5)
+
+- ✅ **v2.7 Hybrid 演算法**: OOP 架構 + v2.5 的 70/30 權重 + Laplace 平滑
+- ✅ **94.4% 準確度**: 測試案例 17/18 正確 (明天天氣如何**會**放假嗎)
+- ✅ **完整資料庫**: 切換至 ngram_db.json (16MB, 279K bigrams)
+- ✅ **測試重組**: 47 個測試檔案組織至結構化資料夾
+- ✅ **完整文件**: 18KB 技術旅程文件 + 測試說明
+
+---
+
+## 🎉 完整功能展示
+
+**[立即試用 WebDaYi MVP1 v11.3 →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
 在瀏覽器中體驗核心大易輸入引擎，具備現代化設計與進階功能：
+
+### 🚀 v11.3.5 最新特色 (2025-11-12)
+
+- ✅ **v2.7 Hybrid 演算法**：完美結合 v2.6 OOP 架構與 v2.5 的 70/30 權重
+- ✅ **94.4% 準確度**：智慧句子預測達到新高峰
+- ✅ **完整資料庫**：ngram_db.json (16MB, 279K bigrams) 提供完整語言模型覆蓋
+- ✅ **Laplace 平滑**：統計正規化處理，處理未見 bigrams
+- ✅ **測試結構化**：47 個測試檔案重組至 tests/node、tests/browser、tests/diagnostic、tests/archived
+- ✅ **完整文件**：SMART-ENGINE-JOURNEY.md (18KB) 記錄完整技術演進
+
+### 🎨 v11.2 介面與體驗
 - 📱 **手機 UX 優化** *(v11.2 Build 007 NEW!)*：三階段全面改善手機輸入體驗！
   - 移除冗餘 Space 按鈕（輸入事件處理器已完全支援）
   - 逐字模式 Space 鍵選字（手機虛擬鍵盤完全支援）
@@ -72,24 +137,25 @@
 
 ## 專案狀態
 
-**目前階段**：✅ MVP 1.0 v11.2.0 完成！（手機 UX 優化 + 事件處理器修復）
-**當前版本**：11.2.0 (Build: 20251111-007, Commit: 326684c)
-**完成度**：~99%（Phase 0、MVP 1 v10、v11.2 100% 完成，準備進入 MVP 2a）
+**目前階段**：✅ MVP 1.0 v11.3.5 完成！（v2.7 Hybrid + 完整資料庫 + 文件完整）
+**當前版本**：11.3.5 (Build: 20251112-009, Commit: 752397f)
+**完成度**：~99%（Phase 0、MVP 1 v11.3 100% 完成，準備進入 MVP 2a）
+**生產狀態**：✅ 智慧引擎生產就緒！(94.4% 準確度)
 
 ### 如何確認版本
 
 打開 WebDaYi 後，按 **F12** 開啟 DevTools Console，會自動顯示：
 ```
 🚀 WebDaYi MVP 1.0
-Version: 11.2.0
-Build: 20251111-005
-Commit: caef860
-Release: Space/= Handlers Fix + Buffer Display
+Version: 11.3.5
+Build: 20251112-009
+Commit: 752397f
+Release: v2.7 Hybrid (OOP + 70/30 + Laplace) + Full ngram_db.json
 ```
 
 或輸入：`window.WEBDAYI_VERSION`
 
-詳見：[VERSION-GUIDE.md](VERSION-GUIDE.md)
+詳見：[docs/project/VERSION-GUIDE.md](docs/project/VERSION-GUIDE.md)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -151,7 +217,16 @@ Release: Space/= Handlers Fix + Buffer Display
 └──────────────────────────────────────────────────────────┘
 ```
 
-**最新成就**：🎉 MVP 1.0 v11 完整版（212+ 測試全數通過，100% 完成！）
+**最新成就**：🎉 MVP 1.0 v11.3 完整版（212+ 測試全數通過，94.4% 準確度，生產就緒！）
+
+**v11.3.5 Build 009 智慧引擎完成** (2025-11-12) - **v2.7 Hybrid + 完整文件**:
+- 🧠 **v2.7 Hybrid 演算法**：完美結合 OOP 架構、70/30 權重、Laplace 平滑
+- 📊 **94.4% 準確度**：測試案例 17/18 正確（明天天氣如何**會**放假嗎）
+- 💾 **完整資料庫**：切換至 ngram_db.json (16MB, 279K bigrams, 完整語言模型覆蓋)
+- 🔧 **根因修復**：診斷並修復資料庫問題（儈 vs 會 選字錯誤）
+- 📁 **測試重組**：47 個測試檔案組織至結構化資料夾 (tests/node、tests/browser、tests/diagnostic、tests/archived)
+- 📚 **完整文件**：SMART-ENGINE-JOURNEY.md (18KB) 記錄完整 v2.1→v2.7 技術演進
+- ✅ **生產就緒**：智慧引擎達到生產品質標準
 
 **v11.2 Build 007 手機 UX 優化** (2025-11-11) - **三階段全面改善**:
 - 📱 **Phase 1: 移除冗餘 Space 按鈕**：
@@ -256,7 +331,7 @@ Release: Space/= Handlers Fix + Buffer Display
   - **🚀 生產部署**：v1.2-strict 已部署為預設（`mvp1/ngram_blended.json`）
   - **📦 完整實驗報告**：`docs/design/NGRAM-BLENDED-EXPERIMENTS.md` (2.0 版)
 
-**下個里程碑**：開始 MVP 2a（Chrome 瀏覽器外掛）實作
+**下個里程碑**：開始 MVP 2a（Chrome 瀏覽器外掛）實作（需要針對擴充套件優化資料庫大小）
 
 ## 📚 文件結構
 
@@ -270,6 +345,7 @@ Release: Space/= Handlers Fix + Buffer Display
 - **FINAL-VERIFICATION.md** - 最終驗證報告
 
 ### 🎨 docs/design/ - 設計文件
+- **SMART-ENGINE-JOURNEY.md** - 智慧引擎完整技術演進 (v2.1→v2.7, 18KB) ✨ **NEW!**
 - **DESIGN-v2.md** - 轉換器 v2 設計（頻率排序系統）
 - **DESIGN-ngram.md** - N-gram 資料管線設計
 - **DESIGN-viterbi.md** - Viterbi 演算法設計
@@ -280,7 +356,7 @@ Release: Space/= Handlers Fix + Buffer Display
 - **DESIGN-v11.md** - N-gram 整合設計 (v11)
 - **DESIGN-v11-ux-improvements.md** - v11 UX 改善設計
 - **DESIGN-ngram-pruning.md** - N-gram 剪枝優化設計 (v11 Session 8)
-- **DESIGN-ngram-blended.md** - N-gram 混合模型設計 (v11 Session 9 NEW!)
+- **DESIGN-ngram-blended.md** - N-gram 混合模型設計 (v11 Session 9)
 
 ### 🧪 docs/testing/ - 測試文件
 - **BROWSER-TESTING-v11.md** - 瀏覽器測試計畫
@@ -523,19 +599,25 @@ webdayi/
 │   ├── compare_ngram_quality.py     # N-gram 品質 A/B 測試工具 ✅
 │   └── README.md                    # 轉換器文件
 │
-├── 🚀 mvp1/                         # MVP 1.0 核心引擎 (v11.2.0 Build 007)
+├── 🚀 mvp1/                         # MVP 1.0 核心引擎 (v11.3.5 Build 009)
 │   ├── index.html                   # 主要 UI（手機 UX 優化）✅
 │   ├── version.json                 # 版本追蹤 + 變更日誌
 │   ├── core_logic.js                # v8 邏輯 (46KB)
 │   ├── core_logic_v11.js            # N-gram 函式 (7KB)
 │   ├── core_logic_v11_ui.js         # UI 整合 (16KB)
-│   ├── viterbi_module.js            # Viterbi v2.0 with Laplace (7KB)
+│   ├── viterbi_module.js            # Viterbi v2.7 Hybrid (OOP + 70/30 + Laplace, 7KB)
 │   ├── dayi_db.json                 # 字元資料庫 (760KB)
-│   ├── ngram_db.json                # N-gram 機率 (16.5MB, 原始版)
-│   ├── ngram_pruned.json            # N-gram 機率 (3.1MB, 已優化) ✅ 正在使用
+│   ├── ngram_db.json                # N-gram 機率 (16MB, 279K bigrams) ✅ 正在使用
+│   ├── ngram_pruned.json            # N-gram 機率 (3.1MB, 已優化, 用於 MVP 2a)
+│   ├── ngram_blended.json           # 混合模型 (1.64MB, Session 9)
 │   ├── README.md / README.en.md     # MVP1 文件
-│   ├── test*.js                     # 21 個測試檔（212+ 測試）
-│   └── diagnose*.js                 # 診斷工具
+│   ├── organize-tests.sh            # 測試重組腳本 ✨ NEW!
+│   └── tests/                       # 結構化測試 ✨ NEW!
+│       ├── node/                    # Node.js 自動化測試 (10 個檔案)
+│       ├── browser/                 # 瀏覽器測試頁面 (4 個檔案)
+│       ├── diagnostic/              # 診斷工具 (7 個檔案)
+│       ├── archived/                # 歷史測試 (26 個檔案)
+│       └── README.md                # 測試結構說明
 │
 ├── 📦 mvp3-smart-engine/            # 舊版 N-gram 實驗
 │   └── (已被 viterbi_module.js 取代)
@@ -781,9 +863,10 @@ open mvp1/test.html
 | ✅ MVP 1.0 v9：Tailwind CSS + 深色模式 | 2025-11-10 | 完成 |
 | ✅ MVP 1.0 v10：手機 UX + 字體控制 + 錯誤修正 | 2025-11-10 | 完成 |
 | ✅ MVP 1.0 v11：N-gram 智能預測（核心 + UI） | 2025-11-10 | 完成 |
-| ✅ MVP 1.0 v11.2 Build 005：事件處理器 + 緩衝區修復 | 2025-11-11 | 完成 |
+| ✅ MVP 1.0 v11.2：事件處理器 + 緩衝區修復 + 手機 UX | 2025-11-11 | 完成 |
+| ✅ MVP 1.0 v11.3.5：v2.7 Hybrid + 完整資料庫 + 文件 | 2025-11-12 | 完成 |
 | 📋 MVP 3.0：N-gram 資料管線 + Viterbi | 2025-11-10 | 已整合至 v11 |
-| ⏳ MVP 2a：瀏覽器外掛 | 2025-11-20 | 規劃中 |
+| ⏳ MVP 2a：瀏覽器外掛（資料庫優化） | 2025-11-20 | 規劃中 |
 | ⏳ 公開發布（Chrome 線上應用程式商店） | 2025-11-25 | 規劃中 |
 | 📋 MVP 2a+：進階功能 | 2025-12-15 | 未來 |
 
@@ -816,7 +899,8 @@ open mvp1/test.html
 
 ---
 
-**最後更新**：2025-11-11
-**狀態**：✅ MVP 1.0 v11.2 Build 005 完成（事件處理器修復 + 緩衝區顯示 - 所有核心功能運作正常）
-**版本**：1.0.11.2-build005（MVP1 v11.2 with N-gram Sentence Prediction + Viterbi Algorithm + Dual-Mode Input + Critical Handler Fixes）
-**資料來源**：Rime Dàyì Dictionary + Rime Essay Corpus (rime-essay/essay.txt)
+**最後更新**：2025-11-12
+**狀態**：✅ MVP 1.0 v11.3.5 完成（v2.7 Hybrid + 完整資料庫 + 文件完整 - 智慧引擎生產就緒！）
+**版本**：1.0.11.3.5-build009（MVP1 v11.3 with v2.7 Hybrid Algorithm + Full N-gram Database + 94.4% Accuracy）
+**資料來源**：Rime Dàyì Dictionary + Rime Essay Corpus (rime-essay/essay.txt, 717M chars)
+**演算法**：Viterbi v2.7 Hybrid (OOP + 70/30 Weighting + Laplace Smoothing)
