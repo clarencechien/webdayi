@@ -6,28 +6,23 @@
   <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.3.3</title>
 
   <!-- Version Information (for testing verification) -->
-  <meta name="app-version" content="11.3.3">
+  <meta name="app-version" content="11.2.1">
   <meta name="app-build" content="20251112-007">
-  <meta name="app-commit" content="7d74b2d">
-  <meta name="app-release" content="Viterbi v2.4 - THE ACTUAL FIX">
+  <meta name="app-commit" content="a37d173">
+  <meta name="app-release" content="Chinese Text Recognition Diagnostics">
   <!--
-    WebDaYi MVP 1.0 - Version 11.3.3
+    WebDaYi MVP 1.0 - Version 11.2.1
     Build: 20251112-007
-    Release: Viterbi v2.4 - Logarithmic Frequency Bonus (THE ACTUAL FIX)
-    Commit: 7d74b2d
+    Release: Chinese Text Recognition Diagnostics
+    Commit: a37d173
 
-    Latest Changes (Build 007 - THE ACTUAL FIX):
-    - CRITICAL: v2.3's frequency bonus was TOO SMALL (0.00001)!
-    - Changed from linear (freq*1e-9) to LOGARITHMIC: log(1+freq/10000)
-    - freq=10000 → bonus=0.69 (vs 0.00001 in v2.3) - 69,000x larger!
-    - freq=1000 → bonus=0.095 (vs 0.000001 in v2.3) - 95,000x larger!
-    - Now comparable to N-gram differences (~1-3) - will actually work!
-    - Score will be visibly different from v2.3's -76.157
-
-    Why v2.3 failed:
-    - N-gram log scores range from -5 to -50
-    - v2.3 bonus was 0.00001 - disappeared when rounding to 3 decimals
-    - Like adding a grain of sand to a mountain!
+    Latest Changes:
+    - Created viterbi_module_debug.js with extensive console logging
+    - Created test-viterbi-debug.html for browser-based algorithm tracing
+    - Created diagnose-candidate-order.js to analyze candidate ordering
+    - Created check-duplicates.js to verify no duplicate characters
+    - Identified bug: main app picks low-frequency candidates (freq=1000)
+    - Found candidates are sorted correctly, bug is in Viterbi algorithm
 
     How to verify version:
     1. Open browser DevTools console
@@ -454,11 +449,11 @@
   <script>
     // Version information (for testing verification)
     window.WEBDAYI_VERSION = {
-      version: '11.3.3',
+      version: '11.2.1',
       build: '20251112-007',
-      buildDate: '2025-11-12T06:00:00Z',
-      commit: '7d74b2d',
-      releaseName: 'Viterbi v2.4 - THE ACTUAL FIX',
+      buildDate: '2025-11-12T00:00:00Z',
+      commit: 'a37d173',
+      releaseName: 'Chinese Text Recognition Diagnostics',
       changes: [
         'THE ACTUAL FIX: Changed to LOGARITHMIC frequency bonus!',
         'v2.3 bonus (freq*1e-9=0.00001) was too small - disappeared in rounding!',
@@ -475,8 +470,8 @@
     // Display version in console for easy verification
     console.log('%c🚀 WebDaYi MVP 1.0', 'font-size: 16px; font-weight: bold; color: #3b82f6;');
     console.log('%cVersion: ' + window.WEBDAYI_VERSION.version, 'font-size: 14px; color: #10b981;');
-    console.log('%cBuild: 20251112-005
-    console.log('%cCommit: b94527a
+    console.log('%cBuild: 20251112-007
+    console.log('%cCommit: a37d173
     console.log('%cRelease: ' + window.WEBDAYI_VERSION.releaseName, 'font-size: 12px; color: #6b7280;');
     console.log('%c' + '-'.repeat(50), 'color: #d1d5db;');
     console.log('%cLatest Changes:', 'font-size: 12px; font-weight: bold; color: #f59e0b;');
