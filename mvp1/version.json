@@ -1,9 +1,9 @@
 {
-  "version": "11.3.2",
-  "build": "20251112-006",
-  "buildDate": "2025-11-12T05:00:00Z",
-  "commit": "f393f76",
-  "releaseName": "Viterbi v2.3 - THE REAL FIX (Frequency Bonus)",
+  "version": "11.2.1",
+  "build": "20251112-005",
+  "buildDate": "2025-11-12T02:21:57Z",
+  "commit": "b94527a",
+  "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
       "version": "11.3.2",
