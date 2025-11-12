@@ -2,7 +2,7 @@
   "version": "11.3.3",
   "build": "20251112-007",
   "buildDate": "2025-11-12T06:00:00Z",
-  "commit": "pending",
+  "commit": "7d74b2d",
   "releaseName": "Viterbi v2.4 - Logarithmic Frequency Bonus (THE ACTUAL FIX)",
   "changelog": [
     {
