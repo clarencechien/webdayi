@@ -7,16 +7,21 @@
 
   <!-- Version Information (for testing verification) -->
   <meta name="app-version" content="11.3.0">
-  <meta name="app-build" content="20251112-003">
+  <meta name="app-build" content="20251112-004">
   <meta name="app-commit" content="88dccd8">
-  <meta name="app-release" content="Viterbi Tie-Breaking Fix">
+  <meta name="app-release" content="Viterbi Tie-Breaking Fix (Complete)">
   <!--
     WebDaYi MVP 1.0 - Version 11.3.0
-    Build: 20251112-003
-    Release: Viterbi Tie-Breaking Fix
+    Build: 20251112-004
+    Release: Viterbi Tie-Breaking Fix (Complete)
     Commit: 88dccd8
 
-    Latest Changes:
+    Latest Changes (Build 004):
+    - Applied tie-breaking fix to debug version (viterbi_module_debug.js v2.1)
+    - Both production and debug versions now use identical algorithm
+    - Enhanced debug output shows tie-breaking decisions
+
+    Previous Changes (Build 003):
     - FIXED: Viterbi tie-breaking now prefers high-frequency candidates
     - When multiple paths have equal scores, prefer higher-frequency characters
     - Upgraded viterbi_module.js from v2.0 to v2.1
@@ -449,16 +454,18 @@
     // Version information (for testing verification)
     window.WEBDAYI_VERSION = {
       version: '11.3.0',
-      build: '20251112-003',
-      buildDate: '2025-11-12T02:00:00Z',
+      build: '20251112-004',
+      buildDate: '2025-11-12T03:00:00Z',
       commit: '88dccd8',
-      releaseName: 'Viterbi Tie-Breaking Fix',
+      releaseName: 'Viterbi Tie-Breaking Fix (Complete)',
       changes: [
+        'Applied tie-breaking fix to debug version (viterbi_module_debug.js v2.1)',
+        'Both production and debug versions now use identical algorithm',
+        'Enhanced debug output shows tie-breaking decisions',
+        '--- Previous (Build 003) ---',
         'FIXED: Viterbi tie-breaking now prefers high-frequency candidates',
-        'When multiple paths have equal scores, prefer higher-frequency characters',
         'Upgraded viterbi_module.js from v2.0 to v2.1',
-        'Resolves bug where low-frequency candidates (freq=1000) were selected',
-        'Fixes issue where main app picked rank 8-10 characters instead of rank 1'
+        'Resolves bug where low-frequency candidates were incorrectly selected'
       ]
     };
 
