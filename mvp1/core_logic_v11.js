@@ -86,7 +86,8 @@ function getNgramDbStats() {
   return {
     uniqueChars: Object.keys(ngramDb.unigrams).length,
     uniqueBigrams: Object.keys(ngramDb.bigrams).length,
-    totalChars: ngramDb.metadata ? (ngramDb.metadata.total_chars || 0) : 0
+    // FIX: total_chars is at top level, not in metadata
+    totalChars: ngramDb.total_chars || (ngramDb.metadata ? (ngramDb.metadata.total_chars || 0) : 0)
   };
 }
 
