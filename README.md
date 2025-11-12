@@ -584,10 +584,17 @@ webdayi/
 ├── 🧠 memory-bank/                  # AI 助手專案記憶
 │   ├── projectbrief.md              # 專案簡介
 │   ├── productContext.md            # 產品脈絡
-│   ├── activeContext.md             # 活躍脈絡（Session 6 更新）
+│   ├── activeContext.md             # 活躍脈絡（Session 10 更新）
 │   ├── systemPatterns.md            # 系統模式
 │   ├── techContext.md               # 技術脈絡
 │   └── progress.md                  # 進度追蹤
+│
+├── 📊 data/                         # 資料管理 ✨ NEW!
+│   ├── README.md                    # Data Pipeline 完整文件 (v2.0)
+│   └── archive/                     # 歸檔資料庫
+│       ├── README.md                # 歸檔說明與版本演進
+│       ├── ngram_blended_experiments/  # Session 9 混合模型 (6 files, 19MB)
+│       └── ngram_alternatives/      # 替代版本 (1 file, 5.4MB)
 │
 ├── 🔄 converter/                    # Phase 0：資料處理管線
 │   ├── convert.js                   # 基礎 YAML → JSON
@@ -606,10 +613,9 @@ webdayi/
 │   ├── core_logic_v11.js            # N-gram 函式 (7KB)
 │   ├── core_logic_v11_ui.js         # UI 整合 (16KB)
 │   ├── viterbi_module.js            # Viterbi v2.7 Hybrid (OOP + 70/30 + Laplace, 7KB)
-│   ├── dayi_db.json                 # 字元資料庫 (760KB)
-│   ├── ngram_db.json                # N-gram 機率 (16MB, 279K bigrams) ✅ 正在使用
-│   ├── ngram_pruned.json            # N-gram 機率 (3.1MB, 已優化, 用於 MVP 2a)
-│   ├── ngram_blended.json           # 混合模型 (1.64MB, Session 9)
+│   ├── dayi_db.json                 # 字元資料庫 (743KB) ✅ 生產
+│   ├── ngram_db.json                # N-gram 機率 (16MB, 279K bigrams) ✅ 生產使用
+│   ├── ngram_pruned.json            # N-gram 機率 (3.2MB, 42K bigrams) ⏳ MVP 2a 預備
 │   ├── README.md / README.en.md     # MVP1 文件
 │   ├── organize-tests.sh            # 測試重組腳本 ✨ NEW!
 │   └── tests/                       # 結構化測試 ✨ NEW!
