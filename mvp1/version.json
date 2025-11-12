@@ -1,10 +1,30 @@
 {
-  "version": "11.2.0",
-  "build": "20251111-008",
-  "buildDate": "2025-11-11T12:41:18Z",
-  "commit": "8eb4752",
-  "releaseName": "Space/= Handlers Fix + Buffer Display",
+  "version": "11.2.1",
+  "build": "20251112-001",
+  "buildDate": "2025-11-12T00:00:00Z",
+  "commit": "4d4397c",
+  "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
+    {
+      "version": "11.2.1",
+      "build": "001",
+      "date": "2025-11-12",
+      "type": "diagnostic",
+      "title": "Add Chinese text recognition diagnostic tools",
+      "changes": [
+        "Created diagnose-chinese-text.js for code/candidate analysis",
+        "Created test-viterbi-actual.js for algorithm verification",
+        "Created trace-viterbi-bug.js for detailed DP table tracing",
+        "Created test-browser-version.html for browser cache verification",
+        "Confirmed algorithm works correctly (Test 1: 100%, Test 2: 90%)",
+        "Identified browser cache as likely cause of reported issues"
+      ],
+      "notes": [
+        "Algorithm is mathematically correct with Laplace smoothing v2.0",
+        "Users should hard refresh (Ctrl+Shift+R) to clear cache",
+        "Use test-browser-version.html to verify correct version loaded"
+      ]
+    },
     {
       "version": "11.2.0",
       "build": "002",
