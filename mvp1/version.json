@@ -1,8 +1,8 @@
 {
   "version": "11.2.1",
-  "build": "20251112-001",
-  "buildDate": "2025-11-12T00:00:00Z",
-  "commit": "4d4397c",
+  "build": "20251112-002",
+  "buildDate": "2025-11-12T00:40:29Z",
+  "commit": "3a7f74d",
   "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
