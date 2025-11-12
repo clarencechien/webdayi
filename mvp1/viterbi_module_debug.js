@@ -4,7 +4,12 @@
  * This version has extensive console logging to trace the algorithm execution
  * and identify why it's picking low-frequency candidates.
  *
- * Version 2.0: Implements full Laplace smoothing (Solution B) + DEBUG
+ * Version 2.1: Implements full Laplace smoothing + frequency-based tie-breaking + DEBUG
+ *
+ * v2.1 Changes:
+ * - Added frequency-based tie-breaking to prefer high-frequency candidates
+ * - When multiple paths have equal DP scores (within epsilon=1e-9), prefer path through higher-frequency character
+ * - Enhanced debug output to show tie-breaking decisions
  */
 
 /**
@@ -85,7 +90,7 @@ function initializeDP_debug(lattice, ngramDb) {
 }
 
 /**
- * Perform forward pass of Viterbi algorithm (DEBUG VERSION).
+ * Perform forward pass of Viterbi algorithm (DEBUG VERSION with v2.1 tie-breaking).
  */
 function forwardPass_debug(lattice, dp, backpointer, ngramDb, debugPositions = []) {
   for (let t = 1; t < lattice.length; t++) {
@@ -95,10 +100,19 @@ function forwardPass_debug(lattice, dp, backpointer, ngramDb, debugPositions = [
       console.log(`\n[DEBUG] === Processing position ${t} ===`);
     }
 
+    // Build frequency map for PREVIOUS position (t-1) for tie-breaking
+    const prevFreqMap = {};
+    if (t > 0) {
+      for (const candidate of lattice[t-1]) {
+        prevFreqMap[candidate.char] = candidate.freq;
+      }
+    }
+
     for (const candidate of lattice[t]) {
       const char2 = candidate.char;
       let maxProb = -Infinity;
       let maxPrevChar = null;
+      let maxPrevCharFreq = 0;
 
       if (shouldDebug && candidate.freq >= 1000) {
         console.log(`[DEBUG] Evaluating candidate: ${char2} (freq=${candidate.freq})`);
@@ -109,13 +123,27 @@ function forwardPass_debug(lattice, dp, backpointer, ngramDb, debugPositions = [
         const bigramProb = getLaplaceBigram_debug(prevChar, char2, ngramDb);
         const prob = dp[t-1][prevChar] + Math.log(bigramProb);
 
-        if (shouldDebug && candidate.freq >= 1000 && prob > maxProb) {
-          console.log(`[DEBUG]   From ${prevChar}: bigram_prob=${bigramProb.toExponential(3)}, prev_score=${dp[t-1][prevChar].toFixed(3)}, total=${prob.toFixed(3)} ${prob > maxProb ? '← NEW MAX' : ''}`);
+        // Get frequency of previous character for tie-breaking
+        const prevCharFreq = prevFreqMap[prevChar] || 0;
+        const epsilon = 1e-9;
+
+        if (shouldDebug && candidate.freq >= 1000) {
+          const isTie = Math.abs(prob - maxProb) < epsilon;
+          const isNewMax = prob > maxProb + epsilon;
+          const isBetterTie = isTie && prevCharFreq > maxPrevCharFreq;
+
+          if (isNewMax || isBetterTie) {
+            console.log(`[DEBUG]   From ${prevChar} (freq=${prevCharFreq}): bigram_prob=${bigramProb.toExponential(3)}, prev_score=${dp[t-1][prevChar].toFixed(3)}, total=${prob.toFixed(3)} ${isNewMax ? '← NEW MAX' : isBetterTie ? '← BETTER TIE (higher freq)' : ''}`);
+          }
         }
 
-        if (prob > maxProb) {
+        // BUG FIX (v2.1): Tie-breaking by frequency
+        // If scores are essentially equal (within epsilon), prefer higher-frequency previous character
+        if (prob > maxProb + epsilon ||
+            (Math.abs(prob - maxProb) < epsilon && prevCharFreq > maxPrevCharFreq)) {
           maxProb = prob;
           maxPrevChar = prevChar;
+          maxPrevCharFreq = prevCharFreq;
         }
       }
 
@@ -123,7 +151,7 @@ function forwardPass_debug(lattice, dp, backpointer, ngramDb, debugPositions = [
       backpointer[t][char2] = maxPrevChar;
 
       if (shouldDebug && candidate.freq >= 1000) {
-        console.log(`[DEBUG]   RESULT: ${char2} gets score ${maxProb.toFixed(3)} from ${maxPrevChar}`);
+        console.log(`[DEBUG]   RESULT: ${char2} gets score ${maxProb.toFixed(3)} from ${maxPrevChar} (freq=${maxPrevCharFreq})`);
       }
     }
 
