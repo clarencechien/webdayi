@@ -1,10 +1,26 @@
 {
-  "version": "11.3.1",
-  "build": "20251112-005",
-  "buildDate": "2025-11-12T04:00:00Z",
-  "commit": "d93e094",
-  "releaseName": "Viterbi Tie-Breaking Fix v2.2 (Backtrack)",
+  "version": "11.3.2",
+  "build": "20251112-006",
+  "buildDate": "2025-11-12T05:00:00Z",
+  "commit": "pending",
+  "releaseName": "Viterbi v2.3 - THE REAL FIX (Frequency Bonus)",
   "changelog": [
+    {
+      "version": "11.3.2",
+      "build": "006",
+      "date": "2025-11-12",
+      "type": "critical-fix",
+      "title": "THE REAL FIX: Frequency bonus added to DP scores (v2.3)",
+      "summary": "Previous tie-breaking approaches (v2.1, v2.2) were insufficient. The real solution is to bake frequency preference into DP scores as a tiny bonus. This ensures backtracking naturally follows paths through high-frequency characters.",
+      "changes": [
+        "CRITICAL: Added frequency bonus (freq * 1e-9) directly to DP scores",
+        "Previous approaches only affected transition choices, not overall path selection",
+        "Now when N-gram scores are equal, high-frequency paths get slightly higher DP scores",
+        "Applied to both initializeDP() and forwardPass()",
+        "Updated both production (viterbi_module.js) and debug (viterbi_module_debug.js) versions",
+        "Upgraded algorithm to v2.3"
+      ]
+    },
     {
       "version": "11.3.1",
       "build": "005",

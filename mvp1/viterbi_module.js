@@ -7,17 +7,18 @@
  * This is a browser-compatible version of the Viterbi algorithm.
  * All functions are exposed globally for use in MVP 1.0 v11.
  *
+ * Version 2.3: Fixed tie-breaking by adding frequency bonus to DP scores
  * Version 2.2: Fixed tie-breaking in backtrack() function
  * Version 2.1: Fixed tie-breaking in forwardPass() function
  * Version 2.0: Implements full Laplace smoothing (Solution B)
  *
- * Bug Fix (v2.2):
- * - Added frequency-based tie-breaking to backtrack() function
- * - When multiple candidates at final position have equal DP scores,
- *   the algorithm now prefers the higher-frequency character
- * - Completes the tie-breaking fix started in v2.1
- * - Fixes bug where "嬌俏侚艭傻" (all freq=1000) were selected instead
- *   of "如何會放假" (all freq>9000)
+ * Bug Fix (v2.3) - THE REAL FIX:
+ * - Previous tie-breaking approaches (v2.1, v2.2) were insufficient
+ * - Root cause: Tie-breaking only affected transition choices, not overall path selection
+ * - Solution: Add tiny frequency bonus (freq * 1e-9) directly to DP score
+ * - Now when paths have equal N-gram scores, high-frequency paths get slightly higher DP scores
+ * - This ensures backtracking follows the path through high-frequency characters
+ * - Fixes bug where "嬌俏侚艭" (freq=1000) were selected instead of "如何會放" (freq>9000)
  *
  * Original: mvp3-smart-engine/viterbi.js
  * Design Document: mvp1/DESIGN-v11.md
@@ -113,7 +114,9 @@ function initializeDP(lattice, ngramDb) {
     const char = candidate.char;
     // Solution B: Use full Laplace smoothing instead of fallback
     const unigramProb = getLaplaceUnigram(char, ngramDb);
-    firstDP[char] = Math.log(unigramProb);
+    // BUG FIX (v2.3): Add frequency bonus for tie-breaking at first position too
+    const freqBonus = candidate.freq * 1e-9;
+    firstDP[char] = Math.log(unigramProb) + freqBonus;
   }
   dp.push(firstDP);
 
@@ -156,11 +159,9 @@ function forwardPass(lattice, dp, backpointer, ngramDb) {
         const bigramProb = getLaplaceBigram(prevChar, char2, ngramDb);
         const prob = dp[t-1][prevChar] + Math.log(bigramProb);
 
-        // BUG FIX: Tie-breaking by frequency
-        // When DP scores are equal (common when all bigrams are unseen),
-        // prefer path through higher-frequency previous character
+        // BUG FIX (v2.1): Tie-breaking by previous character frequency
         const prevCharFreq = prevFreqMap[prevChar] || 0;
-        const epsilon = 1e-9; // Threshold for "equal" scores
+        const epsilon = 1e-9;
 
         if (prob > maxProb + epsilon ||
             (Math.abs(prob - maxProb) < epsilon && prevCharFreq > maxPrevCharFreq)) {
@@ -170,7 +171,12 @@ function forwardPass(lattice, dp, backpointer, ngramDb) {
         }
       }
 
-      dp[t][char2] = maxProb;
+      // BUG FIX (v2.3): Add tiny frequency bonus to DP score for tie-breaking
+      // This ensures that when multiple paths have equal N-gram scores,
+      // the path through higher-frequency characters gets a slightly higher DP score
+      // Scale: freq=10000 → bonus=1e-5, freq=1000 → bonus=1e-6 (much smaller than N-gram diffs)
+      const freqBonus = candidate.freq * 1e-9;
+      dp[t][char2] = maxProb + freqBonus;
       backpointer[t][char2] = maxPrevChar;
     }
   }
@@ -275,4 +281,4 @@ function viterbi(codes, dayiDb, ngramDb) {
 
 // Functions are now globally available in browser context
 // No module.exports needed - browser version
-console.log('✓ Viterbi module loaded (v2.2 with complete tie-breaking fix)');
+console.log('✓ Viterbi module loaded (v2.3 with frequency-bonus tie-breaking)');
