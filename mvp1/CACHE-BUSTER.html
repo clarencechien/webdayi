@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>WebDaYi - CACHE BUSTER VERSION</title>
+  <script>
+    // Generate unique timestamp
+    const timestamp = Date.now();
+    document.write('<script src="viterbi_module.js?v=' + timestamp + '"><\/script>');
+    document.write('<script src="core_logic_v11.js?v=' + timestamp + '"><\/script>');
+    document.write('<script src="core_logic_v11_ui.js?v=' + timestamp + '"><\/script>');
+  </script>
+</head>
+<body style="background: #000; color: #0f0; font-family: monospace; padding: 20px;">
+  <h1>🔥 CACHE BUSTER - v2.3 Verification</h1>
+  <p>This page forces your browser to load fresh JavaScript files!</p>
+  <p>Timestamp: <span id="ts"></span></p>
+  <script>
+    document.getElementById('ts').textContent = Date.now();
+  </script>
+
+  <h2>Quick Test:</h2>
+  <ol>
+    <li>Wait for scripts to load</li>
+    <li>Open DevTools Console (F12)</li>
+    <li>Check for: <code>✓ Viterbi module loaded (v2.3 with frequency-bonus tie-breaking)</code></li>
+    <li>Run test:</li>
+  </ol>
+
+  <pre style="background: #111; padding: 10px; border: 1px solid #0f0;">
+// Copy-paste this into Console:
+const codes = ['dj', 'ev', 'ev', 'c8', 'lo', 'aj', 'ad', '.x', 'ax', 'ob'];
+const dayiDb = window.dayiMap;  // Assuming dayiMap is loaded
+const ngramDb = window.ngramDbGlobal;  // Assuming ngramDb is loaded
+
+if (dayiDb && ngramDb) {
+  const result = viterbi(codes, dayiDb, ngramDb);
+  console.log('Result:', result.sentence);
+  console.log('Score:', result.score);
+  console.log('Expected: 明天天氣如何會放假嗎');
+  console.log('Match:', result.sentence === '明天天氣如何會放假嗎' ? '✓ PASS' : '✗ FAIL');
+} else {
+  console.log('Databases not loaded yet, wait a moment...');
+}
+  </pre>
+
+  <h2 style="color: #ff0;">⚠️ If this still doesn't work:</h2>
+  <ol>
+    <li><strong>Close ALL browser tabs</strong></li>
+    <li><strong>Clear ALL browsing data:</strong>
+      <ul>
+        <li>Chrome: Settings → Privacy → Clear browsing data → Cached images and files</li>
+        <li>Firefox: Settings → Privacy → Clear Data → Cached Web Content</li>
+        <li>Edge: Settings → Privacy → Choose what to clear → Cached data</li>
+      </ul>
+    </li>
+    <li><strong>Restart browser</strong></li>
+    <li><strong>Try Incognito/Private mode</strong> (Ctrl+Shift+N / Ctrl+Shift+P)</li>
+  </ol>
+</body>
+</html>
