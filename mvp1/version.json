@@ -2,7 +2,7 @@
   "version": "11.3.1",
   "build": "20251112-005",
   "buildDate": "2025-11-12T04:00:00Z",
-  "commit": "pending",
+  "commit": "d93e094",
   "releaseName": "Viterbi Tie-Breaking Fix v2.2 (Backtrack)",
   "changelog": [
     {
