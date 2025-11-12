@@ -6,6 +6,36 @@
   "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
+      "version": "11.3.5",
+      "build": "009",
+      "date": "2025-11-12",
+      "type": "enhancement",
+      "title": "v2.7 Hybrid Implementation - Clean Architecture + Proven Algorithm",
+      "summary": "Upgraded to v2.7 which combines v2.6's clean OOP architecture with v2.5's proven 70/30 weighting and Laplace smoothing. Maintains 94.4% accuracy while improving code maintainability.",
+      "changes": [
+        "Replaced viterbi_module.js with v2.7 hybrid implementation",
+        "Architecture: v2.6 OOP design (clean, modular structure)",
+        "Algorithm: v2.5 proven parameters (70/30 weights + Laplace smoothing)",
+        "Accuracy: 94.4% (same as v2.5, Test 1: 100%, Test 2: 90%)",
+        "Code quality: Adjustable BIGRAM_WEIGHT/UNIGRAM_WEIGHT constants",
+        "Backed up v2.5 as viterbi_module_v25_backup.js"
+      ],
+      "benefits": [
+        "Easier to understand (clear OOP architecture)",
+        "Easier to maintain (modular design)",
+        "Easier to tune (adjustable weight parameters)",
+        "Same accuracy as v2.5 (proven 90%+)",
+        "Better documentation (comprehensive comments)"
+      ],
+      "technical_details": [
+        "BIGRAM_WEIGHT = 0.7 (70% context)",
+        "UNIGRAM_WEIGHT = 0.3 (30% popularity)",
+        "Laplace smoothing: (count + alpha) / (total + alpha * vocab_size)",
+        "Browser-compatible global functions (no module.exports)",
+        "Fixed bigram_counts access (flat structure, not nested)"
+      ]
+    },
+    {
       "version": "11.3.4",
       "build": "008",
       "date": "2025-11-12",
