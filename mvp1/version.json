@@ -6,6 +6,39 @@
   "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
+      "version": "11.3.1",
+      "build": "005",
+      "date": "2025-11-12",
+      "type": "critical-fix",
+      "title": "CRITICAL FIX: Added tie-breaking to backtrack() function",
+      "changes": [
+        "Fixed viterbi_module.js backtrack() to use frequency-based tie-breaking",
+        "Fixed viterbi_module_debug.js backtrack() with same tie-breaking logic",
+        "Upgraded algorithm to v2.2 (complete tie-breaking coverage)",
+        "When multiple candidates at final position have equal scores, prefer higher-frequency character",
+        "Resolves bug where '嬌俏侚艭傻' (freq=1000) were selected instead of '如何會放假' (freq>9000)"
+      ],
+      "technical_details": [
+        "Added lastFreqMap building in backtrack()",
+        "Added maxFreq tracking for final character selection",
+        "Updated comparison logic: prob > maxProb + epsilon || (tie && freq > maxFreq)",
+        "Debug version shows tie-breaking decisions with detailed logging",
+        "Both production and debug versions now have complete tie-breaking"
+      ],
+      "root_cause": [
+        "v2.1 only fixed tie-breaking in forwardPass() (choosing best previous character)",
+        "But backtrack() had NO tie-breaking when selecting final character",
+        "When '嬌' and '如' both had equal final scores, JavaScript object iteration order determined winner",
+        "This caused low-frequency characters to be selected due to iteration order"
+      ],
+      "impact": [
+        "CRITICAL: This was causing the main app to produce wrong predictions",
+        "Main app was producing '明天天氣嬌俏侚艭傻嗎' instead of correct result",
+        "Debug version happened to work better due to different iteration order",
+        "Now both versions should produce high-quality predictions consistently"
+      ]
+    },
+    {
       "version": "11.3.0",
       "build": "004",
       "date": "2025-11-12",

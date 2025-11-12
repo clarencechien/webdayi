@@ -4,12 +4,13 @@
  * This version has extensive console logging to trace the algorithm execution
  * and identify why it's picking low-frequency candidates.
  *
- * Version 2.1: Implements full Laplace smoothing + frequency-based tie-breaking + DEBUG
+ * Version 2.2: Complete tie-breaking fix (forwardPass + backtrack) + DEBUG
  *
- * v2.1 Changes:
- * - Added frequency-based tie-breaking to prefer high-frequency candidates
- * - When multiple paths have equal DP scores (within epsilon=1e-9), prefer path through higher-frequency character
- * - Enhanced debug output to show tie-breaking decisions
+ * v2.2 Changes:
+ * - Added frequency-based tie-breaking to backtrack() function
+ * - When multiple candidates at final position have equal DP scores, prefer higher-frequency character
+ * - Enhanced debug output shows tie-breaking decisions in both forward pass and backtrack
+ * - Completes the tie-breaking fix started in v2.1
  */
 
 /**
@@ -168,25 +169,43 @@ function forwardPass_debug(lattice, dp, backpointer, ngramDb, debugPositions = [
 }
 
 /**
- * Backtrack to reconstruct the best path (DEBUG VERSION).
+ * Backtrack to reconstruct the best path (DEBUG VERSION with v2.1 tie-breaking).
  */
 function backtrack_debug(dp, backpointer, lattice) {
   const lastT = dp.length - 1;
 
   console.log('\n[DEBUG] === Backtracking ===');
 
+  // Build frequency map for last position for tie-breaking
+  const lastFreqMap = {};
+  for (const candidate of lattice[lastT]) {
+    lastFreqMap[candidate.char] = candidate.freq;
+  }
+
   // Find character with maximum probability at last position
+  // With tie-breaking by frequency
   let maxChar = null;
   let maxProb = -Infinity;
+  let maxFreq = 0;
+  const epsilon = 1e-9;
 
+  console.log('[DEBUG] Finding best final character with tie-breaking:');
   for (const char in dp[lastT]) {
-    if (dp[lastT][char] > maxProb) {
-      maxProb = dp[lastT][char];
+    const prob = dp[lastT][char];
+    const freq = lastFreqMap[char] || 0;
+    const isTie = Math.abs(prob - maxProb) < epsilon;
+    const isNewMax = prob > maxProb + epsilon;
+    const isBetterTie = isTie && freq > maxFreq;
+
+    if (isNewMax || isBetterTie) {
+      console.log(`[DEBUG]   ${char} (freq=${freq}, score=${prob.toFixed(3)}) ${isNewMax ? '← NEW MAX' : '← BETTER TIE'}`);
+      maxProb = prob;
       maxChar = char;
+      maxFreq = freq;
     }
   }
 
-  console.log(`[DEBUG] Final position best char: ${maxChar} (score=${maxProb.toFixed(3)})`);
+  console.log(`[DEBUG] Final position best char: ${maxChar} (freq=${maxFreq}, score=${maxProb.toFixed(3)})`);
 
   // Reconstruct path backwards
   const chars = [];

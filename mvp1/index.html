@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.3.0</title>
+  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.3.1</title>
 
   <!-- Version Information (for testing verification) -->
   <meta name="app-version" content="11.2.1">
@@ -27,7 +27,7 @@
     How to verify version:
     1. Open browser DevTools console
     2. Check window.WEBDAYI_VERSION
-    3. Console should show "Viterbi module loaded (v2.1 with tie-breaking fix)"
+    3. Console should show "Viterbi module loaded (v2.2 with complete tie-breaking fix)"
   -->
 
   <!-- Google Fonts -->
@@ -455,13 +455,13 @@
       commit: 'bbfb0a7',
       releaseName: 'Chinese Text Recognition Diagnostics',
       changes: [
-        'Applied tie-breaking fix to debug version (viterbi_module_debug.js v2.1)',
-        'Both production and debug versions now use identical algorithm',
-        'Enhanced debug output shows tie-breaking decisions',
-        '--- Previous (Build 003) ---',
-        'FIXED: Viterbi tie-breaking now prefers high-frequency candidates',
-        'Upgraded viterbi_module.js from v2.0 to v2.1',
-        'Resolves bug where low-frequency candidates were incorrectly selected'
+        'CRITICAL FIX: Added frequency tie-breaking to backtrack() function',
+        'Upgraded Viterbi module to v2.2 (complete tie-breaking coverage)',
+        'Fixed bug where "嬌俏侚艭傻" were selected instead of "如何會放假"',
+        'Root cause: v2.1 only fixed forwardPass(), backtrack() had no tie-breaking',
+        '--- Previous (Build 003-004) ---',
+        'Applied tie-breaking fix to forwardPass() in production and debug versions',
+        'Upgraded viterbi_module.js from v2.0 to v2.1'
       ]
     };
 

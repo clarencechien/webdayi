@@ -7,14 +7,17 @@
  * This is a browser-compatible version of the Viterbi algorithm.
  * All functions are exposed globally for use in MVP 1.0 v11.
  *
- * Version 2.1: Fixed tie-breaking bug (prefers high-frequency candidates)
+ * Version 2.2: Fixed tie-breaking in backtrack() function
+ * Version 2.1: Fixed tie-breaking in forwardPass() function
  * Version 2.0: Implements full Laplace smoothing (Solution B)
  *
- * Bug Fix (v2.1):
- * - When multiple paths have equal DP scores (common with unseen bigrams),
- *   the algorithm now prefers paths through higher-frequency characters
- * - Fixes issue where low-frequency candidates (freq=1000) were selected
- *   over high-frequency candidates (freq>9000) due to iteration order
+ * Bug Fix (v2.2):
+ * - Added frequency-based tie-breaking to backtrack() function
+ * - When multiple candidates at final position have equal DP scores,
+ *   the algorithm now prefers the higher-frequency character
+ * - Completes the tie-breaking fix started in v2.1
+ * - Fixes bug where "嬌俏侚艭傻" (all freq=1000) were selected instead
+ *   of "如何會放假" (all freq>9000)
  *
  * Original: mvp3-smart-engine/viterbi.js
  * Design Document: mvp1/DESIGN-v11.md
@@ -178,19 +181,36 @@ function forwardPass(lattice, dp, backpointer, ngramDb) {
  *
  * @param {Object[]} dp - DP table
  * @param {Object[]} backpointer - Backpointer array
+ * @param {Array[]} lattice - Candidate lattice (for frequency tie-breaking)
  * @returns {Object} Best path information
  */
-function backtrack(dp, backpointer) {
+function backtrack(dp, backpointer, lattice) {
   const lastT = dp.length - 1;
 
+  // Build frequency map for last position for tie-breaking
+  const lastFreqMap = {};
+  for (const candidate of lattice[lastT]) {
+    lastFreqMap[candidate.char] = candidate.freq;
+  }
+
   // Find character with maximum probability at last position
+  // With tie-breaking by frequency
   let maxChar = null;
   let maxProb = -Infinity;
+  let maxFreq = 0;
+  const epsilon = 1e-9;
 
   for (const char in dp[lastT]) {
-    if (dp[lastT][char] > maxProb) {
-      maxProb = dp[lastT][char];
+    const prob = dp[lastT][char];
+    const freq = lastFreqMap[char] || 0;
+
+    // BUG FIX (v2.1): Tie-breaking by frequency in backtrack
+    // If scores are tied, prefer higher-frequency character
+    if (prob > maxProb + epsilon ||
+        (Math.abs(prob - maxProb) < epsilon && freq > maxFreq)) {
+      maxProb = prob;
       maxChar = char;
+      maxFreq = freq;
     }
   }
 
@@ -244,8 +264,8 @@ function viterbi(codes, dayiDb, ngramDb) {
   // 3. Forward pass
   forwardPass(lattice, dp, backpointer, ngramDb);
 
-  // 4. Backtrack
-  const result = backtrack(dp, backpointer);
+  // 4. Backtrack (with lattice for frequency tie-breaking)
+  const result = backtrack(dp, backpointer, lattice);
 
   // Optional: Add lattice for debugging
   result.lattice = lattice;
@@ -255,4 +275,4 @@ function viterbi(codes, dayiDb, ngramDb) {
 
 // Functions are now globally available in browser context
 // No module.exports needed - browser version
-console.log('✓ Viterbi module loaded (v2.1 with tie-breaking fix)');
+console.log('✓ Viterbi module loaded (v2.2 with complete tie-breaking fix)');
