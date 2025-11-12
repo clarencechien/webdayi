@@ -3621,6 +3621,115 @@ Updated to **v11.3.5 (Build: 20251112-009)**:
 - **Database decision**: Switched from pruned (1.64MB, 70%) to full (16MB, 90%)
 - **Status**: ✅ **Session 10 Core Work Complete! Documentation in progress...**
 
+### Database Reorganization (Continuation)
+
+**User Request**: 整理 mvp1 資料庫，保留最終版本，歸檔實驗版本，並補充 data pipeline 文件
+
+**Problem**: mvp1 目錄包含 10+ JSON 檔案，混雜生產版本與實驗版本，缺乏清晰組織
+
+**Solution**: 建立 `data/` 目錄結構，分離生產與歸檔資料庫
+
+**Changes Implemented**:
+
+1. **建立歸檔目錄結構**:
+   ```
+   data/
+   ├── README.md                       # 完整 Data Pipeline 文件
+   └── archive/
+       ├── README.md                   # 歸檔說明文件
+       ├── ngram_blended_experiments/  # Session 9 混合模型 (6 files)
+       └── ngram_alternatives/         # 替代版本 (1 file)
+   ```
+
+2. **移動實驗版本檔案**:
+   - **From mvp1/** → **To data/archive/ngram_blended_experiments/**:
+     - `ngram_blended.json` (5.5MB) - v1.2-strict 部署版
+     - `ngram_blended_v1.1.json` (1.7MB) - v1.1 基準
+     - `ngram_blended_v1.1_smoothed.json` (1.7MB) - v1.1 + Laplace
+     - `ngram_blended_v1.2.json` (2.7MB) - v1.2 開發版
+     - `ngram_blended_v1.2_strict.json` (1.7MB) - v1.2-strict
+     - `ngram_blended_v1.3_formal.json` (5.4MB) - v1.3-formal
+   - **From mvp1/** → **To data/archive/ngram_alternatives/**:
+     - `ngram_db_taiwan.json` (5.4MB) - 台灣特化版本
+
+3. **保留生產版本 (mvp1/)**:
+   - ✅ `dayi_db.json` (743KB) - 大易字典，核心資料
+   - ✅ `ngram_db.json` (16MB) - 完整 N-gram，**目前生產使用**
+   - ✅ `ngram_pruned.json` (3.2MB) - 壓縮 N-gram，**MVP 2a 預備使用**
+   - ✅ `version.json` (14KB) - 版本資訊
+
+4. **建立文件**:
+   - **data/README.md** (完整 Data Pipeline 文件):
+     - TL;DR 資料庫總覽
+     - Pipeline 1: 大易字典轉換 (convert-v2.js)
+     - Pipeline 2: N-gram 建構 (build_ngram.py)
+     - Pipeline 3: 混合模型實驗 (已歸檔)
+     - 測試與驗證流程
+     - 完整目錄結構
+     - 快速參考指南
+     - MVP 2a 未來規劃
+   - **data/archive/README.md** (歸檔說明):
+     - 目錄結構與檔案列表
+     - Session 9 版本演進詳細說明
+     - 實驗結論與決策理由
+     - 生產版本對比
+     - 未來用途 (MVP 2a, 學術研究)
+
+**Results**:
+
+**Before (mvp1/ 混亂)**:
+```
+mvp1/
+├── dayi_db.json                    743KB
+├── ngram_db.json                   16MB
+├── ngram_db_taiwan.json            5.4MB
+├── ngram_pruned.json               3.2MB
+├── ngram_blended.json              5.5MB
+├── ngram_blended_v1.1.json         1.7MB
+├── ngram_blended_v1.1_smoothed.json 1.7MB
+├── ngram_blended_v1.2.json         2.7MB
+├── ngram_blended_v1.2_strict.json  1.7MB
+├── ngram_blended_v1.3_formal.json  5.4MB
+└── version.json                    14KB
+總計：10 個 JSON 檔案，~45MB
+```
+
+**After (清晰分離)**:
+```
+mvp1/                               # 生產版本
+├── dayi_db.json                    743KB ✅
+├── ngram_db.json                   16MB ✅ 生產使用
+├── ngram_pruned.json               3.2MB ⏳ MVP 2a 預備
+└── version.json                    14KB ✅
+總計：4 個檔案，~20MB
+
+data/archive/                       # 歸檔版本
+├── ngram_blended_experiments/      19MB (6 files)
+└── ngram_alternatives/             5.4MB (1 file)
+總計：7 個檔案，~24MB
+```
+
+**Benefits**:
+- ✅ **清晰分離**：生產 vs 實驗版本
+- ✅ **檔案減少**：mvp1/ 從 10 個減少到 4 個
+- ✅ **易於維護**：明確知道哪些檔案在使用
+- ✅ **完整文件**：data pipeline 全流程記錄
+- ✅ **保留實驗**：歸檔供未來研究參考
+- ✅ **MVP 2a 就緒**：ngram_pruned.json 清楚標示用途
+
+**Documentation Created**:
+1. `data/README.md` (Data Pipeline v2.0) - 完整資料處理管線文件
+2. `data/archive/README.md` - 歸檔資料庫說明與版本演進
+
+**Key Insights**:
+- 混合模型實驗 (Session 9) 提供了寶貴經驗
+- 檔案大小優化 vs 準確度是關鍵權衡
+- MVP 1.0 選擇準確度 (16MB, 94.4%)
+- MVP 2a 將使用剪枝版本 (3.2MB, 86.8%)
+- 所有實驗版本保留供未來參考
+
+**Status**: ✅ **Session 10 Database Reorganization Complete!**
+
 ---
 
 **Last Updated**: 2025-11-12 (Session 10 Complete - v2.7 Hybrid + Full Database + Documentation)
