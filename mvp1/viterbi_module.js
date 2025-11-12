@@ -7,17 +7,19 @@
  * This is a browser-compatible version of the Viterbi algorithm.
  * All functions are exposed globally for use in MVP 1.0 v11.
  *
- * Version 2.3: Fixed tie-breaking by adding frequency bonus to DP scores
+ * Version 2.4: Fixed frequency bonus scale (logarithmic instead of linear)
+ * Version 2.3: Added frequency bonus to DP scores (but too small!)
  * Version 2.2: Fixed tie-breaking in backtrack() function
  * Version 2.1: Fixed tie-breaking in forwardPass() function
  * Version 2.0: Implements full Laplace smoothing (Solution B)
  *
- * Bug Fix (v2.3) - THE REAL FIX:
- * - Previous tie-breaking approaches (v2.1, v2.2) were insufficient
- * - Root cause: Tie-breaking only affected transition choices, not overall path selection
- * - Solution: Add tiny frequency bonus (freq * 1e-9) directly to DP score
- * - Now when paths have equal N-gram scores, high-frequency paths get slightly higher DP scores
- * - This ensures backtracking follows the path through high-frequency characters
+ * Bug Fix (v2.4) - THE ACTUAL REAL FIX:
+ * - v2.3's frequency bonus (freq * 1e-9) was TOO SMALL - disappeared in rounding!
+ * - N-gram log scores range from -5 to -50, typical differences are 1-3
+ * - v2.3's bonus was 0.00001, which rounds to 0 when displayed to 3 decimal places
+ * - Solution: Use logarithmic bonus: log(1 + freq/10000)
+ * - freq=10000 → bonus=0.69, freq=1000 → bonus=0.095, difference=0.595
+ * - This is comparable to N-gram differences and will actually affect path selection!
  * - Fixes bug where "嬌俏侚艭" (freq=1000) were selected instead of "如何會放" (freq>9000)
  *
  * Original: mvp3-smart-engine/viterbi.js
@@ -114,8 +116,12 @@ function initializeDP(lattice, ngramDb) {
     const char = candidate.char;
     // Solution B: Use full Laplace smoothing instead of fallback
     const unigramProb = getLaplaceUnigram(char, ngramDb);
-    // BUG FIX (v2.3): Add frequency bonus for tie-breaking at first position too
-    const freqBonus = candidate.freq * 1e-9;
+
+    // BUG FIX (v2.4): Use logarithmic frequency bonus for proper scale
+    // Formula: log(1 + freq/10000) gives bonus in range [0, 0.69]
+    // freq=10000 → bonus=log(2)≈0.69, freq=1000 → bonus=log(1.1)≈0.095
+    // This is comparable to N-gram log probability differences (~1-3)
+    const freqBonus = Math.log(1 + candidate.freq / 10000);
     firstDP[char] = Math.log(unigramProb) + freqBonus;
   }
   dp.push(firstDP);
@@ -171,11 +177,12 @@ function forwardPass(lattice, dp, backpointer, ngramDb) {
         }
       }
 
-      // BUG FIX (v2.3): Add tiny frequency bonus to DP score for tie-breaking
-      // This ensures that when multiple paths have equal N-gram scores,
-      // the path through higher-frequency characters gets a slightly higher DP score
-      // Scale: freq=10000 → bonus=1e-5, freq=1000 → bonus=1e-6 (much smaller than N-gram diffs)
-      const freqBonus = candidate.freq * 1e-9;
+      // BUG FIX (v2.4): Use logarithmic frequency bonus for proper scale
+      // Formula: log(1 + freq/10000) gives bonus in range [0, 0.69]
+      // freq=10000 → bonus=log(2)≈0.69, freq=1000 → bonus=log(1.1)≈0.095
+      // This is comparable to N-gram log probability differences (~1-3)
+      // Previous v2.3 used freq*1e-9 which was too small (disappeared in rounding)
+      const freqBonus = Math.log(1 + candidate.freq / 10000);
       dp[t][char2] = maxProb + freqBonus;
       backpointer[t][char2] = maxPrevChar;
     }
@@ -281,4 +288,4 @@ function viterbi(codes, dayiDb, ngramDb) {
 
 // Functions are now globally available in browser context
 // No module.exports needed - browser version
-console.log('✓ Viterbi module loaded (v2.3 with frequency-bonus tie-breaking)');
+console.log('✓ Viterbi module loaded (v2.4 with LOGARITHMIC frequency bonus)');
