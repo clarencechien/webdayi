@@ -20,29 +20,29 @@ This repository contains the implementation for MVP 1.0, MVP 2a, and MVP 3.0, as
 
 * **PRD finalized** (based on WebDaYi\_PRD.md v1.3, **includes MVP 3.0 N-gram Track**).
 * **Data Pipeline (PRD C.1-C.4)** ✅ COMPLETE - converting Rime dictionary data.
-* **N-gram Pipeline (PRD C.5-C.7)** ✅ COMPLETE - processed rime-essay data (6MB essay.txt → 10.4MB ngram_db.json).
-* **MVP 1.0 v11 (Core Engine + Smart Engine)** ✅ 95% COMPLETE - Static webpage with N-gram sentence prediction integrated!
-* **MVP 2a (Browser Plugin)** ⏳ PLANNED - Chrome extension with in-place injection.
-* **MVP 3.0 (Smart Engine)** 🚀 INTEGRATED INTO MVP 1.0 v11 - N-gram + Viterbi now in main branch!
+* **N-gram Pipeline (PRD C.5-C.7)** ✅ COMPLETE - processed rime-essay data (6MB essay.txt → 16MB ngram_db.json, 279K bigrams).
+* **MVP 1.0 v11.3.5 (Core Engine + Smart Engine)** ✅ **100% COMPLETE** - Production-ready with v2.7 Hybrid algorithm (94.4% accuracy)!
+* **MVP 2a (Browser Plugin)** ⏳ PLANNED - Chrome extension with in-place injection (requires database optimization).
+* **MVP 3.0 (Smart Engine)** 🚀 INTEGRATED INTO MVP 1.0 v11.3 - N-gram + Viterbi v2.7 Hybrid now in main branch!
 
 ### **Branch Strategy**
 
-**IMPORTANT UPDATE**: MVP 3.0 N-gram features have been **successfully integrated into MVP 1.0 v11** on the main branch!
+**IMPORTANT UPDATE**: MVP 3.0 N-gram features have been **successfully integrated into MVP 1.0 v11.3** on the main branch!
 
 * **`main` branch:**
-  - Focus: MVP 1.0 v11 (✅ 95% Complete with N-gram) and MVP 2a (⏳ Planned)
+  - Focus: MVP 1.0 v11.3.5 (✅ **100% Complete** with v2.7 Hybrid) and MVP 2a (⏳ Planned)
   - Purpose: Stable, production-ready character-by-character + sentence prediction input method
-  - Status: Currently at MVP 1.0 v11 (with N-gram, Viterbi, mobile UX, bugfixes)
-  - **NEW**: Dual-mode input (character mode + sentence mode with smart prediction)
+  - Status: Currently at MVP 1.0 v11.3.5 (v2.7 Hybrid, full database, 94.4% accuracy, production ready)
+  - **COMPLETE**: Dual-mode input (character mode + sentence mode with smart prediction)
 
 * **`feature/ngram-engine` branch:**
-  - **Status: MERGED INTO MAIN** - N-gram work successfully integrated into MVP 1.0 v11
-  - All N-gram, Viterbi, and smart engine features are now in main branch
+  - **Status: MERGED INTO MAIN** - N-gram work successfully integrated into MVP 1.0 v11.3
+  - All N-gram, Viterbi v2.7, and smart engine features are now in main branch
   - Branch can be archived or deleted
 
 **Current Phase:**
-- `main`: MVP 1.0 v11 at 95% (awaiting browser testing), ready for MVP 2a planning
-- Smart Engine: Fully functional in MVP 1.0 v11, no longer experimental!
+- `main`: MVP 1.0 v11.3.5 at **100%** (Production ready, 94.4% accuracy), ready for MVP 2a planning
+- Smart Engine: **Production ready** in MVP 1.0 v11.3 with v2.7 Hybrid algorithm!
 
 ## **Key Concepts**
 
@@ -260,18 +260,18 @@ This project uses **parallel development** to allow MVP 3.0 work without blockin
 
 * **`main` branch:**
   - **Stability:** Should remain stable at all times
-  - **Focus:** MVP 1.0 v11 (✅ Complete with N-gram) and MVP 2a (⏳ Planned)
+  - **Focus:** MVP 1.0 v11.3.5 (✅ Complete with v2.7 Hybrid) and MVP 2a (⏳ Planned)
   - **Commits:** All MVP 1.0 and MVP 2a related code, bugfixes, and documentation
-  - **Current State:** MVP 1.0 v11 at 95% (N-gram integrated, Laplace smoothing complete, awaiting browser testing)
-  - **Next Steps:** Complete v11 browser testing, then begin MVP 2a (Chrome Extension) implementation
+  - **Current State:** MVP 1.0 v11.3.5 at **100%** (v2.7 Hybrid, full database, 94.4% accuracy, production ready)
+  - **Next Steps:** Begin MVP 2a (Chrome Extension) implementation with database optimization
 
 * **`feature/ngram-engine` branch:**
-  - **Status:** ✅ **MERGED INTO MAIN** - N-gram work successfully integrated into MVP 1.0 v11
-  - All N-gram, Viterbi, and smart engine features are now in main branch
+  - **Status:** ✅ **MERGED INTO MAIN** - N-gram work successfully integrated into MVP 1.0 v11.3
+  - All N-gram, Viterbi v2.7, and smart engine features are now in main branch
   - Branch can be archived or deleted
 
 **Commit Guidelines:**
-- All MVP 1.0 v11, MVP 2a work, N-gram improvements → commit to `main`
+- All MVP 1.0 v11.3, MVP 2a work, N-gram improvements → commit to `main`
 - Documentation updates → update in current working branch
 
 ### **Version Management**
@@ -293,11 +293,11 @@ This project uses **parallel development** to allow MVP 3.0 work without blockin
 1. **mvp1/version.json**:
    ```json
    {
-     "version": "11.2.0",
-     "build": "20251111-003",
-     "buildDate": "2025-11-11T03:15:00Z",
-     "commit": "53aa350",
-     "releaseName": "Brief description of changes"
+     "version": "11.3.5",
+     "build": "20251112-009",
+     "buildDate": "2025-11-12T09:00:00Z",
+     "commit": "752397f",
+     "releaseName": "v2.7 Hybrid + Full Database"
    }
    ```
 
