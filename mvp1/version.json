@@ -6,6 +6,22 @@
   "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
+      "version": "11.3.3",
+      "build": "007",
+      "date": "2025-11-12",
+      "type": "critical-fix",
+      "title": "THE ACTUAL FIX: v2.4 logarithmic frequency bonus",
+      "summary": "v2.3's linear frequency bonus (freq*1e-9) was too small and disappeared in rounding! Changed to logarithmic: log(1+freq/10000) which gives meaningful bonuses comparable to N-gram scores.",
+      "changes": [
+        "Changed frequency bonus from freq*1e-9 to log(1+freq/10000)",
+        "freq=10000 → bonus=0.69 (vs 0.00001 in v2.3)",
+        "freq=1000 → bonus=0.095 (vs 0.000001 in v2.3)",
+        "Difference: 0.595 (vs 0.000009 in v2.3) - 66,000x larger!",
+        "Now comparable to N-gram log probability differences (~1-3)",
+        "Score will now be visibly different, not -76.157 anymore"
+      ]
+    },
+    {
       "version": "11.3.2",
       "build": "006",
       "date": "2025-11-12",

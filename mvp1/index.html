@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.3.2</title>
+  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.3.3</title>
 
   <!-- Version Information (for testing verification) -->
   <meta name="app-version" content="11.2.1">
@@ -26,8 +26,8 @@
 
     How to verify version:
     1. Open browser DevTools console
-    2. Check window.WEBDAYI_VERSION
-    3. Console should show "Viterbi module loaded (v2.3 with frequency-bonus tie-breaking)"
+    2. Check: "Viterbi module loaded (v2.4 with LOGARITHMIC frequency bonus)"
+    3. Score should NOT be -76.157 (should be different!)
   -->
 
   <!-- Google Fonts -->
@@ -455,14 +455,15 @@
       commit: 'a37d173',
       releaseName: 'Chinese Text Recognition Diagnostics',
       changes: [
-        'CRITICAL: Added frequency bonus (freq * 1e-9) directly to DP scores',
-        'Upgraded Viterbi module to v2.3 with frequency-bonus tie-breaking',
-        'Previous approaches (v2.1, v2.2) only affected transition choices',
-        'Root cause: Backtracking follows precomputed backpointers',
-        'Solution: Bake frequency preference into DP score as tiny bonus',
-        '--- Previous (Build 003-005) ---',
-        'Build 005: Added tie-breaking to backtrack() (v2.2) - insufficient',
-        'Build 003-004: Added tie-breaking to forwardPass() (v2.1) - insufficient'
+        'THE ACTUAL FIX: Changed to LOGARITHMIC frequency bonus!',
+        'v2.3 bonus (freq*1e-9=0.00001) was too small - disappeared in rounding!',
+        'v2.4 bonus: log(1+freq/10000) gives 0.095-0.69 - 66,000x larger!',
+        'freq=10000 → bonus=0.69 (vs 0.00001) - actually visible now!',
+        'Score will be different from -76.157 now',
+        '--- Why v2.3 failed ---',
+        'N-gram scores: -5 to -50, differences ~1-3',
+        'v2.3 bonus: 0.00001 rounded to 0.000 (invisible!)',
+        'Like adding sand grain to mountain!'
       ]
     };
 
@@ -486,9 +487,9 @@
 
   <!-- v11: N-gram Sentence Prediction -->
   <!-- CACHE BUSTER: Version parameter forces browser to reload JavaScript -->
-  <script src="viterbi_module.js?v=11.3.2-006"></script>
-  <script src="core_logic_v11.js?v=11.3.2-006"></script>
-  <script src="core_logic_v11_ui.js?v=11.3.2-006"></script>
+  <script src="viterbi_module.js?v=11.3.3-007"></script>
+  <script src="core_logic_v11.js?v=11.3.3-007"></script>
+  <script src="core_logic_v11_ui.js?v=11.3.3-007"></script>
 
   <!-- Dark Mode Toggle Script -->
   <script>
