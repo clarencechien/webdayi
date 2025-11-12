@@ -1,8 +1,9 @@
 # **產品需求文件 (PRD)：WebDaYi (網頁大易輸入法)**
 
-| 文件版本 | 1.3 (N-gram 智能引擎詳述) |
+| 文件版本 | 1.4 (v3.0 智能升級：個人化學習 & 情境感知) |
 | :---- | :---- |
-| **建立日期** | 2025-11-10 |
+| **建立日期** | 2025-11-12 |
+| **最後更新** | 2025-11-12 |
 | **專案負責人** | (您的名字) |
 | **狀態** | 已批准 (Approved) |
 
@@ -129,10 +130,297 @@
 * **效能：** querySentence (Viterbi 運算) 必須在 200ms 內完成，以實現即時回應。
 * **大小：** 包含 ngram\_db.json 的外掛總大小應控制在 5-10MB (gzipped) 以內。
 
-## **8\. 未來展望 (MVP 3.1+ 路線)**
+## **8\. MVP 3.0 v2：智能升級 PRD (v1.4 - 個人化學習與情境感知)**
 
-MVP 3 的 N-gram 架構為我們解鎖了獨特的「超能力」：
+**目標：** 在 MVP 3.0 (N-gram 整句預測) 的基礎上，實現「個人化學習」與「情境自適應」，解決 v2.7 的平局問題。
 
-* **MVP3.1+ (領域感知)：** content.js 偵測 window.location.hostname，並通知 background.js 動態加權或載入**特定領域的 N-gram 表** (例如在 github.com 優先顯示程式碼相關詞彙)。
-* **MVP3.1+ (雲同步個人詞庫)：** background.js 使用 chrome.storage.sync API 來儲存使用者的動態詞庫。使用者在 A 電腦學會的新詞，會自動同步到 B 電腦的 Chrome。
-* **MVP3.1+ (動態學習)：** 實現完整的 N-gram 統計與個人化機率調整，並將結果存入 chrome.storage.sync。
+### **8.1. 問題陳述 (v2.7 局限性)**
+
+雖然 MVP 3.0 v2.7 Hybrid 已達到 94.4% 準確率，但仍存在以下問題：
+
+1. **平局問題：** 當「天氣」和「天真」的 N-gram 分數接近時（70/30 混合），系統無法學習使用者偏好。
+2. **情境盲目：** 在 GitHub (正式) 和 PTT (口語) 上使用相同的預測策略，無法針對情境優化。
+3. **一體適用：** 無法適應個人打字習慣，每個使用者得到相同的預測結果。
+4. **靜態模型：** 沒有個人化或學習能力，無法隨時間改進。
+
+### **8.2. 解決方案：雙軌並行開發**
+
+我們將並行開發兩個**「共享功能模組」**，兩者都將自動增強「逐字模式」與「整句模式」：
+
+* **F-4.0: 個人化 N-gram 學習 (User LoRA)** - 優先級 1
+* **F-5.0: 情境自適應權重 (Adaptive Weights)** - 優先級 2
+
+兩個模組都被設計為**「共享服務」**，無論是「逐字模式」還是「整句模式」呼叫 Viterbi.js 時，都會自動啟用這些新功能。
+
+### **8.3. F-4.0: 個人化 N-gram 學習 (User LoRA)**
+
+#### **概念：使用者自適應 (User-Side LoRA)**
+
+受機器學習的 LoRA (Low-Rank Adaptation) 技術啟發，我們在靜態 N-gram 模型上實現「使用者適配層」。
+
+**核心架構**：
+* **基礎模型 (Base Model)**: ngram_db.json，靜態、唯讀，提供統計基礎
+* **適配器 (LoRA)**: chrome.storage.sync (使用者資料庫)，動態、可讀寫，記錄個人偏好
+* **運作方式**: Viterbi 演算法計算分數時，將「基礎模型分數」與「LoRA 分數」相加
+
+**公式**：
+```
+最終分數 = 基礎模型分數 + 使用者 LoRA 分數
+```
+
+#### **功能需求 (Functional Requirements)**
+
+| ID | 功能 | 使用者故事 | 驗收標準 (AC) |
+| :---- | :---- | :---- | :---- |
+| **F-4.1** | **UserDB 模組** | 作為開發者，我需要一個 UserDB.js 模組來管理使用者的個人化權重。 | 1\. 必須實作 UserDB.js 類別。<br>2\. 必須提供 getWeights(prevChar, currChar) 方法，回傳個人權重 (e.g., +10, -5, 0)。<br>3\. 必須提供 recordCorrection(prevChar, currChar, action) 方法，action 為 "promote" (+5) 或 "demote" (-2)。<br>4\. 必須使用 chrome.storage.sync 或 localStorage 持久化儲存。 |
+| **F-4.2** | **逐字模式整合** | 作為使用者，當我在逐字模式中選擇非預設候選字時，我希望系統能記住我的偏好。 | 1\. sortCandidates() 函式必須查詢 UserDB.getWeights(prevChar, candidate.char)。<br>2\. 最終分數 = candidate.freq + userWeight。<br>3\. 當使用者選擇第 2 個候選字時，必須呼叫 UserDB.recordCorrection(prevChar, selectedChar, "promote")。<br>4\. (可選) 同時呼叫 UserDB.recordCorrection(prevChar, defaultChar, "demote")。 |
+| **F-4.3** | **整句模式整合** | 作為使用者，當我在整句模式中手動修正預測結果時，我希望系統能記住這次修正。 | 1\. viterbi\_module.js 的 forwardPass() 必須在計算轉移機率時，加上 userDB.getWeights(prevChar, currChar)。<br>2\. content.js 必須偵測「手動修正」事件 (使用者改變了 Viterbi 的預測)。<br>3\. 必須呼叫 UserDB.recordCorrection() 記錄此修正。 |
+| **F-4.4** | **跨模式協同** | 作為使用者，我希望在逐字模式中教過的詞，在整句模式中立刻生效，反之亦然。 | 1\. UserDB 必須被兩種模式共享 (同一個 chrome.storage.sync 資料)。<br>2\. 在逐字模式學習 {"天": {"氣": +5}} 後，在整句模式盲打「天氣」時，Viterbi 必須自動使用此權重。 |
+| **F-4.5** | **學習回饋 UI** | 作為使用者，當系統學習了我的偏好時，我希望能看到明確的回饋。 | 1\. 當 UserDB.recordCorrection() 被呼叫時，必須顯示 Toast 通知：「✓ 已學習：天氣 > 天真」。<br>2\. 必須在設定面板中，提供「查看已學習模式」功能。<br>3\. 必須提供「清除學習資料」按鈕。 |
+
+#### **範例：平局問題解決**
+
+**情境**：使用者打「天」(ev) 後，接著打「c8」(氣/真)
+
+**v2.7 行為 (無學習)**：
+```
+候選字: [1. 真 (freq: 80), 2. 氣 (freq: 70)]
+問題: 永遠是「真」排第一
+```
+
+**v3.0 行為 (有學習)**：
+```
+第一次:
+  候選字: [1. 真 (80), 2. 氣 (70)]
+  使用者選擇: 2 (氣)
+  UserDB 記錄: {"天": {"氣": +5, "真": -2}}
+
+第二次 (相同輸入):
+  候選字排序:
+    真: 80 + (-2) = 78
+    氣: 70 + (+5) = 75
+  結果: [1. 氣, 2. 真]  ✓ 已學習！
+
+第三次 (使用者再次選氣):
+  UserDB 更新: {"天": {"氣": +10, "真": -4}}
+  結果: 氣 = 80, 真 = 76  ✓ 偏好更強化！
+```
+
+### **8.4. F-5.0: 情境自適應權重 (Adaptive Weights)**
+
+#### **概念：動態調整「泛用 vs 聊天」比例**
+
+我們的 ngram_db.json 是 70% 泛用 + 30% 聊天混合模型。但在不同網站上，使用者的需求不同：
+
+* **GitHub / Medium**：正式寫作 → Bigram 結構更重要 (80/20)
+* **PTT / Dcard**：口語聊天 → Unigram 熱門字更重要 (60/40)
+* **預設**：平衡 (70/30，v2.5 黃金比例)
+
+**錯誤作法**：載入兩個模型 (慢、佔記憶體)
+**正確作法**：只載入一個模型，動態調整 Viterbi.js 的評分公式權重
+
+#### **功能需求 (Functional Requirements)**
+
+| ID | 功能 | 使用者故事 | 驗收標準 (AC) |
+| :---- | :---- | :---- | :---- |
+| **F-5.1** | **ContextEngine 模組** | 作為開發者，我需要一個 ContextEngine.js 模組來根據網站情境，提供動態權重。 | 1\. 必須實作 ContextEngine.js 類別。<br>2\. 必須提供 getWeights(url) 方法，回傳 {bigram: 0.7, unigram: 0.3}。<br>3\. 必須預設定義至少 10 個常見網站的規則 (github.com, ptt.cc, etc.)。 |
+| **F-5.2** | **情境偵測** | 作為系統，我必須能自動偵測使用者當前所在的網站。 | 1\. content.js 必須能取得 window.location.hostname。<br>2\. 必須在每次查詢時，將 context (hostname) 傳遞給 background.js。 |
+| **F-5.3** | **Viterbi 整合** | 作為 Viterbi 演算法，我必須根據情境權重，動態調整評分公式。 | 1\. forwardPass() 函式必須接收 contextWeights 參數。<br>2\. 計算轉移機率時，必須使用：<br>&nbsp;&nbsp;&nbsp;finalProb = contextWeights.bigram \* bigramProb + contextWeights.unigram \* unigramProb。<br>3\. 不再使用固定的 BIGRAM\_WEIGHT = 0.7。 |
+| **F-5.4** | **自訂規則** | 作為使用者，我希望能為特定網站自訂權重。 | 1\. 必須在設定面板中，提供「情境規則」編輯介面。<br>2\. 使用者可以新增自訂規則 (e.g., "mycompany.com": {bigram: 0.75, unigram: 0.25})。<br>3\. 自訂規則必須儲存在 chrome.storage.sync 中。 |
+| **F-5.5** | **情境回饋 UI** | 作為使用者，我希望能看到當前的情境權重。 | 1\. 必須在候選字區域顯示「情境徽章」，例如「GitHub: 80/20」。<br>2\. 點擊徽章可以快速調整權重 (選擇預設 Preset：正式/口語/平衡)。 |
+
+#### **範例：情境適應**
+
+**情境**：使用者輸入「實作演算法」
+
+**在 github.com (正式寫作)**：
+```
+contextWeights = {bigram: 0.8, unigram: 0.2}
+
+候選 A: "實作" (formal)
+  bigramProb = 0.30 (moderate structure)
+  unigramProb = 0.05 (less common)
+  finalScore = 0.8 * 0.30 + 0.2 * 0.05 = 0.25
+
+候選 B: "實做" (colloquial)
+  bigramProb = 0.25 (weaker structure)
+  unigramProb = 0.08 (more common)
+  finalScore = 0.8 * 0.25 + 0.2 * 0.08 = 0.216
+
+結果: "實作" 勝出 (0.25 > 0.216) ✓ 正式用語
+```
+
+**在 ptt.cc (口語聊天)**：
+```
+contextWeights = {bigram: 0.6, unigram: 0.4}
+
+候選 A: "實作"
+  finalScore = 0.6 * 0.30 + 0.4 * 0.05 = 0.20
+
+候選 B: "實做"
+  finalScore = 0.6 * 0.25 + 0.4 * 0.08 = 0.182
+
+結果: "實作" 仍勝出，但差距縮小
+      (若 unigram 差異更大，"實做" 可能勝出)
+```
+
+### **8.5. 架構演進 (v2.7 → v3.0)**
+
+#### **v2.7 架構 (當前)**
+
+```
+Content/UI → Viterbi.js → ngram_db.json (靜態模型)
+```
+
+#### **v3.0 架構 (目標)**
+
+```
+┌──────────────────────────────────────────────────────────┐
+│              UI Layer (content.js / index.html)          │
+│  ┌────────────────┐              ┌──────────────────┐   │
+│  │ Character Mode │              │  Sentence Mode   │   │
+│  │ (逐字模式)      │              │  (整句模式)       │   │
+│  └────────┬───────┘              └────────┬─────────┘   │
+└───────────┼──────────────────────────────┼──────────────┘
+            │                              │
+            └──────────────┬───────────────┘
+                           │
+                           ▼
+            ┌──────────────────────────┐
+            │   viterbi_module.js      │
+            │   (Enhanced Scoring)     │
+            └──────────────┬───────────┘
+                           │
+            ┌──────────────┼──────────────┐
+            ▼              ▼              ▼
+   ┌──────────────┐ ┌─────────────┐ ┌────────────┐
+   │  UserDB.js   │ │ContextEngine│ │ngram_db.json│
+   │  (F-4.0)     │ │   (F-5.0)   │ │  (Static)  │
+   │              │ │             │ │            │
+   │ - getWeights │ │ - getWeights│ │ - unigrams │
+   │ - record     │ │ - setCustom │ │ - bigrams  │
+   │ - learn      │ │             │ │ - smoothing│
+   └──────┬───────┘ └─────────────┘ └────────────┘
+          │
+          ▼
+   ┌──────────────┐
+   │chrome.storage│
+   │   .sync      │
+   │  (Cloud DB)  │
+   └──────────────┘
+```
+
+**關鍵改進**：
+1. **統一評分**: 逐字與整句模式使用相同的增強評分函式
+2. **模組化設計**: UserDB 與 ContextEngine 是獨立、可重用的模組
+3. **雲端持久化**: 使用者偏好透過 chrome.storage.sync 跨裝置同步
+4. **優雅降級**: 若模組失敗，回退至 v2.7 靜態模型
+5. **漸進式增強**: 可以獨立啟用 F-4.0 與 F-5.0
+
+### **8.6. 成功指標 (Success Metrics)**
+
+**量化指標**：
+* **準確率提升**: v2.7 基準 94.4% (17/18) → v3.0 目標 97% (18/18) (經過 10 次學習迭代後)
+* **學習速度**: 1-2 次修正即可學會高信心偏好
+* **情境效果**: 特定領域文本準確率提升 +3-5%
+
+**質化指標**：
+* 學習過程無感 (無需額外步驟)
+* 情境適應自然 (無需手動切換)
+* 回饋清晰 (「✓ 已學習：天氣 > 天真」)
+
+**發布標準**：
+* ✅ 100+ 測試通過 (單元 + 整合)
+* ✅ 5+ 真實場景手動測試
+* ✅ 文件完整 (README, 使用指南, 開發指南)
+* ✅ 效能基準達成 (< 10ms 額外延遲)
+
+### **8.7. 實作排程 (Implementation Schedule)**
+
+#### 🆕 新策略：PWA POC 優先
+
+**關鍵決策**：Feature 分支的首個交付產物將是 **PWA (Progressive Web App)** 作為概念驗證 (Proof-of-Concept)。
+
+**儲存策略**：
+- **PWA 階段 (Phase 0.5-1)**: IndexedDB (本地快取) + 手動匯出/匯入同步
+- **Extension 階段 (Phase 4)**: chrome.storage.sync (雲端同步) + 自動同步
+
+| 階段 | 時程 | 交付物 | 狀態 |
+| :---- | :---- | :---- | :---- |
+| **Phase 0: 基礎** | Week 1 | 設計文件 + PRD 更新 + Memory Bank 更新 | ✅ 完成 |
+| **Phase 0.5: PWA POC** 🆕 | Week 2 | PWA + IndexedDB + 手動匯出/匯入 | ⏳ 下一步 |
+| **Phase 1: F-4.0 增強** | Week 3 | 基於 PWA POC 的進階學習功能 + 25+ 測試 | ⏳ 待開始 |
+| **Phase 2: F-5.0** | Week 4-5 | ContextEngine.js + 情境整合 + 30+ 測試 | ⏳ 待開始 |
+| **Phase 3: MVP1 v12** | Week 6 | 整合至 MVP 1.0，版本 12.0.0 發布 | ⏳ 待開始 |
+| **Phase 4: MVP2a v2.0** | Week 7-9 | 移植至 Chrome Extension (IndexedDB → chrome.storage.sync) | ⏳ 待開始 |
+
+**總計時程**：9 週 (原 8 週 + PWA POC 1 週)
+
+#### Phase 0.5 詳細規格 (PWA POC)
+
+**目標**：驗證 F-4.0 核心概念，無需 Chrome Extension 複雜性
+
+**核心功能**：
+1. **Progressive Web App**
+   - Service Worker 提供離線支援
+   - 可安裝為獨立應用程式 (手機 + 桌面)
+   - 響應式設計 (RWD)
+
+2. **IndexedDB 本地快取**
+   - 儲存 `user_ngram.db` (key-value pairs)
+   - Schema: `{ prevChar, currChar, weight, lastUpdated }`
+   - 非同步 API，不阻塞查詢
+
+3. **手動匯出/匯入**
+   - 匯出：下載 `user_ngram.json` (包含時間戳)
+   - 匯入：上傳 JSON 檔案至另一台裝置
+   - 格式：`{ "version": "1.0", "data": {...}, "exportDate": "..." }`
+
+4. **N-gram 引擎整合**
+   - 基於 v2.7 Hybrid 演算法 (OOP + 70/30 + Laplace)
+   - UserDB 權重應用於候選字評分
+   - 學習偵測：追蹤非預設選擇
+
+5. **Mobile 自訂觸控鍵盤** 🆕
+   - **問題解決**：系統鍵盤 (Gboard, iOS) 為 QWERTY 佈局，不適合大易輸入
+   - **解決方案**：PWA 內建 HTML 自訂鍵盤
+     - 完美複製大易鍵位配置 (~50 按鈕)
+     - 固定於畫面底部 (`position: fixed; bottom: 0`)
+     - 不遮擋文字編輯區 (無 reflow)
+   - **統一邏輯**：Desktop 與 Mobile 共用同一套 N-gram 引擎
+     - Desktop: `keydown` 事件 (實體鍵盤)
+     - Mobile: `click`/`touchstart` 事件 (HTML 按鈕)
+     - 兩者都呼叫 `viterbi.processInput(code)`
+   - **阻擋系統鍵盤**：使用 `inputmode="none"` 防止 Gboard/iOS 鍵盤彈出
+   - **觸控回饋**：
+     - 震動回饋 (`navigator.vibrate(50)`)
+     - 視覺回饋 (按鈕按下動畫)
+     - 聲音回饋 (可選)
+   - **RWD 響應式設計**：
+     - Desktop: 自訂鍵盤隱藏 (`display: none`)
+     - Mobile: 自訂鍵盤顯示 (`display: grid`)
+     - 單一頁面，無需兩個版本
+
+**成功標準**：
+- ✅ PWA 可在手機/桌面安裝
+- ✅ 使用者可學習偏好 (與 v2.7 相同行為)
+- ✅ 匯出/匯入跨裝置運作
+- ✅ 離線模式功能正常
+- ✅ 效能：< 10ms 總額外延遲
+- ✅ **Mobile**: 自訂大易鍵盤正常運作 (系統鍵盤被阻擋)
+- ✅ **Mobile**: N-gram 預測結果與 Desktop 一致
+- ✅ **Mobile**: 觸控回饋 (震動/視覺) 正常運作
+
+**未來遷移路徑**：
+- Phase 1: 增強 PWA 的完整 F-4.0 功能
+- Phase 4: 將 IndexedDB 邏輯移植至 chrome.storage.sync (Extension)
+- 自動同步：以雲端同步取代手動匯出/匯入
+
+## **9\. 未來展望 (MVP 3.1+ 路線)**
+
+MVP 3.0 的個人化學習與情境感知架構為我們解鎖了更多「超能力」：
+
+* **MVP3.1+ (進階學習 - LoRA 啟發)：** 實現真正的 LoRA 風格自適應學習率、信心評分、自適應閾值。
+* **MVP3.1+ (多語料庫情境)：** 針對不同情境載入特定領域的 N-gram 模型 (GitHub 載入程式碼語料，PTT 載入聊天語料)。
+* **MVP3.1+ (協作學習)：** 選擇性分享匿名化的學習模式給所有使用者，使用差分隱私技術保護隱私。
+* **MVP3.1+ (視覺化學習儀表板)：** 顯示「我學到的模式」頁面，使用 Heatmap 視覺化 bigram 權重，支援手動編輯、匯出/匯入。

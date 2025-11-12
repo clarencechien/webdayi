@@ -160,11 +160,84 @@ User continues typing naturally
 
 ## Future Product Evolution
 
-### MVP 2a+ Features
-1. **Cloud Sync**: Personal dictionary via `chrome.storage.sync`
-2. **Context Awareness**: Different candidate weights for github.com vs gmail.com
-3. **N-gram Learning**: "的時候" should rank higher when "的" was just typed
-4. **Manual Dictionary**: UI to add custom mappings
+### MVP 3.0 v2: Smart Upgrade (2025-11-12 Planning)
+
+**Vision**: Transform from static prediction to **intelligent, adaptive prediction** that learns from users and adapts to context.
+
+#### F-4.0: Personalized N-gram Learning (User LoRA)
+
+**Problem it solves**: Tie-breaking and personalization
+- When "天氣" and "天真" have similar scores, system cannot learn user preference
+- Each user gets same predictions, no personalization
+
+**Solution**: User-side LoRA (Low-Rank Adaptation)
+- Base Model: ngram_db.json (static, shared by all users)
+- Adapter: chrome.storage.sync (dynamic, personal to each user)
+- Formula: `Final Score = Base Score + User LoRA Score`
+
+**User Experience**:
+```
+First time: User types "天" + "c8"
+  → Sees [1. 真, 2. 氣]
+  → Selects 2 (氣)
+  → System learns: "天氣 > 天真" for this user
+
+Second time: Same input
+  → Sees [1. 氣, 2. 真]  ✓ Learned!
+  → First choice is now what user wants
+```
+
+**Synergy**: Learning works across both modes
+- Learn in character mode → affects sentence mode
+- Learn in sentence mode → affects character mode
+- Same UserDB shared by both!
+
+#### F-5.0: Context-Adaptive Weights
+
+**Problem it solves**: Context blindness
+- Same predictions on GitHub (formal) and PTT (casual)
+- Cannot adapt to different writing styles
+
+**Solution**: Dynamic scoring weight adjustment
+- GitHub: {bigram: 0.8, unigram: 0.2} - trust structure
+- PTT: {bigram: 0.6, unigram: 0.4} - trust popularity
+- Default: {bigram: 0.7, unigram: 0.3} - balanced
+
+**User Experience**:
+```
+On github.com: User types "實作演算法"
+  → System uses formal weights
+  → Predicts "實作" (formal) over "實做" (casual)
+  → Result matches context ✓
+
+On ptt.cc: Same input
+  → System uses casual weights
+  → Balances structure vs popularity differently
+  → Result adapts to context ✓
+```
+
+**No manual switching**: System automatically detects website and adjusts
+
+#### Success Vision (MVP 3.0 v2)
+
+**Accuracy**: 94.4% → 97% (after 10 learning iterations)
+**Personalization**: 1-2 corrections to learn a preference
+**Context-awareness**: +3-5% accuracy on domain-specific text
+**User Experience**: "It just knows what I want"
+
+**8-Week Roadmap**:
+- Week 1: Planning & design (current)
+- Week 2-3: F-4.0 UserDB.js implementation
+- Week 4: F-5.0 ContextEngine.js implementation
+- Week 5: MVP 1.0 v12 integration
+- Week 6-8: MVP 2a v2.0 Chrome Extension
+
+### MVP 2a+ Features (Future)
+1. **Cloud Sync**: Personal dictionary via `chrome.storage.sync` (part of F-4.0)
+2. **Advanced Learning**: LoRA-style adaptive learning rates, confidence scoring
+3. **Multi-Corpus Context**: Domain-specific N-gram models per website
+4. **Visual Dashboard**: See what engine has learned, manual editing
+5. **Collaborative Learning**: Share anonymized patterns (privacy-preserving)
 
 ### Potential Beyond Browser
 - Firefox extension (similar architecture)
