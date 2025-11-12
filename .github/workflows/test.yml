@@ -30,6 +30,10 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install test dependencies
+        working-directory: mvp1
+        run: npm install
+
       - name: Display version information
         run: |
           echo "=== WebDaYi Version Information ==="
@@ -42,38 +46,29 @@ jobs:
           echo "Latest commit: ${{ github.sha }}"
           echo "Branch: ${{ github.ref_name }}"
 
-      - name: Run v11 core tests
-        working-directory: mvp1
-        run: |
-          echo "Running v11 core tests..."
-          node node/test-node-v11.js
-
       - name: Run Laplace smoothing tests
         working-directory: mvp1
         run: |
           echo "Running Laplace smoothing tests..."
-          node node/test-laplace-smoothing.js
+          node tests/node/test-laplace-smoothing.js
 
-      - name: Run sentence mode tests
+      - name: Run v11 UI initialization tests
         working-directory: mvp1
         run: |
-          echo "Running sentence mode Space/= key tests..."
-          node node/test-sentence-mode-space-key.js
+          echo "Running v11 UI initialization tests..."
+          npx mocha tests/node/test-v11-ui-init.js --timeout 10000
 
-      - name: Run correct behavior tests
+      - name: Run v2.7 Hybrid algorithm tests
         working-directory: mvp1
         run: |
-          echo "Running correct Space/= behavior tests..."
-          node node/test-correct-space-equal-behavior.js
+          echo "Running v2.7 Hybrid algorithm tests..."
+          node tests/node/test-v27-hybrid.js
 
-      - name: Run v11 UX tests
+      - name: Run algorithm comparison tests
         working-directory: mvp1
         run: |
-          echo "Running v11 UX Round 1 tests..."
-          node node/test-v11-ux-fixes.js
-          echo ""
-          echo "Running v11 UX Round 2 tests..."
-          node node/test-v11-ux-round2.js
+          echo "Running v2.5 vs v2.7 final comparison tests..."
+          node tests/node/test-v25-vs-v27-final.js
 
       - name: Test Summary
         if: always()

@@ -1,0 +1,19 @@
+{
+  "name": "webdayi-mvp1",
+  "version": "11.3.5",
+  "description": "WebDaYi MVP 1.0 - Web-First Dayi Input Method",
+  "scripts": {
+    "test": "npm run test:laplace && npm run test:v11-ui && npm run test:v27-hybrid && npm run test:comparison",
+    "test:laplace": "node tests/node/test-laplace-smoothing.js",
+    "test:v11-ui": "mocha tests/node/test-v11-ui-init.js --timeout 10000",
+    "test:v27-hybrid": "node tests/node/test-v27-hybrid.js",
+    "test:comparison": "node tests/node/test-v25-vs-v27-final.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0",
+    "mocha": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
