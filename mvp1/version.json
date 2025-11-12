@@ -1,9 +1,9 @@
 {
-  "version": "11.3.5",
+  "version": "11.2.1",
   "build": "20251112-009",
-  "buildDate": "2025-11-12T09:00:00Z",
-  "commit": "c811cc7",
-  "releaseName": "v2.7 Hybrid Implementation - Best of Both Worlds",
+  "buildDate": "2025-11-12T05:07:41Z",
+  "commit": "c25a2e0",
+  "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
       "version": "11.3.5",
