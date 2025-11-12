@@ -381,12 +381,35 @@ Content/UI → Viterbi.js → ngram_db.json (靜態模型)
    - UserDB 權重應用於候選字評分
    - 學習偵測：追蹤非預設選擇
 
+5. **Mobile 自訂觸控鍵盤** 🆕
+   - **問題解決**：系統鍵盤 (Gboard, iOS) 為 QWERTY 佈局，不適合大易輸入
+   - **解決方案**：PWA 內建 HTML 自訂鍵盤
+     - 完美複製大易鍵位配置 (~50 按鈕)
+     - 固定於畫面底部 (`position: fixed; bottom: 0`)
+     - 不遮擋文字編輯區 (無 reflow)
+   - **統一邏輯**：Desktop 與 Mobile 共用同一套 N-gram 引擎
+     - Desktop: `keydown` 事件 (實體鍵盤)
+     - Mobile: `click`/`touchstart` 事件 (HTML 按鈕)
+     - 兩者都呼叫 `viterbi.processInput(code)`
+   - **阻擋系統鍵盤**：使用 `inputmode="none"` 防止 Gboard/iOS 鍵盤彈出
+   - **觸控回饋**：
+     - 震動回饋 (`navigator.vibrate(50)`)
+     - 視覺回饋 (按鈕按下動畫)
+     - 聲音回饋 (可選)
+   - **RWD 響應式設計**：
+     - Desktop: 自訂鍵盤隱藏 (`display: none`)
+     - Mobile: 自訂鍵盤顯示 (`display: grid`)
+     - 單一頁面，無需兩個版本
+
 **成功標準**：
 - ✅ PWA 可在手機/桌面安裝
 - ✅ 使用者可學習偏好 (與 v2.7 相同行為)
 - ✅ 匯出/匯入跨裝置運作
 - ✅ 離線模式功能正常
 - ✅ 效能：< 10ms 總額外延遲
+- ✅ **Mobile**: 自訂大易鍵盤正常運作 (系統鍵盤被阻擋)
+- ✅ **Mobile**: N-gram 預測結果與 Desktop 一致
+- ✅ **Mobile**: 觸控回饋 (震動/視覺) 正常運作
 
 **未來遷移路徑**：
 - Phase 1: 增強 PWA 的完整 F-4.0 功能

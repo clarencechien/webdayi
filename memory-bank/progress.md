@@ -62,6 +62,7 @@
 │   ├─ IndexedDB Implementation [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │   ├─ Export/Import UI         [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │   ├─ Core Integration         [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│   ├─ Mobile Custom Keyboard   [░░░░░░░░░░░░░░░░]   0% ⏳📱🆕│
 │   └─ Testing & Validation     [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.8: F-4.0 Enhancement   [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.9: F-5.0 ContextEngine [░░░░░░░░░░░░░░░░]   0% ⏳    │
@@ -115,14 +116,15 @@ Legend: 🚀 Smart Engine | 🔄 In Progress | ⏳ Next | 📋 Planned
 
 ## What's Complete ✅
 
-### 🆕 LATEST MILESTONE: MVP 3.0 v2 Planning + PWA POC Strategy!
+### 🆕 LATEST MILESTONE: MVP 3.0 v2 Planning + PWA POC + Mobile Keyboard Strategy!
 
 **Achievement Summary** (2025-11-12):
-- ✅ **Comprehensive Design Document v1.1**: DESIGN-v3-smart-upgrade.md (15,000+ lines) + PWA POC
-- ✅ **PRD Updated to v1.4**: Added Section 8 (MVP 3.0 v2) with F-4.0, F-5.0, and PWA POC
+- ✅ **Comprehensive Design Document v1.2**: DESIGN-v3-smart-upgrade.md (15,200+ lines) + PWA POC + Mobile Keyboard
+- ✅ **PRD Updated to v1.4**: Added Section 8 (MVP 3.0 v2) with F-4.0, F-5.0, PWA POC, and Mobile Custom Keyboard
 - ✅ **Architecture Evolution Planned**: v2.7 → PWA POC → v3.0 → Chrome Extension
-- ✅ **9-Week Implementation Roadmap**: 5 phases (added Phase 0.5 PWA POC), 100+ tests
-- ✅ **Memory Bank Updates**: activeContext.md (Session 10 + 10.5), progress.md, productContext.md
+- ✅ **9-Week Implementation Roadmap**: 5 phases (added Phase 0.5 PWA POC), 110+ tests
+- ✅ **Memory Bank Updates**: activeContext.md (Session 10 + 10.5 + 10.6), progress.md, productContext.md
+- ✅ **Mobile Strategy**: Custom touch keyboard with RWD approach (~300 lines)
 
 **Key Features Designed**:
 
@@ -133,6 +135,12 @@ Legend: 🚀 Smart Engine | 🔄 In Progress | ⏳ Next | 📋 Planned
    - **Service Worker**: Offline support
    - **Cross-browser**: Works in any modern browser
    - **Validates F-4.0 concepts** before Chrome Extension complexity
+   - **Mobile Custom Touch Keyboard** 🆕📱:
+     - Custom HTML keyboard for Dayi layout (not QWERTY)
+     - RWD approach (desktop: hidden, mobile: shown)
+     - Unified N-gram logic (same engine for desktop + mobile)
+     - System keyboard prevention (`inputmode="none"`)
+     - Touch feedback (haptics, visual, audio)
 
 1. **F-4.0: Personalized N-gram Learning (User LoRA)**
    - User-side adaptation layer on top of static N-gram model
@@ -146,11 +154,11 @@ Legend: 🚀 Smart Engine | 🔄 In Progress | ⏳ Next | 📋 Planned
    - PTT: {bigram: 0.6, unigram: 0.4} (casual)
    - Default: {bigram: 0.7, unigram: 0.3} (v2.5 golden ratio)
 
-**Files Created/Updated** (Session 10 + 10.5):
-- ✅ `docs/design/DESIGN-v3-smart-upgrade.md` (v1.0 → v1.1, added PWA POC)
-- ✅ `docs/project/PRD.md` (Updated to v1.4 with PWA POC strategy)
-- ✅ `memory-bank/activeContext.md` (Session 10 + 10.5)
-- ✅ `memory-bank/progress.md` (Phase 1.6 + 1.7)
+**Files Created/Updated** (Session 10 + 10.5 + 10.6):
+- ✅ `docs/design/DESIGN-v3-smart-upgrade.md` (v1.0 → v1.1 → v1.2, added PWA POC + Mobile Keyboard)
+- ✅ `docs/project/PRD.md` (Updated to v1.4 with PWA POC + Mobile Keyboard strategy)
+- ✅ `memory-bank/activeContext.md` (Session 10 + 10.5 + 10.6)
+- ✅ `memory-bank/progress.md` (Phase 1.6 + 1.7 with mobile keyboard task)
 - ✅ `memory-bank/productContext.md` (Updated)
 
 **Updated Roadmap** (9 weeks):

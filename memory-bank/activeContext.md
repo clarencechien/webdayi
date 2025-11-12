@@ -9,10 +9,11 @@
 
 **Latest Achievements**:
 - ✅ Smart Engine 94.4% accuracy (17/18) - v2.7 Production Ready
-- ✅ Comprehensive v3.0 design document (DESIGN-v3-smart-upgrade.md v1.1 with PWA POC)
-- ✅ PRD updated to v1.4 with F-4.0, F-5.0, and PWA POC specifications
+- ✅ Comprehensive v3.0 design document (DESIGN-v3-smart-upgrade.md v1.2 with PWA POC + Mobile Keyboard)
+- ✅ PRD updated to v1.4 with F-4.0, F-5.0, PWA POC, and Mobile Custom Keyboard
 - ✅ Architecture evolution planned (v2.7 → PWA POC → v3.0 → Extension)
 - ✅ Implementation roadmap adjusted (9-week plan with PWA POC first)
+- ✅ Mobile strategy: Custom touch keyboard (RWD approach, ~300 lines)
 
 ---
 
@@ -141,6 +142,159 @@ Final: Production Extension
 - [ ] Implement Service Worker + PWA manifest
 - [ ] Implement IndexedDB wrapper (user_db_indexeddb.js)
 - [ ] Build Export/Import UI
+- [ ] Implement mobile custom touch keyboard
+
+---
+
+## 🆕 SESSION 10.6: Mobile Custom Touch Keyboard Strategy (2025-11-12) - ✅ COMPLETE!
+
+**Status**: ✅ Design Updated | ✅ PRD Updated | ✅ Tasks Added
+
+### User Request (Mobile Keyboard Strategy)
+
+> PWA 策略分析：自訂觸控鍵盤 (Custom Touch Keyboard)
+>
+> 核心概念：在 Mobile 上解決兩個痛點：
+> 1. 版面配置：系統鍵盤是 QWERTY，大易使用者需要大易鍵位
+> 2. 使用者體驗：系統鍵盤遮擋畫面，導致 textarea 被遮住
+
+### Key Insight: RWD (Responsive Web Design)
+
+**Problem**: Mobile users with system keyboards face:
+1. **Layout Mismatch**: QWERTY keyboard ≠ Dayi keyboard layout
+2. **Screen Obstruction**: System keyboard covers ~50% of screen, forces reflow
+
+**Solution**: Custom HTML touch keyboard embedded in PWA
+
+✅ **Benefits**:
+- Perfect Dayi layout (~50 buttons in correct positions)
+- Immersive UX (no screen reflow, keyboard is part of PWA)
+- Unified N-gram logic (desktop physical keyboard + mobile touch buttons → same engine)
+- Single page (RWD approach, not two separate pages)
+
+❌ **Trade-offs**:
+- Cannot use system features (glide typing, voice input)
+- Must implement touch feedback ourselves (haptics, sound, animations)
+
+### Architecture: Single-Page RWD
+
+**Key Decision**: We don't need two pages. One `index.html` with CSS `@media` queries:
+
+```html
+<textarea id="main-textarea"></textarea>
+<div id="candidate-window">...</div>
+<div id="custom-keyboard" class="mobile-only">
+  <button data-key="4">4</button>
+  <button data-key="j">J</button>
+  <!-- Full Dayi layout -->
+</div>
+```
+
+**CSS**:
+```css
+/* Desktop: Hide keyboard */
+#custom-keyboard { display: none; }
+
+/* Mobile: Show keyboard at bottom */
+@media (max-width: 768px) {
+  #custom-keyboard {
+    display: grid;
+    position: fixed;
+    bottom: 0;
+  }
+}
+```
+
+**JavaScript** (Unified Input):
+```javascript
+// Desktop: Physical keyboard
+window.addEventListener('keydown', (e) => {
+  if (isMobile()) return;
+  viterbi.processInput(e.key);
+});
+
+// Mobile: Touch keyboard
+keyboard.addEventListener('click', (e) => {
+  viterbi.processInput(e.target.dataset.key); // Same engine!
+});
+```
+
+### Implementation Strategy
+
+**Prevent System Keyboard**:
+```javascript
+if (isMobile()) {
+  textarea.setAttribute('inputmode', 'none');
+  // Tells browser: "Don't show system keyboard"
+}
+```
+
+**Touch Feedback**:
+- Haptic: `navigator.vibrate(50)` on button press
+- Visual: Active state animation
+- Audio: Optional beep sound
+
+### Files Updated (Session 10.6)
+
+1. **docs/design/DESIGN-v3-smart-upgrade.md** (v1.1 → v1.2)
+   - Added "Mobile Custom Touch Keyboard Strategy" subsection (150+ lines)
+   - Added new task 0.5.5: Mobile Custom Touch Keyboard (2 days)
+   - Updated task 0.5.6: Testing & Validation (mobile keyboard tests)
+   - Updated success criteria (3 new mobile-specific criteria)
+   - Total addition: ~200 lines with code examples
+
+2. **docs/project/PRD.md** (Phase 0.5 specifications)
+   - Added 5th core feature: "Mobile 自訂觸控鍵盤"
+   - Explained problem, solution, unified logic, RWD approach
+   - Added 3 new success criteria for mobile keyboard
+   - Total addition: ~30 lines
+
+3. **memory-bank/activeContext.md** (this file)
+   - Added Session 10.6 documenting mobile keyboard strategy
+   - Updated next steps to include keyboard implementation
+
+### Success Criteria (Mobile Keyboard)
+
+- ✅ Custom Dayi keyboard works on mobile (system keyboard blocked)
+- ✅ Same N-gram predictions on desktop vs mobile
+- ✅ Touch feedback (haptics/visual) works
+- ✅ RWD: Keyboard hidden on desktop, shown on mobile
+- ✅ No screen reflow when keyboard appears
+
+### Implementation Complexity
+
+**Low-to-Medium**:
+- HTML: ~50 buttons (~100 lines)
+- CSS: Grid layout + RWD (~150 lines)
+- JS: Event delegation + inputmode (~50 lines)
+- **Total**: ~300 lines of additional code
+
+### Phase 0.5 Updated Tasks
+
+**New Task 0.5.5**: Mobile Custom Touch Keyboard (2 days)
+- Create `custom_keyboard.html` (Dayi layout)
+- CSS Grid for keyboard (desktop hidden, mobile shown)
+- Unified input handler (keydown + click → same viterbi)
+- Prevent system keyboard (`inputmode="none"`)
+- Touch feedback (haptics + visual + audio)
+- Write 10+ RWD tests
+
+**Updated Task 0.5.6**: Testing & Validation (1 day)
+- Add mobile keyboard testing
+- Verify system keyboard prevention
+
+### Next Steps
+
+**Immediate**:
+- [ ] Update memory-bank/progress.md with keyboard tasks
+- [ ] Commit and push all changes
+
+**Next Session** (Begin Phase 0.5):
+- [ ] Create `mvp1-pwa/` directory structure
+- [ ] Implement Service Worker + PWA manifest
+- [ ] Implement IndexedDB wrapper
+- [ ] Build Export/Import UI
+- [ ] **Implement mobile custom keyboard** (RWD approach)
 
 ---
 

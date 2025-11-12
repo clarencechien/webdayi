@@ -1,10 +1,10 @@
 # MVP 3.0 Smart Upgrade: Personalized Learning & Context-Aware Engine
 
-**Document Version**: 1.1 (PWA POC Strategy)
+**Document Version**: 1.2 (PWA POC + Mobile Custom Keyboard)
 **Created**: 2025-11-12
-**Updated**: 2025-11-12 (Added Phase 0.5 PWA POC)
+**Updated**: 2025-11-12 (Added Phase 0.5 PWA POC + Mobile Custom Touch Keyboard Strategy)
 **Status**: 📋 Planning Phase
-**Target**: PWA POC → MVP 1.0 Enhancement → Chrome Extension
+**Target**: PWA POC (Desktop + Mobile) → MVP 1.0 Enhancement → Chrome Extension
 
 ---
 
@@ -638,6 +638,164 @@ Result: "實作" still wins, but margin smaller
    - UserDB weights applied to candidate scoring
    - Learning detection: Track non-default selections
 
+5. **Mobile Custom Touch Keyboard** 🆕
+   - Custom HTML keyboard for Dayi layout (not QWERTY)
+   - Immersive experience (no system keyboard obstruction)
+   - Unified N-gram logic for desktop and mobile
+   - RWD approach (single page, responsive design)
+
+#### Mobile Custom Touch Keyboard Strategy
+
+**Problem**: Mobile users face two critical pain points with system keyboards:
+
+1. **Layout Mismatch**: System keyboards (Gboard, iOS) use QWERTY layout
+   - Dayi users need specific Dayi key positions
+   - Typing `4jp` (易) on QWERTY is inefficient and unintuitive
+
+2. **Screen Obstruction**: System keyboard covers ~50% of screen
+   - PWA forced to reflow/reposition
+   - `textarea` often hidden behind keyboard
+   - User loses context of what they're typing
+
+**Solution**: Custom HTML Touch Keyboard
+
+✅ **Benefits**:
+- **Perfect Layout**: 100% control over keyboard layout (Dayi-specific key positions)
+- **Immersive UX**: Keyboard is part of PWA (`position: fixed; bottom: 0`)
+  - No screen reflow or obstruction
+  - `textarea` always visible above keyboard
+- **Unified Logic**: Same `core_logic.js` for both desktop and mobile
+  - Desktop: `keydown` events from physical keyboard
+  - Mobile: `click`/`touchstart` events from HTML buttons
+  - Both call same N-gram engine (Viterbi + UserDB)
+
+❌ **Trade-offs**:
+- Cannot use system features (glide typing, voice input, auto-correct bar)
+- Must implement touch feedback ourselves (haptics, sound, animations)
+
+**Architecture**: Single-Page RWD (Responsive Web Design)
+
+**Key Insight**: We don't need two separate pages. One `index.html` with CSS/JS to switch modes:
+
+```html
+<!-- index.html (single page) -->
+<body>
+  <!-- 1. Text editing area -->
+  <textarea id="main-textarea"></textarea>
+
+  <!-- 2. N-gram candidate window -->
+  <div id="candidate-window">...</div>
+
+  <!-- 3. Custom keyboard (hidden on desktop, shown on mobile) -->
+  <div id="custom-keyboard" class="mobile-only">
+    <button data-key="4">4</button>
+    <button data-key="j">J</button>
+    <button data-key="p">P</button>
+    <!-- Full Dayi keyboard layout -->
+  </div>
+</body>
+```
+
+**CSS (RWD Mode Switching)**:
+
+```css
+/* Desktop: Hide custom keyboard */
+#custom-keyboard {
+  display: none;
+}
+
+/* Mobile: Show custom keyboard at bottom */
+@media (max-width: 768px) {
+  #custom-keyboard {
+    display: grid;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    /* Dayi layout styling */
+  }
+
+  #main-textarea {
+    margin-bottom: 250px; /* Reserve space for keyboard */
+  }
+}
+```
+
+**JavaScript (Unified Input Handling)**:
+
+```javascript
+// N-gram core (same for both modes)
+const viterbi = new Viterbi(ngramModel, userDB);
+
+// Input Source 1: Desktop physical keyboard
+window.addEventListener('keydown', (event) => {
+  if (isMobile()) return; // Skip on mobile
+
+  const code = mapKeyCode(event.key);
+  viterbi.processInput(code);
+});
+
+// Input Source 2: Mobile custom keyboard
+document.getElementById('custom-keyboard').addEventListener('click', (event) => {
+  if (event.target.tagName !== 'BUTTON') return;
+
+  const code = event.target.dataset.key;
+  viterbi.processInput(code); // Same N-gram logic!
+});
+```
+
+**Preventing System Keyboard on Mobile**:
+
+```javascript
+// When mobile detected, prevent system keyboard
+if (isMobile()) {
+  const textarea = document.getElementById('main-textarea');
+
+  // Method: Use inputmode="none" (recommended)
+  // Tells browser: "This input doesn't need system keyboard"
+  textarea.setAttribute('inputmode', 'none');
+
+  // User can still focus textarea (cursor shown)
+  textarea.addEventListener('focus', () => {
+    document.getElementById('custom-keyboard').style.display = 'grid';
+  });
+}
+```
+
+**User Experience Flow**:
+
+**Desktop (Physical Keyboard)**:
+```
+1. User focuses textarea
+2. Physical keyboard: Types "4jp"
+3. keydown events → core_logic.js → N-gram engine
+4. Candidate window shows [1. 易, 2. 義]
+5. User presses "1" → Character appended
+```
+
+**Mobile (Touch Keyboard)**:
+```
+1. User taps textarea
+2. Custom keyboard appears at bottom (system keyboard blocked)
+3. User taps buttons: [4] → [j] → [p]
+4. touchstart/click events → core_logic.js → N-gram engine
+5. Candidate window shows [1. 易, 2. 義]
+6. User taps "1" → Character appended
+```
+
+**Implementation Complexity**: Low-to-Medium
+- **HTML**: ~50 buttons for Dayi layout (~100 lines)
+- **CSS**: Grid layout + RWD breakpoints (~150 lines)
+- **JS**: Event delegation + inputmode logic (~50 lines)
+- **Total**: ~300 lines of additional code
+
+**Testing Requirements**:
+- [ ] Desktop: Physical keyboard input works (existing tests)
+- [ ] Mobile: Touch keyboard input triggers same N-gram logic
+- [ ] Mobile: System keyboard does NOT appear (`inputmode="none"` works)
+- [ ] Mobile: Screen does NOT reflow when keyboard shown
+- [ ] Mobile: Touch feedback (haptics/sound) works on button press
+- [ ] Cross-device: Same learning data works on both desktop and mobile
+
 **Tasks**:
 
 **0.5.1. PWA Infrastructure** (1 day)
@@ -673,13 +831,36 @@ Result: "實作" still wins, but margin smaller
 - [ ] Add learning feedback: "✓ Learned: 天氣 > 天真"
 - [ ] Test character mode + sentence mode learning
 
-**0.5.5. Testing & Validation** (1 day)
+**0.5.5. Mobile Custom Touch Keyboard** 🆕 (2 days)
+- [ ] Create `custom_keyboard.html` (Dayi keyboard layout ~50 buttons)
+- [ ] Implement CSS Grid layout for keyboard
+  - Desktop: `display: none` (hidden)
+  - Mobile: `display: grid; position: fixed; bottom: 0`
+- [ ] Implement unified input handler in `core_logic.js`
+  - Desktop: Listen to `keydown` events
+  - Mobile: Listen to `click`/`touchstart` events on keyboard buttons
+  - Both call same `viterbi.processInput(code)` function
+- [ ] Prevent system keyboard on mobile
+  - Set `textarea.setAttribute('inputmode', 'none')`
+  - Test that Gboard/iOS keyboard does NOT appear
+- [ ] Add touch feedback
+  - Haptic feedback: `navigator.vibrate(50)` on button press
+  - Visual feedback: Active state animation on touch
+  - Audio feedback: Optional beep sound
+- [ ] Write RWD tests (10+ tests)
+  - Desktop mode: Custom keyboard hidden
+  - Mobile mode: Custom keyboard shown
+  - Input parity: Same N-gram results on desktop vs mobile
+
+**0.5.6. Testing & Validation** (1 day)
 - [ ] Manual testing: Learn → Export → Clear → Import → Verify
 - [ ] Cross-device testing: Export on Device A → Import on Device B
 - [ ] Offline testing: Service Worker caching works
 - [ ] Performance: IndexedDB queries < 5ms
+- [ ] Mobile keyboard testing: Touch input triggers N-gram correctly
+- [ ] System keyboard prevention: Gboard/iOS keyboard blocked
 
-**Deliverable**: Working PWA POC with IndexedDB + Manual Sync
+**Deliverable**: Working PWA POC with IndexedDB + Manual Sync + Mobile Custom Keyboard
 
 **Success Criteria**:
 - ✅ PWA installable on mobile/desktop
@@ -687,6 +868,9 @@ Result: "實作" still wins, but margin smaller
 - ✅ Export/Import works across devices
 - ✅ Offline mode functional
 - ✅ Performance: < 10ms total overhead
+- ✅ **Mobile**: Custom Dayi keyboard works (system keyboard blocked)
+- ✅ **Mobile**: Same N-gram predictions as desktop
+- ✅ **Mobile**: Touch feedback (haptics/visual) works
 
 **Future Migration Path**:
 - Phase 1: Enhance PWA with full F-4.0 features
