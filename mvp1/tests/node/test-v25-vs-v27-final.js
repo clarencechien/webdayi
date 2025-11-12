@@ -14,15 +14,18 @@ console.log('🏆 FINAL SHOWDOWN: v2.5 vs v2.7');
 console.log('='.repeat(80));
 console.log('');
 
+// Files are in mvp1 root, two levels up from tests/node
+const rootDir = path.join(__dirname, '../..');
+
 // --- Load v2.5 (current production version) ---
 console.log('Loading v2.5 (current production)...');
-const v25Code = fs.readFileSync(path.join(__dirname, 'viterbi_module.js'), 'utf8');
+const v25Code = fs.readFileSync(path.join(rootDir, 'viterbi_module.js'), 'utf8');
 eval(v25Code);
 const viterbi_v25 = viterbi;
 
 // --- Load v2.7 (new hybrid browser version) ---
 console.log('Loading v2.7 (new hybrid version)...');
-const v27Code = fs.readFileSync(path.join(__dirname, 'viterbi_module_v27.js'), 'utf8');
+const v27Code = fs.readFileSync(path.join(rootDir, 'viterbi_module_v27.js'), 'utf8');
 // Clear previous viterbi definition
 const originalViterbi = viterbi;
 eval(v27Code);
@@ -33,9 +36,9 @@ viterbi = originalViterbi;
 console.log('');
 
 // --- Load databases ---
-const dayiDbData = JSON.parse(fs.readFileSync(path.join(__dirname, 'dayi_db.json'), 'utf8'));
+const dayiDbData = JSON.parse(fs.readFileSync(path.join(rootDir, 'dayi_db.json'), 'utf8'));
 const dayiDb = new Map(Object.entries(dayiDbData));
-const ngramDb = JSON.parse(fs.readFileSync(path.join(__dirname, 'ngram_db.json'), 'utf8'));
+const ngramDb = JSON.parse(fs.readFileSync(path.join(rootDir, 'ngram_db.json'), 'utf8'));
 
 console.log('✓ All modules loaded');
 console.log('');

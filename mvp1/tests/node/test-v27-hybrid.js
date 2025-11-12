@@ -21,13 +21,14 @@ console.log('');
 console.log('Expected Result: 90% accuracy (same as v2.5)');
 console.log('');
 
-// Load v2.7
-const { viterbi_v27 } = require('./viterbi_v27_hybrid.js');
+// Load v2.7 (file is in mvp1 root, two levels up from tests/node)
+const { viterbi_v27 } = require('../../viterbi_v27_hybrid.js');
 
-// Load databases
-const dayiDbData = JSON.parse(fs.readFileSync(path.join(__dirname, 'dayi_db.json'), 'utf8'));
+// Load databases (files are in mvp1 root, two levels up from tests/node)
+const rootDir = path.join(__dirname, '../..');
+const dayiDbData = JSON.parse(fs.readFileSync(path.join(rootDir, 'dayi_db.json'), 'utf8'));
 const dayiDb = new Map(Object.entries(dayiDbData));
-const ngramDb = JSON.parse(fs.readFileSync(path.join(__dirname, 'ngram_db.json'), 'utf8'));
+const ngramDb = JSON.parse(fs.readFileSync(path.join(rootDir, 'ngram_db.json'), 'utf8'));
 
 console.log('✓ Databases loaded');
 console.log('✓ Viterbi v2.7 module loaded');
