@@ -4,13 +4,15 @@
  * This version has extensive console logging to trace the algorithm execution
  * and identify why it's picking low-frequency candidates.
  *
- * Version 2.2: Complete tie-breaking fix (forwardPass + backtrack) + DEBUG
+ * Version 2.3: THE REAL FIX - Frequency bonus added to DP scores + DEBUG
  *
- * v2.2 Changes:
- * - Added frequency-based tie-breaking to backtrack() function
- * - When multiple candidates at final position have equal DP scores, prefer higher-frequency character
- * - Enhanced debug output shows tie-breaking decisions in both forward pass and backtrack
- * - Completes the tie-breaking fix started in v2.1
+ * v2.3 Changes (THE REAL FIX):
+ * - Previous approaches (v2.1, v2.2) were insufficient - only affected transition choices
+ * - Root cause: Tie-breaking didn't affect which path backtracking follows
+ * - Solution: Add tiny frequency bonus (freq * 1e-9) directly to DP score
+ * - Now paths through high-frequency characters get slightly higher DP scores
+ * - Enhanced debug output shows frequency bonus calculation
+ * - This is the definitive fix for the tie-breaking problem
  */
 
 /**
@@ -67,12 +69,14 @@ function initializeDP_debug(lattice, ngramDb) {
   const dp = [];
   const numPositions = lattice.length;
 
-  console.log('[DEBUG] Initializing DP table...');
+  console.log('[DEBUG] Initializing DP table with frequency bonus...');
   const firstDP = {};
   for (const candidate of lattice[0]) {
     const char = candidate.char;
     const unigramProb = getLaplaceUnigram_debug(char, ngramDb);
-    firstDP[char] = Math.log(unigramProb);
+    // BUG FIX (v2.3): Add frequency bonus for tie-breaking
+    const freqBonus = candidate.freq * 1e-9;
+    firstDP[char] = Math.log(unigramProb) + freqBonus;
   }
   dp.push(firstDP);
 
@@ -138,8 +142,7 @@ function forwardPass_debug(lattice, dp, backpointer, ngramDb, debugPositions = [
           }
         }
 
-        // BUG FIX (v2.1): Tie-breaking by frequency
-        // If scores are essentially equal (within epsilon), prefer higher-frequency previous character
+        // BUG FIX (v2.1): Tie-breaking by previous character frequency
         if (prob > maxProb + epsilon ||
             (Math.abs(prob - maxProb) < epsilon && prevCharFreq > maxPrevCharFreq)) {
           maxProb = prob;
@@ -148,11 +151,13 @@ function forwardPass_debug(lattice, dp, backpointer, ngramDb, debugPositions = [
         }
       }
 
-      dp[t][char2] = maxProb;
+      // BUG FIX (v2.3): Add frequency bonus to DP score for tie-breaking
+      const freqBonus = candidate.freq * 1e-9;
+      dp[t][char2] = maxProb + freqBonus;
       backpointer[t][char2] = maxPrevChar;
 
       if (shouldDebug && candidate.freq >= 1000) {
-        console.log(`[DEBUG]   RESULT: ${char2} gets score ${maxProb.toFixed(3)} from ${maxPrevChar} (freq=${maxPrevCharFreq})`);
+        console.log(`[DEBUG]   RESULT: ${char2} (freq=${candidate.freq}) gets score ${maxProb.toFixed(3)} + freq_bonus=${freqBonus.toExponential(2)} = ${(maxProb + freqBonus).toFixed(3)} from ${maxPrevChar} (freq=${maxPrevCharFreq})`);
       }
     }
 

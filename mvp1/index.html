@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.3.1</title>
+  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.3.2</title>
 
   <!-- Version Information (for testing verification) -->
   <meta name="app-version" content="11.2.1">
@@ -27,7 +27,7 @@
     How to verify version:
     1. Open browser DevTools console
     2. Check window.WEBDAYI_VERSION
-    3. Console should show "Viterbi module loaded (v2.2 with complete tie-breaking fix)"
+    3. Console should show "Viterbi module loaded (v2.3 with frequency-bonus tie-breaking)"
   -->
 
   <!-- Google Fonts -->
@@ -455,13 +455,14 @@
       commit: 'b94527a',
       releaseName: 'Chinese Text Recognition Diagnostics',
       changes: [
-        'CRITICAL FIX: Added frequency tie-breaking to backtrack() function',
-        'Upgraded Viterbi module to v2.2 (complete tie-breaking coverage)',
-        'Fixed bug where "嬌俏侚艭傻" were selected instead of "如何會放假"',
-        'Root cause: v2.1 only fixed forwardPass(), backtrack() had no tie-breaking',
-        '--- Previous (Build 003-004) ---',
-        'Applied tie-breaking fix to forwardPass() in production and debug versions',
-        'Upgraded viterbi_module.js from v2.0 to v2.1'
+        'CRITICAL: Added frequency bonus (freq * 1e-9) directly to DP scores',
+        'Upgraded Viterbi module to v2.3 with frequency-bonus tie-breaking',
+        'Previous approaches (v2.1, v2.2) only affected transition choices',
+        'Root cause: Backtracking follows precomputed backpointers',
+        'Solution: Bake frequency preference into DP score as tiny bonus',
+        '--- Previous (Build 003-005) ---',
+        'Build 005: Added tie-breaking to backtrack() (v2.2) - insufficient',
+        'Build 003-004: Added tie-breaking to forwardPass() (v2.1) - insufficient'
       ]
     };
 
