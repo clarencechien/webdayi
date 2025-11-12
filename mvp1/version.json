@@ -1,10 +1,35 @@
 {
-  "version": "11.2.2",
-  "build": "20251112-002",
-  "buildDate": "2025-11-12T01:00:00Z",
-  "commit": "b75c36e",
-  "releaseName": "Viterbi Debug Tools & Duplicate Character Analysis",
+  "version": "11.3.0",
+  "build": "20251112-003",
+  "buildDate": "2025-11-12T02:00:00Z",
+  "commit": "88dccd8",
+  "releaseName": "Viterbi Tie-Breaking Fix",
   "changelog": [
+    {
+      "version": "11.3.0",
+      "build": "003",
+      "date": "2025-11-12",
+      "type": "bug-fix",
+      "title": "FIX: Viterbi tie-breaking now prefers high-frequency candidates",
+      "changes": [
+        "Fixed Viterbi algorithm to break DP score ties by character frequency",
+        "When multiple paths have equal scores, prefer higher-frequency characters",
+        "Upgraded viterbi_module.js from v2.0 to v2.1",
+        "Resolves bug where low-frequency candidates (freq=1000) were selected",
+        "Fixes issue where main app picked rank 8-10 characters instead of rank 1"
+      ],
+      "technical_details": [
+        "Added prevFreqMap to track candidate frequencies at previous position",
+        "Modified forwardPass() to compare prevCharFreq when scores are within epsilon",
+        "Epsilon threshold set to 1e-9 for floating-point comparison",
+        "Tie-breaking: if |score1 - score2| < 1e-9, prefer higher freq"
+      ],
+      "expected_results": [
+        "Test Case 1 (大家好我是大學生): Should remain 100% correct",
+        "Main app should no longer pick 嬌俏侚艭傻 (low-freq characters)",
+        "Test Case 2 (明天天氣...): May still show 真 due to 真如 bigram strength"
+      ]
+    },
     {
       "version": "11.2.2",
       "build": "002",

@@ -7,7 +7,14 @@
  * This is a browser-compatible version of the Viterbi algorithm.
  * All functions are exposed globally for use in MVP 1.0 v11.
  *
+ * Version 2.1: Fixed tie-breaking bug (prefers high-frequency candidates)
  * Version 2.0: Implements full Laplace smoothing (Solution B)
+ *
+ * Bug Fix (v2.1):
+ * - When multiple paths have equal DP scores (common with unseen bigrams),
+ *   the algorithm now prefers paths through higher-frequency characters
+ * - Fixes issue where low-frequency candidates (freq=1000) were selected
+ *   over high-frequency candidates (freq>9000) due to iteration order
  *
  * Original: mvp3-smart-engine/viterbi.js
  * Design Document: mvp1/DESIGN-v11.md
@@ -125,10 +132,19 @@ function initializeDP(lattice, ngramDb) {
  */
 function forwardPass(lattice, dp, backpointer, ngramDb) {
   for (let t = 1; t < lattice.length; t++) {
+    // Build frequency map for PREVIOUS position (t-1) for tie-breaking
+    const prevFreqMap = {};
+    if (t > 0) {
+      for (const candidate of lattice[t-1]) {
+        prevFreqMap[candidate.char] = candidate.freq;
+      }
+    }
+
     for (const candidate of lattice[t]) {
       const char2 = candidate.char;
       let maxProb = -Infinity;
       let maxPrevChar = null;
+      let maxPrevCharFreq = 0;
 
       // Try all previous characters
       for (const prevChar in dp[t-1]) {
@@ -137,9 +153,17 @@ function forwardPass(lattice, dp, backpointer, ngramDb) {
         const bigramProb = getLaplaceBigram(prevChar, char2, ngramDb);
         const prob = dp[t-1][prevChar] + Math.log(bigramProb);
 
-        if (prob > maxProb) {
+        // BUG FIX: Tie-breaking by frequency
+        // When DP scores are equal (common when all bigrams are unseen),
+        // prefer path through higher-frequency previous character
+        const prevCharFreq = prevFreqMap[prevChar] || 0;
+        const epsilon = 1e-9; // Threshold for "equal" scores
+
+        if (prob > maxProb + epsilon ||
+            (Math.abs(prob - maxProb) < epsilon && prevCharFreq > maxPrevCharFreq)) {
           maxProb = prob;
           maxPrevChar = prevChar;
+          maxPrevCharFreq = prevCharFreq;
         }
       }
 
@@ -231,4 +255,4 @@ function viterbi(codes, dayiDb, ngramDb) {
 
 // Functions are now globally available in browser context
 // No module.exports needed - browser version
-console.log('✓ Viterbi module loaded (v2.0 with Laplace smoothing - Solution B)');
+console.log('✓ Viterbi module loaded (v2.1 with tie-breaking fix)');
