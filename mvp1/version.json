@@ -1,9 +1,9 @@
 {
-  "version": "11.3.3",
+  "version": "11.2.1",
   "build": "20251112-007",
-  "buildDate": "2025-11-12T06:00:00Z",
-  "commit": "7d74b2d",
-  "releaseName": "Viterbi v2.4 - Logarithmic Frequency Bonus (THE ACTUAL FIX)",
+  "buildDate": "2025-11-12T02:41:27Z",
+  "commit": "a37d173",
+  "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
       "version": "11.3.3",
