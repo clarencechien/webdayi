@@ -7,20 +7,21 @@
  * This is a browser-compatible version of the Viterbi algorithm.
  * All functions are exposed globally for use in MVP 1.0 v11.
  *
+ * Version 2.5: Unigram weighting to fix Rare Word Trap (Method B)
  * Version 2.4: Fixed frequency bonus scale (logarithmic instead of linear)
  * Version 2.3: Added frequency bonus to DP scores (but too small!)
  * Version 2.2: Fixed tie-breaking in backtrack() function
  * Version 2.1: Fixed tie-breaking in forwardPass() function
  * Version 2.0: Implements full Laplace smoothing (Solution B)
  *
- * Bug Fix (v2.4) - THE ACTUAL REAL FIX:
- * - v2.3's frequency bonus (freq * 1e-9) was TOO SMALL - disappeared in rounding!
- * - N-gram log scores range from -5 to -50, typical differences are 1-3
- * - v2.3's bonus was 0.00001, which rounds to 0 when displayed to 3 decimal places
- * - Solution: Use logarithmic bonus: log(1 + freq/10000)
- * - freq=10000 → bonus=0.69, freq=1000 → bonus=0.095, difference=0.595
- * - This is comparable to N-gram differences and will actually affect path selection!
- * - Fixes bug where "嬌俏侚艭" (freq=1000) were selected instead of "如何會放" (freq>9000)
+ * Bug Fix (v2.5) - RARE WORD TRAP FIX:
+ * - v2.4 achieved 70% accuracy but still failed on common phrases like "會放假"
+ * - Root cause: Rare Word Trap - P(艭|侚)=1.0 beats P(放|會)=0.01
+ * - Rare fixed combinations (侚艭) incorrectly beat common flexible words (會放)
+ * - Solution: Unigram interpolation - mix bigram and unigram probabilities
+ * - Formula: score = 0.7 * log(P(B|A)) + 0.3 * log(P(B))
+ * - This ensures common characters get credit for high unigram frequency
+ * - Expected result: "會放假" (high unigram freq) beats "侚艭傻" (rare characters)
  *
  * Original: mvp3-smart-engine/viterbi.js
  * Design Document: mvp1/DESIGN-v11.md
@@ -117,12 +118,9 @@ function initializeDP(lattice, ngramDb) {
     // Solution B: Use full Laplace smoothing instead of fallback
     const unigramProb = getLaplaceUnigram(char, ngramDb);
 
-    // BUG FIX (v2.4): Use logarithmic frequency bonus for proper scale
-    // Formula: log(1 + freq/10000) gives bonus in range [0, 0.69]
-    // freq=10000 → bonus=log(2)≈0.69, freq=1000 → bonus=log(1.1)≈0.095
-    // This is comparable to N-gram log probability differences (~1-3)
-    const freqBonus = Math.log(1 + candidate.freq / 10000);
-    firstDP[char] = Math.log(unigramProb) + freqBonus;
+    // v2.5: No separate frequency bonus needed - unigram probability already
+    // incorporates frequency information through Laplace smoothing
+    firstDP[char] = Math.log(unigramProb);
   }
   dp.push(firstDP);
 
@@ -160,10 +158,17 @@ function forwardPass(lattice, dp, backpointer, ngramDb) {
 
       // Try all previous characters
       for (const prevChar in dp[t-1]) {
-        // Solution B: Use full Laplace smoothing for bigrams
-        // Replaces Quick Fix (unigram fallback) with proper statistical smoothing
+        // v2.5: Unigram interpolation to fix Rare Word Trap
+        // Mix bigram (context) and unigram (popularity) probabilities
+        // Formula: score = 0.7 * log(P(B|A)) + 0.3 * log(P(B))
+        // This ensures common characters like "會放假" beat rare combinations like "侚艭傻"
         const bigramProb = getLaplaceBigram(prevChar, char2, ngramDb);
-        const prob = dp[t-1][prevChar] + Math.log(bigramProb);
+        const unigramProb = getLaplaceUnigram(char2, ngramDb);
+
+        // Weighted combination: 70% context, 30% character popularity
+        const prob = dp[t-1][prevChar] +
+                     (0.7 * Math.log(bigramProb)) +
+                     (0.3 * Math.log(unigramProb));
 
         // BUG FIX (v2.1): Tie-breaking by previous character frequency
         const prevCharFreq = prevFreqMap[prevChar] || 0;
@@ -177,13 +182,8 @@ function forwardPass(lattice, dp, backpointer, ngramDb) {
         }
       }
 
-      // BUG FIX (v2.4): Use logarithmic frequency bonus for proper scale
-      // Formula: log(1 + freq/10000) gives bonus in range [0, 0.69]
-      // freq=10000 → bonus=log(2)≈0.69, freq=1000 → bonus=log(1.1)≈0.095
-      // This is comparable to N-gram log probability differences (~1-3)
-      // Previous v2.3 used freq*1e-9 which was too small (disappeared in rounding)
-      const freqBonus = Math.log(1 + candidate.freq / 10000);
-      dp[t][char2] = maxProb + freqBonus;
+      // v2.5: No separate frequency bonus - unigram interpolation handles this
+      dp[t][char2] = maxProb;
       backpointer[t][char2] = maxPrevChar;
     }
   }
@@ -288,4 +288,4 @@ function viterbi(codes, dayiDb, ngramDb) {
 
 // Functions are now globally available in browser context
 // No module.exports needed - browser version
-console.log('✓ Viterbi module loaded (v2.4 with LOGARITHMIC frequency bonus)');
+console.log('✓ Viterbi module loaded (v2.5 with UNIGRAM INTERPOLATION - Rare Word Trap fix)');

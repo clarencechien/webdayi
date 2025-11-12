@@ -3,31 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.3.3</title>
+  <title>WebDaYi (網頁大易輸入法) - MVP 1.0 v11.3.4</title>
 
   <!-- Version Information (for testing verification) -->
-  <meta name="app-version" content="11.2.1">
-  <meta name="app-build" content="20251112-007">
-  <meta name="app-commit" content="a37d173">
-  <meta name="app-release" content="Chinese Text Recognition Diagnostics">
+  <meta name="app-version" content="11.3.4">
+  <meta name="app-build" content="20251112-008">
+  <meta name="app-commit" content="b1d0136">
+  <meta name="app-release" content="v2.5 Unigram Interpolation - Rare Word Trap Fix">
   <!--
-    WebDaYi MVP 1.0 - Version 11.2.1
-    Build: 20251112-007
-    Release: Chinese Text Recognition Diagnostics
-    Commit: a37d173
+    WebDaYi MVP 1.0 - Version 11.3.4
+    Build: 20251112-008
+    Release: v2.5 Unigram Interpolation - Rare Word Trap Fix
+    Commit: b1d0136
 
     Latest Changes:
-    - Created viterbi_module_debug.js with extensive console logging
-    - Created test-viterbi-debug.html for browser-based algorithm tracing
-    - Created diagnose-candidate-order.js to analyze candidate ordering
-    - Created check-duplicates.js to verify no duplicate characters
-    - Identified bug: main app picks low-frequency candidates (freq=1000)
-    - Found candidates are sorted correctly, bug is in Viterbi algorithm
+    - Implemented unigram interpolation (Method B) to fix Rare Word Trap
+    - Formula: score = 0.7 * log(P(B|A)) + 0.3 * log(P(B))
+    - Common characters now get credit for high unigram frequency
+    - Rare combinations like '侚艭傻' no longer beat common words '會放假'
+    - Removed separate frequency bonus (redundant with unigram weighting)
+    - Expected: Near 100% accuracy on common phrase test cases
 
     How to verify version:
     1. Open browser DevTools console
-    2. Check: "Viterbi module loaded (v2.4 with LOGARITHMIC frequency bonus)"
-    3. Score should NOT be -76.157 (should be different!)
+    2. Check: "Viterbi module loaded (v2.5 with UNIGRAM INTERPOLATION - Rare Word Trap fix)"
+    3. Test: "dj ev ev c8 lo aj ad .x ax ob" should produce "明天天氣如何會放假嗎"
   -->
 
   <!-- Google Fonts -->
@@ -449,21 +449,21 @@
   <script>
     // Version information (for testing verification)
     window.WEBDAYI_VERSION = {
-      version: '11.2.1',
-      build: '20251112-007',
-      buildDate: '2025-11-12T00:00:00Z',
-      commit: 'a37d173',
-      releaseName: 'Chinese Text Recognition Diagnostics',
+      version: '11.3.4',
+      build: '20251112-008',
+      buildDate: '2025-11-12T08:00:00Z',
+      commit: 'b1d0136',
+      releaseName: 'v2.5 Unigram Interpolation - Rare Word Trap Fix',
       changes: [
-        'THE ACTUAL FIX: Changed to LOGARITHMIC frequency bonus!',
-        'v2.3 bonus (freq*1e-9=0.00001) was too small - disappeared in rounding!',
-        'v2.4 bonus: log(1+freq/10000) gives 0.095-0.69 - 66,000x larger!',
-        'freq=10000 → bonus=0.69 (vs 0.00001) - actually visible now!',
-        'Score will be different from -76.157 now',
-        '--- Why v2.3 failed ---',
-        'N-gram scores: -5 to -50, differences ~1-3',
-        'v2.3 bonus: 0.00001 rounded to 0.000 (invisible!)',
-        'Like adding sand grain to mountain!'
+        'v2.5: Implemented unigram interpolation to fix Rare Word Trap',
+        'Formula: score = 0.7 * log(P(B|A)) + 0.3 * log(P(B))',
+        'Common characters now get credit for high unigram frequency',
+        'Rare combinations like "侚艭傻" no longer beat common words "會放假"',
+        '--- Root Cause (Rare Word Trap) ---',
+        'P(艭|侚) = 1/1 = 1.0 (rare fixed combination)',
+        'P(放|會) = 100/10000 = 0.01 (common flexible word)',
+        'Algorithm incorrectly preferred rare combinations over common words',
+        'Solution: Mix 70% context (bigram) + 30% popularity (unigram)'
       ]
     };
 
@@ -487,7 +487,7 @@
 
   <!-- v11: N-gram Sentence Prediction -->
   <!-- CACHE BUSTER: Version parameter forces browser to reload JavaScript -->
-  <script src="viterbi_module.js?v=11.3.3-007"></script>
+  <script src="viterbi_module.js?v=11.3.4-008"></script>
   <script src="core_logic_v11.js?v=11.3.3-007"></script>
   <script src="core_logic_v11_ui.js?v=11.3.3-007"></script>
 
