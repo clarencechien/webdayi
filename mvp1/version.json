@@ -6,6 +6,35 @@
   "releaseName": "Chinese Text Recognition Diagnostics",
   "changelog": [
     {
+      "version": "11.3.4",
+      "build": "008",
+      "date": "2025-11-12",
+      "type": "critical-fix",
+      "title": "RARE WORD TRAP FIX: v2.5 unigram interpolation (Method B)",
+      "summary": "v2.4 achieved 70% accuracy but still failed on common phrases like '會放假'. Root cause: Rare Word Trap - P(艭|侚)=1.0 beats P(放|會)=0.01. Solution: Mix bigram and unigram probabilities with 0.7/0.3 weights.",
+      "changes": [
+        "Implemented unigram interpolation: score = 0.7 * log(P(B|A)) + 0.3 * log(P(B))",
+        "Removed separate frequency bonus (redundant with unigram weighting)",
+        "Common characters now get credit for high unigram frequency",
+        "Rare combinations like '侚艭傻' no longer beat common words '會放假'",
+        "Expected: Near 100% accuracy on common phrase test cases"
+      ],
+      "technical_details": [
+        "Modified forwardPass() to calculate both bigram and unigram probabilities",
+        "Weighted combination: 70% context (bigram), 30% popularity (unigram)",
+        "Modified initializeDP() to use pure unigram probability",
+        "Removed logarithmic frequency bonus from v2.4 (subsumed by unigram)",
+        "Updated console log: 'v2.5 with UNIGRAM INTERPOLATION'"
+      ],
+      "root_cause": [
+        "Rare Word Trap: Conditional probability P(B|A) favors rare fixed combinations",
+        "P(艭|侚) = 1/1 = 1.0 (perfect score because they only appear together once)",
+        "P(放|會) = 100/10000 = 0.01 (low score because 會 is common, followed by many chars)",
+        "Algorithm incorrectly preferred rare combinations over common words",
+        "User feedback: '這是在為模型的缺陷找藉口' - correctly rejected 70% as unacceptable"
+      ]
+    },
+    {
       "version": "11.3.3",
       "build": "007",
       "date": "2025-11-12",
