@@ -2,7 +2,7 @@
   "version": "11.3.0",
   "build": "20251112-004",
   "buildDate": "2025-11-12T03:00:00Z",
-  "commit": "88dccd8",
+  "commit": "e6df947",
   "releaseName": "Viterbi Tie-Breaking Fix (Complete)",
   "changelog": [
     {
