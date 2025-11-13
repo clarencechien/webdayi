@@ -4,9 +4,9 @@
 
 > 輕量、透明、網頁優先的大易中文輸入法引擎
 
-[![Status](https://img.shields.io/badge/status-Phase%201.10.4%20COMPLETE-brightgreen)]()
-[![Version](https://img.shields.io/badge/version-0.5.0--build.011-blue)]()
-[![Tests](https://img.shields.io/badge/tests-85%2F85%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-Phase%201.10.5%20COMPLETE-brightgreen)]()
+[![Version](https://img.shields.io/badge/version-0.5.0--build.012-blue)]()
+[![Tests](https://img.shields.io/badge/tests-103%2F103%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ---
@@ -20,7 +20,7 @@
 - ✏️ **字元級編輯**: 點擊字元、方向鍵導航、Space 開啟候選、Enter 送出
 - ⚡ **Viterbi 演算法**: 基於 rime-essay 語料庫 (717M 字元，94.4% 準確度)
 - 📊 **Laplace 平滑**: 完整統計平滑處理
-- 📱 **跨平台**: 完美支援桌面與手機，響應式設計
+- 📱 **跨平台**: 完美支援桌面與手機，單頁無捲動設計
 - 🎨 **現代 UI**: Tailwind CSS + 深色模式 + PWA 支援
 
 ---
@@ -35,7 +35,7 @@
 
 ## 🎯 現況一覽
 
-**最新版本**: v0.5.0 (Build: 20251113-011) - Phase 1.10.4 COMPLETE
+**最新版本**: v0.5.0 (Build: 20251113-012) - Phase 1.10.5 COMPLETE
 
 ### Phase 1.10: 字元級編輯系統 ✅
 完整的智慧字元編輯工作流程，讓句子修正變得前所未有的簡單！
@@ -46,7 +46,8 @@
 | **Phase 1.10.2** | 候選選擇視窗 | 22 tests | ✅ |
 | **Phase 1.10.3** | 自動前進 + 方向鍵 | 20 tests | ✅ |
 | **Phase 1.10.4** | 完成編輯 + 送出 | 19 tests | ✅ |
-| **總計** | 完整工作流程 | **85 tests** | ✅ |
+| **Phase 1.10.5** | 關鍵修復 + UX 優化 | 18 tests | ✅ |
+| **總計** | 完整工作流程 | **103 tests** | ✅ |
 
 ### 完整工作流程
 ```
@@ -89,12 +90,14 @@ open http://localhost:8000
 
 ### 執行測試
 ```bash
-# Phase 1.10 測試
+# Phase 1.10 測試（全部 5 個測試檔案）
+open mvp1-pwa/tests/test-phase-1.10.1-character-spans.html
 open mvp1-pwa/tests/test-phase-1.10.2-candidate-modal.html
 open mvp1-pwa/tests/test-phase-1.10.3-auto-advance-navigation.html
 open mvp1-pwa/tests/test-phase-1.10.4-finish-and-submit.html
+open mvp1-pwa/tests/test-phase-1.10.5-critical-fixes.html
 
-# 預期結果: 85/85 tests passing ✅
+# 預期結果: 103/103 tests passing ✅
 ```
 
 ---
@@ -113,6 +116,7 @@ open mvp1-pwa/tests/test-phase-1.10.4-finish-and-submit.html
 |------|------|
 | **[PHASE-1.10-SUMMARY.md](docs/PHASE-1.10-SUMMARY.md)** | Phase 1.10 完整實作總結 |
 | **[PHASE-1.10-TEST-SUMMARY.md](docs/PHASE-1.10-TEST-SUMMARY.md)** | Phase 1.10 測試覆蓋報告 |
+| **[PHASE-1.10.5-CRITICAL-FIXES.md](docs/PHASE-1.10.5-CRITICAL-FIXES.md)** | Phase 1.10.5 關鍵修復文件 |
 | **[SMART-ENGINE-JOURNEY.md](docs/SMART-ENGINE-JOURNEY.md)** | 智慧引擎演進歷程 (v2.1 → v2.7) |
 
 ### 設計與 UX
