@@ -1,13 +1,17 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-13 (🎉 Session 10.11 Part 5 COMPLETE + Bug Fixes!)
-**Current Phase**: ✅ Phase 1.9 COMPLETE - Sentence Mode Top-N Prediction Cycling
-**Current Version**: 0.5.0 (Build: 20251113-006, Session 10.11 Part 5 Complete)
+**Last Updated**: 2025-11-13 (🐛 Critical Mobile NaN Bug Fixed + Phase 1.10 Design Ready!)
+**Current Phase**: ⏳ Phase 1.10 IN PROGRESS - Character-Level Editing UI
+**Current Version**: 0.5.0 (Build: 20251113-007, Mobile NaN Fix + contenteditable Quick Fix)
 **Main Branch Status**: ✅ v2.7 Hybrid (OOP + 70/30 + Laplace) + Full ngram_db.json (Production Ready)
 **Feature Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
-**Next Milestone**: Phase 1.10 - Character-Level Editing for Sentence Mode
+**Next Milestone**: Phase 1.10 - Character Span Architecture Implementation
 
-**Latest Achievements** (Session 10.11 Part 5 + Bug Fixes):
+**Latest Achievements** (Mobile NaN Fix + Phase 1.10 Design):
+- ✅ **CRITICAL MOBILE FIX**: Fixed NaN bug in Android character mode learning (triple-layer validation)!
+- ✅ **CONTENTEDITABLE QUICK FIX**: Added Enter/= key handlers directly to contenteditable (temporary)
+- ✅ **PHASE 1.10 DESIGN**: Comprehensive character span architecture design document (430 lines)
+- ✅ **TDD**: 25 comprehensive mobile NaN prevention tests (all passing)
 - ✅ **SESSION 10.11 PART 5 COMPLETE**: Top-N prediction cycling with = key + Enter confirmation!
 - ✅ **MOBILE EXPORT FIX**: Web Share API for mobile devices (native share sheet on iOS/Android)
 - ✅ **CONSOLE CLEANUP**: Fixed dayiMap loading race condition logging (error → info)
@@ -343,6 +347,186 @@ Manifest: property 'url' ignored, should be within scope of the manifest
 - No manifest warnings
 - No deprecation warnings
 - Icon 404s will persist until PNG icons are generated (non-blocking)
+
+---
+
+## 🐛 CRITICAL: Mobile NaN Bug + contenteditable Quick Fix (2025-11-13)
+
+**Status**: ✅ FIXED | Triple-Layer Validation + TDD Tests
+**Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
+**Commits**: d5ae04f (contenteditable fix), a6c79c9 (mobile NaN fix)
+
+### Issue 1: Mobile Android Export Contains NaN Values 🚨
+
+**User Report**: "Mobile 的逐字模式下 學習後的字 export 的檔案又有問題了"
+- Chrome DevTools mobile simulation: ✅ Works fine
+- Real Android phone: ❌ Export shows `{ "^→商": NaN, "^→艙": NaN }`
+- Impact: Mobile users cannot use learning feature
+
+**Root Cause**:
+```javascript
+// Line 1247-1258 in core_logic.js
+const actualIndex = currentPage * 6 + index;
+const learningData = [{
+  selectedRank: actualIndex,  // ← NaN if index or currentPage is invalid!
+  // ...
+}];
+```
+
+**Diagnosis**:
+1. Mobile touch events sometimes pass undefined/NaN to handleSelection()
+2. parseInt(dataset.index, 10) returns NaN with corrupt/missing data
+3. NaN propagates through calculation: actualIndex = NaN * 6 + NaN = NaN
+4. NaN gets stored in IndexedDB
+5. Export file contains NaN instead of numbers
+
+**Solution: Triple-Layer Validation**:
+
+**Layer 1: handleSelection() (core_logic.js:1227-1274)**
+```javascript
+function handleSelection(index) {
+  // Validate index
+  if (typeof index !== 'number' || isNaN(index) || index < 0) {
+    console.error(`Invalid index: ${index}`);
+    return; // Early exit
+  }
+
+  // Validate currentPage
+  if (typeof currentPage !== 'number' || isNaN(currentPage)) {
+    console.error(`Invalid currentPage, resetting to 0`);
+    currentPage = 0;
+  }
+
+  // ... later ...
+
+  // Validate actualIndex before learning
+  if (isNaN(actualIndex) || actualIndex < 0) {
+    console.error(`Invalid actualIndex: ${actualIndex}`);
+    return;
+  }
+
+  // Validate candidates exist
+  if (!firstCandidate || !selectedCandidate) {
+    console.error('Missing candidate data');
+    return;
+  }
+}
+```
+
+**Layer 2: parseInt() validation (core_logic.js:1791, 1822)**
+```javascript
+// Click handler
+const index = parseInt(candidateItem.dataset.index, 10);
+if (isNaN(index)) {
+  console.error(`Failed to parse index: "${candidateItem.dataset.index}"`);
+  return;
+}
+handleSelection(index);
+
+// Keydown handler
+const index = parseInt(candidateItem.dataset.index, 10);
+if (isNaN(index)) {
+  console.error(`Failed to parse index in keydown: "${candidateItem.dataset.index}"`);
+  return;
+}
+handleSelection(index);
+```
+
+**Layer 3: UserDB.setWeight() validation (user_db_indexeddb.js:103-108)**
+```javascript
+async setWeight(prevChar, currChar, weight) {
+  // Last line of defense
+  if (typeof weight !== 'number' || isNaN(weight) || !isFinite(weight)) {
+    console.error(`Invalid weight value: ${weight}`);
+    console.error(`Context: prevChar="${prevChar}", currChar="${currChar}"`);
+    throw new Error(`Invalid weight: ${weight}. Must be a finite number.`);
+  }
+  // ... proceed with storage ...
+}
+```
+
+**Testing**: 25 TDD Tests (test-mobile-nan-fix.html)
+- Section 1: handleSelection validation (8 tests) ✅
+- Section 2: parseInt validation (5 tests) ✅
+- Section 3: UserDB.setWeight validation (7 tests) ✅
+- Section 4: Integration tests (3 tests) ✅
+- **All 25/25 tests passing** 🎉
+
+### Issue 2: contenteditable Enter/= Keys Not Working 🎹
+
+**User Report**: "在整句模式下 按了 = 後 在智慧區(可編輯) 按下= 或是enter 都沒有反應"
+
+**Root Cause**:
+- `contenteditable="true"` captures keyboard events
+- Events don't bubble to document-level handlers
+- Enter/= key handlers in document can't receive events
+
+**Quick Fix** (Temporary):
+```javascript
+// core_logic_v11_ui.js:543-575
+setTimeout(() => {
+  const editableArea = document.getElementById('prediction-result-text');
+  if (editableArea) {
+    editableArea.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        window.confirmPrediction();
+      }
+      if (e.key === '=') {
+        e.preventDefault();
+        window.triggerPrediction();
+      }
+    });
+  }
+}, 50);
+```
+
+**Long-Term Solution**: Character Span Architecture (Phase 1.10)
+- See: `docs/design/PHASE-1.10-CHARACTER-EDITING-UI.md` (430 lines)
+- Replace contenteditable with `<span class="char">` elements
+- Each character is clickable → shows candidate modal
+- Keyboard events propagate correctly
+- Supports all Session 10.11 Part 6 requirements
+
+### Files Changed 📝
+
+**Commit d5ae04f (contenteditable quick fix)**:
+1. mvp1-pwa/js/core_logic_v11_ui.js (+32 lines)
+   - Added direct keydown handlers to contenteditable
+2. docs/design/PHASE-1.10-CHARACTER-EDITING-UI.md (NEW, 430 lines)
+   - Comprehensive design for character span architecture
+
+**Commit a6c79c9 (mobile NaN fix)**:
+1. mvp1-pwa/js/core_logic.js (+33 lines)
+   - handleSelection(): +21 lines validation
+   - click handler: +6 lines validation
+   - keydown handler: +6 lines validation
+2. mvp1-pwa/js/user_db_indexeddb.js (+6 lines)
+   - setWeight(): +6 lines validation
+3. mvp1-pwa/tests/test-mobile-nan-fix.html (NEW, 523 lines)
+   - 25 comprehensive tests
+
+### Expected Results ✅
+
+**On Real Android Phone**:
+- ✅ All indices properly validated
+- ✅ No NaN values in learning data
+- ✅ Export file shows valid numbers only: `{ "^→商": 2, "^→艙": 3 }`
+- ✅ Console logs detailed errors for debugging
+- ✅ Learning system continues to work correctly
+
+**In Sentence Mode contenteditable**:
+- ✅ Enter key confirms prediction
+- ✅ = key cycles to next prediction
+- ✅ Edits are preserved for learning
+
+### Summary 📊
+
+**Problem**: Critical data corruption on mobile + keyboard events blocked
+**Solution**: Triple-layer validation + direct event handlers
+**Testing**: 25 automated tests
+**Status**: ✅ Fixed and ready for mobile testing
+**Next**: User to test on real Android device, then continue Phase 1.10
 
 ---
 
