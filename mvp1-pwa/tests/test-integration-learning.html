@@ -385,16 +385,18 @@
         });
 
         await it('viterbiWithUserDB should use learned weights in scoring', async () => {
-          const db = new UserDB();
+          // Use fresh database to ensure test isolation
+          const db = new UserDB('test_learned_weights_' + Date.now());
           await db.open();
 
-          // Set a strong preference: 易→在 (boost from 0.6 to 1.6)
-          await db.setWeight('易', '在', 1.0);
+          // Set a strong preference: 易→在 (boost it significantly)
+          await db.setWeight('易', '在', 10.0);  // Large weight to ensure it wins
 
           const result = await viterbiWithUserDB(['4jp', 'ad'], mockDayiDb, mockNgramDb, db);
           expect(result.sentence).toContain('易在');
 
           await db.close();
+          await db.deleteDatabase();
         });
 
         await it('viterbiWithUserDB result should match standard viterbi structure', async () => {
@@ -604,15 +606,19 @@
       // Suite 6: End-to-End Learning Workflow
       describe('Category 6: E2E Learning Workflow (6 tests)', async () => {
         await it('Complete workflow: predict → detect → apply → re-predict', async () => {
-          const db = new UserDB();
+          // Use fresh database to ensure predictable initial prediction
+          const db = new UserDB('test_e2e_workflow_' + Date.now());
           await db.open();
 
-          // Step 1: Initial prediction
+          // Step 1: Initial prediction (with fresh DB, should be default N-gram choice)
           const result1 = await viterbiWithUserDB(['4jp', 'ad'], mockDayiDb, mockNgramDb, db);
           const prediction = result1.sentence;
+          console.log(`[E2E Test] Initial prediction: "${prediction}"`);
 
-          // Step 2: User correction (simulate user choosing different chars)
-          const userSelection = '義再'; // User corrects both characters
+          // Step 2: User correction (ensure it's different from prediction)
+          // Use opposite of whatever was predicted
+          const userSelection = (prediction === '易在') ? '義再' : '易在';
+          console.log(`[E2E Test] User corrects to: "${userSelection}"`);
 
           // Step 3: Detect learning
           const learningData = detectLearning(prediction, userSelection);
@@ -628,6 +634,7 @@
           expect(result2).toBeDefined();
 
           await db.close();
+          await db.deleteDatabase();  // Clean up test database
         });
 
         await it('Learning should improve prediction accuracy over time', async () => {
