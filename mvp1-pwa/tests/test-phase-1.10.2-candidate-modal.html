@@ -280,6 +280,185 @@
   <div id="test-results"></div>
   <div id="summary" class="summary"></div>
 
+  <!-- Load dependencies for testing -->
+  <script>
+    // Mock dayiMap for testing (simplified database)
+    window.dayiMap = new Map([
+      ['4jp', [
+        { char: '易', freq: 80 },
+        { char: '義', freq: 70 },
+        { char: '移', freq: 50 },
+        { char: '異', freq: 40 },
+        { char: '逸', freq: 30 },
+        { char: '益', freq: 20 }
+      ]],
+      ['ad', [
+        { char: '在', freq: 90 },
+        { char: '再', freq: 60 },
+        { char: '載', freq: 40 },
+        { char: '宰', freq: 20 }
+      ]],
+      ['a', [
+        { char: '大', freq: 100 },
+        { char: '太', freq: 80 },
+        { char: '夫', freq: 40 }
+      ]]
+    ]);
+
+    // Helper function from core_logic.js (for sorting)
+    function sortCandidatesByFreq(candidates) {
+      if (!candidates || candidates.length === 0) {
+        return [];
+      }
+      return [...candidates].sort((a, b) => b.freq - a.freq);
+    }
+
+    // Modal functions from core_logic_v11_ui.js (extracted for testing)
+    window.showCandidateModal = function showCandidateModal(charIndex, code, candidates) {
+      const modal = document.getElementById('candidate-modal');
+      const backdrop = document.getElementById('modal-backdrop');
+      const modalTitle = document.getElementById('modal-title');
+      const candidatesGrid = document.getElementById('candidates-grid');
+
+      if (!modal || !backdrop || !modalTitle || !candidatesGrid) {
+        console.error('[Phase 1.10.2] Modal elements not found');
+        return;
+      }
+
+      // Store current editing context
+      window.currentEditingIndex = charIndex;
+
+      // Update modal title
+      modalTitle.textContent = `選擇字元 (位置 ${charIndex}: ${code})`;
+
+      // Highlight the character being edited
+      const charSpans = document.querySelectorAll('.char-span');
+      charSpans.forEach((span, i) => {
+        span.classList.toggle('editing', i === charIndex);
+      });
+
+      // Keyboard shortcut keys (6 candidates max: Space, ', [, ], -, \)
+      const shortcutKeys = [' ', "'", '[', ']', '-', '\\'];
+      const shortcutLabels = ['Space', "'", '[', ']', '-', '\\'];
+
+      // Populate candidates grid
+      candidatesGrid.innerHTML = candidates.map((char, i) => {
+        const keyLabel = i < shortcutLabels.length ? shortcutLabels[i] : '';
+        return `
+          <button class="candidate-btn" data-index="${i}" data-char="${char}">
+            <span class="candidate-char">${char}</span>
+            ${keyLabel ? `<span class="candidate-key">${keyLabel}</span>` : ''}
+          </button>
+        `;
+      }).join('');
+
+      // Attach click handlers to candidate buttons
+      const candidateButtons = candidatesGrid.querySelectorAll('.candidate-btn');
+      candidateButtons.forEach((btn, i) => {
+        btn.addEventListener('click', () => {
+          selectCandidate(charIndex, candidates[i]);
+        });
+      });
+
+      // Show modal and backdrop
+      modal.classList.remove('hidden');
+      backdrop.classList.remove('hidden');
+
+      console.log(`[Phase 1.10.2] Modal shown for character ${charIndex} (${code}) with ${candidates.length} candidates`);
+    };
+
+    window.closeCandidateModal = function closeCandidateModal() {
+      const modal = document.getElementById('candidate-modal');
+      const backdrop = document.getElementById('modal-backdrop');
+
+      if (modal) modal.classList.add('hidden');
+      if (backdrop) backdrop.classList.add('hidden');
+
+      // Remove editing highlight from all characters
+      const charSpans = document.querySelectorAll('.char-span');
+      charSpans.forEach(span => span.classList.remove('editing'));
+
+      // Clear editing context
+      window.currentEditingIndex = -1;
+
+      console.log('[Phase 1.10.2] Modal closed');
+    };
+
+    window.selectCandidate = function selectCandidate(charIndex, newChar) {
+      const charSpans = document.querySelectorAll('.char-span');
+
+      if (charIndex < 0 || charIndex >= charSpans.length) {
+        console.error(`[Phase 1.10.2] Invalid character index: ${charIndex}`);
+        return;
+      }
+
+      const targetSpan = charSpans[charIndex];
+
+      // Update character text
+      targetSpan.textContent = newChar;
+
+      // Mark as edited
+      targetSpan.dataset.edited = 'true';
+
+      console.log(`[Phase 1.10.2] Character ${charIndex} changed to "${newChar}"`);
+
+      // Close modal
+      closeCandidateModal();
+
+      console.log(`[Phase 1.10.2] selectCandidate complete for index ${charIndex}`);
+    };
+
+    // Keyboard event handler for modal shortcuts
+    document.addEventListener('keydown', function(e) {
+      const modal = document.getElementById('candidate-modal');
+      const isModalVisible = modal && !modal.classList.contains('hidden');
+
+      if (!isModalVisible) return;
+
+      const key = e.key;
+      const shortcutKeys = {
+        ' ': 0,      // Space
+        "'": 1,
+        '[': 2,
+        ']': 3,
+        '-': 4,
+        '\\': 5
+      };
+
+      if (key === 'Escape') {
+        e.preventDefault();
+        closeCandidateModal();
+      } else if (key in shortcutKeys) {
+        e.preventDefault();
+        const candidateIndex = shortcutKeys[key];
+        const candidateButtons = document.querySelectorAll('.candidate-btn');
+        if (candidateIndex < candidateButtons.length) {
+          candidateButtons[candidateIndex].click();
+        }
+      }
+    });
+
+    // Backdrop click handler
+    document.getElementById('modal-backdrop')?.addEventListener('click', function() {
+      closeCandidateModal();
+    });
+
+    // Close button handler
+    document.getElementById('close-modal-btn')?.addEventListener('click', function() {
+      closeCandidateModal();
+    });
+
+    // Attach click handlers to test character spans
+    document.querySelectorAll('.char-span').forEach((span, index) => {
+      span.addEventListener('click', function() {
+        const dataIndex = parseInt(this.dataset.index, 10);
+        const dataCode = this.dataset.code;
+        const dataCandidates = JSON.parse(this.dataset.candidates);
+        showCandidateModal(dataIndex, dataCode, dataCandidates);
+      });
+    });
+  </script>
+
   <script>
     // Test Results Container
     const resultsContainer = document.getElementById('test-results');

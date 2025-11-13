@@ -177,6 +177,215 @@
   <div id="test-results"></div>
   <div id="summary" class="summary"></div>
 
+  <!-- Modal HTML (needed for Phase 1.10.2 functions) -->
+  <div id="modal-backdrop" class="modal-backdrop hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+  <div id="candidate-modal" class="candidate-modal hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2d2d30; padding: 20px; border-radius: 12px; z-index: 1000; min-width: 300px;">
+    <div class="modal-header" style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+      <span class="modal-title" id="modal-title">選擇字元</span>
+      <button class="close-btn" id="close-modal-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;">✕</button>
+    </div>
+    <div class="candidates-grid" id="candidates-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+      <!-- Candidates populated dynamically -->
+    </div>
+  </div>
+
+  <!-- Load dependencies for testing -->
+  <script>
+    // Mock dayiMap
+    window.dayiMap = new Map([
+      ['4jp', [
+        { char: '易', freq: 80 },
+        { char: '義', freq: 70 },
+        { char: '移', freq: 50 },
+        { char: '異', freq: 40 },
+        { char: '逸', freq: 30 },
+        { char: '益', freq: 20 }
+      ]],
+      ['ad', [
+        { char: '在', freq: 90 },
+        { char: '再', freq: 60 },
+        { char: '載', freq: 40 },
+        { char: '宰', freq: 20 }
+      ]],
+      ['a', [
+        { char: '大', freq: 100 },
+        { char: '太', freq: 80 },
+        { char: '夫', freq: 40 }
+      ]]
+    ]);
+
+    function sortCandidatesByFreq(candidates) {
+      if (!candidates || candidates.length === 0) return [];
+      return [...candidates].sort((a, b) => b.freq - a.freq);
+    }
+
+    // Phase 1.10.2: Modal functions
+    window.showCandidateModal = function showCandidateModal(charIndex, code, candidates) {
+      const modal = document.getElementById('candidate-modal');
+      const backdrop = document.getElementById('modal-backdrop');
+      const modalTitle = document.getElementById('modal-title');
+      const candidatesGrid = document.getElementById('candidates-grid');
+
+      if (!modal || !backdrop || !modalTitle || !candidatesGrid) {
+        console.error('[Test] Modal elements not found');
+        return;
+      }
+
+      window.currentEditingIndex = charIndex;
+      modalTitle.textContent = `選擇字元 (位置 ${charIndex}: ${code})`;
+
+      const charSpans = document.querySelectorAll('.char-span');
+      charSpans.forEach((span, i) => span.classList.toggle('editing', i === charIndex));
+
+      const shortcutLabels = ['Space', "'", '[', ']', '-', '\\'];
+      candidatesGrid.innerHTML = candidates.map((char, i) => {
+        const keyLabel = i < shortcutLabels.length ? shortcutLabels[i] : '';
+        return `<button class="candidate-btn" data-index="${i}" data-char="${char}" style="background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 1.2em;">
+          ${char} ${keyLabel ? `<small style="opacity: 0.7;">${keyLabel}</small>` : ''}
+        </button>`;
+      }).join('');
+
+      candidatesGrid.querySelectorAll('.candidate-btn').forEach((btn, i) => {
+        btn.addEventListener('click', () => selectCandidate(charIndex, candidates[i]));
+      });
+
+      modal.classList.remove('hidden');
+      backdrop.classList.remove('hidden');
+    };
+
+    window.closeCandidateModal = function closeCandidateModal() {
+      const modal = document.getElementById('candidate-modal');
+      const backdrop = document.getElementById('modal-backdrop');
+      if (modal) modal.classList.add('hidden');
+      if (backdrop) backdrop.classList.add('hidden');
+
+      document.querySelectorAll('.char-span').forEach(span => span.classList.remove('editing'));
+      window.currentEditingIndex = -1;
+    };
+
+    window.selectCandidate = function selectCandidate(charIndex, newChar) {
+      const charSpans = document.querySelectorAll('.char-span');
+      if (charIndex < 0 || charIndex >= charSpans.length) return;
+
+      const targetSpan = charSpans[charIndex];
+      targetSpan.textContent = newChar;
+      targetSpan.dataset.edited = 'true';
+
+      closeCandidateModal();
+
+      // 🆕 Phase 1.10.3: Auto-advance to next character
+      if (charIndex + 1 < charSpans.length) {
+        const nextSpan = charSpans[charIndex + 1];
+        const nextCode = nextSpan.dataset.code;
+        const nextCandidates = JSON.parse(nextSpan.dataset.candidates);
+
+        setTimeout(() => {
+          showCandidateModal(charIndex + 1, nextCode, nextCandidates);
+        }, 150);
+      }
+    };
+
+    // Phase 1.10.3: Navigation functions
+    let currentFocusedIndex = -1;
+
+    window.setCharacterFocus = function setCharacterFocus(index) {
+      const charSpans = document.querySelectorAll('.char-span');
+      charSpans.forEach(span => span.classList.remove('focused'));
+
+      if (index >= 0 && index < charSpans.length) {
+        charSpans[index].classList.add('focused');
+        currentFocusedIndex = index;
+      } else {
+        currentFocusedIndex = -1;
+      }
+    };
+
+    window.navigateToPreviousChar = function navigateToPreviousChar() {
+      const charSpans = document.querySelectorAll('.char-span');
+      if (charSpans.length === 0) return;
+
+      if (currentFocusedIndex === -1) {
+        setCharacterFocus(charSpans.length - 1);
+      } else if (currentFocusedIndex > 0) {
+        setCharacterFocus(currentFocusedIndex - 1);
+      }
+    };
+
+    window.navigateToNextChar = function navigateToNextChar() {
+      const charSpans = document.querySelectorAll('.char-span');
+      if (charSpans.length === 0) return;
+
+      if (currentFocusedIndex === -1) {
+        setCharacterFocus(0);
+      } else if (currentFocusedIndex < charSpans.length - 1) {
+        setCharacterFocus(currentFocusedIndex + 1);
+      }
+    };
+
+    window.openModalForFocusedChar = function openModalForFocusedChar() {
+      if (currentFocusedIndex === -1) return;
+
+      const charSpans = document.querySelectorAll('.char-span');
+      if (currentFocusedIndex < charSpans.length) {
+        const span = charSpans[currentFocusedIndex];
+        const code = span.dataset.code;
+        const candidates = JSON.parse(span.dataset.candidates);
+        showCandidateModal(currentFocusedIndex, code, candidates);
+      }
+    };
+
+    // Arrow key event handler
+    document.addEventListener('keydown', function(e) {
+      const modal = document.getElementById('candidate-modal');
+      const isModalVisible = modal && !modal.classList.contains('hidden');
+
+      if (isModalVisible) return; // Don't navigate while modal is open
+
+      const key = e.key;
+      if (key === 'ArrowLeft') {
+        e.preventDefault();
+        navigateToPreviousChar();
+      } else if (key === 'ArrowRight') {
+        e.preventDefault();
+        navigateToNextChar();
+      } else if (key === 'Enter') {
+        if (currentFocusedIndex !== -1) {
+          e.preventDefault();
+          openModalForFocusedChar();
+        }
+      }
+    });
+
+    // Attach click handlers to character spans
+    document.querySelectorAll('.char-span').forEach((span, index) => {
+      span.addEventListener('click', function() {
+        const dataIndex = parseInt(this.dataset.index, 10);
+        const dataCode = this.dataset.code;
+        const dataCandidates = JSON.parse(this.dataset.candidates);
+        showCandidateModal(dataIndex, dataCode, dataCandidates);
+      });
+    });
+
+    // Modal keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      const modal = document.getElementById('candidate-modal');
+      const isModalVisible = modal && !modal.classList.contains('hidden');
+      if (!isModalVisible) return;
+
+      const shortcutKeys = { ' ': 0, "'": 1, '[': 2, ']': 3, '-': 4, '\\': 5 };
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeCandidateModal();
+      } else if (e.key in shortcutKeys) {
+        e.preventDefault();
+        const candidateButtons = document.querySelectorAll('.candidate-btn');
+        if (shortcutKeys[e.key] < candidateButtons.length) {
+          candidateButtons[shortcutKeys[e.key]].click();
+        }
+      }
+    });
+  </script>
+
   <script>
     const resultsContainer = document.getElementById('test-results');
     const summaryContainer = document.getElementById('summary');
