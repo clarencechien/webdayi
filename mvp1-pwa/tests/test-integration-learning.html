@@ -279,11 +279,12 @@
     // Mock Data
     // ============================================================================
 
-    const mockDayiDb = {
-      '4jp': [{ char: '易', freq: 80 }, { char: '義', freq: 70 }],
-      'ad': [{ char: '在', freq: 90 }, { char: '再', freq: 85 }],
-      'a': [{ char: '大', freq: 100 }]
-    };
+    // Convert mock data to Map (Viterbi expects Map, not plain object)
+    const mockDayiDb = new Map([
+      ['4jp', [{ char: '易', freq: 80 }, { char: '義', freq: 70 }]],
+      ['ad', [{ char: '在', freq: 90 }, { char: '再', freq: 85 }]],
+      ['a', [{ char: '大', freq: 100 }]]
+    ]);
 
     const mockNgramDb = {
       version: '2.0',
@@ -349,11 +350,14 @@
         });
 
         await it('UserDB should return 0 for unlearned patterns', async () => {
-          const db = new UserDB();
+          // Use unique database name to ensure fresh start
+          const db = new UserDB('test_fresh_db_' + Date.now());
           await db.open();
           const weight = await db.getWeight('易', '在');
           expect(weight).toBe(0);
           await db.close();
+          // Clean up - delete the test database
+          await db.deleteDatabase();
         });
       });
 
