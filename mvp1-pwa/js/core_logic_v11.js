@@ -211,7 +211,12 @@ function clearCodeBuffer() {
     codeBufferDisplay.innerHTML = '';
   }
 
-  console.log('[Phase 1.10.5] clearCodeBuffer: All state cleared (code buffer, sentence display, finish hint, candidate area)');
+  // 🆕 Phase 1.10.5: Clear prediction state (CRITICAL FIX for ghost sentences)
+  if (typeof window.clearPredictionState === 'function') {
+    window.clearPredictionState();
+  }
+
+  console.log('[Phase 1.10.5] clearCodeBuffer: ALL state cleared (buffer, UI, predictions)');
 }
 
 /**
