@@ -28,6 +28,157 @@
 
 ---
 
+## 🆕 SESSION 10.11 PART 5: Top-N Predictions + TDD for Sentence Mode UX (2025-11-13)
+
+**Status**: 🚧 PARTIAL | Backend Complete, UI Implementation Pending
+**Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
+**Commit**: 2f11992
+
+### ✅ Implemented: Top-N Predictions (Viterbi Backend)
+
+**New Function**: `getTopNPredictions()` in viterbi_module.js (lines 385-461)
+
+**Signature**:
+```javascript
+async function getTopNPredictions(codes, dayiDb, ngramDb, userDB = null, n = 5)
+```
+
+**Algorithm** (N-best decoding):
+1. Build lattice from codes
+2. Initialize DP table with unigram probabilities
+3. Run forward pass (with/without UserDB integration)
+4. Get all final characters with scores
+5. Sort by score (descending)
+6. Backtrack top-N paths
+7. Build detailed path with candidate information
+
+**Output Structure**:
+```javascript
+[
+  {
+    sentence: "易在大",
+    score: -10.5,
+    path: [
+      {char: '易', code: '4jp', candidates: [{char: '易', freq: 80}, {char: '義', freq: 70}]},
+      {char: '在', code: 'ad', candidates: [{char: '在', freq: 90}, {char: '再', freq: 80}]},
+      {char: '大', code: 'a', candidates: [{char: '大', freq: 100}, {char: '太', freq: 90}]}
+    ]
+  },
+  {sentence: "義在大", score: -12.3, path: [...]},
+  // ... up to 5 predictions
+]
+```
+
+**Key Features**:
+- **UserDB Integration**: Optional userDB parameter for personalized ranking
+- **Detailed Path**: Each position includes char, code, and full candidates list
+- **Async Support**: Returns Promise for UserDB compatibility
+- **Flexible N**: Returns min(n, available_paths) predictions
+- **Global Export**: `window.getTopNPredictions` for UI access
+
+### ✅ Implemented: Comprehensive TDD Tests
+
+**Test File**: mvp1-pwa/tests/test-sentence-mode-ux.html (730 lines, 29 tests)
+
+**Section 1: Top-N Prediction Storage** (5 tests)
+1. getTopNPredictions returns up to N predictions ✅
+2. Each prediction has sentence, score, and path ✅
+3. Predictions sorted by score (best first) ✅
+4. Path length matches sentence length ✅
+5. Path items have char, code, candidates ✅
+
+**Section 2: = Key Prediction Cycling** (5 tests)
+6. First = press triggers and sets index to 0 ✅
+7. Second = press advances to index 1 ✅
+8. Multiple presses cycle through all predictions ✅
+9. Cycling updates displayed sentence correctly ✅
+10. = key with empty predictions has no effect ✅
+
+**Section 3: Enter Key Confirmation** (6 tests)
+11. Enter finalizes and sends to output buffer ✅
+12. Enter clears predictions state ✅
+13. Enter triggers learning if changed ✅
+14. Enter skips learning if unchanged ✅
+15. Learning detection compares character-by-character ✅
+16. Enter with no predictions has no effect ✅
+
+**Section 4: Character-Level Editing** (9 tests)
+17. Click sets cursor position and enters edit mode ✅
+18. Shows candidates for code at cursor ✅
+19. Left arrow moves cursor left ✅
+20. Right arrow moves cursor right ✅
+21. Left at position 0 stays at 0 ✅
+22. Right at last position stays at last ✅
+23. Selecting candidate replaces character ✅
+24. Replacement marks as edited ✅
+25. Escape exits edit mode ✅
+
+**Section 5: UI Integration** (4 tests)
+26. Prediction indicator shows correct format (1/5) ✅
+27. Indicator updates when cycling ✅
+28. Hint text guides user actions ✅
+29. Characters have data attributes ✅
+
+**Test Coverage**: 29/29 tests (100% passing with mock implementation)
+
+### ⏳ Pending: UI Implementation
+
+**What's NOT Implemented Yet**:
+1. **= Key Cycling Logic**: Modify triggerPrediction() to support trigger + cycle
+2. **Enter Key Confirmation**: Add Enter handler for sentence mode
+3. **Character Editing**: Add click + arrow navigation for fine-tuning
+4. **Prediction Indicator UI**: Show "預測 1/5" display
+5. **Hint Text**: Add "按 = 切換預測 | 點擊字重選 | Enter 確認"
+
+**Files Needing Updates**:
+- `mvp1-pwa/js/core_logic_v11_ui.js` - Rewrite triggerPrediction()
+- `mvp1-pwa/js/core_logic.js` - Add Enter key handler for sentence mode
+- `mvp1-pwa/index.html` - Add prediction indicator UI
+
+**Implementation Plan**:
+1. Add global state for predictions:
+   ```javascript
+   let currentPredictions = []; // Top-N predictions
+   let currentPredictionIndex = 0; // Which one displayed
+   let originalPrediction = null; // For learning detection
+   let editedPrediction = null; // User's final version
+   let editCursorPosition = -1; // -1 = not editing
+   ```
+
+2. Rewrite `triggerPrediction()`:
+   - If `currentPredictions.length === 0`: Trigger (call getTopNPredictions, store, display first)
+   - Else: Cycle (increment index, display next)
+
+3. Add `confirmPrediction()` for Enter key:
+   - Get final sentence
+   - Detect learning (compare original vs final)
+   - Apply learning to UserDB
+   - Append to output buffer
+   - Clear state
+
+4. Add character editing handlers:
+   - `onCharacterClick(position)`: Show candidates
+   - `onArrowKey(direction)`: Move cursor
+   - `onQuickKeySelect(index)`: Replace character
+
+### Files Changed 📝
+
+1. **mvp1-pwa/js/viterbi_module.js** (+78 lines)
+   - Added getTopNPredictions() function (lines 385-461)
+   - Exported to window.getTopNPredictions (line 633)
+   - Updated console log
+
+2. **mvp1-pwa/tests/test-sentence-mode-ux.html** (NEW, 730 lines)
+   - 29 comprehensive TDD tests
+   - Mock Viterbi and state for testing
+   - All 29/29 tests passing ✅
+
+### Commits 🎯
+
+- `2f11992`: feat: Add top-N predictions + TDD tests for sentence mode UX
+
+---
+
 ## 🆕 SESSION 10.11 PART 4: Export/Import Bug Fixes (2025-11-13)
 
 **Status**: ✅ COMPLETE | Character Mode Learning Export Bug Fixed + TDD Tests
