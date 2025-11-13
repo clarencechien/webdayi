@@ -100,6 +100,13 @@ export class UserDB {
       throw new Error('Database not opened. Call open() first.');
     }
 
+    // 🐛 Mobile Fix: Validate weight to prevent NaN storage
+    if (typeof weight !== 'number' || isNaN(weight) || !isFinite(weight)) {
+      console.error(`[UserDB] Invalid weight value: ${weight} (type: ${typeof weight})`);
+      console.error(`[UserDB] Context: prevChar="${prevChar}", currChar="${currChar}"`);
+      throw new Error(`Invalid weight: ${weight}. Must be a finite number.`);
+    }
+
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction([this.storeName], 'readwrite');
       const objectStore = transaction.objectStore(this.storeName);

@@ -1224,7 +1224,19 @@ function updateCandidateArea(candidates, pageIndex = 0) {
  * @param {number} index - The selected index (0-5)
  */
 function handleSelection(index) {
+  // 🐛 Mobile Fix: Defensive validation to prevent NaN
+  if (typeof index !== 'number' || isNaN(index) || index < 0) {
+    console.error(`[WebDaYi] Invalid index in handleSelection: ${index} (type: ${typeof index})`);
+    return;
+  }
+
   if (!currentCode || currentCandidates.length === 0) return;
+
+  // Ensure currentPage is valid
+  if (typeof currentPage !== 'number' || isNaN(currentPage)) {
+    console.error(`[WebDaYi] Invalid currentPage: ${currentPage}, resetting to 0`);
+    currentPage = 0;
+  }
 
   // Get candidates for current page
   const pageCandidates = getCandidatesForPage(currentCandidates, currentPage);
@@ -1245,8 +1257,21 @@ function handleSelection(index) {
     // If user selected non-first candidate, record as learning preference
     if (index > 0 && window.userDB && window.userDBReady && typeof applyLearning === 'function') {
       const actualIndex = currentPage * 6 + index;
+
+      // 🐛 Mobile Fix: Validate actualIndex before creating learning data
+      if (isNaN(actualIndex) || actualIndex < 0) {
+        console.error(`[WebDaYi] Invalid actualIndex: ${actualIndex} (currentPage: ${currentPage}, index: ${index})`);
+        return;
+      }
+
       const firstCandidate = currentCandidates[0]; // What system predicted
       const selectedCandidate = selected; // What user actually chose
+
+      // Validate candidates exist
+      if (!firstCandidate || !selectedCandidate) {
+        console.error('[WebDaYi] Missing candidate data for learning');
+        return;
+      }
 
       // Record as unigram preference (using special prevChar '^' for context-free)
       const learningData = [{
@@ -1761,6 +1786,13 @@ async function initialize() {
         const candidateItem = e.target.closest('.candidate-item');
         if (candidateItem && candidateItem.dataset.index) {
           const index = parseInt(candidateItem.dataset.index, 10);
+
+          // 🐛 Mobile Fix: Validate parsed index
+          if (isNaN(index)) {
+            console.error(`[WebDaYi] Failed to parse index from dataset: "${candidateItem.dataset.index}"`);
+            return;
+          }
+
           handleSelection(index);
           return;
         }
@@ -1785,6 +1817,13 @@ async function initialize() {
           if (candidateItem && candidateItem.dataset.index) {
             e.preventDefault();
             const index = parseInt(candidateItem.dataset.index, 10);
+
+            // 🐛 Mobile Fix: Validate parsed index
+            if (isNaN(index)) {
+              console.error(`[WebDaYi] Failed to parse index from dataset in keydown: "${candidateItem.dataset.index}"`);
+              return;
+            }
+
             handleSelection(index);
           }
         }
