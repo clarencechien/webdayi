@@ -797,38 +797,90 @@
       border-color: #0fb8f0;
     }
 
+    /* Trapezoid Layout - Row 4 */
     .key-wide {
-      flex: 1.5;
+      flex: 1.5; /* Shift and Backspace in Row 4 */
     }
 
-    .key-extra-wide {
-      flex: 3;
-    }
-
-    .key-backspace, .key-enter {
-      background: #ef4444;
-      border-color: #dc2626;
+    .key-shift {
+      background: #64748b;
+      border-color: #475569;
       color: white;
     }
 
-    .dark .key-backspace, .dark .key-enter {
-      background: #dc2626;
-      border-color: #b91c1c;
+    .dark .key-shift {
+      background: #475569;
+      border-color: #334155;
+    }
+
+    .key-backspace {
+      background: #64748b;
+      border-color: #475569;
+      color: white;
+    }
+
+    .dark .key-backspace {
+      background: #475569;
+      border-color: #334155;
+    }
+
+    /* Control Row - Row 5 */
+    .key-small {
+      flex: 0.8; /* Punctuation keys: , . / */
+    }
+
+    .key-medium {
+      flex: 1.2; /* Language toggle */
+    }
+
+    .key-super-wide {
+      flex: 4; /* Space bar - largest key */
+    }
+
+    .key-lang {
+      background: #64748b;
+      border-color: #475569;
+      color: white;
+    }
+
+    .dark .key-lang {
+      background: #475569;
+      border-color: #334155;
+    }
+
+    .key-punct {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #1e293b;
+    }
+
+    .dark .key-punct {
+      background: #334155;
+      border-color: #475569;
+      color: #f1f5f9;
     }
 
     .key-space {
-      background: #0fb8f0;
-      border-color: #0891b2;
-      color: white;
+      background: #cbd5e1;
+      border-color: #94a3b8;
+      color: #1e293b;
+      font-size: 14px;
     }
 
     .dark .key-space {
-      background: #0891b2;
-      border-color: #0e7490;
+      background: #475569;
+      border-color: #334155;
+      color: #94a3b8;
+    }
+
+    .space-text {
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0.7;
     }
 
     .control-row {
-      gap: 6px;
+      gap: 5px;
     }
 
     /* Show keyboard on mobile */
@@ -838,8 +890,9 @@
       }
 
       /* Add bottom padding to main content to prevent keyboard overlap */
+      /* Reduced from 280px to 265px for better candidate visibility */
       #app-container {
-        padding-bottom: 280px;
+        padding-bottom: 265px;
       }
 
       /* Prevent input mode "none" attribute from being overridden */
@@ -1139,11 +1192,21 @@
           const inputBox = document.getElementById('input-box');
           if (!inputBox) return;
 
+          // Skip language toggle button (handled separately)
+          if (button.id === 'key-lang-toggle') {
+            console.log('[PWA] Language toggle pressed (no action yet)');
+            return;
+          }
+
           // Handle different key types
           // Note: Synthetic KeyboardEvent doesn't update input.value automatically (browser security)
           // We need to manually update the value and trigger events
 
-          if (key === 'Backspace') {
+          if (key === 'Shift') {
+            // Shift key - currently no action for Dayi IME
+            console.log('[PWA] Shift pressed (no action for Dayi)');
+            return;
+          } else if (key === 'Backspace') {
             // Remove last character
             inputBox.value = inputBox.value.slice(0, -1);
 
@@ -1235,73 +1298,78 @@
     });
   </script>
 
-  <!-- Mobile Custom Touch Keyboard (RWD) -->
+  <!-- Mobile Custom Touch Keyboard (RWD) - Trapezoid Layout -->
   <div id="custom-keyboard" class="mobile-keyboard">
-    <!-- Row 1: Number Keys -->
-    <div class="keyboard-row">
-      <button class="key-btn" data-key="1" data-char="1">1</button>
-      <button class="key-btn" data-key="2" data-char="2">2</button>
-      <button class="key-btn" data-key="3" data-char="3">3</button>
-      <button class="key-btn" data-key="4" data-char="4">4</button>
-      <button class="key-btn" data-key="5" data-char="5">5</button>
-      <button class="key-btn" data-key="6" data-char="6">6</button>
-      <button class="key-btn" data-key="7" data-char="7">7</button>
-      <button class="key-btn" data-key="8" data-char="8">8</button>
-      <button class="key-btn" data-key="9" data-char="9">9</button>
-      <button class="key-btn" data-key="0" data-char="0">0</button>
+    <!-- Row 1: Number Keys (1-0, 10 keys) -->
+    <div class="keyboard-row row-numbers">
+      <button class="key-btn key-num" data-key="1">1</button>
+      <button class="key-btn key-num" data-key="2">2</button>
+      <button class="key-btn key-num" data-key="3">3</button>
+      <button class="key-btn key-num" data-key="4">4</button>
+      <button class="key-btn key-num" data-key="5">5</button>
+      <button class="key-btn key-num" data-key="6">6</button>
+      <button class="key-btn key-num" data-key="7">7</button>
+      <button class="key-btn key-num" data-key="8">8</button>
+      <button class="key-btn key-num" data-key="9">9</button>
+      <button class="key-btn key-num" data-key="0">0</button>
     </div>
 
-    <!-- Row 2: QWERTY Top Row -->
-    <div class="keyboard-row">
-      <button class="key-btn" data-key="q">Q</button>
-      <button class="key-btn" data-key="w">W</button>
-      <button class="key-btn" data-key="e">E</button>
-      <button class="key-btn" data-key="r">R</button>
-      <button class="key-btn" data-key="t">T</button>
-      <button class="key-btn" data-key="y">Y</button>
-      <button class="key-btn" data-key="u">U</button>
-      <button class="key-btn" data-key="i">I</button>
-      <button class="key-btn" data-key="o">O</button>
-      <button class="key-btn" data-key="p">P</button>
+    <!-- Row 2: QWERTY Top Row (q-p, 10 keys) -->
+    <div class="keyboard-row row-qwerty">
+      <button class="key-btn key-letter" data-key="q">q</button>
+      <button class="key-btn key-letter" data-key="w">w</button>
+      <button class="key-btn key-letter" data-key="e">e</button>
+      <button class="key-btn key-letter" data-key="r">r</button>
+      <button class="key-btn key-letter" data-key="t">t</button>
+      <button class="key-btn key-letter" data-key="y">y</button>
+      <button class="key-btn key-letter" data-key="u">u</button>
+      <button class="key-btn key-letter" data-key="i">i</button>
+      <button class="key-btn key-letter" data-key="o">o</button>
+      <button class="key-btn key-letter" data-key="p">p</button>
     </div>
 
-    <!-- Row 3: Home Row -->
-    <div class="keyboard-row">
-      <button class="key-btn" data-key="a">A</button>
-      <button class="key-btn" data-key="s">S</button>
-      <button class="key-btn" data-key="d">D</button>
-      <button class="key-btn" data-key="f">F</button>
-      <button class="key-btn" data-key="g">G</button>
-      <button class="key-btn" data-key="h">H</button>
-      <button class="key-btn" data-key="j">J</button>
-      <button class="key-btn" data-key="k">K</button>
-      <button class="key-btn" data-key="l">L</button>
-      <button class="key-btn" data-key=";">;</button>
+    <!-- Row 3: Home Row (a-;, 10 keys) -->
+    <div class="keyboard-row row-home">
+      <button class="key-btn key-letter" data-key="a">a</button>
+      <button class="key-btn key-letter" data-key="s">s</button>
+      <button class="key-btn key-letter" data-key="d">d</button>
+      <button class="key-btn key-letter" data-key="f">f</button>
+      <button class="key-btn key-letter" data-key="g">g</button>
+      <button class="key-btn key-letter" data-key="h">h</button>
+      <button class="key-btn key-letter" data-key="j">j</button>
+      <button class="key-btn key-letter" data-key="k">k</button>
+      <button class="key-btn key-letter" data-key="l">l</button>
+      <button class="key-btn key-letter" data-key=";">;</button>
     </div>
 
-    <!-- Row 4: Bottom Row -->
-    <div class="keyboard-row">
-      <button class="key-btn" data-key="z">Z</button>
-      <button class="key-btn" data-key="x">X</button>
-      <button class="key-btn" data-key="c">C</button>
-      <button class="key-btn" data-key="v">V</button>
-      <button class="key-btn" data-key="b">B</button>
-      <button class="key-btn" data-key="n">N</button>
-      <button class="key-btn" data-key="m">M</button>
-      <button class="key-btn" data-key=",">,</button>
-      <button class="key-btn" data-key=".">.</button>
-      <button class="key-btn" data-key="/">/</button>
-    </div>
-
-    <!-- Row 5: Control Keys -->
-    <div class="keyboard-row control-row">
-      <button class="key-btn key-wide key-backspace" data-key="Backspace">
+    <!-- Row 4: Bottom Row - Trapezoid Layout (Shift + z-m + Backspace) -->
+    <div class="keyboard-row row-bottom">
+      <button class="key-btn key-shift key-wide" data-key="Shift">
+        <span class="material-symbols-outlined">arrow_upward</span>
+      </button>
+      <button class="key-btn key-letter" data-key="z">z</button>
+      <button class="key-btn key-letter" data-key="x">x</button>
+      <button class="key-btn key-letter" data-key="c">c</button>
+      <button class="key-btn key-letter" data-key="v">v</button>
+      <button class="key-btn key-letter" data-key="b">b</button>
+      <button class="key-btn key-letter" data-key="n">n</button>
+      <button class="key-btn key-letter" data-key="m">m</button>
+      <button class="key-btn key-backspace key-wide" data-key="Backspace">
         <span class="material-symbols-outlined">backspace</span>
       </button>
-      <button class="key-btn key-extra-wide key-space" data-key=" ">Space</button>
-      <button class="key-btn key-wide key-enter" data-key="Enter">
-        <span class="material-symbols-outlined">keyboard_return</span>
+    </div>
+
+    <!-- Row 5: Control Keys (Language + Punctuation + Space + Enter) -->
+    <div class="keyboard-row control-row">
+      <button class="key-btn key-lang key-medium" id="key-lang-toggle" title="語言/鍵盤切換">
+        <span class="material-symbols-outlined">language</span>
       </button>
+      <button class="key-btn key-punct key-small" data-key=",">,</button>
+      <button class="key-btn key-space key-super-wide" data-key=" ">
+        <span class="space-text">Space</span>
+      </button>
+      <button class="key-btn key-punct key-small" data-key=".">.</button>
+      <button class="key-btn key-punct key-small" data-key="/">/</button>
     </div>
   </div>
 
