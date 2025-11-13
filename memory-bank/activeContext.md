@@ -637,12 +637,20 @@ User experience: Fast, clear confirmation, full control
 - = key: First press triggers prediction, subsequent presses cycle
 - No separate Space trigger (confusing and extra action)
 
-**Core Principles** (CORRECTED):
-1. **Type naturally with spaces**: "4jp ad de" (spaces are code separators, not triggers)
-2. **= key = Trigger + Cycle**:
-   - First press: Parse input → trigger Viterbi → show top-1
-   - Second press: Show top-2
-   - Third press: Show top-3, ..., top-5, then loop back to top-1
+**Core Principles** (CORRECTED - User Feedback: "單碼時還是需要space"):
+
+**IMPORTANT CLARIFICATION**: The current implementation is CORRECT!
+- Space key MUST be used to buffer codes (especially single codes)
+- = key triggers prediction on buffered codes AND cycles through predictions
+
+1. **Space key = Buffer individual codes** (REQUIRED):
+   - Type "4jp" + **Space** → buffer "4jp", show live preview "易"
+   - Type "ad" + **Space** → buffer "ad", show live preview "易 在"
+   - **Cannot skip Space** for single code input
+2. **= key = Trigger + Cycle predictions**:
+   - First press: Trigger Viterbi on buffered codes → show top-1 prediction
+   - Second press: Cycle to top-2
+   - Third press: Cycle to top-3, ..., top-5, then loop back to top-1
 3. **Click character + Left/Right arrows = Fine-tune**:
    - Click character → show 6 candidates (no pagination)
    - Left/Right arrows → move cursor between characters
@@ -651,13 +659,13 @@ User experience: Fast, clear confirmation, full control
 
 **User Actions Comparison**:
 
-| Scenario | Old Design (Space triggers) | New Design (= triggers) |
-|----------|------------------------------|--------------------------|
-| Accept top-1 | Type "4jp ad" + Space + ??? | Type "4jp ad" + = + Enter (3 keys) ✅ |
-| Try top-2 | Not possible | Type "4jp ad" + = + = + Enter (4 keys) ✅ |
-| Edit 1 char | Space + click + edit + ??? | = + click + select + Enter (4 actions) ✅ |
+| Scenario | Current Implementation (CORRECT) |
+|----------|-----------------------------------|
+| Accept top-1 | Type "4jp" + Space + "ad" + Space + = + Enter (6 keys) |
+| Try top-2 | Type "4jp" + Space + "ad" + Space + = + = + Enter (7 keys) |
+| Edit 1 char | Space codes + = + click + select + Enter (5+ actions) |
 
-**Key Improvement**: Natural typing flow → Type codes with spaces → = triggers → Enter confirms (3-4 keys)
+**Key Design**: Explicit buffering with Space → = triggers/cycles → Enter confirms
 
 ---
 
@@ -689,13 +697,31 @@ currentPredictions = [
 
 ---
 
-### Key Handlers Logic (CORRECTED)
+### Key Handlers Logic (CORRECTED - Space for buffering)
 
-**Input Box Behavior** (natural typing):
+**IMPORTANT**: The current implementation in core_logic.js is CORRECT and matches this design.
+
+**Space Key** (buffer codes - REQUIRED):
 ```javascript
-// User types: "4jp ad de" (spaces are code separators)
-// No action triggered until = key is pressed
-// Input box shows raw text: "4jp ad de"
+if (sentenceMode && inputValue.length > 0) {
+  // 1. Validate code exists in dayiDb
+  const candidates = dayiDb.get(inputValue);
+  if (!candidates || candidates.length === 0) {
+    return; // Invalid code
+  }
+
+  // 2. Add code to buffer
+  codesBuffer.push(inputValue);
+
+  // 3. Clear input box
+  clearInputBox();
+
+  // 4. Update live preview (show first candidates)
+  updateLivePreviewDisplay(); // Shows "易 在" for ['4jp', 'ad']
+
+  // 5. Update buffer display (show code badges)
+  updateBufferDisplay(); // Shows [4jp] [ad] badges
+}
 ```
 
 **= Key** (trigger + cycle predictions):
@@ -703,26 +729,21 @@ currentPredictions = [
 if (sentenceMode) {
   // Case 1: First press - trigger prediction
   if (currentPredictions.length === 0) {
-    // 1. Parse input: "4jp ad de" → codes ['4jp', 'ad', 'de']
-    const codes = parseInput(inputBox.value.trim());
-
-    if (codes.length === 0) {
-      return; // No codes to predict
+    if (codesBuffer.length === 0) {
+      console.error('[= Key] No codes in buffer to predict');
+      return;
     }
 
-    // 2. Run Viterbi to get top-5 predictions
-    currentPredictions = await getTopNPredictions(codes, 5);
+    // 1. Run Viterbi to get top-5 predictions
+    currentPredictions = await getTopNPredictions(codesBuffer, 5);
     currentPredictionIndex = 0;
     originalPrediction = currentPredictions[0].sentence;
 
-    // 3. Display first prediction
+    // 2. Display first prediction
     displayPrediction(currentPredictions[0]);
 
-    // 4. Show hint: "按 = 切換預測 | 點擊字重選 | Enter 確認"
+    // 3. Show hint: "按 = 切換預測 | 點擊字重選 | Enter 確認"
     showPredictionHint();
-
-    // 5. Clear input box
-    clearInputBox();
   }
   // Case 2: Subsequent presses - cycle predictions
   else {
