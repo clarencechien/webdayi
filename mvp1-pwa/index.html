@@ -137,6 +137,40 @@
       <span>整句</span>
     </button>
 
+    <!-- PWA: Learning Data Management -->
+    <div class="w-full h-px bg-slate-300 dark:bg-slate-600 my-2"></div>
+
+    <!-- PWA: UserDB Status -->
+    <div id="userdb-status" class="px-4 py-2 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 rounded-lg">
+      ⏳ IndexedDB Loading...
+    </div>
+
+    <!-- PWA: Export Button -->
+    <button onclick="exportLearnedPatterns()"
+            class="flex h-10 items-center gap-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 px-4 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 shadow-md transition-all hover:shadow-lg"
+            aria-label="匯出學習資料">
+      <span class="material-symbols-outlined text-base">download</span>
+      <span>Export</span>
+    </button>
+
+    <!-- PWA: Import Button -->
+    <button onclick="importLearnedPatterns()"
+            class="flex h-10 items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 px-4 text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 shadow-md transition-all hover:shadow-lg"
+            aria-label="匯入學習資料">
+      <span class="material-symbols-outlined text-base">upload</span>
+      <span>Import</span>
+    </button>
+
+    <!-- PWA: Clear All Button -->
+    <button onclick="clearAllPatterns()"
+            class="flex h-10 items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 px-4 text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 shadow-md transition-all hover:shadow-lg"
+            aria-label="清除所有學習資料">
+      <span class="material-symbols-outlined text-base">delete_sweep</span>
+      <span>Clear</span>
+    </button>
+
+    <div class="w-full h-px bg-slate-300 dark:bg-slate-600 my-2"></div>
+
     <!-- Font Size Decrease -->
     <button id="font-size-decrease-btn"
             class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg"
@@ -428,6 +462,20 @@
         </div>
 
         <!-- Debug Section (hidden in express mode) -->
+        <!-- PWA: UserDB Statistics Section -->
+        <div id="userdb-stats-section"
+             class="rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-4 transition-colors mb-4">
+          <details class="group">
+            <summary class="cursor-pointer select-none text-sm font-medium text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-base group-open:rotate-90 transition-transform">chevron_right</span>
+              <span>Learning Statistics (PWA)</span>
+            </summary>
+            <div id="userdb-stats" class="mt-3 text-xs text-slate-600 dark:text-slate-400 space-y-1">
+              <p class="text-slate-500 dark:text-slate-500">No learning data yet. Start using the input method to learn your preferences!</p>
+            </div>
+          </details>
+        </div>
+
         <div id="debug-section"
              class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 p-4 transition-colors">
           <details class="group">
@@ -446,11 +494,13 @@
       <footer id="app-footer"
               class="text-center text-sm text-slate-500 dark:text-slate-500 pb-4 transition-colors">
         <p>
-          WebDaYi MVP 1.0 v11 - N-gram Sentence Prediction
+          WebDaYi PWA v0.5.0 - Progressive Web App with Personalized Learning
           <br>
           <span class="text-xs">
             Data source: <a href="https://github.com/rime/rime-dayi" target="_blank" class="text-primary hover:underline">Rime Dàyì Dictionary</a> +
             <a href="https://github.com/rime/rime-essay" target="_blank" class="text-primary hover:underline">Rime Essay (N-gram)</a>
+            <br>
+            <span class="text-green-600 dark:text-green-400">✓ Offline-First | ✓ IndexedDB Learning | ✓ Mobile Keyboard</span>
           </span>
         </p>
       </footer>
@@ -506,13 +556,13 @@
   </script>
 
   <!-- Core Logic -->
-  <script src="core_logic.js"></script>
+  <script src="js/core_logic.js"></script>
 
   <!-- v11: N-gram Sentence Prediction -->
   <!-- CACHE BUSTER: Version parameter forces browser to reload JavaScript -->
-  <script src="viterbi_module.js?v=11.3.5-009"></script>
-  <script src="core_logic_v11.js?v=11.3.3-007"></script>
-  <script src="core_logic_v11_ui.js?v=11.3.3-007"></script>
+  <script src="js/viterbi_module.js?v=11.3.5-009"></script>
+  <script src="js/core_logic_v11.js?v=11.3.3-007"></script>
+  <script src="js/core_logic_v11_ui.js?v=11.3.3-007"></script>
 
   <!-- Dark Mode Toggle Script -->
   <script>
@@ -673,6 +723,146 @@
       .predicted-sentence {
         font-size: 1.5rem;
       }
+    }
+
+    /* PWA: Mobile Custom Touch Keyboard (RWD) */
+    .mobile-keyboard {
+      display: none; /* Hidden on desktop */
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.05)),
+                  #f1f5f9;
+      border-top: 2px solid #cbd5e1;
+      padding: 8px;
+      z-index: 1000;
+      box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1),
+                  0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .dark .mobile-keyboard {
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.05)),
+                  #1e293b;
+      border-top-color: #475569;
+    }
+
+    .keyboard-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 6px;
+      justify-content: center;
+    }
+
+    .keyboard-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .key-btn {
+      flex: 1;
+      min-width: 0;
+      height: 44px;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      color: #1e293b;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .dark .key-btn {
+      background: #334155;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+
+    .key-btn:active {
+      transform: scale(0.95);
+      background: #0fb8f0;
+      color: white;
+      border-color: #0fb8f0;
+      box-shadow: 0 0 0 3px rgba(15, 184, 240, 0.2);
+    }
+
+    .dark .key-btn:active {
+      background: #0fb8f0;
+      border-color: #0fb8f0;
+    }
+
+    .key-wide {
+      flex: 1.5;
+    }
+
+    .key-extra-wide {
+      flex: 3;
+    }
+
+    .key-backspace, .key-enter {
+      background: #ef4444;
+      border-color: #dc2626;
+      color: white;
+    }
+
+    .dark .key-backspace, .dark .key-enter {
+      background: #dc2626;
+      border-color: #b91c1c;
+    }
+
+    .key-space {
+      background: #0fb8f0;
+      border-color: #0891b2;
+      color: white;
+    }
+
+    .dark .key-space {
+      background: #0891b2;
+      border-color: #0e7490;
+    }
+
+    .control-row {
+      gap: 6px;
+    }
+
+    /* Show keyboard on mobile */
+    @media (max-width: 768px) {
+      .mobile-keyboard {
+        display: block;
+      }
+
+      /* Add bottom padding to main content to prevent keyboard overlap */
+      #app-container {
+        padding-bottom: 280px;
+      }
+
+      /* Prevent input mode "none" attribute from being overridden */
+      #input-box[inputmode="none"]:focus {
+        caret-color: auto;
+      }
+    }
+
+    /* Keyboard haptic feedback animation */
+    @keyframes key-press {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(0.95);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .key-btn.pressed {
+      animation: key-press 0.1s ease;
     }
   </style>
 
@@ -875,6 +1065,200 @@
     window.clearAllPatterns = clearAllPatterns;
     window.updateUserDBStats = updateUserDBStats;
   </script>
+
+  <!-- PWA: Unified Input Handler (Desktop + Mobile) -->
+  <script>
+    /**
+     * Unified Input Handler for PWA
+     * Handles both desktop physical keyboard and mobile touch keyboard
+     * Uses same core_logic.js for both input sources
+     */
+
+    // Detect if mobile
+    function isMobile() {
+      return window.innerWidth <= 768;
+    }
+
+    // Prevent system keyboard on mobile
+    function preventSystemKeyboard() {
+      if (isMobile()) {
+        const inputBox = document.getElementById('input-box');
+        if (inputBox) {
+          inputBox.setAttribute('inputmode', 'none');
+          console.log('[PWA] System keyboard prevented on mobile');
+        }
+      }
+    }
+
+    // Haptic feedback for touch
+    function triggerHaptic() {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50); // 50ms vibration
+      }
+    }
+
+    // Visual feedback for key press
+    function animateKeyPress(button) {
+      button.classList.add('pressed');
+      setTimeout(() => {
+        button.classList.remove('pressed');
+      }, 100);
+    }
+
+    // Initialize mobile keyboard
+    function initMobileKeyboard() {
+      const keyboard = document.getElementById('custom-keyboard');
+      if (!keyboard) return;
+
+      // Add touch event listeners to all key buttons
+      const keyButtons = keyboard.querySelectorAll('.key-btn');
+
+      keyButtons.forEach(button => {
+        // Use touchstart for faster response
+        button.addEventListener('touchstart', (e) => {
+          e.preventDefault(); // Prevent default touch behavior
+
+          const key = button.dataset.key;
+
+          // Trigger haptic feedback
+          triggerHaptic();
+
+          // Animate button
+          animateKeyPress(button);
+
+          // Simulate keyboard event for existing core_logic.js
+          const event = new KeyboardEvent('keydown', {
+            key: key,
+            code: key === ' ' ? 'Space' : (key === 'Backspace' ? 'Backspace' : `Key${key.toUpperCase()}`),
+            keyCode: key.charCodeAt(0),
+            which: key.charCodeAt(0),
+            bubbles: true,
+            cancelable: true
+          });
+
+          // Dispatch to input box
+          const inputBox = document.getElementById('input-box');
+          if (inputBox) {
+            inputBox.dispatchEvent(event);
+          }
+
+          console.log(`[PWA] Mobile key pressed: ${key}`);
+        });
+
+        // Also add click for desktop testing
+        button.addEventListener('click', (e) => {
+          if (!isMobile()) return; // Only on mobile
+
+          const key = button.dataset.key;
+
+          // Simulate keyboard event
+          const event = new KeyboardEvent('keydown', {
+            key: key,
+            code: key === ' ' ? 'Space' : (key === 'Backspace' ? 'Backspace' : `Key${key.toUpperCase()}`),
+            keyCode: key.charCodeAt(0),
+            which: key.charCodeAt(0),
+            bubbles: true,
+            cancelable: true
+          });
+
+          const inputBox = document.getElementById('input-box');
+          if (inputBox) {
+            inputBox.dispatchEvent(event);
+          }
+        });
+      });
+
+      console.log('[PWA] Mobile keyboard initialized with', keyButtons.length, 'keys');
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+      preventSystemKeyboard();
+      initMobileKeyboard();
+
+      // Log input mode
+      if (isMobile()) {
+        console.log('%c[PWA] Mobile mode: Custom touch keyboard enabled', 'color: #0fb8f0; font-weight: bold');
+      } else {
+        console.log('%c[PWA] Desktop mode: Physical keyboard enabled', 'color: #0fb8f0; font-weight: bold');
+      }
+    });
+
+    // Re-check on resize (orientation change)
+    window.addEventListener('resize', () => {
+      preventSystemKeyboard();
+    });
+  </script>
+
+  <!-- Mobile Custom Touch Keyboard (RWD) -->
+  <div id="custom-keyboard" class="mobile-keyboard">
+    <!-- Row 1: Number Keys -->
+    <div class="keyboard-row">
+      <button class="key-btn" data-key="1" data-char="1">1</button>
+      <button class="key-btn" data-key="2" data-char="2">2</button>
+      <button class="key-btn" data-key="3" data-char="3">3</button>
+      <button class="key-btn" data-key="4" data-char="4">4</button>
+      <button class="key-btn" data-key="5" data-char="5">5</button>
+      <button class="key-btn" data-key="6" data-char="6">6</button>
+      <button class="key-btn" data-key="7" data-char="7">7</button>
+      <button class="key-btn" data-key="8" data-char="8">8</button>
+      <button class="key-btn" data-key="9" data-char="9">9</button>
+      <button class="key-btn" data-key="0" data-char="0">0</button>
+    </div>
+
+    <!-- Row 2: QWERTY Top Row -->
+    <div class="keyboard-row">
+      <button class="key-btn" data-key="q">Q</button>
+      <button class="key-btn" data-key="w">W</button>
+      <button class="key-btn" data-key="e">E</button>
+      <button class="key-btn" data-key="r">R</button>
+      <button class="key-btn" data-key="t">T</button>
+      <button class="key-btn" data-key="y">Y</button>
+      <button class="key-btn" data-key="u">U</button>
+      <button class="key-btn" data-key="i">I</button>
+      <button class="key-btn" data-key="o">O</button>
+      <button class="key-btn" data-key="p">P</button>
+    </div>
+
+    <!-- Row 3: Home Row -->
+    <div class="keyboard-row">
+      <button class="key-btn" data-key="a">A</button>
+      <button class="key-btn" data-key="s">S</button>
+      <button class="key-btn" data-key="d">D</button>
+      <button class="key-btn" data-key="f">F</button>
+      <button class="key-btn" data-key="g">G</button>
+      <button class="key-btn" data-key="h">H</button>
+      <button class="key-btn" data-key="j">J</button>
+      <button class="key-btn" data-key="k">K</button>
+      <button class="key-btn" data-key="l">L</button>
+      <button class="key-btn" data-key=";">;</button>
+    </div>
+
+    <!-- Row 4: Bottom Row -->
+    <div class="keyboard-row">
+      <button class="key-btn" data-key="z">Z</button>
+      <button class="key-btn" data-key="x">X</button>
+      <button class="key-btn" data-key="c">C</button>
+      <button class="key-btn" data-key="v">V</button>
+      <button class="key-btn" data-key="b">B</button>
+      <button class="key-btn" data-key="n">N</button>
+      <button class="key-btn" data-key="m">M</button>
+      <button class="key-btn" data-key=",">,</button>
+      <button class="key-btn" data-key=".">.</button>
+      <button class="key-btn" data-key="/">/</button>
+    </div>
+
+    <!-- Row 5: Control Keys -->
+    <div class="keyboard-row control-row">
+      <button class="key-btn key-wide key-backspace" data-key="Backspace">
+        <span class="material-symbols-outlined">backspace</span>
+      </button>
+      <button class="key-btn key-extra-wide key-space" data-key=" ">Space</button>
+      <button class="key-btn key-wide key-enter" data-key="Enter">
+        <span class="material-symbols-outlined">keyboard_return</span>
+      </button>
+    </div>
+  </div>
 
 </body>
 </html>

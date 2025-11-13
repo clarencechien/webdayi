@@ -19,6 +19,7 @@ const STATIC_ASSETS = [
   '/index.html',
   '/css/style.css',
   '/js/user_db_indexeddb.js',
+  '/js/core_logic.js',
   '/js/core_logic_v11.js',
   '/js/core_logic_v11_ui.js',
   '/js/viterbi_module.js',
@@ -27,8 +28,8 @@ const STATIC_ASSETS = [
 
 // Large database files to cache separately
 const DATABASE_ASSETS = [
-  '/mvp1/dayi_db.json',
-  '/mvp1/ngram_db.json'
+  '/dayi_db.json',
+  '/ngram_db.json'
 ];
 
 /**
