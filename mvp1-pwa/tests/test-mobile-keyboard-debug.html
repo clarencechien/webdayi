@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Keyboard Debug Tests</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    h1 { color: #4ec9b0; }
+    .test-section {
+      background: #252526;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    .pass { color: #4ec9b0; }
+    .fail { color: #f48771; }
+    .info { color: #569cd6; }
+    #test-input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: 1px solid #3c3c3c;
+    }
+    .key-btn {
+      padding: 15px;
+      margin: 5px;
+      font-size: 16px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .key-btn:active {
+      background: #0fb8f0;
+      color: white;
+    }
+    #event-log {
+      background: #1e1e1e;
+      padding: 10px;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐛 Mobile Keyboard Debug Tests</h1>
+
+  <div class="test-section">
+    <h2>Test Input Box</h2>
+    <input type="text" id="test-input" placeholder="Type here or use buttons below">
+    <div style="margin-top: 10px;">
+      <strong>Input Value:</strong> <span id="input-value" style="color: #4ec9b0;">""</span>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test Buttons</h2>
+    <button class="key-btn" data-key="4">4</button>
+    <button class="key-btn" data-key="j">j</button>
+    <button class="key-btn" data-key="p">p</button>
+    <button class="key-btn" data-key="a">a</button>
+    <button class="key-btn" data-key="d">d</button>
+  </div>
+
+  <div class="test-section">
+    <h2>Event Log</h2>
+    <div id="event-log"></div>
+    <button onclick="document.getElementById('event-log').innerHTML = ''">Clear Log</button>
+  </div>
+
+  <div class="test-section">
+    <h2>Diagnostic Results</h2>
+    <div id="diagnostic-results"></div>
+  </div>
+
+  <script>
+    const testInput = document.getElementById('test-input');
+    const inputValueDisplay = document.getElementById('input-value');
+    const eventLog = document.getElementById('event-log');
+    const diagnosticResults = document.getElementById('diagnostic-results');
+
+    let eventCount = 0;
+
+    function log(message, type = 'info') {
+      eventCount++;
+      const entry = document.createElement('div');
+      entry.className = type;
+      entry.textContent = `[${eventCount}] ${message}`;
+      eventLog.appendChild(entry);
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    function updateInputDisplay() {
+      inputValueDisplay.textContent = `"${testInput.value}"`;
+    }
+
+    // Monitor all input changes
+    testInput.addEventListener('input', (e) => {
+      log(`✓ INPUT event fired, value: "${testInput.value}"`, 'pass');
+      updateInputDisplay();
+    });
+
+    // Monitor keydown events
+    testInput.addEventListener('keydown', (e) => {
+      log(`⚡ KEYDOWN event: key="${e.key}", code="${e.code}", keyCode=${e.keyCode}, which=${e.which}, isTrusted=${e.isTrusted}`, 'info');
+    });
+
+    // Monitor keypress events
+    testInput.addEventListener('keypress', (e) => {
+      log(`⚡ KEYPRESS event: key="${e.key}"`, 'info');
+    });
+
+    // Initialize test buttons
+    const keyButtons = document.querySelectorAll('.key-btn');
+
+    keyButtons.forEach(button => {
+      button.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const key = button.dataset.key;
+
+        log(`👆 Touch button: ${key}`, 'info');
+
+        // Method 1: Dispatch keydown event (current approach)
+        const keydownEvent = new KeyboardEvent('keydown', {
+          key: key,
+          code: `Key${key.toUpperCase()}`,
+          keyCode: key.charCodeAt(0),
+          which: key.charCodeAt(0),
+          bubbles: true,
+          cancelable: true
+        });
+
+        testInput.dispatchEvent(keydownEvent);
+        log(`📤 Dispatched keydown event`, 'info');
+
+        // Check if input value changed
+        setTimeout(() => {
+          if (testInput.value.includes(key)) {
+            log(`✓ SUCCESS: Input value updated`, 'pass');
+          } else {
+            log(`✗ FAIL: Input value NOT updated`, 'fail');
+            log(`💡 Trying Method 2: Direct value manipulation`, 'info');
+
+            // Method 2: Directly update input value
+            testInput.value += key;
+
+            // Trigger input event manually
+            const inputEvent = new Event('input', {
+              bubbles: true,
+              cancelable: true
+            });
+            testInput.dispatchEvent(inputEvent);
+
+            if (testInput.value.includes(key)) {
+              log(`✓ SUCCESS with Method 2: Input value updated`, 'pass');
+            } else {
+              log(`✗ FAIL with Method 2: Still not working`, 'fail');
+            }
+          }
+          updateInputDisplay();
+        }, 100);
+      });
+
+      // Also handle click for desktop testing
+      button.addEventListener('click', (e) => {
+        const key = button.dataset.key;
+
+        log(`🖱️ Click button: ${key}`, 'info');
+
+        // Try both methods
+        log(`Method 1: KeyboardEvent`, 'info');
+        const keydownEvent = new KeyboardEvent('keydown', {
+          key: key,
+          code: `Key${key.toUpperCase()}`,
+          bubbles: true,
+          cancelable: true
+        });
+        testInput.dispatchEvent(keydownEvent);
+
+        setTimeout(() => {
+          if (!testInput.value.includes(key)) {
+            log(`Method 1 failed, trying Method 2: Direct value`, 'info');
+            testInput.value += key;
+
+            const inputEvent = new Event('input', { bubbles: true });
+            testInput.dispatchEvent(inputEvent);
+          }
+          updateInputDisplay();
+        }, 50);
+      });
+    });
+
+    // Run diagnostic tests
+    setTimeout(() => {
+      diagnosticResults.innerHTML = `
+        <h3>Diagnostic Summary:</h3>
+        <div style="margin-top: 10px;">
+          <strong>Issue Identified:</strong><br>
+          <div style="color: #f48771; margin-top: 5px;">
+            ⚠️ Simulated KeyboardEvent does NOT automatically update input.value<br>
+            ⚠️ This is by design in browsers - synthetic events don't trigger default actions
+          </div>
+          <div style="color: #4ec9b0; margin-top: 10px;">
+            ✓ Solution: Manually update input.value + dispatch 'input' event<br>
+            ✓ Formula: input.value += key; input.dispatchEvent(new Event('input'))
+          </div>
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: #2d2d30; border-radius: 4px;">
+          <strong>Root Cause:</strong><br>
+          Browsers prevent synthetic keyboard events from modifying input values for security reasons.<br>
+          This prevents malicious scripts from filling forms without user interaction.<br>
+          <br>
+          <strong>Fix Required:</strong><br>
+          Mobile keyboard handler must manually update input.value when keys are pressed.
+        </div>
+      `;
+    }, 500);
+  </script>
+</body>
+</html>

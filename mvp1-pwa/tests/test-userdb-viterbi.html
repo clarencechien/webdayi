@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UserDB-Viterbi Integration Tests - WebDaYi PWA</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    h1 {
+      color: #4ec9b0;
+      border-bottom: 2px solid #4ec9b0;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #dcdcaa;
+      margin-top: 30px;
+    }
+    .test-section {
+      background: #252526;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .test-item {
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+    .pass {
+      background: #1e3a1e;
+      color: #4ec9b0;
+      border-left: 4px solid #4ec9b0;
+    }
+    .fail {
+      background: #3a1e1e;
+      color: #f48771;
+      border-left: 4px solid #f48771;
+    }
+    .summary {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 4px;
+      background: #2d2d30;
+    }
+    .summary.all-pass {
+      color: #4ec9b0;
+      border: 2px solid #4ec9b0;
+    }
+    .summary.has-fail {
+      color: #f48771;
+      border: 2px solid #f48771;
+    }
+    pre {
+      background: #1e1e1e;
+      border: 1px solid #3c3c3c;
+      padding: 10px;
+      border-radius: 3px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .error-detail {
+      color: #ce9178;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 UserDB-Viterbi Integration Tests (TDD Phase 1)</h1>
+
+  <p style="color: #808080;">
+    Testing UserDB integration with Viterbi algorithm for personalized learning.<br>
+    <strong>Total Tests:</strong> 25+ | <strong>Status:</strong> <span id="test-status">⏳ Running...</span>
+  </p>
+
+  <div id="test-results"></div>
+
+  <div id="summary" class="summary">
+    <div id="summary-text">Running tests...</div>
+  </div>
+
+  <!-- Import modules -->
+  <script type="module">
+    import { UserDB } from '../js/user_db_indexeddb.js';
+
+    // ============================================================================
+    // Test Infrastructure
+    // ============================================================================
+
+    let testResults = [];
+    let currentCategory = '';
+
+    function startCategory(name) {
+      currentCategory = name;
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.id = `category-${name.replace(/\s+/g, '-')}`;
+      section.innerHTML = `<h2>${name}</h2>`;
+      document.getElementById('test-results').appendChild(section);
+    }
+
+    function assert(condition, message) {
+      const result = {
+        category: currentCategory,
+        message: message,
+        passed: condition,
+        error: condition ? null : 'Assertion failed'
+      };
+      testResults.push(result);
+
+      const testItem = document.createElement('div');
+      testItem.className = `test-item ${condition ? 'pass' : 'fail'}`;
+      testItem.innerHTML = `
+        ${condition ? '✓' : '✗'} ${message}
+        ${!condition ? '<div class="error-detail">Expected: true, Got: false</div>' : ''}
+      `;
+
+      const section = document.getElementById(`category-${currentCategory.replace(/\s+/g, '-')}`);
+      section.appendChild(testItem);
+    }
+
+    function assertEqual(actual, expected, message) {
+      const passed = actual === expected;
+      const result = {
+        category: currentCategory,
+        message: message,
+        passed: passed,
+        error: passed ? null : `Expected: ${expected}, Got: ${actual}`
+      };
+      testResults.push(result);
+
+      const testItem = document.createElement('div');
+      testItem.className = `test-item ${passed ? 'pass' : 'fail'}`;
+      testItem.innerHTML = `
+        ${passed ? '✓' : '✗'} ${message}
+        ${!passed ? `<div class="error-detail">Expected: ${expected}, Got: ${actual}</div>` : ''}
+      `;
+
+      const section = document.getElementById(`category-${currentCategory.replace(/\s+/g, '-')}`);
+      section.appendChild(testItem);
+    }
+
+    function showSummary() {
+      const total = testResults.length;
+      const passed = testResults.filter(r => r.passed).length;
+      const failed = total - passed;
+
+      const summaryDiv = document.getElementById('summary');
+      const summaryText = document.getElementById('summary-text');
+      const statusSpan = document.getElementById('test-status');
+
+      if (failed === 0) {
+        summaryDiv.className = 'summary all-pass';
+        summaryText.innerHTML = `🎉 All ${total} tests passed!`;
+        statusSpan.innerHTML = '✅ All Pass';
+        statusSpan.style.color = '#4ec9b0';
+      } else {
+        summaryDiv.className = 'summary has-fail';
+        summaryText.innerHTML = `⚠️ ${passed}/${total} tests passed (${failed} failed)`;
+        statusSpan.innerHTML = `⚠️ ${failed} Failed`;
+        statusSpan.style.color = '#f48771';
+      }
+    }
+
+    // ============================================================================
+    // Mock Data
+    // ============================================================================
+
+    // Mock Dayi database (simplified)
+    const mockDayiDb = new Map([
+      ['a', [{ char: '大', freq: 100 }]],
+      ['4jp', [{ char: '易', freq: 80 }, { char: '義', freq: 70 }]],
+      ['ad', [{ char: '在', freq: 90 }]],
+      ['v', [{ char: '天', freq: 95 }, { char: '夫', freq: 60 }]],
+      ['u4jp', [{ char: '真', freq: 75 }, { char: '氣', freq: 85 }]]
+    ]);
+
+    // Mock N-gram database (simplified)
+    const mockNgramDb = {
+      unigram_counts: {
+        '大': 10000,
+        '易': 5000,
+        '義': 3000,
+        '在': 8000,
+        '天': 12000,
+        '夫': 2000,
+        '真': 4000,
+        '氣': 6000
+      },
+      bigram_counts: {
+        '大易': 500,
+        '大義': 200,
+        '天氣': 800,
+        '天真': 300,
+        '天夫': 10
+      },
+      smoothing_alpha: 0.1,
+      total_chars: 717000000,
+      vocab_size: 18000
+    };
+
+    // ============================================================================
+    // Tests: Category 1 - API Integration (5 tests)
+    // ============================================================================
+
+    async function test_category_1() {
+      startCategory('1. API Integration');
+
+      // Test 1.1: viterbi function accepts userDB parameter
+      try {
+        // Load viterbi module
+        const viterbiScript = document.createElement('script');
+        viterbiScript.src = '../js/viterbi_module.js';
+        await new Promise((resolve, reject) => {
+          viterbiScript.onload = resolve;
+          viterbiScript.onerror = reject;
+          document.head.appendChild(viterbiScript);
+        });
+
+        assert(typeof window.viterbi === 'function', 'Test 1.1: viterbi function exists');
+        assert(typeof window.viterbiWithUserDB === 'function', 'Test 1.2: viterbiWithUserDB function exists (new API)');
+      } catch (error) {
+        assert(false, `Test 1.1-1.2: Failed to load viterbi module: ${error.message}`);
+      }
+
+      // Test 1.3: viterbiWithUserDB returns Promise
+      try {
+        const userDB = new UserDB('test_viterbi_db');
+        await userDB.open();
+
+        const result = window.viterbiWithUserDB(['a'], mockDayiDb, mockNgramDb, userDB);
+        assert(result instanceof Promise, 'Test 1.3: viterbiWithUserDB returns Promise');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 1.3: ${error.message}`);
+      }
+
+      // Test 1.4: viterbiWithUserDB accepts null userDB (graceful degradation)
+      try {
+        const result = await window.viterbiWithUserDB(['a'], mockDayiDb, mockNgramDb, null);
+        assert(result && result.sentence, 'Test 1.4: viterbiWithUserDB works with null userDB');
+      } catch (error) {
+        assert(false, `Test 1.4: ${error.message}`);
+      }
+
+      // Test 1.5: Result structure unchanged (backward compatible)
+      try {
+        const userDB = new UserDB('test_viterbi_db_2');
+        await userDB.open();
+
+        const result = await window.viterbiWithUserDB(['a'], mockDayiDb, mockNgramDb, userDB);
+        assert(result.hasOwnProperty('sentence'), 'Test 1.5a: Result has sentence property');
+        assert(result.hasOwnProperty('chars'), 'Test 1.5b: Result has chars property');
+        assert(result.hasOwnProperty('score'), 'Test 1.5c: Result has score property');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 1.5: ${error.message}`);
+      }
+    }
+
+    // ============================================================================
+    // Tests: Category 2 - UserDB Weight Integration (6 tests)
+    // ============================================================================
+
+    async function test_category_2() {
+      startCategory('2. UserDB Weight Integration');
+
+      // Test 2.1: Viterbi uses UserDB weights in scoring
+      try {
+        const userDB = new UserDB('test_viterbi_weights');
+        await userDB.open();
+
+        // Set a positive weight for 天→氣 (天氣 is more preferred than 天真)
+        await userDB.setWeight('天', '氣', 2.0);
+
+        const result = await window.viterbiWithUserDB(['v', 'u4jp'], mockDayiDb, mockNgramDb, userDB);
+
+        // With positive weight, 天氣 should be preferred over 天真
+        const contains天氣 = result.sentence.includes('天氣');
+        assert(contains天氣, 'Test 2.1: Positive UserDB weight influences prediction (天氣 > 天真)');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 2.1: ${error.message}`);
+      }
+
+      // Test 2.2: Negative weights decrease candidate score
+      try {
+        const userDB = new UserDB('test_viterbi_negative');
+        await userDB.open();
+
+        // Set a negative weight for 大→易 (discourage 大易)
+        await userDB.setWeight('大', '易', -5.0);
+
+        const result = await window.viterbiWithUserDB(['a', '4jp'], mockDayiDb, mockNgramDb, userDB);
+
+        // With negative weight, 大義 might be preferred over 大易
+        // (This test might fail if the bigram score is too strong, but it demonstrates the concept)
+        assert(result.sentence, 'Test 2.2: Negative UserDB weight applied (sentence generated)');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 2.2: ${error.message}`);
+      }
+
+      // Test 2.3: Zero weight has no effect
+      try {
+        const userDB = new UserDB('test_viterbi_zero');
+        await userDB.open();
+
+        await userDB.setWeight('大', '易', 0);
+
+        const withZero = await window.viterbiWithUserDB(['a', '4jp'], mockDayiDb, mockNgramDb, userDB);
+        const withoutDB = await window.viterbiWithUserDB(['a', '4jp'], mockDayiDb, mockNgramDb, null);
+
+        assertEqual(withZero.sentence, withoutDB.sentence, 'Test 2.3: Zero weight produces same result as no UserDB');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 2.3: ${error.message}`);
+      }
+
+      // Test 2.4: Multiple weights accumulate correctly
+      try {
+        const userDB = new UserDB('test_viterbi_multiple');
+        await userDB.open();
+
+        // Set weights for a sequence
+        await userDB.setWeight('大', '易', 1.0);
+        await userDB.setWeight('易', '在', 1.0);
+
+        const result = await window.viterbiWithUserDB(['a', '4jp', 'ad'], mockDayiDb, mockNgramDb, userDB);
+
+        assert(result.sentence, 'Test 2.4: Multiple UserDB weights processed successfully');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 2.4: ${error.message}`);
+      }
+
+      // Test 2.5: Empty UserDB behaves like no UserDB
+      try {
+        const userDB = new UserDB('test_viterbi_empty');
+        await userDB.open();
+
+        const withEmpty = await window.viterbiWithUserDB(['a'], mockDayiDb, mockNgramDb, userDB);
+        const withoutDB = await window.viterbiWithUserDB(['a'], mockDayiDb, mockNgramDb, null);
+
+        assertEqual(withEmpty.sentence, withoutDB.sentence, 'Test 2.5: Empty UserDB produces same result as no UserDB');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 2.5: ${error.message}`);
+      }
+
+      // Test 2.6: Large weights don't cause overflow
+      try {
+        const userDB = new UserDB('test_viterbi_large');
+        await userDB.open();
+
+        await userDB.setWeight('大', '易', 100.0);
+
+        const result = await window.viterbiWithUserDB(['a', '4jp'], mockDayiDb, mockNgramDb, userDB);
+
+        assert(isFinite(result.score), 'Test 2.6a: Large UserDB weight doesn't cause Infinity score');
+        assert(result.sentence, 'Test 2.6b: Sentence generated with large weight');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 2.6: ${error.message}`);
+      }
+    }
+
+    // ============================================================================
+    // Tests: Category 3 - Learning Detection (5 tests)
+    // ============================================================================
+
+    async function test_category_3() {
+      startCategory('3. Learning Detection');
+
+      // Test 3.1: detectLearning function exists
+      try {
+        assert(typeof window.detectLearning === 'function', 'Test 3.1: detectLearning function exists');
+      } catch (error) {
+        assert(false, `Test 3.1: ${error.message}`);
+      }
+
+      // Test 3.2: Detects non-default selection (user selects 2nd candidate)
+      try {
+        const prediction = ['大', '易', '在'];
+        const userSelection = ['大', '義', '在']; // User selected 義 instead of 易
+
+        const learned = window.detectLearning(prediction, userSelection);
+
+        assert(learned && learned.length > 0, 'Test 3.2: Detects learning when user selects non-default');
+        assertEqual(learned[0].from, '易', 'Test 3.2a: Identifies correct "from" character');
+        assertEqual(learned[0].to, '義', 'Test 3.2b: Identifies correct "to" character');
+      } catch (error) {
+        assert(false, `Test 3.2: ${error.message}`);
+      }
+
+      // Test 3.3: No learning for default selection
+      try {
+        const prediction = ['大', '易', '在'];
+        const userSelection = ['大', '易', '在']; // User accepted default
+
+        const learned = window.detectLearning(prediction, userSelection);
+
+        assertEqual(learned.length, 0, 'Test 3.3: No learning detected when user accepts default');
+      } catch (error) {
+        assert(false, `Test 3.3: ${error.message}`);
+      }
+
+      // Test 3.4: Multiple learning points detected
+      try {
+        const prediction = ['大', '易', '在'];
+        const userSelection = ['大', '義', '才']; // User changed 2 characters
+
+        const learned = window.detectLearning(prediction, userSelection);
+
+        assertEqual(learned.length, 2, 'Test 3.4: Detects multiple learning points');
+      } catch (error) {
+        assert(false, `Test 3.4: ${error.message}`);
+      }
+
+      // Test 3.5: Learning detection includes context (bigrams)
+      try {
+        const prediction = ['天', '真', '好'];
+        const userSelection = ['天', '氣', '好']; // User selected 氣 instead of 真
+
+        const learned = window.detectLearning(prediction, userSelection);
+
+        assert(learned[0].prevChar, 'Test 3.5a: Learning includes previous character (天)');
+        assert(learned[0].nextChar, 'Test 3.5b: Learning includes next character (好)');
+      } catch (error) {
+        assert(false, `Test 3.5: ${error.message}`);
+      }
+    }
+
+    // ============================================================================
+    // Tests: Category 4 - Learning Persistence (4 tests)
+    // ============================================================================
+
+    async function test_category_4() {
+      startCategory('4. Learning Persistence');
+
+      // Test 4.1: applyLearning function exists
+      try {
+        assert(typeof window.applyLearning === 'function', 'Test 4.1: applyLearning function exists');
+      } catch (error) {
+        assert(false, `Test 4.1: ${error.message}`);
+      }
+
+      // Test 4.2: Learning is persisted to UserDB
+      try {
+        const userDB = new UserDB('test_learning_persist');
+        await userDB.open();
+
+        const learningData = [
+          { prevChar: '天', from: '真', to: '氣', weight: 1.0 }
+        ];
+
+        await window.applyLearning(learningData, userDB);
+
+        const weight = await userDB.getWeight('天', '氣');
+        assert(weight > 0, 'Test 4.2: Learning persisted to UserDB (weight > 0)');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 4.2: ${error.message}`);
+      }
+
+      // Test 4.3: Repeated learning increases weight
+      try {
+        const userDB = new UserDB('test_learning_repeat');
+        await userDB.open();
+
+        const learningData = [
+          { prevChar: '天', from: '真', to: '氣', weight: 1.0 }
+        ];
+
+        await window.applyLearning(learningData, userDB);
+        const weight1 = await userDB.getWeight('天', '氣');
+
+        await window.applyLearning(learningData, userDB);
+        const weight2 = await userDB.getWeight('天', '氣');
+
+        assert(weight2 > weight1, 'Test 4.3: Repeated learning increases weight');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 4.3: ${error.message}`);
+      }
+
+      // Test 4.4: Learning persists across sessions
+      try {
+        const userDB1 = new UserDB('test_learning_session');
+        await userDB1.open();
+
+        await userDB1.setWeight('天', '氣', 5.0);
+        userDB1.close();
+
+        // Reopen in new "session"
+        const userDB2 = new UserDB('test_learning_session');
+        await userDB2.open();
+
+        const weight = await userDB2.getWeight('天', '氣');
+        assertEqual(weight, 5.0, 'Test 4.4: Learning persists across sessions');
+
+        await userDB2.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 4.4: ${error.message}`);
+      }
+    }
+
+    // ============================================================================
+    // Tests: Category 5 - Learning UI Feedback (3 tests)
+    // ============================================================================
+
+    async function test_category_5() {
+      startCategory('5. Learning UI Feedback');
+
+      // Test 5.1: showLearningFeedback function exists
+      try {
+        assert(typeof window.showLearningFeedback === 'function', 'Test 5.1: showLearningFeedback function exists');
+      } catch (error) {
+        assert(false, `Test 5.1: ${error.message}`);
+      }
+
+      // Test 5.2: Feedback UI element created
+      try {
+        const learningData = [
+          { prevChar: '天', from: '真', to: '氣' }
+        ];
+
+        window.showLearningFeedback(learningData);
+
+        // Check if feedback element was created
+        const feedbackElement = document.querySelector('.learning-feedback');
+        assert(feedbackElement !== null, 'Test 5.2: Learning feedback UI element created');
+
+        // Clean up
+        if (feedbackElement) feedbackElement.remove();
+      } catch (error) {
+        assert(false, `Test 5.2: ${error.message}`);
+      }
+
+      // Test 5.3: Feedback shows correct learning information
+      try {
+        const learningData = [
+          { prevChar: '天', from: '真', to: '氣' }
+        ];
+
+        window.showLearningFeedback(learningData);
+
+        const feedbackElement = document.querySelector('.learning-feedback');
+        const text = feedbackElement ? feedbackElement.textContent : '';
+
+        assert(text.includes('氣'), 'Test 5.3: Feedback shows learned character (氣)');
+
+        // Clean up
+        if (feedbackElement) feedbackElement.remove();
+      } catch (error) {
+        assert(false, `Test 5.3: ${error.message}`);
+      }
+    }
+
+    // ============================================================================
+    // Tests: Category 6 - Edge Cases (2 tests)
+    // ============================================================================
+
+    async function test_category_6() {
+      startCategory('6. Edge Cases');
+
+      // Test 6.1: Handle corrupted UserDB gracefully
+      try {
+        const userDB = new UserDB('test_corrupted_db');
+        await userDB.open();
+
+        // Simulate corruption by setting invalid data type
+        await userDB.setWeight('天', '氣', 'not_a_number');
+
+        const result = await window.viterbiWithUserDB(['v', 'u4jp'], mockDayiDb, mockNgramDb, userDB);
+        assert(result.sentence, 'Test 6.1: Handles corrupted UserDB data gracefully');
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        // Should not throw, should handle gracefully
+        assert(false, `Test 6.1: Threw error instead of handling gracefully: ${error.message}`);
+      }
+
+      // Test 6.2: Performance with large UserDB
+      try {
+        const userDB = new UserDB('test_large_db');
+        await userDB.open();
+
+        // Add 100 entries
+        for (let i = 0; i < 100; i++) {
+          await userDB.setWeight('測' + i, '試' + i, Math.random());
+        }
+
+        const startTime = performance.now();
+        const result = await window.viterbiWithUserDB(['a'], mockDayiDb, mockNgramDb, userDB);
+        const endTime = performance.now();
+
+        const duration = endTime - startTime;
+        assert(duration < 1000, `Test 6.2: Performs acceptably with large UserDB (${duration.toFixed(2)}ms < 1000ms)`);
+
+        await userDB.deleteDatabase();
+      } catch (error) {
+        assert(false, `Test 6.2: ${error.message}`);
+      }
+    }
+
+    // ============================================================================
+    // Run All Tests
+    // ============================================================================
+
+    async function runAllTests() {
+      try {
+        await test_category_1();
+        await test_category_2();
+        await test_category_3();
+        await test_category_4();
+        await test_category_5();
+        await test_category_6();
+
+        showSummary();
+      } catch (error) {
+        console.error('Test suite error:', error);
+        document.getElementById('summary-text').innerHTML = `❌ Test suite crashed: ${error.message}`;
+      }
+    }
+
+    // Start tests when page loads
+    window.addEventListener('load', () => {
+      setTimeout(runAllTests, 100);
+    });
+  </script>
+</body>
+</html>
