@@ -626,24 +626,38 @@ User experience: Fast, clear confirmation, full control
 
 ---
 
-### New UX Design 🎨
+### New UX Design 🎨 (CORRECTED PER USER FEEDBACK)
 
-**Core Principles**:
-1. **Space = Trigger prediction** (show top-1)
-2. **= = Cycle predictions** (top-1 → top-2 → ... → top-5 → loop)
-3. **Click character = Fine-tune** (show candidates for that position)
+**User Correction**:
+> "Space = 觸發預測 (顯示 top-1)" - "原本不是改成 = 觸發了嗎 請修正 或是好好的思考看看"
+> Translation: "Wasn't it changed to = triggering? Please correct or think carefully"
+
+**Analysis**: For minimal user actions, natural typing flow should be:
+- Type codes with spaces as separators: "4jp ad de"
+- = key: First press triggers prediction, subsequent presses cycle
+- No separate Space trigger (confusing and extra action)
+
+**Core Principles** (CORRECTED):
+1. **Type naturally with spaces**: "4jp ad de" (spaces are code separators, not triggers)
+2. **= key = Trigger + Cycle**:
+   - First press: Parse input → trigger Viterbi → show top-1
+   - Second press: Show top-2
+   - Third press: Show top-3, ..., top-5, then loop back to top-1
+3. **Click character + Left/Right arrows = Fine-tune**:
+   - Click character → show 6 candidates (no pagination)
+   - Left/Right arrows → move cursor between characters
+   - Quick keys (Space/'[]\-): Select candidate (0-5)
 4. **Enter = Confirm** (learn + output buffer + clear)
 
 **User Actions Comparison**:
 
-| Scenario | Current (broken) | New (optimized) |
-|----------|------------------|-----------------|
-| Accept top-1 | Space + ??? | Space + Enter (2 keys) ✅ |
-| Try top-2 | Not possible | Space + = + Enter (3 keys) ✅ |
-| Edit 1 char | Space + click + edit + ??? | Space + click + select + Enter (4 actions) ✅ |
-| Full edit | Space + manual edit + ??? | Space + [= cycle] + [click edits] + Enter ✅ |
+| Scenario | Old Design (Space triggers) | New Design (= triggers) |
+|----------|------------------------------|--------------------------|
+| Accept top-1 | Type "4jp ad" + Space + ??? | Type "4jp ad" + = + Enter (3 keys) ✅ |
+| Try top-2 | Not possible | Type "4jp ad" + = + = + Enter (4 keys) ✅ |
+| Edit 1 char | Space + click + edit + ??? | = + click + select + Enter (4 actions) ✅ |
 
-**Minimum Actions**: 2 keys (Space + Enter) for most common case ✅
+**Key Improvement**: Natural typing flow → Type codes with spaces → = triggers → Enter confirms (3-4 keys)
 
 ---
 
@@ -675,38 +689,55 @@ currentPredictions = [
 
 ---
 
-### Key Handlers Logic
+### Key Handlers Logic (CORRECTED)
 
-**Space Key** (trigger prediction):
+**Input Box Behavior** (natural typing):
 ```javascript
-if (sentenceMode && codesBuffer.length > 0) {
-  // 1. Run Viterbi to get top-5 predictions
-  currentPredictions = await getTopNPredictions(codesBuffer, 5);
-  currentPredictionIndex = 0;
-  originalPrediction = currentPredictions[0].sentence;
-
-  // 2. Display first prediction
-  displayPrediction(currentPredictions[0]);
-
-  // 3. Show hint: "按 = 切換預測 | 點擊字重選 | Enter 確認"
-  showPredictionHint();
-}
+// User types: "4jp ad de" (spaces are code separators)
+// No action triggered until = key is pressed
+// Input box shows raw text: "4jp ad de"
 ```
 
-**= Key** (cycle predictions):
+**= Key** (trigger + cycle predictions):
 ```javascript
-if (sentenceMode && currentPredictions.length > 0) {
-  // 1. Cycle to next prediction
-  currentPredictionIndex = (currentPredictionIndex + 1) % currentPredictions.length;
+if (sentenceMode) {
+  // Case 1: First press - trigger prediction
+  if (currentPredictions.length === 0) {
+    // 1. Parse input: "4jp ad de" → codes ['4jp', 'ad', 'de']
+    const codes = parseInput(inputBox.value.trim());
 
-  // 2. Display new prediction
-  displayPrediction(currentPredictions[currentPredictionIndex]);
+    if (codes.length === 0) {
+      return; // No codes to predict
+    }
 
-  // 3. Update indicator: "預測 2/5"
-  updatePredictionIndicator(currentPredictionIndex + 1, currentPredictions.length);
+    // 2. Run Viterbi to get top-5 predictions
+    currentPredictions = await getTopNPredictions(codes, 5);
+    currentPredictionIndex = 0;
+    originalPrediction = currentPredictions[0].sentence;
 
-  // 4. Reset edited flag
-  editedPrediction = null;
+    // 3. Display first prediction
+    displayPrediction(currentPredictions[0]);
+
+    // 4. Show hint: "按 = 切換預測 | 點擊字重選 | Enter 確認"
+    showPredictionHint();
+
+    // 5. Clear input box
+    clearInputBox();
+  }
+  // Case 2: Subsequent presses - cycle predictions
+  else {
+    // 1. Cycle to next prediction
+    currentPredictionIndex = (currentPredictionIndex + 1) % currentPredictions.length;
+
+    // 2. Display new prediction
+    displayPrediction(currentPredictions[currentPredictionIndex]);
+
+    // 3. Update indicator: "預測 2/5"
+    updatePredictionIndicator(currentPredictionIndex + 1, currentPredictions.length);
+
+    // 4. Reset edited flag
+    editedPrediction = null;
+  }
 }
 ```
 
@@ -745,30 +776,98 @@ if (sentenceMode && currentPrediction) {
 }
 ```
 
-**Character Click** (fine-tune editing):
+**Character Editing** (fine-tune with arrows + quick keys):
 ```javascript
+// Global state for character editing
+let editCursorPosition = -1; // -1 = not editing, 0+ = editing at position
+
+// Click character to start editing
 function onCharacterClick(position) {
   const predictionPath = currentPredictions[currentPredictionIndex].path;
   const charInfo = predictionPath[position];
   const code = charInfo.code;
 
-  // 1. Get all candidates for this code
-  const candidates = dayiDb.get(code);
+  // 1. Get candidates for this code (first 6 only, no pagination)
+  const allCandidates = dayiDb.get(code);
+  const candidates = allCandidates.slice(0, 6); // Always show 6 candidates
 
-  // 2. Show popup at character position
+  // 2. Set cursor position
+  editCursorPosition = position;
+
+  // 3. Show candidate popup at character position
   showCandidatePopup(position, candidates);
+
+  // 4. Highlight current character
+  highlightCharacterAt(position);
 }
 
-function onCandidateSelect(position, newChar) {
-  // 1. Replace character at position
-  replaceCharacterAt(position, newChar);
+// Left/Right arrow keys to move cursor
+function onArrowKey(direction) {
+  if (editCursorPosition === -1) {
+    return; // Not in edit mode
+  }
 
-  // 2. Mark as edited
-  editedPrediction = getCurrentPredictionText();
+  const predictionLength = currentPredictions[currentPredictionIndex].sentence.length;
 
-  // 3. Hide popup
-  hideCandidatePopup();
+  if (direction === 'ArrowLeft') {
+    editCursorPosition = Math.max(0, editCursorPosition - 1);
+  } else if (direction === 'ArrowRight') {
+    editCursorPosition = Math.min(predictionLength - 1, editCursorPosition + 1);
+  }
+
+  // Show candidates for new position
+  onCharacterClick(editCursorPosition);
 }
+
+// Quick keys (Space/'[]\-) to select candidate
+function onQuickKeySelect(index) {
+  if (editCursorPosition === -1) {
+    return; // Not in edit mode
+  }
+
+  const predictionPath = currentPredictions[currentPredictionIndex].path;
+  const charInfo = predictionPath[editCursorPosition];
+  const code = charInfo.code;
+  const allCandidates = dayiDb.get(code);
+  const candidates = allCandidates.slice(0, 6);
+
+  if (index >= 0 && index < candidates.length) {
+    const newChar = candidates[index].char;
+
+    // 1. Replace character at position
+    replaceCharacterAt(editCursorPosition, newChar);
+
+    // 2. Mark as edited
+    editedPrediction = getCurrentPredictionText();
+
+    // 3. Move to next character (auto-advance)
+    editCursorPosition = Math.min(predictionLength - 1, editCursorPosition + 1);
+
+    // 4. Show candidates for next position
+    onCharacterClick(editCursorPosition);
+  }
+}
+
+// Escape key to exit edit mode
+function onEscapeKey() {
+  if (editCursorPosition !== -1) {
+    editCursorPosition = -1;
+    hideCandidatePopup();
+    unhighlightAllCharacters();
+  }
+}
+```
+
+**Key Mapping for Character Editing**:
+- **Click character**: Enter edit mode, show candidates
+- **Left/Right arrows**: Move cursor between characters
+- **Space**: Select candidate 0
+- **'**: Select candidate 1
+- **[**: Select candidate 2
+- **]**: Select candidate 3
+- **\\**: Select candidate 4 (or use other key)
+- **-**: Select candidate 5
+- **Escape**: Exit edit mode
 ```
 
 ---
