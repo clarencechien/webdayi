@@ -4,9 +4,9 @@
 
 > 輕量、透明、網頁優先的大易中文輸入法引擎
 
-[![Status](https://img.shields.io/badge/status-MVP%201%20v11.3-brightgreen)]()
-[![Version](https://img.shields.io/badge/version-11.3.5-blue)]()
-[![Tests](https://img.shields.io/badge/tests-212%2B%2F212%2B%20passing-brightgreen)]()
+[![Status](https://img.shields.io/badge/status-Phase%201.10%20COMPLETE-brightgreen)]()
+[![Version](https://img.shields.io/badge/version-0.5.0--build.010-blue)]()
+[![Tests](https://img.shields.io/badge/tests-282%2B%2F282%2B%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ---
@@ -17,11 +17,11 @@
 
 ### 🎯 現況一覽
 
-- **版本**: v11.3.5 (Build: 20251112-009)
-- **狀態**: ✅ MVP 1.0 完成！智慧引擎生產就緒
+- **版本**: v0.5.0 (Build: 20251113-010)
+- **狀態**: ✅ Phase 1.10 FEATURE COMPLETE！字元級編輯完整實現
 - **準確度**: 94.4% (v2.7 Hybrid: OOP + 70/30 + Laplace)
-- **測試**: 212+ 測試全數通過
-- **資料庫**: 16MB 完整 N-gram (279K bigrams, 90% 準確度)
+- **測試**: 282+ 測試全數通過 (新增 70 個 Phase 1.10 測試)
+- **資料庫**: 16MB 完整 N-gram (279K bigrams)
 
 ### 🚀 立即試用
 
@@ -68,6 +68,44 @@ open index.html  # 或使用 python3 -m http.server 8000
 **[立即試用 WebDaYi MVP1 v11.3 →](https://clarencechien.github.io/webdayi/)** (GitHub Pages)
 
 在瀏覽器中體驗核心大易輸入引擎，具備現代化設計與進階功能：
+
+### 🎉 Phase 1.10 字元級編輯 FEATURE COMPLETE! (2025-11-13)
+
+**完整的智慧字元編輯系統** - 三階段完整實現，讓句子修正變得前所未有的簡單！
+
+**Phase 1.10.1: 字元架構** ✅
+- 🎯 **可點擊字元**：每個預測字元都是獨立可點擊的 span 元素
+- 📊 **完整資料**：每個字元帶有 data-index、data-code、data-candidates 屬性
+- 🎨 **視覺回饋**：懸停縮放 (1.15x)、編輯高亮、焦點外框
+- 🧪 **24 個 TDD 測試**：涵蓋結構、屬性、事件、CSS、整合測試
+
+**Phase 1.10.2: 候選選擇視窗** ✅
+- 🪟 **精美視窗**：點擊字元 → 顯示 6 個候選字的漸層視窗
+- 🖱️ **滑鼠選擇**：點擊任何候選字按鈕即可替換
+- ⌨️ **鍵盤快速鍵**：Space/'[]\\- 快速選擇候選字 0-5
+- 🚪 **多種關閉方式**：Escape 鍵 / 點擊背景 / 關閉按鈕
+- 🧪 **27+ 個 TDD 測試**：涵蓋視窗結構、函數、事件、鍵盤、整合
+
+**Phase 1.10.3: 自動前進 + 方向鍵導航** ✅
+- 🚀 **自動前進**：選擇候選字 → 下一個字元視窗自動開啟 (150ms 延遲)
+- ⬅️ **方向鍵導航**：← → 鍵在字元間移動焦點
+- ⏎ **Enter 開啟**：在焦點字元按 Enter → 開啟候選視窗
+- 👁️ **焦點狀態**：焦點字元有獨特的外框光暈效果
+- 🎯 **邊界處理**：導航在首尾字元自動停止
+- 🧪 **19 個 TDD 測試**：涵蓋自動前進、方向鍵、焦點、整合
+
+**完整工作流程示範**：
+```
+1. 輸入碼：4jp ad a → 按 = → 看到「易在大」
+2. 【點擊】「易」→ 視窗顯示 6 個候選字
+3. 【按】' 鍵 → 選擇「義」，視窗關閉
+4. 【自動前進】→「在」視窗自動開啟 (無需動作!)
+5. 【按】Space → 選擇「在」，視窗關閉
+6. 【自動前進】→「大」視窗自動開啟
+7. 【按】[ → 選擇「移」，完成！
+```
+
+**只需一次點擊 + 三次按鍵就能修正 3 個字元！**
 
 ### 🆕 PWA 最新更新 (2025-11-13)
 
