@@ -1,13 +1,17 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-13 (🎉 Phase 1 F-4.0 UserDB-Viterbi + Trapezoid Keyboard COMPLETE!)
-**Current Phase**: ✅ Phase 1.8 COMPLETE - F-4.0 Learning + Trapezoid Keyboard
-**Current Version**: 0.5.0 (Build: 20251113-002, PWA POC Complete)
+**Last Updated**: 2025-11-13 (🎉 Phase 1 F-4.0 FIXED + UI Layout Improvements!)
+**Current Phase**: ✅ Phase 1.8 COMPLETE - F-4.0 Learning (FULLY FUNCTIONAL) + UI Fixes
+**Current Version**: 0.5.0 (Build: 20251113-003, PWA POC Complete + Critical Fixes)
 **Main Branch Status**: ✅ v2.7 Hybrid (OOP + 70/30 + Laplace) + Full ngram_db.json (Production Ready)
 **Feature Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
 **Next Milestone**: Phase 1.9 - F-5.0 Context-Adaptive Weights
 
 **Latest Achievements**:
+- ✅ **CRITICAL FIX**: Phase 1 F-4.0 learning integration now fully functional (exported functions to window scope)
+- ✅ **UI FIX**: Desktop controls no longer overlap input area (moved UserDB controls to Learning Stats section)
+- ✅ **FEATURE ADD**: Mobile controls now have Export/Import/Clear buttons
+- ✅ **TDD**: 15 comprehensive UI layout tests (test-ui-layout-fixes.html)
 - ✅ Phase 0 (Foundation): 100% Complete - Planning & Documentation
 - ✅ Phase 0.5 (PWA POC): **100% COMPLETE** - Full implementation with TDD 🎉
   - ✅ Directory structure (mvp1-pwa/)
@@ -19,6 +23,145 @@
   - ✅ Mobile custom touch keyboard (HTML + CSS + JS)
   - ✅ Unified input handler (desktop + mobile)
   - ✅ Core files migrated from MVP 1.0
+
+---
+
+## 🆕 SESSION 10.11: Critical Fixes & UI Layout Improvements (2025-11-13)
+
+**Status**: ✅ COMPLETE | Phase 1 F-4.0 Integration Fixed + UI Improvements
+**Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
+**Commits**: 3431cef (learning integration fix), [next commit] (UI layout fixes)
+
+### Critical Bug Fixes 🐛
+
+**Problem 1: Phase 1 F-4.0 Learning Integration Completely Broken**
+- **Root Cause**: Functions defined in `viterbi_module.js` but never exported to window scope
+- **Impact**: `detectLearning()`, `applyLearning()`, `viterbiWithUserDB()`, `showLearningFeedback()` were undefined
+- **Symptoms**: Learning stats never updated, export always showed 6 sample records
+- **Fix**: Added window exports (viterbi_module.js:553-561)
+  ```javascript
+  window.viterbiWithUserDB = viterbiWithUserDB;
+  window.detectLearning = detectLearning;
+  window.applyLearning = applyLearning;
+  window.showLearningFeedback = showLearningFeedback;
+  ```
+
+**Problem 2: Desktop Controls Overlap with Input Area**
+- **Root Cause**: Fixed desktop panel had 11 items stacked vertically at top-right
+- **Impact**: Panel overlapped inputbox/candidate area on smaller viewports
+- **Fix**: Moved UserDB management (Export/Import/Clear/Status) from fixed panel to Learning Statistics section
+- **Result**: Desktop panel reduced from 11 items to 7 buttons (36% reduction)
+
+**Problem 3: Mobile Missing Import/Export Features**
+- **Root Cause**: Mobile controls panel lacked UserDB management buttons
+- **Impact**: Mobile users couldn't export/import/clear learning data
+- **Fix**: Added Export/Import/Clear buttons + UserDB status to mobile panel
+
+**Problem 4: Syntax Error in Console Logging**
+- **Root Cause**: Lines 559-560 had incomplete console.log statements
+- **Impact**: Page failed to load with SyntaxError
+- **Fix**: Added missing quotes and parentheses
+
+### UI Layout Improvements ✨
+
+**Desktop Controls Panel** (index.html:100-154)
+- **Before**: 11 items (Dark, Focus, Auto-Copy, Char Mode, Sentence Mode, [UserDB Status], Export, Import, Clear, Font-, Font+)
+- **After**: 7 buttons (removed UserDB management section)
+- **Layout**: Fixed top-4 right-4, vertical stack
+- **Height Reduction**: ~40% less vertical space
+
+**Learning Statistics Section** (index.html:446-491)
+- **Added**: UserDB Status indicator
+- **Added**: Export/Import/Clear buttons (flex-wrap layout)
+- **Benefits**:
+  - Contextually located near stats they manage
+  - Prevents desktop controls overlap
+  - Default open (`<details open>`)
+
+**Mobile Controls Panel** (index.html:197-287)
+- **Added**: UserDB Status Mobile indicator (id="userdb-status-mobile")
+- **Added**: Export button (green theme)
+- **Added**: Import button (blue theme)
+- **Added**: Clear button (red theme)
+- **Layout**: Full-width buttons with bilingual labels
+
+**UserDB Status Synchronization** (index.html:1030-1063)
+- Both desktop and mobile status elements update together
+- Success: Green text with "✓ IndexedDB Ready"
+- Error: Red text with "✗ IndexedDB Error"
+
+### TDD Coverage 🧪
+
+**Created**: `tests/test-ui-layout-fixes.html` (15 tests, 4 sections)
+
+**Section 1: Desktop Controls Overlap Fix**
+1. Desktop controls panel exists
+2. Desktop controls should NOT contain UserDB management buttons
+3. Desktop controls should have exactly 7 buttons (down from 11)
+4. Learning Statistics section contains Export/Import/Clear buttons
+5. Learning Statistics section has UserDB status indicator
+
+**Section 2: Mobile Controls - Import/Export Features**
+6. Mobile controls panel exists
+7. Mobile controls contain Export button
+8. Mobile controls contain Import button
+9. Mobile controls contain Clear All button
+10. Mobile controls have UserDB status indicator
+
+**Section 3: UserDB Status Synchronization**
+11. Both desktop and mobile UserDB status elements exist
+12. Desktop UserDB status has initial loading text
+13. Mobile UserDB status has initial loading text
+
+**Section 4: Button Accessibility & Styling**
+14. All Export/Import/Clear buttons have aria-label attributes
+15. Mobile buttons have consistent styling with gap-3 and w-full
+
+### Files Changed
+
+- **mvp1-pwa/index.html**
+  - Removed UserDB controls from desktop-controls (lines 100-154)
+  - Added UserDB controls to Learning Statistics section (lines 446-491)
+  - Added UserDB controls to mobile panel (lines 241-276)
+  - Updated initUserDB() to sync both status elements (lines 1030-1063)
+  - Added collapsible sentence panel logic (lines 1146-1176)
+
+- **mvp1-pwa/js/viterbi_module.js**
+  - Added window exports for Phase 1 F-4.0 functions (lines 553-561)
+
+- **mvp1-pwa/tests/test-ui-layout-fixes.html**
+  - New file: 15 comprehensive UI layout tests
+
+### Testing Verification ✓
+
+**Manual Verification**:
+- Export buttons: 2 (desktop + mobile) ✓
+- Import buttons: 2 (desktop + mobile) ✓
+- Clear buttons: 2 (desktop + mobile) ✓
+- Desktop controls buttons: 7 (down from 11) ✓
+
+**User Reported Issues**:
+- ✅ Fixed: Learning stats now update when user makes selections
+- ✅ Fixed: Export now shows actual learned patterns (not sample data)
+- ✅ Fixed: Menu no longer overlaps inputbox/candidate area
+- ✅ Fixed: Mobile now has import/export buttons
+
+### Key Decisions
+
+1. **UserDB Controls Placement**: Moved to Learning Statistics section (not inline in main flow)
+   - Rationale: Contextually relevant, prevents overlap, doesn't clutter main UI
+   - Alternative considered: Keep in fixed panel with scrollable container
+   - Chosen: Better UX, no scrolling needed
+
+2. **Mobile Status Element**: Separate element (id="userdb-status-mobile")
+   - Rationale: Different styling for mobile panel context
+   - Alternative considered: Reuse same element with responsive classes
+   - Chosen: Simpler CSS, easier to maintain
+
+3. **Learning Stats Default State**: Open by default (`<details open>`)
+   - Rationale: Make learning features discoverable
+   - Alternative considered: Closed by default
+   - Chosen: Better visibility for new feature
 
 ---
 
