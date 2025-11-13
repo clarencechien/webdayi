@@ -512,7 +512,9 @@
     const charSpans = path.map((p, i) => {
       // Get all candidates for this position from dayiMap
       const candidates = dayiMap.get(p.code) || [];
-      const candidateChars = candidates.map(c => c.char);
+      // 🐛 FIX Phase 1.10.2: Sort by frequency and limit to 6 candidates
+      const sortedCandidates = sortCandidatesByFreq(candidates).slice(0, 6);
+      const candidateChars = sortedCandidates.map(c => c.char);
 
       // Build data attributes
       const dataIndex = i;
@@ -557,6 +559,16 @@
 
     // 🆕 Phase 1.10.1: Attach click handlers to character spans
     attachCharacterClickHandlers();
+
+    // 🐛 FIX Phase 1.10.3: Auto-focus sentence display for immediate arrow key navigation
+    const sentenceDisplay = document.getElementById('sentence-display');
+    if (sentenceDisplay) {
+      // Small delay to ensure DOM is fully rendered
+      setTimeout(() => {
+        sentenceDisplay.focus();
+        console.log('[Phase 1.10.3] Auto-focused sentence display for arrow navigation');
+      }, 50);
+    }
 
     console.log(`[Phase 1.10.1] Prediction ${index + 1}/${total} displayed with ${path.length} clickable characters`);
   }
