@@ -670,6 +670,7 @@
 
   /**
    * 🆕 Phase 1.10.2: Select a candidate character
+   * 🆕 Phase 1.10.3: Added auto-advance to next character
    * @param {number} charIndex - Character position to update
    * @param {string} newChar - New character to replace with
    */
@@ -695,11 +696,20 @@
     // Close modal
     closeCandidateModal();
 
-    // 🚧 TODO (Phase 1.10.3): Auto-advance to next character
-    // if (charIndex + 1 < charSpans.length) {
-    //   const nextSpan = charSpans[charIndex + 1];
-    //   nextSpan.click();
-    // }
+    // 🆕 Phase 1.10.3: Auto-advance to next character
+    if (charIndex + 1 < charSpans.length) {
+      const nextSpan = charSpans[charIndex + 1];
+      const nextCode = nextSpan.dataset.code;
+      const nextCandidates = JSON.parse(nextSpan.dataset.candidates);
+
+      // Small delay to allow modal close animation to complete
+      setTimeout(() => {
+        showCandidateModal(charIndex + 1, nextCode, nextCandidates);
+        console.log(`[Phase 1.10.3] Auto-advanced to character ${charIndex + 1}`);
+      }, 150);
+    } else {
+      console.log(`[Phase 1.10.3] Last character selected, no auto-advance`);
+    }
   }
 
   // ============================================
@@ -1145,6 +1155,133 @@
       }
     }
   });
+
+  // ============================================
+  // 🆕 Phase 1.10.3: Arrow Key Navigation + Focus Management
+  // ============================================
+
+  // Track current focused character index (-1 = no focus)
+  let currentFocusedIndex = -1;
+
+  /**
+   * 🆕 Phase 1.10.3: Set focus to a specific character
+   * @param {number} index - Character index to focus (-1 to clear focus)
+   */
+  function setCharacterFocus(index) {
+    const charSpans = document.querySelectorAll('.char-span');
+
+    // Remove focus from all characters
+    charSpans.forEach(span => span.classList.remove('focused'));
+
+    // Set focus if valid index
+    if (index >= 0 && index < charSpans.length) {
+      charSpans[index].classList.add('focused');
+      currentFocusedIndex = index;
+      console.log(`[Phase 1.10.3] Focus set to character ${index}`);
+    } else {
+      currentFocusedIndex = -1;
+      console.log(`[Phase 1.10.3] Focus cleared`);
+    }
+  }
+
+  /**
+   * 🆕 Phase 1.10.3: Navigate to previous character
+   */
+  function navigateToPreviousChar() {
+    const charSpans = document.querySelectorAll('.char-span');
+
+    if (charSpans.length === 0) return;
+
+    // If no focus, focus last character
+    if (currentFocusedIndex === -1) {
+      setCharacterFocus(charSpans.length - 1);
+      return;
+    }
+
+    // Move focus left (stop at 0)
+    if (currentFocusedIndex > 0) {
+      setCharacterFocus(currentFocusedIndex - 1);
+    } else {
+      console.log(`[Phase 1.10.3] Already at first character`);
+    }
+  }
+
+  /**
+   * 🆕 Phase 1.10.3: Navigate to next character
+   */
+  function navigateToNextChar() {
+    const charSpans = document.querySelectorAll('.char-span');
+
+    if (charSpans.length === 0) return;
+
+    // If no focus, focus first character
+    if (currentFocusedIndex === -1) {
+      setCharacterFocus(0);
+      return;
+    }
+
+    // Move focus right (stop at last)
+    if (currentFocusedIndex < charSpans.length - 1) {
+      setCharacterFocus(currentFocusedIndex + 1);
+    } else {
+      console.log(`[Phase 1.10.3] Already at last character`);
+    }
+  }
+
+  /**
+   * 🆕 Phase 1.10.3: Open modal for currently focused character
+   */
+  function openModalForFocusedChar() {
+    if (currentFocusedIndex === -1) {
+      console.warn(`[Phase 1.10.3] No character focused`);
+      return;
+    }
+
+    const charSpans = document.querySelectorAll('.char-span');
+    if (currentFocusedIndex < charSpans.length) {
+      const span = charSpans[currentFocusedIndex];
+      const code = span.dataset.code;
+      const candidates = JSON.parse(span.dataset.candidates);
+
+      showCandidateModal(currentFocusedIndex, code, candidates);
+      console.log(`[Phase 1.10.3] Opened modal for focused character ${currentFocusedIndex}`);
+    }
+  }
+
+  // Arrow key navigation (only when modal is closed)
+  document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('candidate-modal');
+    const isModalVisible = modal && !modal.classList.contains('hidden');
+
+    // Only allow arrow navigation when modal is closed
+    if (isModalVisible) return;
+
+    // Only handle arrow keys when sentence display exists
+    const charSpans = document.querySelectorAll('.char-span');
+    if (charSpans.length === 0) return;
+
+    const key = e.key;
+
+    if (key === 'ArrowLeft') {
+      e.preventDefault();
+      navigateToPreviousChar();
+    } else if (key === 'ArrowRight') {
+      e.preventDefault();
+      navigateToNextChar();
+    } else if (key === 'Enter') {
+      // Enter key opens modal for focused character
+      if (currentFocusedIndex !== -1) {
+        e.preventDefault();
+        openModalForFocusedChar();
+      }
+    }
+  });
+
+  // Export functions for testing
+  window.setCharacterFocus = setCharacterFocus;
+  window.navigateToPreviousChar = navigateToPreviousChar;
+  window.navigateToNextChar = navigateToNextChar;
+  window.openModalForFocusedChar = openModalForFocusedChar;
 
   // ============================================
   // Initialization
