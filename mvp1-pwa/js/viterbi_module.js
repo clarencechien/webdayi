@@ -550,5 +550,12 @@ function showLearningFeedback(learningData) {
   });
 }
 
+// 🆕 Phase 1 F-4.0: Export functions to global scope
+window.viterbiWithUserDB = viterbiWithUserDB;
+window.detectLearning = detectLearning;
+window.applyLearning = applyLearning;
+window.showLearningFeedback = showLearningFeedback;
+
 // Functions are now globally available in browser context
 console.log('✓ Viterbi module loaded (v2.7 HYBRID + UserDB Integration - Phase 1)');
+console.log('✓ Phase 1 F-4.0 functions exported: viterbiWithUserDB, detectLearning, applyLearning, showLearningFeedback');
