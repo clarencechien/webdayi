@@ -1,13 +1,13 @@
 # Progress Tracker: WebDaYi
 
-**Last Updated**: 2025-11-13 (🎉 Phase 0.5 PWA POC - 100% COMPLETE!)
+**Last Updated**: 2025-11-13 (🎉 Phase 1 F-4.0 UserDB-Viterbi + Trapezoid Keyboard COMPLETE!)
 **Current Version**: 11.3.5 (MVP 1.0) / 0.5.0 (PWA POC)
-**Build**: 20251112-009 (MVP 1.0), 20251113-001 (PWA)
-**Git Commits**: 752397f (MVP 1.0), 559b208 (PWA POC)
-**Overall Status**: 🎉 Phase 0.5 COMPLETE! Ready for Phase 1!
-**Main Branch**: ~85% (Phase 0 v2 ✅, MVP 1.0 v11.3 ✅, Phase 0.5 PWA POC ✅, MVP 2a next)
-**Feature Branch**: Phase 0.5 PWA POC complete (4,760 lines, 17 files, 30/30 tests passing)
-**Integration**: MVP 3.0 v2.7 Hybrid production ready (94.4%) + PWA POC with mobile keyboard!
+**Build**: 20251112-009 (MVP 1.0), 20251113-002 (PWA + Trapezoid)
+**Git Commits**: 752397f (MVP 1.0), 35f07fb (Trapezoid Keyboard)
+**Overall Status**: 🎉 Phase 1.8 COMPLETE! F-4.0 Learning + Trapezoid Keyboard Ready!
+**Main Branch**: ~85% (Phase 0 v2 ✅, MVP 1.0 v11.3 ✅, Phase 1.7-1.8 ✅, MVP 2a next)
+**Feature Branch**: Phase 1.8 complete (68 tests passing: 38 unit + 30 integration)
+**Integration**: F-4.0 UserDB-Viterbi integrated + Trapezoid keyboard optimized for Dayi input!
 
 ## Project Phases Overview
 
@@ -69,10 +69,20 @@
 │   ├─ Export/Import UI         [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Core Files Migration     [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Mobile Custom Keyboard   [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅📱🆕│
-│   ├─ UserDB-Viterbi Integration [░░░░░░░░░░░░░░]   0% ⏳→P1│
-│   ├─ RWD Tests (10+)          [░░░░░░░░░░░░░░░░]   0% ⏳→P1│
-│   └─ Integration Testing      [░░░░░░░░░░░░░░░░]   0% ⏳→P1│
-│ Phase 1.8: F-4.0 Enhancement   [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│   ├─ Mobile Keyboard Fix (Bug)[▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🐛✅  │
+│ Phase 1.8: F-4.0 UserDB-Viterbi [▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎉✅  │
+│   ├─ Learning Functions (TDD) [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅🧪  │
+│   ├─ viterbiWithUserDB()      [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ detectLearning()         [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ applyLearning()          [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ showLearningFeedback()   [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Integration with PWA     [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Editable Predictions     [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Async Viterbi Flow       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Integration Tests (30)   [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅🧪  │
+│   ├─ Mobile Keyboard Trapezoid[▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅📱✨│
+│   ├─ RWD Tests (10+)          [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│   └─ Integration Testing (E2E)[░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.9: F-5.0 ContextEngine [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.10: MVP 1.0 v12        [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.11: MVP 2a v2.0 Ext    [░░░░░░░░░░░░░░░░]   0% ⏳    │
