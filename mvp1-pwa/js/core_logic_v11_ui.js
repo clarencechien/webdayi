@@ -24,6 +24,16 @@
   console.log('[v11 UI] Initializing...');
 
   // ============================================
+  // Global State for Sentence Mode Prediction Cycling (Session 10.11 Part 5)
+  // ============================================
+
+  let currentPredictions = []; // Top-N predictions from getTopNPredictions()
+  let currentPredictionIndex = 0; // Which prediction is currently displayed (0-4)
+  let originalPrediction = null; // First prediction (for learning detection)
+  let editedPrediction = null; // User's final selection after edits
+  let editCursorPosition = -1; // -1 = not editing, 0+ = editing at position
+
+  // ============================================
   // UI Element References
   // ============================================
 
@@ -254,61 +264,175 @@
   window.updateBufferDisplay = updateBufferDisplay;
   window.updateLivePreviewDisplay = updateLivePreviewDisplay;
 
+  // 🆕 Session 10.11 Part 5: Trigger + Cycle Prediction with top-N
   // Export to window for = key handler in core_logic.js
   window.triggerPrediction = async function triggerPrediction() {
-    const buffer = getCodeBuffer();
+    // Case 1: No predictions yet - TRIGGER prediction
+    if (currentPredictions.length === 0) {
+      const buffer = getCodeBuffer();
 
-    if (buffer.length === 0) {
-      console.warn('[v11 UI] Buffer empty, cannot predict');
-      return;
-    }
-
-    console.log(`[v11 UI] Predicting sentence for: ${buffer.join(', ')}`);
-
-    // Ensure N-gram DB is loaded
-    const ngram = await loadNgramDatabase();
-    if (!ngram) {
-      alert('N-gram 資料庫未載入，無法預測');
-      return;
-    }
-
-    // 🆕 Phase 1: Run Viterbi prediction (now async with UserDB)
-    const result = await predictSentenceFromBuffer(buffer, dayiMap, ngram);
-
-    if (result) {
-      console.log(`[v11 UI] Prediction: "${result.sentence}" (score: ${result.score.toFixed(3)})`);
-
-      // 🆕 Phase 1: Store prediction for learning detection
-      window.lastPrediction = result.sentence;
-
-      // Display prediction
-      displaySentencePrediction(result);
-
-      // Append to output buffer
-      const outputBuffer = document.getElementById('output-buffer');
-      if (outputBuffer) {
-        outputBuffer.value += result.sentence;
-
-        // Auto-copy if enabled
-        if (typeof autoCopyEnabled !== 'undefined' && autoCopyEnabled) {
-          if (typeof performAutoCopy === 'function') {
-            performAutoCopy(outputBuffer.value);
-          }
-          if (typeof showCopyFeedback === 'function') {
-            showCopyFeedback();
-          }
-        }
+      if (buffer.length === 0) {
+        console.warn('[v11 UI] Buffer empty, cannot predict');
+        return;
       }
 
-      // Clear buffer and input
+      console.log(`[v11 UI] Triggering top-N predictions for: ${buffer.join(', ')}`);
+
+      // Ensure N-gram DB is loaded
+      const ngram = await loadNgramDatabase();
+      if (!ngram) {
+        alert('N-gram 資料庫未載入，無法預測');
+        return;
+      }
+
+      // 🆕 Get top-5 predictions (Session 10.11 Part 5)
+      if (typeof window.getTopNPredictions !== 'function') {
+        console.error('[v11 UI] getTopNPredictions not found! Falling back to single prediction.');
+        const result = await predictSentenceFromBuffer(buffer, dayiMap, ngram);
+        if (result) {
+          currentPredictions = [result];
+          currentPredictionIndex = 0;
+          originalPrediction = result.sentence;
+        }
+      } else {
+        // Get top-5 predictions with UserDB support
+        const userDB = (typeof window.userDB !== 'undefined' && window.userDBReady) ? window.userDB : null;
+        currentPredictions = await window.getTopNPredictions(buffer, dayiMap, ngram, userDB, 5);
+        currentPredictionIndex = 0;
+        originalPrediction = currentPredictions[0]?.sentence || null;
+      }
+
+      if (currentPredictions.length === 0) {
+        console.error('[v11 UI] No predictions generated');
+        alert('預測失敗，請重試');
+        return;
+      }
+
+      console.log(`[v11 UI] Generated ${currentPredictions.length} predictions`);
+      console.log(`[v11 UI] Top prediction: "${currentPredictions[0].sentence}" (score: ${currentPredictions[0].score.toFixed(3)})`);
+
+      // Display first prediction
+      displayPredictionWithIndicator(currentPredictions[0], 0, currentPredictions.length);
+
+      // Clear buffer and input (codes are now in prediction state)
       clearCodeBuffer();
       updateBufferDisplay();
       updateLivePreviewDisplay();
       if (inputBox) inputBox.value = '';
+
+    // Case 2: Predictions exist - CYCLE to next prediction
     } else {
-      console.error('[v11 UI] Prediction failed');
-      alert('預測失敗，請重試');
+      console.log(`[v11 UI] Cycling predictions (current: ${currentPredictionIndex + 1}/${currentPredictions.length})`);
+
+      // Increment index (with wrap-around)
+      currentPredictionIndex = (currentPredictionIndex + 1) % currentPredictions.length;
+
+      console.log(`[v11 UI] Showing prediction #${currentPredictionIndex + 1}: "${currentPredictions[currentPredictionIndex].sentence}"`);
+
+      // Display new prediction
+      displayPredictionWithIndicator(currentPredictions[currentPredictionIndex], currentPredictionIndex, currentPredictions.length);
+
+      // Reset edited flag when cycling
+      editedPrediction = null;
     }
+  }
+
+  /**
+   * 🆕 Session 10.11 Part 5: Confirm prediction and apply learning
+   * Called when user presses Enter in sentence mode
+   */
+  window.confirmPrediction = async function confirmPrediction() {
+    if (currentPredictions.length === 0) {
+      console.warn('[v11 UI] No predictions to confirm');
+      return;
+    }
+
+    console.log('[v11 UI] Confirming prediction...');
+
+    // Get current prediction text (may have been edited)
+    const predictionTextEl = document.getElementById('prediction-result-text');
+    if (!predictionTextEl) {
+      console.error('[v11 UI] Prediction text element not found');
+      return;
+    }
+
+    const finalSentence = predictionTextEl.textContent || predictionTextEl.innerText;
+    console.log(`[v11 UI] Final sentence: "${finalSentence}"`);
+    console.log(`[v11 UI] Original prediction: "${originalPrediction}"`);
+
+    // Detect learning (compare original vs final)
+    if (originalPrediction && originalPrediction !== finalSentence) {
+      console.log('[v11 UI] Prediction was modified, triggering learning...');
+
+      // Convert strings to arrays for detectLearning
+      const originalChars = originalPrediction.split('');
+      const finalChars = finalSentence.split('');
+
+      if (typeof window.detectLearning === 'function' && typeof window.applyLearning === 'function') {
+        const learningData = window.detectLearning(originalChars, finalChars);
+
+        if (learningData.length > 0 && window.userDB && window.userDBReady) {
+          try {
+            await window.applyLearning(learningData, window.userDB);
+            console.log(`[v11 UI] Applied ${learningData.length} learning points`);
+
+            // Show learning feedback
+            if (typeof window.showLearningFeedback === 'function') {
+              window.showLearningFeedback(learningData);
+            }
+
+            // Update stats
+            if (typeof updateUserDBStats === 'function') {
+              setTimeout(() => updateUserDBStats(), 100);
+            }
+          } catch (error) {
+            console.error('[v11 UI] Learning failed:', error);
+          }
+        } else {
+          console.log('[v11 UI] No learning data or UserDB not ready');
+        }
+      } else {
+        console.warn('[v11 UI] Learning functions not available');
+      }
+    } else {
+      console.log('[v11 UI] Prediction unchanged, no learning needed');
+    }
+
+    // Append to output buffer
+    const outputBuffer = document.getElementById('output-buffer');
+    if (outputBuffer) {
+      outputBuffer.value += finalSentence;
+      console.log('[v11 UI] Appended to output buffer');
+
+      // Auto-copy if enabled
+      if (typeof autoCopyEnabled !== 'undefined' && autoCopyEnabled) {
+        if (typeof performAutoCopy === 'function') {
+          performAutoCopy(outputBuffer.value);
+        }
+        if (typeof showCopyFeedback === 'function') {
+          showCopyFeedback();
+        }
+      }
+    }
+
+    // Clear prediction state
+    currentPredictions = [];
+    currentPredictionIndex = 0;
+    originalPrediction = null;
+    editedPrediction = null;
+    console.log('[v11 UI] Prediction state cleared');
+
+    // Clear candidate area
+    if (candidateArea) {
+      candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 = 預測句子</div>';
+    }
+
+    // Focus back to input
+    if (inputBox) {
+      inputBox.focus();
+    }
+
+    console.log('[v11 UI] Confirmation complete!');
   }
 
   /**
@@ -364,6 +488,71 @@
         sel.addRange(range);
 
         console.log('[Phase 1] Prediction displayed and ready for editing');
+      }
+    }, 100);
+  }
+
+  /**
+   * Display sentence prediction with cycling indicator (Session 10.11 Part 5)
+   * Shows prediction number (e.g., "預測 2/5") and hint text
+   *
+   * @param {Object} prediction - Prediction object with {sentence, score, path}
+   * @param {number} index - Current prediction index (0-based)
+   * @param {number} total - Total number of predictions
+   */
+  function displayPredictionWithIndicator(prediction, index, total) {
+    if (!candidateArea) return;
+
+    const { sentence, score, path } = prediction;
+
+    const html = `
+      <div class="sentence-prediction w-full">
+        <div class="prediction-header flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined">auto_awesome</span>
+            <span>智慧預測結果</span>
+            <span class="text-xs ml-2 opacity-70">✏️ 可編輯</span>
+          </div>
+          <div class="prediction-indicator text-sm font-bold px-3 py-1 rounded-full" style="background: rgba(78, 201, 176, 0.2); color: #4ec9b0;">
+            預測 ${index + 1}/${total}
+          </div>
+        </div>
+        <div
+          id="prediction-result-text"
+          class="predicted-sentence"
+          contenteditable="true"
+          spellcheck="false"
+          style="cursor: text; border: 2px dashed transparent; padding: 8px; border-radius: 4px; transition: all 0.2s;"
+          onfocus="this.style.borderColor='#4ec9b0'; this.style.background='rgba(78, 201, 176, 0.05)';"
+          onblur="this.style.borderColor='transparent'; this.style.background='transparent';"
+        >${sentence}</div>
+        <div class="prediction-details">
+          <div class="char-breakdown">
+            ${path.map((p, i) => `${p.char} (${p.code})`).join(' → ')}
+          </div>
+          <div class="prediction-score">機率分數: ${score.toFixed(3)}</div>
+          <div class="prediction-hint text-xs mt-2 p-2 rounded" style="background: rgba(78, 201, 176, 0.1); color: #4ec9b0;">
+            <kbd>=</kbd> 切換預測 | 點擊字重選 | <kbd>Enter</kbd> 確認
+          </div>
+        </div>
+      </div>
+    `;
+
+    candidateArea.innerHTML = html;
+
+    // Focus the editable prediction for immediate editing
+    setTimeout(() => {
+      const editableArea = document.getElementById('prediction-result-text');
+      if (editableArea) {
+        // Set cursor at end of text
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(editableArea);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+
+        console.log(`[v11 UI] Prediction ${index + 1}/${total} displayed and ready for editing`);
       }
     }, 100);
   }
