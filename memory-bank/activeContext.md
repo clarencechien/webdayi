@@ -121,61 +121,102 @@ async function getTopNPredictions(codes, dayiDb, ngramDb, userDB = null, n = 5)
 
 **Test Coverage**: 29/29 tests (100% passing with mock implementation)
 
-### ⏳ Pending: UI Implementation
+### ✅ Implemented: = Key Cycling + Enter Confirmation (Commit: d739999)
 
-**What's NOT Implemented Yet**:
-1. **= Key Cycling Logic**: Modify triggerPrediction() to support trigger + cycle
-2. **Enter Key Confirmation**: Add Enter handler for sentence mode
-3. **Character Editing**: Add click + arrow navigation for fine-tuning
-4. **Prediction Indicator UI**: Show "預測 1/5" display
-5. **Hint Text**: Add "按 = 切換預測 | 點擊字重選 | Enter 確認"
+**1. Global State Management** (core_logic_v11_ui.js:26-34)
+```javascript
+let currentPredictions = [];      // Top-N predictions from getTopNPredictions()
+let currentPredictionIndex = 0;   // Which prediction displayed (0-4)
+let originalPrediction = null;    // First prediction for learning detection
+let editedPrediction = null;      // User's final selection after edits
+let editCursorPosition = -1;      // -1 = not editing, 0+ = editing at position
+```
 
-**Files Needing Updates**:
-- `mvp1-pwa/js/core_logic_v11_ui.js` - Rewrite triggerPrediction()
-- `mvp1-pwa/js/core_logic.js` - Add Enter key handler for sentence mode
-- `mvp1-pwa/index.html` - Add prediction indicator UI
+**2. = Key: Trigger + Cycle** (core_logic_v11_ui.js:267-338)
 
-**Implementation Plan**:
-1. Add global state for predictions:
-   ```javascript
-   let currentPredictions = []; // Top-N predictions
-   let currentPredictionIndex = 0; // Which one displayed
-   let originalPrediction = null; // For learning detection
-   let editedPrediction = null; // User's final version
-   let editCursorPosition = -1; // -1 = not editing
-   ```
+**Case 1 - No predictions: TRIGGER**
+- Check if buffer has codes
+- Load N-gram database
+- Call `getTopNPredictions(codes, dayiDb, ngram, userDB, 5)`
+- Store predictions, set index to 0
+- Display first prediction with indicator "預測 1/5"
+- Clear buffer and input
 
-2. Rewrite `triggerPrediction()`:
-   - If `currentPredictions.length === 0`: Trigger (call getTopNPredictions, store, display first)
-   - Else: Cycle (increment index, display next)
+**Case 2 - Predictions exist: CYCLE**
+- Increment index with wrap-around: `(index + 1) % length`
+- Display next prediction with updated indicator
+- Reset edited flag
 
-3. Add `confirmPrediction()` for Enter key:
-   - Get final sentence
-   - Detect learning (compare original vs final)
-   - Apply learning to UserDB
-   - Append to output buffer
-   - Clear state
+**3. Display with Indicator** (core_logic_v11_ui.js:397-460)
 
-4. Add character editing handlers:
-   - `onCharacterClick(position)`: Show candidates
-   - `onArrowKey(direction)`: Move cursor
-   - `onQuickKeySelect(index)`: Replace character
+**New Function**: `displayPredictionWithIndicator(prediction, index, total)`
+
+Features:
+- **Indicator Badge**: "預測 N/5" in rounded badge (top-right)
+- **Code Breakdown**: Shows "易 (4jp) → 在 (ad) → 大 (a)"
+- **Hint Text**: "<kbd>=</kbd> 切換預測 | 點擊字重選 | <kbd>Enter</kbd> 確認"
+- **Editable**: contenteditable=true for manual corrections
+- **Auto-focus**: Cursor positioned at end of text
+
+**4. Enter Key Handler** (core_logic.js:1601-1617)
+- Detects sentence mode with `isSentenceMode()`
+- Calls `window.confirmPrediction()` if available
+- Graceful fallback if function not found
+
+**5. Confirm Prediction** (core_logic_v11_ui.js:340-436)
+
+**New Function**: `confirmPrediction()`
+
+Workflow:
+1. Get final sentence from editable area (`#prediction-result-text`)
+2. Compare with `originalPrediction`
+3. If different:
+   - Convert to character arrays
+   - Call `detectLearning(originalChars, finalChars)`
+   - Apply learning to UserDB asynchronously
+   - Show learning feedback toast
+   - Update UserDB stats display
+4. Append final sentence to output buffer
+5. Auto-copy if enabled
+6. Clear prediction state (arrays, indices, flags)
+7. Clear candidate area
+8. Focus back to input box
+
+### ⏳ Remaining: Character Editing (Future - Session 10.11 Part 6)
+
+**Not Yet Implemented**:
+1. Click character → Show 6 candidates in popup
+2. Left/Right arrows → Move cursor between characters
+3. Quick keys (Space/'[]\-) → Select candidate (0-5)
+4. Escape → Exit edit mode
+5. Auto-advance after selection
 
 ### Files Changed 📝
 
+**Backend (Commit 2f11992)**:
 1. **mvp1-pwa/js/viterbi_module.js** (+78 lines)
    - Added getTopNPredictions() function (lines 385-461)
    - Exported to window.getTopNPredictions (line 633)
-   - Updated console log
 
 2. **mvp1-pwa/tests/test-sentence-mode-ux.html** (NEW, 730 lines)
    - 29 comprehensive TDD tests
-   - Mock Viterbi and state for testing
-   - All 29/29 tests passing ✅
+   - All 29/29 tests (20/29 passing in real app - char editing pending)
+
+**UI Implementation (Commit d739999)**:
+3. **mvp1-pwa/js/core_logic_v11_ui.js** (+177 lines, -36 lines)
+   - Lines 26-34: Global state variables
+   - Lines 267-338: Rewritten triggerPrediction() with trigger+cycle
+   - Lines 340-436: New confirmPrediction() function
+   - Lines 397-460: New displayPredictionWithIndicator() function
+
+4. **mvp1-pwa/js/core_logic.js** (+19 lines)
+   - Lines 1601-1617: Enter key handler for sentence mode
+   - Line 1620: Updated comment
 
 ### Commits 🎯
 
 - `2f11992`: feat: Add top-N predictions + TDD tests for sentence mode UX
+- `d739999`: feat: Implement = key cycling + Enter confirmation for sentence mode
 
 ---
 
