@@ -720,8 +720,77 @@
         console.log(`[Phase 1.10.3] Auto-advanced to character ${charIndex + 1}`);
       }, 150);
     } else {
-      console.log(`[Phase 1.10.3] Last character selected, no auto-advance`);
+      // 🆕 Phase 1.10.4: Last character - show finish hint
+      console.log(`[Phase 1.10.4] Last character selected, showing finish hint`);
+      showFinishHint();
     }
+  }
+
+  /**
+   * 🆕 Phase 1.10.4: Show finish hint after editing last character
+   */
+  window.showFinishHint = function showFinishHint() {
+    const finishHint = document.getElementById('finish-hint');
+    const sentenceDisplay = document.getElementById('sentence-display');
+
+    // Show the finish hint
+    if (finishHint) {
+      finishHint.classList.remove('hidden');
+      console.log('[Phase 1.10.4] Finish hint shown');
+    }
+
+    // Focus sentence display for Enter key
+    if (sentenceDisplay) {
+      setTimeout(() => {
+        sentenceDisplay.focus();
+        console.log('[Phase 1.10.4] Sentence display focused for Enter key');
+      }, 50);
+    }
+  }
+
+  /**
+   * 🆕 Phase 1.10.4: Submit edited sentence to output buffer
+   */
+  window.submitEditedSentence = function submitEditedSentence() {
+    const sentenceDisplay = document.getElementById('sentence-display');
+    const outputBuffer = document.getElementById('output-buffer');
+    const finishHint = document.getElementById('finish-hint');
+
+    if (!sentenceDisplay) {
+      console.error('[Phase 1.10.4] Sentence display not found');
+      return;
+    }
+
+    // Extract final sentence from character spans
+    const charSpans = sentenceDisplay.querySelectorAll('.char-span');
+    if (charSpans.length === 0) {
+      console.warn('[Phase 1.10.4] No characters to submit');
+      return;
+    }
+
+    const finalSentence = Array.from(charSpans).map(span => span.textContent).join('');
+    console.log(`[Phase 1.10.4] Submitting sentence: "${finalSentence}"`);
+
+    // Append to output buffer
+    if (outputBuffer) {
+      outputBuffer.value += finalSentence;
+      console.log('[Phase 1.10.4] Appended to output buffer');
+    }
+
+    // Hide finish hint
+    if (finishHint) {
+      finishHint.classList.add('hidden');
+    }
+
+    // Clear code buffer state
+    clearCodeBuffer();
+
+    // Clear candidate area
+    if (candidateArea) {
+      candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 = 預測句子</div>';
+    }
+
+    console.log('[Phase 1.10.4] Submit complete');
   }
 
   // ============================================
@@ -1260,7 +1329,7 @@
     }
   }
 
-  // Arrow key navigation (only when modal is closed)
+  // Arrow key navigation + Space/Enter keys (only when modal is closed)
   document.addEventListener('keydown', (e) => {
     const modal = document.getElementById('candidate-modal');
     const isModalVisible = modal && !modal.classList.contains('hidden');
@@ -1268,7 +1337,7 @@
     // Only allow arrow navigation when modal is closed
     if (isModalVisible) return;
 
-    // Only handle arrow keys when sentence display exists
+    // Only handle keys when sentence display exists
     const charSpans = document.querySelectorAll('.char-span');
     if (charSpans.length === 0) return;
 
@@ -1280,11 +1349,18 @@
     } else if (key === 'ArrowRight') {
       e.preventDefault();
       navigateToNextChar();
-    } else if (key === 'Enter') {
-      // Enter key opens modal for focused character
+    } else if (key === ' ') {
+      // 🆕 Phase 1.10.4: Space key opens modal for focused character
       if (currentFocusedIndex !== -1) {
         e.preventDefault();
         openModalForFocusedChar();
+      }
+    } else if (key === 'Enter') {
+      // 🆕 Phase 1.10.4: Enter key submits edited sentence (only when finish hint visible)
+      const finishHint = document.getElementById('finish-hint');
+      if (finishHint && !finishHint.classList.contains('hidden')) {
+        e.preventDefault();
+        submitEditedSentence();
       }
     }
   });

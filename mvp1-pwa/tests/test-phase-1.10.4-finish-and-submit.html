@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1.10.4 TDD Tests - Finish Editing and Submit</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+
+    h1 {
+      color: #4ec9b0;
+      border-bottom: 2px solid #4ec9b0;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      color: #569cd6;
+      margin-top: 30px;
+    }
+
+    .test-section {
+      background: #252526;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border-left: 4px solid #569cd6;
+    }
+
+    .test {
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 4px;
+      background: #2d2d30;
+    }
+
+    .test.pass {
+      border-left: 4px solid #4ec9b0;
+    }
+
+    .test.fail {
+      border-left: 4px solid #f48771;
+      background: #3f2d2d;
+    }
+
+    .test-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .test-result {
+      font-size: 0.9em;
+      font-family: 'Courier New', monospace;
+    }
+
+    .summary {
+      background: #0e639c;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+
+    .summary.all-pass {
+      background: #0e7a0d;
+    }
+
+    .summary.some-fail {
+      background: #a80000;
+    }
+
+    .test-ui {
+      background: #1e1e1e;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border: 1px solid #3e3e42;
+    }
+
+    .sentence-display {
+      display: flex;
+      gap: 4px;
+      padding: 12px;
+      background: rgba(78, 201, 176, 0.05);
+      border-radius: 8px;
+      justify-content: center;
+      margin: 1rem 0;
+      outline: none;
+    }
+
+    .char-span {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 2rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      user-select: none;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .char-span:hover {
+      background: rgba(78, 201, 176, 0.3);
+      transform: scale(1.1);
+    }
+
+    .char-span.editing {
+      background: rgba(78, 201, 176, 0.4);
+      border: 2px solid #4ec9b0;
+    }
+
+    .char-span.focused {
+      background: rgba(78, 201, 176, 0.2);
+      border: 2px solid rgba(78, 201, 176, 0.6);
+      box-shadow: 0 0 8px rgba(78, 201, 176, 0.4);
+    }
+
+    .finish-hint {
+      text-align: center;
+      padding: 8px;
+      background: rgba(78, 201, 176, 0.1);
+      border-radius: 6px;
+      border: 1px solid rgba(78, 201, 176, 0.3);
+      color: #4ec9b0;
+      font-size: 0.9em;
+      margin-top: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #output-buffer {
+      width: 100%;
+      min-height: 100px;
+      background: #252526;
+      color: #d4d4d4;
+      border: 1px solid #3e3e42;
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'Microsoft YaHei', sans-serif;
+      font-size: 1.1em;
+      resize: vertical;
+    }
+
+    kbd {
+      background: #3e3e42;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Phase 1.10.4 TDD Tests - Finish Editing and Submit</h1>
+
+  <p><strong>Test File:</strong> test-phase-1.10.4-finish-and-submit.html</p>
+  <p><strong>Testing:</strong> Complete editing workflow with Enter to submit</p>
+  <p><strong>Requirements:</strong> After editing last character, show hint → Press Enter → Submit to buffer</p>
+
+  <h2>Test UI Preview</h2>
+  <div class="test-ui">
+    <p><strong>Manual Testing Instructions:</strong></p>
+    <ol>
+      <li>Click and edit the last character "大" → Select "移"</li>
+      <li>Modal should close and show hint "按 Enter 送出"</li>
+      <li>Press Enter → Sentence should appear in output buffer below</li>
+      <li>Sentence display and hint should clear</li>
+    </ol>
+
+    <p><strong>Character Spans (Click to open modal):</strong></p>
+    <div class="sentence-display" id="test-display" tabindex="0">
+      <span class="char-span" data-index="0" data-code="4jp" data-candidates='["易","義","移","異","逸","益"]'>易</span>
+      <span class="char-span" data-index="1" data-code="ad" data-candidates='["在","再","載","宰"]'>在</span>
+      <span class="char-span" data-index="2" data-code="a" data-candidates='["大","太","夫","移"]'>大</span>
+    </div>
+
+    <div id="finish-hint" class="finish-hint hidden">
+      ✨ 編輯完成！按 <kbd>Enter</kbd> 送出到輸出區
+    </div>
+
+    <p><strong>Output Buffer:</strong></p>
+    <textarea id="output-buffer" placeholder="Edited sentences will appear here..."></textarea>
+  </div>
+
+  <!-- Modal HTML (for Phase 1.10.2 functions) -->
+  <div id="modal-backdrop" class="modal-backdrop hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+  <div id="candidate-modal" class="candidate-modal hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2d2d30; padding: 20px; border-radius: 12px; z-index: 1000; min-width: 300px;">
+    <div class="modal-header" style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+      <span class="modal-title" id="modal-title">選擇字元</span>
+      <button class="close-btn" id="close-modal-btn" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;">✕</button>
+    </div>
+    <div class="candidates-grid" id="candidates-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+      <!-- Candidates populated dynamically -->
+    </div>
+  </div>
+
+  <div id="test-results"></div>
+  <div id="summary" class="summary"></div>
+
+  <!-- Dependencies -->
+  <script>
+    // Mock dayiMap
+    window.dayiMap = new Map([
+      ['4jp', [
+        { char: '易', freq: 80 },
+        { char: '義', freq: 70 },
+        { char: '移', freq: 50 },
+        { char: '異', freq: 40 },
+        { char: '逸', freq: 30 },
+        { char: '益', freq: 20 }
+      ]],
+      ['ad', [
+        { char: '在', freq: 90 },
+        { char: '再', freq: 60 },
+        { char: '載', freq: 40 },
+        { char: '宰', freq: 20 }
+      ]],
+      ['a', [
+        { char: '大', freq: 100 },
+        { char: '太', freq: 80 },
+        { char: '夫', freq: 40 },
+        { char: '移', freq: 35 }
+      ]]
+    ]);
+
+    function sortCandidatesByFreq(candidates) {
+      if (!candidates || candidates.length === 0) return [];
+      return [...candidates].sort((a, b) => b.freq - a.freq);
+    }
+
+    // Phase 1.10.2: Modal functions
+    window.showCandidateModal = function showCandidateModal(charIndex, code, candidates) {
+      const modal = document.getElementById('candidate-modal');
+      const backdrop = document.getElementById('modal-backdrop');
+      const modalTitle = document.getElementById('modal-title');
+      const candidatesGrid = document.getElementById('candidates-grid');
+
+      if (!modal || !backdrop || !modalTitle || !candidatesGrid) {
+        console.error('[Test] Modal elements not found');
+        return;
+      }
+
+      window.currentEditingIndex = charIndex;
+      modalTitle.textContent = `選擇字元 (位置 ${charIndex}: ${code})`;
+
+      const charSpans = document.querySelectorAll('.char-span');
+      charSpans.forEach((span, i) => span.classList.toggle('editing', i === charIndex));
+
+      const shortcutLabels = ['Space', "'", '[', ']', '-', '\\'];
+      candidatesGrid.innerHTML = candidates.map((char, i) => {
+        const keyLabel = i < shortcutLabels.length ? shortcutLabels[i] : '';
+        return `<button class="candidate-btn" data-index="${i}" data-char="${char}" style="background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 1.2em;">
+          ${char} ${keyLabel ? `<small style="opacity: 0.7;">${keyLabel}</small>` : ''}
+        </button>`;
+      }).join('');
+
+      candidatesGrid.querySelectorAll('.candidate-btn').forEach((btn, i) => {
+        btn.addEventListener('click', () => selectCandidate(charIndex, candidates[i]));
+      });
+
+      modal.classList.remove('hidden');
+      backdrop.classList.remove('hidden');
+    };
+
+    window.closeCandidateModal = function closeCandidateModal() {
+      const modal = document.getElementById('candidate-modal');
+      const backdrop = document.getElementById('modal-backdrop');
+      if (modal) modal.classList.add('hidden');
+      if (backdrop) backdrop.classList.add('hidden');
+
+      document.querySelectorAll('.char-span').forEach(span => span.classList.remove('editing'));
+      window.currentEditingIndex = -1;
+    };
+
+    window.selectCandidate = function selectCandidate(charIndex, newChar) {
+      const charSpans = document.querySelectorAll('.char-span');
+      if (charIndex < 0 || charIndex >= charSpans.length) return;
+
+      const targetSpan = charSpans[charIndex];
+      targetSpan.textContent = newChar;
+      targetSpan.dataset.edited = 'true';
+
+      closeCandidateModal();
+
+      // 🆕 Phase 1.10.3: Auto-advance OR Phase 1.10.4: Show finish hint
+      if (charIndex + 1 < charSpans.length) {
+        // Auto-advance to next character
+        const nextSpan = charSpans[charIndex + 1];
+        const nextCode = nextSpan.dataset.code;
+        const nextCandidates = JSON.parse(nextSpan.dataset.candidates);
+        setTimeout(() => {
+          showCandidateModal(charIndex + 1, nextCode, nextCandidates);
+        }, 150);
+      } else {
+        // 🆕 Phase 1.10.4: Last character - show finish hint
+        showFinishHint();
+      }
+    };
+
+    // 🆕 Phase 1.10.4: Show finish hint and focus sentence display
+    window.showFinishHint = function showFinishHint() {
+      const finishHint = document.getElementById('finish-hint');
+      const sentenceDisplay = document.getElementById('test-display');
+
+      if (finishHint) {
+        finishHint.classList.remove('hidden');
+        console.log('[Phase 1.10.4] Finish hint shown');
+      }
+
+      if (sentenceDisplay) {
+        setTimeout(() => {
+          sentenceDisplay.focus();
+          console.log('[Phase 1.10.4] Sentence display focused for Enter key');
+        }, 50);
+      }
+    };
+
+    // 🆕 Phase 1.10.4: Extract and submit sentence
+    window.submitEditedSentence = function submitEditedSentence() {
+      const sentenceDisplay = document.getElementById('test-display');
+      const outputBuffer = document.getElementById('output-buffer');
+      const finishHint = document.getElementById('finish-hint');
+
+      if (!sentenceDisplay || !outputBuffer) {
+        console.error('[Phase 1.10.4] Required elements not found');
+        return;
+      }
+
+      // Extract final sentence from character spans
+      const charSpans = sentenceDisplay.querySelectorAll('.char-span');
+      const finalSentence = Array.from(charSpans).map(span => span.textContent).join('');
+
+      console.log(`[Phase 1.10.4] Submitting sentence: "${finalSentence}"`);
+
+      // Append to output buffer
+      outputBuffer.value += finalSentence;
+
+      // Hide finish hint
+      if (finishHint) {
+        finishHint.classList.add('hidden');
+      }
+
+      // Clear sentence display
+      sentenceDisplay.innerHTML = '';
+
+      console.log('[Phase 1.10.4] Submit complete');
+    };
+
+    // 🆕 Phase 1.10.4: Enter key handler on sentence display
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        const sentenceDisplay = document.getElementById('test-display');
+        const finishHint = document.getElementById('finish-hint');
+
+        // Only submit if finish hint is visible (editing complete)
+        if (finishHint && !finishHint.classList.contains('hidden')) {
+          e.preventDefault();
+          submitEditedSentence();
+        }
+      }
+    });
+
+    // Attach click handlers to character spans
+    document.querySelectorAll('.char-span').forEach((span, index) => {
+      span.addEventListener('click', function() {
+        const dataIndex = parseInt(this.dataset.index, 10);
+        const dataCode = this.dataset.code;
+        const dataCandidates = JSON.parse(this.dataset.candidates);
+        showCandidateModal(dataIndex, dataCode, dataCandidates);
+      });
+    });
+
+    // Modal keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      const modal = document.getElementById('candidate-modal');
+      const isModalVisible = modal && !modal.classList.contains('hidden');
+      if (!isModalVisible) return;
+
+      const shortcutKeys = { ' ': 0, "'": 1, '[': 2, ']': 3, '-': 4, '\\': 5 };
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeCandidateModal();
+      } else if (e.key in shortcutKeys) {
+        e.preventDefault();
+        const candidateButtons = document.querySelectorAll('.candidate-btn');
+        if (shortcutKeys[e.key] < candidateButtons.length) {
+          candidateButtons[shortcutKeys[e.key]].click();
+        }
+      }
+    });
+  </script>
+
+  <script>
+    const resultsContainer = document.getElementById('test-results');
+    const summaryContainer = document.getElementById('summary');
+
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+
+    function reportTest(sectionName, testName, passed, details = '') {
+      totalTests++;
+      if (passed) passedTests++;
+      else failedTests++;
+
+      let section = document.getElementById(`section-${sectionName}`);
+      if (!section) {
+        section = document.createElement('div');
+        section.id = `section-${sectionName}`;
+        section.className = 'test-section';
+        section.innerHTML = `<h2>${sectionName}</h2>`;
+        resultsContainer.appendChild(section);
+      }
+
+      const testDiv = document.createElement('div');
+      testDiv.className = `test ${passed ? 'pass' : 'fail'}`;
+      testDiv.innerHTML = `
+        <div class="test-name">${passed ? '✅' : '❌'} ${testName}</div>
+        <div class="test-result">${details}</div>
+      `;
+      section.appendChild(testDiv);
+    }
+
+    // ========================================
+    // Section 1: Finish Hint Display
+    // ========================================
+
+    (function testFinishHint() {
+      const sectionName = '1. Finish Hint Display';
+
+      // Test 1.1: showFinishHint function exists
+      const hasFunction = typeof window.showFinishHint === 'function';
+      reportTest(sectionName, 'Test 1.1: showFinishHint() function exists', hasFunction,
+        hasFunction ? 'Function found' : 'Function not found');
+
+      // Test 1.2: Finish hint element exists
+      const finishHint = document.getElementById('finish-hint');
+      const hasHint = finishHint !== null;
+      reportTest(sectionName, 'Test 1.2: Finish hint element exists', hasHint,
+        hasHint ? 'Element #finish-hint found' : 'Element not found');
+
+      // Test 1.3: Finish hint initially hidden
+      if (finishHint) {
+        const isHidden = finishHint.classList.contains('hidden');
+        reportTest(sectionName, 'Test 1.3: Finish hint initially hidden', isHidden,
+          isHidden ? 'Has .hidden class' : 'Not hidden initially');
+      }
+
+      // Test 1.4: showFinishHint makes hint visible
+      if (hasFunction && finishHint) {
+        finishHint.classList.add('hidden'); // Ensure hidden first
+        window.showFinishHint();
+        const isVisible = !finishHint.classList.contains('hidden');
+        reportTest(sectionName, 'Test 1.4: showFinishHint() makes hint visible', isVisible,
+          isVisible ? 'Hint became visible' : 'Hint still hidden');
+        finishHint.classList.add('hidden'); // Reset
+      }
+
+      // Test 1.5: Hint should focus sentence display
+      if (hasFunction) {
+        const sentenceDisplay = document.getElementById('test-display');
+        if (sentenceDisplay) {
+          const checkFocus = () => {
+            const isFocused = document.activeElement === sentenceDisplay;
+            reportTest(sectionName, 'Test 1.5: showFinishHint() focuses sentence display', isFocused,
+              isFocused ? 'Sentence display focused' : 'Not focused (may need delay)');
+          };
+          window.showFinishHint();
+          setTimeout(checkFocus, 100); // Wait for focus delay
+        }
+      }
+    })();
+
+    // ========================================
+    // Section 2: Submit Functionality
+    // ========================================
+
+    (function testSubmit() {
+      const sectionName = '2. Submit Functionality';
+
+      // Test 2.1: submitEditedSentence function exists
+      const hasFunction = typeof window.submitEditedSentence === 'function';
+      reportTest(sectionName, 'Test 2.1: submitEditedSentence() function exists', hasFunction,
+        hasFunction ? 'Function found' : 'Function not found');
+
+      // Test 2.2: Output buffer element exists
+      const outputBuffer = document.getElementById('output-buffer');
+      const hasBuffer = outputBuffer !== null;
+      reportTest(sectionName, 'Test 2.2: Output buffer element exists', hasBuffer,
+        hasBuffer ? 'Element #output-buffer found' : 'Element not found');
+
+      // Test 2.3: submitEditedSentence extracts sentence from spans
+      if (hasFunction && hasBuffer) {
+        const sentenceDisplay = document.getElementById('test-display');
+        if (sentenceDisplay) {
+          outputBuffer.value = ''; // Clear first
+          const originalText = Array.from(sentenceDisplay.querySelectorAll('.char-span'))
+            .map(span => span.textContent).join('');
+
+          window.submitEditedSentence();
+          const extracted = outputBuffer.value;
+          const isCorrect = extracted === originalText;
+          reportTest(sectionName, 'Test 2.3: Correctly extracts sentence from spans', isCorrect,
+            isCorrect ? `Extracted: "${extracted}"` : `Expected "${originalText}", got "${extracted}"`);
+        }
+      }
+
+      // Test 2.4: submitEditedSentence hides finish hint
+      if (hasFunction) {
+        const finishHint = document.getElementById('finish-hint');
+        if (finishHint) {
+          finishHint.classList.remove('hidden'); // Make visible first
+          window.submitEditedSentence();
+          const isHidden = finishHint.classList.contains('hidden');
+          reportTest(sectionName, 'Test 2.4: Hides finish hint after submit', isHidden,
+            isHidden ? 'Hint hidden' : 'Hint still visible');
+        }
+      }
+
+      // Test 2.5: submitEditedSentence appends (not replaces)
+      if (hasFunction && hasBuffer) {
+        outputBuffer.value = '第一句';
+        const sentenceDisplay = document.getElementById('test-display');
+        if (sentenceDisplay) {
+          sentenceDisplay.innerHTML = '<span class="char-span">測</span><span class="char-span">試</span>';
+          window.submitEditedSentence();
+          const hasFirst = outputBuffer.value.includes('第一句');
+          const hasSecond = outputBuffer.value.includes('測試');
+          const appends = hasFirst && hasSecond;
+          reportTest(sectionName, 'Test 2.5: Appends to buffer (not replaces)', appends,
+            appends ? `Buffer: "${outputBuffer.value}"` : 'Should append, not replace');
+        }
+      }
+    })();
+
+    // ========================================
+    // Section 3: Enter Key Handler
+    // ========================================
+
+    (function testEnterKey() {
+      const sectionName = '3. Enter Key Handler';
+
+      // Test 3.1: Enter key should trigger submit when hint visible
+      const sentenceDisplay = document.getElementById('test-display');
+      const finishHint = document.getElementById('finish-hint');
+      const outputBuffer = document.getElementById('output-buffer');
+
+      if (sentenceDisplay && finishHint && outputBuffer) {
+        outputBuffer.value = '';
+        finishHint.classList.remove('hidden'); // Show hint
+        sentenceDisplay.innerHTML = '<span class="char-span">測</span><span class="char-span">試</span>';
+        sentenceDisplay.focus();
+
+        const enterEvent = new KeyboardEvent('keydown', {
+          key: 'Enter',
+          bubbles: true,
+          cancelable: true
+        });
+
+        document.dispatchEvent(enterEvent);
+
+        setTimeout(() => {
+          const submitted = outputBuffer.value.includes('測試');
+          reportTest(sectionName, 'Test 3.1: Enter key triggers submit', submitted,
+            submitted ? 'Sentence submitted' : 'Submit not triggered');
+
+          // Test 3.2: Enter key should not submit when hint hidden
+          outputBuffer.value = '';
+          finishHint.classList.add('hidden'); // Hide hint
+          sentenceDisplay.innerHTML = '<span class="char-span">不</span><span class="char-span">送</span>';
+
+          document.dispatchEvent(enterEvent);
+
+          setTimeout(() => {
+            const notSubmitted = !outputBuffer.value.includes('不送');
+            reportTest(sectionName, 'Test 3.2: Enter key ignored when hint hidden', notSubmitted,
+              notSubmitted ? 'Correctly ignored' : 'Should not submit when hint hidden');
+          }, 50);
+        }, 50);
+      }
+    })();
+
+    // ========================================
+    // Section 4: Integration Tests
+    // ========================================
+
+    (function testIntegration() {
+      const sectionName = '4. Integration Tests';
+
+      // Test 4.1: Full workflow (select last char → hint → enter → submit)
+      const charSpans = document.querySelectorAll('.char-span');
+      const outputBuffer = document.getElementById('output-buffer');
+      const finishHint = document.getElementById('finish-hint');
+
+      if (charSpans.length > 0 && outputBuffer && finishHint) {
+        outputBuffer.value = '';
+        finishHint.classList.add('hidden');
+
+        const lastIndex = charSpans.length - 1;
+        const lastSpan = charSpans[lastIndex];
+        const candidates = JSON.parse(lastSpan.dataset.candidates);
+
+        if (candidates && candidates.length > 0) {
+          // Simulate selecting last character
+          window.selectCandidate(lastIndex, candidates[0]);
+
+          setTimeout(() => {
+            const hintShown = !finishHint.classList.contains('hidden');
+            reportTest(sectionName, 'Test 4.1: Selecting last character shows hint', hintShown,
+              hintShown ? 'Hint visible after selection' : 'Hint not shown');
+
+            // Simulate Enter key
+            const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+            document.dispatchEvent(enterEvent);
+
+            setTimeout(() => {
+              const submitted = outputBuffer.value.length > 0;
+              reportTest(sectionName, 'Test 4.2: Full workflow completes successfully', submitted,
+                submitted ? `Output: "${outputBuffer.value}"` : 'No output generated');
+            }, 100);
+          }, 200); // Wait for showFinishHint delay
+        }
+      }
+
+      // Test 4.3: selectCandidate should call showFinishHint for last character
+      const hasAutoAdvanceLogic = typeof window.selectCandidate === 'function' &&
+        window.selectCandidate.toString().includes('showFinishHint');
+      reportTest(sectionName, 'Test 4.3: selectCandidate calls showFinishHint for last char', hasAutoAdvanceLogic,
+        hasAutoAdvanceLogic ? 'Logic found in selectCandidate' : 'Missing showFinishHint call');
+    })();
+
+    // Summary
+    setTimeout(() => {
+      const allPassed = failedTests === 0;
+      summaryContainer.className = allPassed ? 'summary all-pass' : 'summary some-fail';
+      summaryContainer.innerHTML = `
+        <strong>Test Summary: ${passedTests}/${totalTests} tests passed</strong>
+        ${failedTests > 0 ? `<br>⚠️ ${failedTests} test(s) failed` : '<br>🎉 All tests passed!'}
+      `;
+    }, 1000); // Wait for async tests
+  </script>
+</body>
+</html>
