@@ -563,7 +563,7 @@
 
   /**
    * 🆕 Phase 1.10.1: Attach click event handlers to character spans
-   * Logs click events for now (candidate modal implementation in Phase 1.10.2)
+   * 🆕 Phase 1.10.2: Now opens candidate modal on click
    */
   function attachCharacterClickHandlers() {
     const charSpans = document.querySelectorAll('.char-span');
@@ -574,21 +574,132 @@
         const dataCode = this.dataset.code;
         const dataCandidates = JSON.parse(this.dataset.candidates);
 
-        console.log(`[Phase 1.10.1] Character clicked:`, {
+        console.log(`[Phase 1.10.2] Character clicked:`, {
           index: dataIndex,
           char: this.textContent,
           code: dataCode,
           candidates: dataCandidates
         });
 
-        // 🚧 TODO (Phase 1.10.2): Show candidate modal
-        // For now, just highlight the character
-        charSpans.forEach(s => s.classList.remove('editing'));
-        this.classList.add('editing');
+        // 🆕 Phase 1.10.2: Show candidate modal
+        showCandidateModal(dataIndex, dataCode, dataCandidates);
       });
     });
 
-    console.log(`[Phase 1.10.1] Attached click handlers to ${charSpans.length} characters`);
+    console.log(`[Phase 1.10.2] Attached click handlers to ${charSpans.length} characters`);
+  }
+
+  /**
+   * 🆕 Phase 1.10.2: Show candidate selection modal
+   * @param {number} charIndex - Character position (0-based)
+   * @param {string} code - Dayi code (e.g., "4jp")
+   * @param {Array<string>} candidates - Array of candidate characters
+   */
+  window.showCandidateModal = function showCandidateModal(charIndex, code, candidates) {
+    const modal = document.getElementById('candidate-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+    const modalTitle = document.getElementById('modal-title');
+    const candidatesGrid = document.getElementById('candidates-grid');
+
+    if (!modal || !backdrop || !modalTitle || !candidatesGrid) {
+      console.error('[Phase 1.10.2] Modal elements not found');
+      return;
+    }
+
+    // Store current editing context
+    window.currentEditingIndex = charIndex;
+
+    // Update modal title
+    modalTitle.textContent = `選擇字元 (位置 ${charIndex}: ${code})`;
+
+    // Highlight the character being edited
+    const charSpans = document.querySelectorAll('.char-span');
+    charSpans.forEach((span, i) => {
+      span.classList.toggle('editing', i === charIndex);
+    });
+
+    // Keyboard shortcut keys (6 candidates max: Space, ', [, ], -, \)
+    const shortcutKeys = [' ', "'", '[', ']', '-', '\\'];
+    const shortcutLabels = ['Space', "'", '[', ']', '-', '\\'];
+
+    // Populate candidates grid
+    candidatesGrid.innerHTML = candidates.map((char, i) => {
+      const keyLabel = i < shortcutLabels.length ? shortcutLabels[i] : '';
+      return `
+        <button class="candidate-btn" data-index="${i}" data-char="${char}">
+          <span class="candidate-char">${char}</span>
+          ${keyLabel ? `<span class="candidate-key">${keyLabel}</span>` : ''}
+        </button>
+      `;
+    }).join('');
+
+    // Attach click handlers to candidate buttons
+    const candidateButtons = candidatesGrid.querySelectorAll('.candidate-btn');
+    candidateButtons.forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        selectCandidate(charIndex, candidates[i]);
+      });
+    });
+
+    // Show modal and backdrop
+    modal.classList.remove('hidden');
+    backdrop.classList.remove('hidden');
+
+    console.log(`[Phase 1.10.2] Modal shown for character ${charIndex} (${code}) with ${candidates.length} candidates`);
+  }
+
+  /**
+   * 🆕 Phase 1.10.2: Close candidate selection modal
+   */
+  window.closeCandidateModal = function closeCandidateModal() {
+    const modal = document.getElementById('candidate-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+
+    if (modal) modal.classList.add('hidden');
+    if (backdrop) backdrop.classList.add('hidden');
+
+    // Remove editing highlight from all characters
+    const charSpans = document.querySelectorAll('.char-span');
+    charSpans.forEach(span => span.classList.remove('editing'));
+
+    // Clear editing context
+    window.currentEditingIndex = -1;
+
+    console.log('[Phase 1.10.2] Modal closed');
+  }
+
+  /**
+   * 🆕 Phase 1.10.2: Select a candidate character
+   * @param {number} charIndex - Character position to update
+   * @param {string} newChar - New character to replace with
+   */
+  window.selectCandidate = function selectCandidate(charIndex, newChar) {
+    const charSpans = document.querySelectorAll('.char-span');
+
+    if (charIndex < 0 || charIndex >= charSpans.length) {
+      console.error(`[Phase 1.10.2] Invalid charIndex: ${charIndex}`);
+      return;
+    }
+
+    const targetSpan = charSpans[charIndex];
+
+    // Update character text
+    const oldChar = targetSpan.textContent;
+    targetSpan.textContent = newChar;
+
+    // Mark as edited (for learning detection)
+    targetSpan.dataset.edited = 'true';
+
+    console.log(`[Phase 1.10.2] Character ${charIndex} updated: "${oldChar}" → "${newChar}"`);
+
+    // Close modal
+    closeCandidateModal();
+
+    // 🚧 TODO (Phase 1.10.3): Auto-advance to next character
+    // if (charIndex + 1 < charSpans.length) {
+    //   const nextSpan = charSpans[charIndex + 1];
+    //   nextSpan.click();
+    // }
   }
 
   // ============================================
@@ -963,6 +1074,77 @@
       }
     });
   }
+
+  // ============================================
+  // 🆕 Phase 1.10.2: Modal Event Handlers
+  // ============================================
+
+  // Close button
+  const closeModalBtn = document.getElementById('close-modal-btn');
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      closeCandidateModal();
+    });
+  }
+
+  // Backdrop click
+  const modalBackdrop = document.getElementById('modal-backdrop');
+  if (modalBackdrop) {
+    modalBackdrop.addEventListener('click', () => {
+      closeCandidateModal();
+    });
+  }
+
+  // Keyboard shortcuts for modal
+  document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('candidate-modal');
+    const isModalVisible = modal && !modal.classList.contains('hidden');
+
+    if (!isModalVisible) return;
+
+    const key = e.key;
+
+    // Escape key: Close modal
+    if (key === 'Escape') {
+      e.preventDefault();
+      closeCandidateModal();
+      return;
+    }
+
+    // Quick selection keys: Space, ', [, ], -, \
+    const shortcutKeys = {
+      ' ': 0,  // Space → candidate 0
+      "'": 1,  // ' → candidate 1
+      '[': 2,  // [ → candidate 2
+      ']': 3,  // ] → candidate 3
+      '-': 4,  // - → candidate 4
+      '\\': 5  // \ → candidate 5
+    };
+
+    if (key in shortcutKeys) {
+      e.preventDefault();
+      const candidateIndex = shortcutKeys[key];
+
+      // Get current editing context
+      const charIndex = window.currentEditingIndex;
+      if (charIndex === -1) {
+        console.warn('[Phase 1.10.2] No character being edited');
+        return;
+      }
+
+      // Get candidates from modal
+      const candidatesGrid = document.getElementById('candidates-grid');
+      const candidateButtons = candidatesGrid.querySelectorAll('.candidate-btn');
+
+      if (candidateIndex < candidateButtons.length) {
+        const selectedChar = candidateButtons[candidateIndex].dataset.char;
+        selectCandidate(charIndex, selectedChar);
+        console.log(`[Phase 1.10.2] Keyboard shortcut "${key}" → candidate ${candidateIndex}: ${selectedChar}`);
+      } else {
+        console.warn(`[Phase 1.10.2] No candidate at index ${candidateIndex}`);
+      }
+    }
+  });
 
   // ============================================
   // Initialization
