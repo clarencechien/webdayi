@@ -540,6 +540,40 @@
 
     candidateArea.innerHTML = html;
 
+    // 🐛 Quick Fix: Add keyboard event handlers to contenteditable
+    // Problem: contenteditable captures events and prevents bubbling to document level
+    // Solution: Bind Enter/= handlers directly to the contenteditable element
+    setTimeout(() => {
+      const editableArea = document.getElementById('prediction-result-text');
+      if (editableArea) {
+        editableArea.addEventListener('keydown', function(e) {
+          const key = e.key;
+
+          // Enter key: Confirm prediction
+          if (key === 'Enter') {
+            e.preventDefault();
+            console.log('[Contenteditable Handler] Enter pressed, confirming...');
+            if (typeof window.confirmPrediction === 'function') {
+              window.confirmPrediction();
+            }
+            return;
+          }
+
+          // = key: Cycle to next prediction
+          if (key === '=') {
+            e.preventDefault();
+            console.log('[Contenteditable Handler] = pressed, cycling...');
+            if (typeof window.triggerPrediction === 'function') {
+              window.triggerPrediction();
+            }
+            return;
+          }
+        });
+
+        console.log('[v11 UI] Keyboard handlers attached to contenteditable');
+      }
+    }, 50);
+
     // Focus the editable prediction for immediate editing
     setTimeout(() => {
       const editableArea = document.getElementById('prediction-result-text');

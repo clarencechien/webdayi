@@ -1,13 +1,18 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-13 (🚀 Phase 1.9 - Sentence Mode UX Redesign!)
-**Current Phase**: 🚧 Phase 1.9 IN PROGRESS - Sentence Mode UX Improvement
-**Current Version**: 0.5.0 (Build: 20251113-005, UX Redesign)
+**Last Updated**: 2025-11-13 (🎉 Session 10.11 Part 5 COMPLETE + Bug Fixes!)
+**Current Phase**: ✅ Phase 1.9 COMPLETE - Sentence Mode Top-N Prediction Cycling
+**Current Version**: 0.5.0 (Build: 20251113-006, Session 10.11 Part 5 Complete)
 **Main Branch Status**: ✅ v2.7 Hybrid (OOP + 70/30 + Laplace) + Full ngram_db.json (Production Ready)
 **Feature Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
-**Next Milestone**: Phase 1.9 Complete - Top-N Prediction Cycling + Character-Level Editing
+**Next Milestone**: Phase 1.10 - Character-Level Editing for Sentence Mode
 
-**Latest Achievements**:
+**Latest Achievements** (Session 10.11 Part 5 + Bug Fixes):
+- ✅ **SESSION 10.11 PART 5 COMPLETE**: Top-N prediction cycling with = key + Enter confirmation!
+- ✅ **MOBILE EXPORT FIX**: Web Share API for mobile devices (native share sheet on iOS/Android)
+- ✅ **CONSOLE CLEANUP**: Fixed dayiMap loading race condition logging (error → info)
+- ✅ **PWA WARNINGS FIXED**: Manifest shortcuts, deprecated meta tags, icon directory created
+- ✅ **ICONS PLACEHOLDER**: Created icons directory with SVG template and generation guide
 - ✅ **CHARACTER MODE LEARNING**: Character mode now records to Phase 1 UserDB (both modes unified!)
 - ✅ **PWA INSTALLATION**: Fixed all paths for GitHub Pages deployment (manifest, SW, icons)
 - ✅ **CRITICAL FIX**: Phase 1 F-4.0 learning integration fully functional (exported functions to window scope)
@@ -28,11 +33,11 @@
 
 ---
 
-## 🆕 SESSION 10.11 PART 5: Top-N Predictions + TDD for Sentence Mode UX (2025-11-13)
+## 🆕 SESSION 10.11 PART 5: Top-N Predictions + TDD + UI Complete (2025-11-13)
 
-**Status**: 🚧 PARTIAL | Backend Complete, UI Implementation Pending
+**Status**: ✅ COMPLETE | Backend + TDD + UI All Implemented
 **Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
-**Commit**: 2f11992
+**Commits**: 2f11992 (backend), d739999 (UI), 7527fdf (bug fixes), 0982722 (docs)
 
 ### ✅ Implemented: Top-N Predictions (Viterbi Backend)
 
@@ -213,10 +218,131 @@ Workflow:
    - Lines 1601-1617: Enter key handler for sentence mode
    - Line 1620: Updated comment
 
-### Commits 🎯
+### Summary: Session 10.11 Part 5 Complete ✅
 
+**What Was Accomplished**:
+1. **Backend**: N-best decoding algorithm for top-5 predictions
+2. **TDD**: 29 comprehensive tests covering all UX scenarios
+3. **UI**: = key cycling + Enter confirmation fully implemented
+4. **Integration**: Learning detection + UserDB updates working
+5. **Bug Fixes**: Mobile export, console cleanup, PWA warnings
+
+**Commits**:
 - `2f11992`: feat: Add top-N predictions + TDD tests for sentence mode UX
 - `d739999`: feat: Implement = key cycling + Enter confirmation for sentence mode
+- `7527fdf`: fix: Mobile export + console errors + PWA warnings
+- `0982722`: docs: Update memory bank with Session 10.11 Part 5 + bug fixes
+
+---
+
+## 🐛 BUG FIXES: Mobile Export + PWA Warnings (2025-11-13)
+
+**Status**: ✅ COMPLETE | All Reported Issues Fixed
+**Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
+**Commit**: 7527fdf
+
+### Issue 1: Mobile Export Behavior Differs from Laptop 📱
+
+**Problem**: Mobile PWA export button didn't work correctly on iOS/Android
+
+**Root Cause**: Programmatic download (`a.click()`) not well-supported on mobile browsers
+
+**Solution**: Implemented Web Share API with graceful fallback
+```javascript
+// Mobile: Use Web Share API if available
+if (isMobile() && navigator.canShare && navigator.share) {
+  const file = new File([jsonString], fileName, { type: 'application/json' });
+  if (navigator.canShare({ files: [file] })) {
+    await navigator.share({
+      files: [file],
+      title: 'WebDaYi 學習記錄',
+      text: `匯出 ${exportData.count} 筆學習記錄`
+    });
+    return;
+  }
+}
+
+// Desktop or fallback: Create blob and download
+const blob = new Blob([jsonString], { type: 'application/json' });
+// ... rest of download logic with 100ms delay for iOS
+```
+
+**Benefits**:
+- Mobile users get native share sheet (can save to Files, iCloud, Google Drive, etc.)
+- Better UX on iOS/Android
+- Desktop behavior unchanged (direct download)
+
+### Issue 2: Console Error Spam During Initialization 🔇
+
+**Problem**: Multiple error messages during normal initialization
+```
+[v11 UI] dayiMap not loaded yet, retrying... (5-6 times)
+```
+
+**Solution**: Changed log level from `console.error` to `console.log`
+- This is expected behavior (polling for database load), not an error
+- Reduces console noise during normal operation
+
+**File**: `mvp1-pwa/js/core_logic_v11_ui.js:19`
+
+### Issue 3: Missing Icon Files 🖼️
+
+**Problem**: 404 errors for icon-192x192.png, icon-144x144.png
+
+**Solution**: Created icons directory with:
+1. **README.md**: Comprehensive guide for generating icons
+   - ImageMagick commands
+   - Online tools (realfavicongenerator.net, pwabuilder.com)
+   - Design guidelines (use "易" character, #4ec9b0 theme color)
+2. **icon.svg**: SVG template with "易" character on teal background
+   - Can be converted to all PNG sizes using ImageMagick
+   - Scalable and editable
+
+**Files**: `mvp1-pwa/icons/README.md`, `mvp1-pwa/icons/icon.svg`
+
+**Note**: PNG icons still need to be generated (not blocking for functionality)
+
+### Issue 4: Manifest.json Shortcut URL Warnings ⚠️
+
+**Problem**: Browser console warnings
+```
+Manifest: property 'url' ignored, should be within scope of the manifest
+```
+
+**Solution**: Fixed relative URL format
+- Before: `"url": "/?mode=character"`
+- After: `"url": "./?mode=character"`
+
+**File**: `mvp1-pwa/manifest.json:80, 87`
+
+### Issue 5: Deprecated Meta Tag Warning 📛
+
+**Problem**: Chrome DevTools warning
+```
+<meta name="apple-mobile-web-app-capable" content="yes"> is deprecated
+```
+
+**Solution**: Added modern meta tag while keeping legacy for compatibility
+```html
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+```
+
+**File**: `mvp1-pwa/index.html:11`
+
+### Console Improvements Summary 📊
+
+**Before**:
+- 5-6 error messages during initialization
+- 404 errors for missing icons
+- Manifest warnings
+- Deprecation warning
+
+**After**:
+- Clean initialization (info logs only)
+- No manifest warnings
+- No deprecation warnings
+- Icon 404s will persist until PNG icons are generated (non-blocking)
 
 ---
 
