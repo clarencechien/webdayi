@@ -768,12 +768,54 @@
       opacity: 0.8;
     }
 
+    /* 🆕 Phase 1.10.1: Character Span Display */
+    .sentence-display {
+      display: flex;
+      gap: 4px;
+      padding: 12px;
+      background: rgba(78, 201, 176, 0.05);
+      border-radius: 8px;
+      outline: none;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+
+    .char-span {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 2rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      user-select: none;
+      background: rgba(255, 255, 255, 0.1);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .char-span:hover {
+      background: rgba(78, 201, 176, 0.3);
+      transform: scale(1.15);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .char-span.editing {
+      background: rgba(78, 201, 176, 0.4);
+      border: 2px solid #4ec9b0;
+      box-shadow: 0 0 12px rgba(78, 201, 176, 0.6);
+    }
+
     @media (max-width: 640px) {
       .mode-btn span:not(.material-symbols-outlined) {
         display: none;
       }
       .predicted-sentence {
         font-size: 1.5rem;
+      }
+      .char-span {
+        font-size: 1.5rem;
+        padding: 4px 10px;
       }
     }
 

@@ -349,15 +349,17 @@
 
     console.log('[v11 UI] Confirming prediction...');
 
-    // Get current prediction text (may have been edited)
-    const predictionTextEl = document.getElementById('prediction-result-text');
-    if (!predictionTextEl) {
-      console.error('[v11 UI] Prediction text element not found');
+    // 🆕 Phase 1.10.1: Get sentence from character spans
+    const sentenceDisplay = document.getElementById('sentence-display');
+    if (!sentenceDisplay) {
+      console.error('[v11 UI] Sentence display element not found');
       return;
     }
 
-    const finalSentence = predictionTextEl.textContent || predictionTextEl.innerText;
-    console.log(`[v11 UI] Final sentence: "${finalSentence}"`);
+    // Read final sentence from character spans
+    const charSpans = sentenceDisplay.querySelectorAll('.char-span');
+    const finalSentence = Array.from(charSpans).map(span => span.textContent).join('');
+    console.log(`[v11 UI] Final sentence: "${finalSentence}" (from ${charSpans.length} character spans)`);
     console.log(`[v11 UI] Original prediction: "${originalPrediction}"`);
 
     // Detect learning (compare original vs final)
@@ -494,6 +496,7 @@
 
   /**
    * Display sentence prediction with cycling indicator (Session 10.11 Part 5)
+   * 🆕 Phase 1.10: Uses character span architecture instead of contenteditable
    * Shows prediction number (e.g., "預測 2/5") and hint text
    *
    * @param {Object} prediction - Prediction object with {sentence, score, path}
@@ -505,34 +508,46 @@
 
     const { sentence, score, path } = prediction;
 
+    // 🆕 Phase 1.10.1: Build character spans with data attributes
+    const charSpans = path.map((p, i) => {
+      // Get all candidates for this position from dayiMap
+      const candidates = dayiMap.get(p.code) || [];
+      const candidateChars = candidates.map(c => c.char);
+
+      // Build data attributes
+      const dataIndex = i;
+      const dataCode = p.code;
+      const dataCandidates = JSON.stringify(candidateChars);
+
+      return `<span class="char-span" data-index="${dataIndex}" data-code="${dataCode}" data-candidates='${dataCandidates}'>${p.char}</span>`;
+    }).join('');
+
     const html = `
       <div class="sentence-prediction w-full">
         <div class="prediction-header flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined">auto_awesome</span>
             <span>智慧預測結果</span>
-            <span class="text-xs ml-2 opacity-70">✏️ 可編輯</span>
+            <span class="text-xs ml-2 opacity-70">✏️ 點擊字元可重選</span>
           </div>
           <div class="prediction-indicator text-sm font-bold px-3 py-1 rounded-full" style="background: rgba(78, 201, 176, 0.2); color: #4ec9b0;">
             預測 ${index + 1}/${total}
           </div>
         </div>
         <div
-          id="prediction-result-text"
-          class="predicted-sentence"
-          contenteditable="true"
-          spellcheck="false"
-          style="cursor: text; border: 2px dashed transparent; padding: 8px; border-radius: 4px; transition: all 0.2s;"
-          onfocus="this.style.borderColor='#4ec9b0'; this.style.background='rgba(78, 201, 176, 0.05)';"
-          onblur="this.style.borderColor='transparent'; this.style.background='transparent';"
-        >${sentence}</div>
+          id="sentence-display"
+          class="sentence-display"
+          tabindex="0"
+          role="group"
+          aria-label="預測句子"
+        >${charSpans}</div>
         <div class="prediction-details">
           <div class="char-breakdown">
             ${path.map((p, i) => `${p.char} (${p.code})`).join(' → ')}
           </div>
           <div class="prediction-score">機率分數: ${score.toFixed(3)}</div>
           <div class="prediction-hint text-xs mt-2 p-2 rounded" style="background: rgba(78, 201, 176, 0.1); color: #4ec9b0;">
-            <kbd>=</kbd> 切換預測 | 點擊字重選 | <kbd>Enter</kbd> 確認
+            <kbd>=</kbd> 切換預測 | <kbd>點擊字</kbd> 重選 | <kbd>Enter</kbd> 確認
           </div>
         </div>
       </div>
@@ -540,55 +555,40 @@
 
     candidateArea.innerHTML = html;
 
-    // 🐛 Quick Fix: Add keyboard event handlers to contenteditable
-    // Problem: contenteditable captures events and prevents bubbling to document level
-    // Solution: Bind Enter/= handlers directly to the contenteditable element
-    setTimeout(() => {
-      const editableArea = document.getElementById('prediction-result-text');
-      if (editableArea) {
-        editableArea.addEventListener('keydown', function(e) {
-          const key = e.key;
+    // 🆕 Phase 1.10.1: Attach click handlers to character spans
+    attachCharacterClickHandlers();
 
-          // Enter key: Confirm prediction
-          if (key === 'Enter') {
-            e.preventDefault();
-            console.log('[Contenteditable Handler] Enter pressed, confirming...');
-            if (typeof window.confirmPrediction === 'function') {
-              window.confirmPrediction();
-            }
-            return;
-          }
+    console.log(`[Phase 1.10.1] Prediction ${index + 1}/${total} displayed with ${path.length} clickable characters`);
+  }
 
-          // = key: Cycle to next prediction
-          if (key === '=') {
-            e.preventDefault();
-            console.log('[Contenteditable Handler] = pressed, cycling...');
-            if (typeof window.triggerPrediction === 'function') {
-              window.triggerPrediction();
-            }
-            return;
-          }
+  /**
+   * 🆕 Phase 1.10.1: Attach click event handlers to character spans
+   * Logs click events for now (candidate modal implementation in Phase 1.10.2)
+   */
+  function attachCharacterClickHandlers() {
+    const charSpans = document.querySelectorAll('.char-span');
+
+    charSpans.forEach((span, index) => {
+      span.addEventListener('click', function() {
+        const dataIndex = parseInt(this.dataset.index, 10);
+        const dataCode = this.dataset.code;
+        const dataCandidates = JSON.parse(this.dataset.candidates);
+
+        console.log(`[Phase 1.10.1] Character clicked:`, {
+          index: dataIndex,
+          char: this.textContent,
+          code: dataCode,
+          candidates: dataCandidates
         });
 
-        console.log('[v11 UI] Keyboard handlers attached to contenteditable');
-      }
-    }, 50);
+        // 🚧 TODO (Phase 1.10.2): Show candidate modal
+        // For now, just highlight the character
+        charSpans.forEach(s => s.classList.remove('editing'));
+        this.classList.add('editing');
+      });
+    });
 
-    // Focus the editable prediction for immediate editing
-    setTimeout(() => {
-      const editableArea = document.getElementById('prediction-result-text');
-      if (editableArea) {
-        // Set cursor at end of text
-        const range = document.createRange();
-        const sel = window.getSelection();
-        range.selectNodeContents(editableArea);
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
-
-        console.log(`[v11 UI] Prediction ${index + 1}/${total} displayed and ready for editing`);
-      }
-    }, 100);
+    console.log(`[Phase 1.10.1] Attached click handlers to ${charSpans.length} characters`);
   }
 
   // ============================================

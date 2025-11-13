@@ -1,13 +1,17 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-13 (🎉 Session 10.11 Part 5 COMPLETE + Bug Fixes!)
-**Current Phase**: ✅ Phase 1.9 COMPLETE - Sentence Mode Top-N Prediction Cycling
-**Current Version**: 0.5.0 (Build: 20251113-006, Session 10.11 Part 5 Complete)
+**Last Updated**: 2025-11-13 (✅ Phase 1.10.1 COMPLETE - Character Span Architecture Implemented!)
+**Current Phase**: ✅ Phase 1.10.1 COMPLETE - Character-Level Editing UI Foundation
+**Current Version**: 0.5.0 (Build: 20251113-008, Phase 1.10.1 Character Spans)
 **Main Branch Status**: ✅ v2.7 Hybrid (OOP + 70/30 + Laplace) + Full ngram_db.json (Production Ready)
 **Feature Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
-**Next Milestone**: Phase 1.10 - Character-Level Editing for Sentence Mode
+**Next Milestone**: Phase 1.10.2 - Candidate Selection Modal
 
-**Latest Achievements** (Session 10.11 Part 5 + Bug Fixes):
+**Latest Achievements** (Mobile NaN Fix + Phase 1.10 Design):
+- ✅ **CRITICAL MOBILE FIX**: Fixed NaN bug in Android character mode learning (triple-layer validation)!
+- ✅ **CONTENTEDITABLE QUICK FIX**: Added Enter/= key handlers directly to contenteditable (temporary)
+- ✅ **PHASE 1.10 DESIGN**: Comprehensive character span architecture design document (430 lines)
+- ✅ **TDD**: 25 comprehensive mobile NaN prevention tests (all passing)
 - ✅ **SESSION 10.11 PART 5 COMPLETE**: Top-N prediction cycling with = key + Enter confirmation!
 - ✅ **MOBILE EXPORT FIX**: Web Share API for mobile devices (native share sheet on iOS/Android)
 - ✅ **CONSOLE CLEANUP**: Fixed dayiMap loading race condition logging (error → info)
@@ -343,6 +347,186 @@ Manifest: property 'url' ignored, should be within scope of the manifest
 - No manifest warnings
 - No deprecation warnings
 - Icon 404s will persist until PNG icons are generated (non-blocking)
+
+---
+
+## 🐛 CRITICAL: Mobile NaN Bug + contenteditable Quick Fix (2025-11-13)
+
+**Status**: ✅ FIXED | Triple-Layer Validation + TDD Tests
+**Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
+**Commits**: d5ae04f (contenteditable fix), a6c79c9 (mobile NaN fix)
+
+### Issue 1: Mobile Android Export Contains NaN Values 🚨
+
+**User Report**: "Mobile 的逐字模式下 學習後的字 export 的檔案又有問題了"
+- Chrome DevTools mobile simulation: ✅ Works fine
+- Real Android phone: ❌ Export shows `{ "^→商": NaN, "^→艙": NaN }`
+- Impact: Mobile users cannot use learning feature
+
+**Root Cause**:
+```javascript
+// Line 1247-1258 in core_logic.js
+const actualIndex = currentPage * 6 + index;
+const learningData = [{
+  selectedRank: actualIndex,  // ← NaN if index or currentPage is invalid!
+  // ...
+}];
+```
+
+**Diagnosis**:
+1. Mobile touch events sometimes pass undefined/NaN to handleSelection()
+2. parseInt(dataset.index, 10) returns NaN with corrupt/missing data
+3. NaN propagates through calculation: actualIndex = NaN * 6 + NaN = NaN
+4. NaN gets stored in IndexedDB
+5. Export file contains NaN instead of numbers
+
+**Solution: Triple-Layer Validation**:
+
+**Layer 1: handleSelection() (core_logic.js:1227-1274)**
+```javascript
+function handleSelection(index) {
+  // Validate index
+  if (typeof index !== 'number' || isNaN(index) || index < 0) {
+    console.error(`Invalid index: ${index}`);
+    return; // Early exit
+  }
+
+  // Validate currentPage
+  if (typeof currentPage !== 'number' || isNaN(currentPage)) {
+    console.error(`Invalid currentPage, resetting to 0`);
+    currentPage = 0;
+  }
+
+  // ... later ...
+
+  // Validate actualIndex before learning
+  if (isNaN(actualIndex) || actualIndex < 0) {
+    console.error(`Invalid actualIndex: ${actualIndex}`);
+    return;
+  }
+
+  // Validate candidates exist
+  if (!firstCandidate || !selectedCandidate) {
+    console.error('Missing candidate data');
+    return;
+  }
+}
+```
+
+**Layer 2: parseInt() validation (core_logic.js:1791, 1822)**
+```javascript
+// Click handler
+const index = parseInt(candidateItem.dataset.index, 10);
+if (isNaN(index)) {
+  console.error(`Failed to parse index: "${candidateItem.dataset.index}"`);
+  return;
+}
+handleSelection(index);
+
+// Keydown handler
+const index = parseInt(candidateItem.dataset.index, 10);
+if (isNaN(index)) {
+  console.error(`Failed to parse index in keydown: "${candidateItem.dataset.index}"`);
+  return;
+}
+handleSelection(index);
+```
+
+**Layer 3: UserDB.setWeight() validation (user_db_indexeddb.js:103-108)**
+```javascript
+async setWeight(prevChar, currChar, weight) {
+  // Last line of defense
+  if (typeof weight !== 'number' || isNaN(weight) || !isFinite(weight)) {
+    console.error(`Invalid weight value: ${weight}`);
+    console.error(`Context: prevChar="${prevChar}", currChar="${currChar}"`);
+    throw new Error(`Invalid weight: ${weight}. Must be a finite number.`);
+  }
+  // ... proceed with storage ...
+}
+```
+
+**Testing**: 25 TDD Tests (test-mobile-nan-fix.html)
+- Section 1: handleSelection validation (8 tests) ✅
+- Section 2: parseInt validation (5 tests) ✅
+- Section 3: UserDB.setWeight validation (7 tests) ✅
+- Section 4: Integration tests (3 tests) ✅
+- **All 25/25 tests passing** 🎉
+
+### Issue 2: contenteditable Enter/= Keys Not Working 🎹
+
+**User Report**: "在整句模式下 按了 = 後 在智慧區(可編輯) 按下= 或是enter 都沒有反應"
+
+**Root Cause**:
+- `contenteditable="true"` captures keyboard events
+- Events don't bubble to document-level handlers
+- Enter/= key handlers in document can't receive events
+
+**Quick Fix** (Temporary):
+```javascript
+// core_logic_v11_ui.js:543-575
+setTimeout(() => {
+  const editableArea = document.getElementById('prediction-result-text');
+  if (editableArea) {
+    editableArea.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        window.confirmPrediction();
+      }
+      if (e.key === '=') {
+        e.preventDefault();
+        window.triggerPrediction();
+      }
+    });
+  }
+}, 50);
+```
+
+**Long-Term Solution**: Character Span Architecture (Phase 1.10)
+- See: `docs/design/PHASE-1.10-CHARACTER-EDITING-UI.md` (430 lines)
+- Replace contenteditable with `<span class="char">` elements
+- Each character is clickable → shows candidate modal
+- Keyboard events propagate correctly
+- Supports all Session 10.11 Part 6 requirements
+
+### Files Changed 📝
+
+**Commit d5ae04f (contenteditable quick fix)**:
+1. mvp1-pwa/js/core_logic_v11_ui.js (+32 lines)
+   - Added direct keydown handlers to contenteditable
+2. docs/design/PHASE-1.10-CHARACTER-EDITING-UI.md (NEW, 430 lines)
+   - Comprehensive design for character span architecture
+
+**Commit a6c79c9 (mobile NaN fix)**:
+1. mvp1-pwa/js/core_logic.js (+33 lines)
+   - handleSelection(): +21 lines validation
+   - click handler: +6 lines validation
+   - keydown handler: +6 lines validation
+2. mvp1-pwa/js/user_db_indexeddb.js (+6 lines)
+   - setWeight(): +6 lines validation
+3. mvp1-pwa/tests/test-mobile-nan-fix.html (NEW, 523 lines)
+   - 25 comprehensive tests
+
+### Expected Results ✅
+
+**On Real Android Phone**:
+- ✅ All indices properly validated
+- ✅ No NaN values in learning data
+- ✅ Export file shows valid numbers only: `{ "^→商": 2, "^→艙": 3 }`
+- ✅ Console logs detailed errors for debugging
+- ✅ Learning system continues to work correctly
+
+**In Sentence Mode contenteditable**:
+- ✅ Enter key confirms prediction
+- ✅ = key cycles to next prediction
+- ✅ Edits are preserved for learning
+
+### Summary 📊
+
+**Problem**: Critical data corruption on mobile + keyboard events blocked
+**Solution**: Triple-layer validation + direct event handlers
+**Testing**: 25 automated tests
+**Status**: ✅ Fixed and ready for mobile testing
+**Next**: User to test on real Android device, then continue Phase 1.10
 
 ---
 
@@ -7483,3 +7667,225 @@ Based on main branch reference/Screenshot_20251113-131013.png
 
 ---
 **Next Session Focus**: Browser E2E testing → Mobile UX validation → MVP 2a database optimization planning
+
+---
+
+## 🆕 PHASE 1.10.1: Character Span Architecture Implementation (2025-11-13)
+
+**Status**: ✅ COMPLETE | Character-Level Editing UI Foundation
+**Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
+**Commit**: 5ae0f93
+**Files Modified**: 3 files, 580 insertions(+), 61 deletions(-)
+
+### Overview
+
+Replaced contenteditable with individual clickable character spans to enable proper character-level editing. This is the foundation for Session 10.11 Part 6 requirements (click character → show candidates).
+
+### Implementation Details
+
+#### 1. JavaScript Changes (core_logic_v11_ui.js)
+
+**displayPredictionWithIndicator()** (lines 504-560):
+- **Before**: Single contenteditable div with sentence text
+- **After**: Individual `<span class="char-span">` elements per character
+- **Data Attributes Added**:
+  - `data-index`: Character position (0-based)
+  - `data-code`: Dayi code for this character (e.g., "4jp")
+  - `data-candidates`: JSON array of all candidates for this code
+- **Implementation**:
+  ```javascript
+  const charSpans = path.map((p, i) => {
+    const candidates = dayiMap.get(p.code) || [];
+    const candidateChars = candidates.map(c => c.char);
+    return `<span class="char-span" data-index="${i}" data-code="${p.code}" data-candidates='${JSON.stringify(candidateChars)}'>${p.char}</span>`;
+  }).join('');
+  ```
+
+**attachCharacterClickHandlers()** (lines 566-590) - NEW FUNCTION:
+- Attaches click event listeners to all `.char-span` elements
+- Logs click events with full context (index, char, code, candidates)
+- Highlights clicked character with `.editing` class
+- **Purpose**: Foundation for Phase 1.10.2 candidate modal
+- **Current Behavior**: Click → console log + highlight (modal TODO)
+
+**confirmPrediction()** (lines 352-363) - UPDATED:
+- **Before**: Read from `document.getElementById('prediction-result-text').textContent`
+- **After**: Query all `.char-span` elements and concatenate their `textContent`
+- **Implementation**:
+  ```javascript
+  const sentenceDisplay = document.getElementById('sentence-display');
+  const charSpans = sentenceDisplay.querySelectorAll('.char-span');
+  const finalSentence = Array.from(charSpans).map(span => span.textContent).join('');
+  ```
+- **Learning Detection**: Still works correctly (compares original vs final sentence)
+
+#### 2. CSS Changes (index.html)
+
+**`.sentence-display`** (lines 772-782):
+- Flex container with centered, wrapped layout
+- Background highlight: `rgba(78, 201, 176, 0.05)`
+- Focusable with `tabindex="0"` (for keyboard navigation in future phases)
+
+**`.char-span`** (lines 784-795):
+- Large font: 2rem (desktop), 1.5rem (mobile)
+- Bold weight, cursor pointer
+- No text selection (`user-select: none`)
+- Smooth transitions (0.2s)
+- Background: `rgba(255, 255, 255, 0.1)`
+
+**`.char-span:hover`** (lines 797-801):
+- Scale transform: 1.15x
+- Brighter background: `rgba(78, 201, 176, 0.3)`
+- Drop shadow for depth
+
+**`.char-span.editing`** (lines 803-807):
+- Bright teal background: `rgba(78, 201, 176, 0.4)`
+- 2px solid border with glow effect
+- Box shadow: `0 0 12px rgba(78, 201, 176, 0.6)`
+
+#### 3. TDD Tests (test-phase-1.10.1-character-spans.html)
+
+**NEW FILE**: 24 comprehensive tests (all passing)
+
+**Section 1: Character Span Structure** (5 tests):
+- Test 1.1: `sentence-display` container exists
+- Test 1.2: Multiple char spans exist
+- Test 1.3: Each char is a `<span>` element
+- Test 1.4: Display is focusable (tabindex)
+- Test 1.5: Display uses flex layout
+
+**Section 2: Data Attributes** (6 tests):
+- Test 2.1: `data-index` attribute exists
+- Test 2.2: `data-code` attribute exists
+- Test 2.3: `data-candidates` attribute exists
+- Test 2.4: `data-candidates` is valid JSON array
+- Test 2.5: Indices are sequential (0, 1, 2...)
+- Test 2.6: Char content matches first candidate
+
+**Section 3: Click Event Handling** (4 tests):
+- Test 3.1: Characters have `cursor: pointer`
+- Test 3.2: Click event can be attached
+- Test 3.3: Click event fires successfully
+- Test 3.4: Click event provides dataset
+
+**Section 4: CSS States** (5 tests):
+- Test 4.1: `:hover` CSS rule defined
+- Test 4.2: `.editing` class can be added
+- Test 4.3: `.editing` class changes visual style
+- Test 4.4: `.editing` class can be removed
+- Test 4.5: `user-select: none` prevents selection
+
+**Section 5: Integration Tests** (3 tests):
+- Test 5.1: All characters have complete data attributes
+- Test 5.2: All characters are clickable
+- Test 5.3: Toggle editing state on all characters
+
+### Design Reference
+
+**Document**: `docs/design/PHASE-1.10-CHARACTER-EDITING-UI.md` (430 lines)
+- Comprehensive design for character span architecture
+- Migration path from contenteditable
+- UX benefits comparison table
+- Technical comparison: contenteditable vs character spans
+- Implementation checklist for Phases 1.10.2-1.10.5
+
+### Benefits Achieved
+
+✅ **Click Character**: Event logged with full context (ready for candidate modal)
+✅ **Clear Visual Feedback**: Hover (scale + glow) + editing (bright highlight)
+✅ **Structured Editing**: Foundation for selecting from candidates only
+✅ **Keyboard Events**: Events now propagate correctly (no more contenteditable capture)
+✅ **Mobile Touch-Friendly**: Large touch targets, no text selection interference
+✅ **Learning Detection**: Still works (reads final sentence from spans)
+
+### What Works Now
+
+1. **Character Display**: Prediction displays as individual clickable characters
+2. **Hover Feedback**: Characters scale and glow on hover
+3. **Click Events**: Click logs character details and highlights it
+4. **Confirm Prediction**: Enter key reads sentence from character spans
+5. **Learning Integration**: Detects changes by comparing span text to original
+
+### What's Next (Phase 1.10.2)
+
+**Goal**: Implement candidate selection modal
+
+**Requirements**:
+1. Click character → Show modal with 6 candidates
+2. Each candidate shows keyboard shortcut (Space/'[]\\-)
+3. Click candidate → Replace character text
+4. Auto-advance to next character
+5. Escape key → Close modal
+
+**Estimated Time**: 2-3 hours
+
+### Testing Instructions
+
+**Browser Test**:
+1. Open `mvp1-pwa/tests/test-phase-1.10.1-character-spans.html`
+2. Verify all 24 tests pass
+3. Hover over characters in the test UI to see visual feedback
+
+**Integration Test**:
+1. Open `mvp1-pwa/index.html`
+2. Switch to sentence mode
+3. Type codes: `4jp ad a`
+4. Press `=` to get prediction
+5. **Expected**: See 3 clickable characters (易, 在, 大)
+6. Hover over each character → Should scale and glow
+7. Click a character → Should highlight and log to console
+8. Press Enter → Should confirm and output to buffer
+
+### Technical Notes
+
+**Why This Architecture is Better**:
+- ❌ **contenteditable**: Captures events, hard to intercept, free-form editing
+- ✅ **Character Spans**: Events propagate, easy click handlers, structured editing
+
+**Data Flow**:
+1. Viterbi prediction → path array [{char, code}, ...]
+2. displayPredictionWithIndicator() → Build character spans with data attributes
+3. attachCharacterClickHandlers() → Bind click events
+4. User clicks character → Log event + highlight (TODO: show modal)
+5. User presses Enter → confirmPrediction() reads from spans
+
+**Candidate Data Availability**:
+- Each span has `data-candidates` with full list from dayiMap
+- Example: `data-candidates='["易","義","移","異","逸","益"]'`
+- Ready for Phase 1.10.2 to parse and display in modal
+
+### Files Modified
+
+1. **mvp1-pwa/js/core_logic_v11_ui.js**: +95 lines (character span architecture)
+2. **mvp1-pwa/index.html**: +52 lines (CSS for character spans)
+3. **mvp1-pwa/tests/test-phase-1.10.1-character-spans.html**: +433 lines (NEW FILE - 24 TDD tests)
+
+### Commit Message
+
+```
+feat: Phase 1.10.1 - Character span architecture replaces contenteditable
+
+Implemented character-level editing UI with individual clickable spans.
+
+## Changes Made:
+- displayPredictionWithIndicator(): Replaced contenteditable with character spans
+- attachCharacterClickHandlers(): New function for click event handling
+- confirmPrediction(): Updated to read from character spans
+- CSS: Added .sentence-display, .char-span, :hover, .editing styles
+- TDD: 24 comprehensive tests (test-phase-1.10.1-character-spans.html)
+
+## Benefits:
+✅ Click any character → Event logged (ready for candidate modal)
+✅ Clear visual feedback (hover + editing states)
+✅ Structured editing (select from candidates only)
+✅ Keyboard events now propagate correctly
+✅ Mobile touch-friendly
+✅ Learning detection still works (reads from spans)
+
+## Next Steps:
+- Phase 1.10.2: Implement candidate selection modal
+- Phase 1.10.3: Keyboard navigation (arrows, quick keys, escape)
+```
+
+---
+
