@@ -6,7 +6,7 @@
 
 [![Status](https://img.shields.io/badge/status-Phase%201.10.5%20PRODUCTION%20READY-brightgreen)]()
 [![Version](https://img.shields.io/badge/version-0.5.0--build.013-blue)]()
-[![Tests](https://img.shields.io/badge/tests-103%2F103%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-110%2F110%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ---
@@ -47,8 +47,8 @@
 | **Phase 1.10.2** | 候選選擇視窗 | 22 tests | ✅ |
 | **Phase 1.10.3** | 自動前進 + 方向鍵 | 20 tests | ✅ |
 | **Phase 1.10.4** | 完成編輯 + 送出 | 19 tests | ✅ |
-| **Phase 1.10.5** | 完整狀態管理修復 (5個關鍵bug) | 18 tests | ✅ |
-| **總計** | 完整工作流程 | **103 tests** | ✅ |
+| **Phase 1.10.5** | 完整狀態管理修復 (5個關鍵bug) | 25 tests | ✅ |
+| **總計** | 完整工作流程 | **110 tests** | ✅ |
 
 ### 完整工作流程
 ```
@@ -68,7 +68,7 @@
 
 ### 🆕 Phase 1.10.5 關鍵修復 (Build 013)
 
-此版本修復了 **5 個阻擋正式上線的關鍵 bug**：
+此版本修復了 **5 個阻擋正式上線的關鍵 bug**，並提供 **25 個完整 TDD 測試**：
 
 1. ✅ **Desktop Stats 按鈕**: 修復桌面版 Stats 按鈕無法開啟面板的問題
 2. ✅ **版面優化**: 整句模式縮減 ~62px 高度，實現單頁無捲動設計
@@ -76,8 +76,10 @@
 4. ✅ **完整狀態清除**: 修復 ghost sentences 問題（最關鍵！）
    - 根本原因：`currentPredictions` 等全局變數未被清空
    - 解決方案：新增 `clearPredictionState()` 確保完整狀態重置
+   - TDD 覆蓋：7 個專門測試 + 2 個整合測試驗證無 ghost sentences
 5. ✅ **穩定可靠**: 所有操作後（backspace/enter/submit）完整清空記憶體
 
+**TDD 測試覆蓋**: 25 個綜合測試確保所有修復正確運作
 **影響**: 修復前應用程式**完全不能用**（ghost sentences 一直出現），修復後**可正式上線**。
 
 ---
@@ -112,7 +114,7 @@ open mvp1-pwa/tests/test-phase-1.10.3-auto-advance-navigation.html
 open mvp1-pwa/tests/test-phase-1.10.4-finish-and-submit.html
 open mvp1-pwa/tests/test-phase-1.10.5-critical-fixes.html
 
-# 預期結果: 103/103 tests passing ✅
+# 預期結果: 110/110 tests passing ✅
 ```
 
 ---

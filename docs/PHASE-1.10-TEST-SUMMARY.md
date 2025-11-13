@@ -1,9 +1,10 @@
 # Phase 1.10: Test Coverage Summary
 
-**Date**: 2025-11-13
+**Date**: 2025-11-13 (Updated: Build 013 - Complete clearPredictionState coverage)
 **Status**: ✅ ALL TESTS GREEN
-**Total Tests**: 103 comprehensive TDD tests
+**Total Tests**: 110 comprehensive TDD tests
 **Test Files**: 5 HTML test files
+**Pass Rate**: 100% (110/110 passing)
 
 ---
 
@@ -194,8 +195,8 @@
 
 ### 5. test-phase-1.10.5-critical-fixes.html
 **Location**: `mvp1-pwa/tests/test-phase-1.10.5-critical-fixes.html`
-**Lines**: 670 lines
-**Total Tests**: 18 tests
+**Lines**: 844 lines
+**Total Tests**: 25 tests
 **Status**: ✅ ALL PASSING
 
 **Test Breakdown**:
@@ -208,42 +209,51 @@
 - ✅ Test 1.5: NEW clearCodeBuffer clears candidate area
 - ✅ Test 1.6: NEW clearCodeBuffer clears code buffer display
 
-#### Section 2: Enter Key Submit Tests (4 tests)
-- ✅ Test 2.1: Enter key handler exists
-- ✅ Test 2.2: Enter triggers submit when finish hint visible
-- ✅ Test 2.3: Enter ignored when finish hint hidden
-- ✅ Test 2.4: submitEditedSentence calls clearCodeBuffer
+#### Section 2: clearPredictionState() Tests (7 tests) ⭐ **CRITICAL - Ghost Sentence Fix**
+- ✅ Test 2.1: clearPredictionState function exists on window
+- ✅ Test 2.2: Clears currentPredictions array
+- ✅ Test 2.3: Resets currentPredictionIndex to 0
+- ✅ Test 2.4: Clears originalPrediction
+- ✅ Test 2.5: Clears editedPrediction
+- ✅ Test 2.6: Resets editCursorPosition to -1
+- ✅ Test 2.7: clearCodeBuffer() calls clearPredictionState()
 
-#### Section 3: Learning Stats Integration Tests (4 tests)
-- ✅ Test 3.1: Learning stats in mobile menu
-- ✅ Test 3.2: Learning stats in desktop controls
-- ✅ Test 3.3: Learning stats collapsed by default
-- ✅ Test 3.4: Learning stats expandable on demand
+#### Section 3: Enter Key Submit Tests (4 tests)
+- ✅ Test 3.1: Enter key handler exists
+- ✅ Test 3.2: Enter triggers submit when char-spans exist (any position)
+- ✅ Test 3.3: Enter ignored when no char-spans
+- ✅ Test 3.4: submitEditedSentence calls clearCodeBuffer
 
-#### Section 4: Integration Tests (4 tests)
-- ✅ Test 4.1: Complete workflow: edit → submit → clear → new input
-- ✅ Test 4.2: Backspace clears → new code → no ghost sentence
-- ✅ Test 4.3: Multiple submit cycles work correctly
-- ✅ Test 4.4: (Reserved for future tests)
+#### Section 4: Learning Stats Integration Tests (4 tests)
+- ✅ Test 4.1: Learning stats in mobile menu
+- ✅ Test 4.2: Learning stats in desktop controls
+- ✅ Test 4.3: Learning stats collapsed by default
+- ✅ Test 4.4: Learning stats expandable on demand
 
-**Coverage**: clearCodeBuffer state management, Enter key submit, learning stats integration, complete workflow validation
+#### Section 5: Integration Tests (4 tests)
+- ✅ Test 5.1: Complete workflow: edit → submit → clear → new input
+- ✅ Test 5.2: Backspace clears → new code → no ghost sentence (with state verification)
+- ✅ Test 5.3: Multiple submit cycles work correctly
+- ✅ Test 5.4: **CRITICAL** - After Enter submit, = key shows no ghost sentence
+
+**Coverage**: Complete state management (UI + prediction state), Enter key submit from any position, learning stats integration, ghost sentence prevention validation
 
 ---
 
 ## Summary Statistics
 
 ### Total Coverage
-- **Total Tests**: 103 tests
+- **Total Tests**: 110 tests
 - **Test Files**: 5 HTML files
-- **Total Lines**: 3,278 lines of test code
-- **Pass Rate**: 100% (103/103 passing)
+- **Total Lines**: 3,452 lines of test code
+- **Pass Rate**: 100% (110/110 passing)
 
 ### Test Distribution
-- **Phase 1.10.1**: 24 tests (23.3%)
-- **Phase 1.10.2**: 22 tests (21.4%)
-- **Phase 1.10.3**: 20 tests (19.4%)
-- **Phase 1.10.4**: 19 tests (18.4%)
-- **Phase 1.10.5**: 18 tests (17.5%)
+- **Phase 1.10.1**: 24 tests (21.8%)
+- **Phase 1.10.2**: 22 tests (20.0%)
+- **Phase 1.10.3**: 20 tests (18.2%)
+- **Phase 1.10.4**: 19 tests (17.3%)
+- **Phase 1.10.5**: 25 tests (22.7%) ⭐ **Most comprehensive**
 
 ### Test Categories
 - **Structure Tests**: 11 tests (HTML structure, CSS presence)
@@ -364,15 +374,18 @@ Tests prevent these potential bugs:
 
 ## Conclusion
 
-Phase 1.10 has **100% test coverage** with 103 comprehensive TDD tests across 5 test files. All tests are green and provide confidence in the implementation's correctness, reliability, and robustness.
+Phase 1.10 has **100% test coverage** with 110 comprehensive TDD tests across 5 test files. All tests are green and provide confidence in the implementation's correctness, reliability, and robustness.
 
 **Test Summary**:
-- ✅ 103 tests created
-- ✅ 103 tests passing (100%)
+- ✅ 110 tests created
+- ✅ 110 tests passing (100%)
 - ✅ 0 tests failing
 - ✅ 100% code coverage for Phase 1.10 features (all 5 phases)
 - ✅ All critical user paths tested
 - ✅ All edge cases covered
+- ✅ **Complete clearPredictionState() coverage** - 7 dedicated tests for ghost sentence prevention
+
+**Phase 1.10.5 Highlight**: Most comprehensive test suite (25 tests, 22.7%) with complete coverage of the critical clearPredictionState() fix that transformed the app from "completely unusable" to "production ready".
 - ✅ Bug fixes validated and regression prevented
 
 **Status**: READY FOR PRODUCTION (All 5 Phases Complete)
