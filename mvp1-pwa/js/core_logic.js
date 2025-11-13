@@ -1598,8 +1598,26 @@ async function initialize() {
           return;
         }
 
+        // 🆕 Session 10.11 Part 5: Handle Enter key for sentence mode confirmation
+        if (key === 'Enter') {
+          if (isInSentenceMode) {
+            e.preventDefault();
+            console.log('[Enter Handler] Confirming sentence mode prediction');
+
+            // Call confirmation function (defined in core_logic_v11_ui.js)
+            if (typeof window.confirmPrediction === 'function') {
+              window.confirmPrediction();
+            } else {
+              console.error('[Enter Handler] confirmPrediction function not found!');
+            }
+            return;
+          }
+          // Character mode: Enter does nothing (let default behavior)
+          return;
+        }
+
         // Skip remaining character mode logic if in sentence mode
-        // (Space, =, Delete, Shift, Backspace are handled above for both modes)
+        // (Space, =, Delete, Shift, Backspace, Enter are handled above for both modes)
         if (isInSentenceMode) {
           return;  // Let v11 handlers manage other sentence mode interactions
         }

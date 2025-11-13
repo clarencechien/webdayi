@@ -383,6 +383,84 @@ async function forwardPassWithUserDB(lattice, dp, ngramDb, userDB) {
 }
 
 /**
+ * Get top-N predictions using N-best decoding.
+ *
+ * Returns multiple high-scoring paths for user to choose from.
+ *
+ * @param {string[]} codes - Array of Dayi codes
+ * @param {Map} dayiDb - Dictionary mapping codes to candidates
+ * @param {Object} ngramDb - N-gram database
+ * @param {Object|null} userDB - UserDB instance (optional)
+ * @param {number} n - Number of predictions to return (default 5)
+ * @returns {Promise<Array>} Top-N predictions with {sentence, score, path}
+ */
+async function getTopNPredictions(codes, dayiDb, ngramDb, userDB = null, n = 5) {
+  // 1. Build lattice
+  const lattice = buildLattice(codes, dayiDb);
+
+  // 2. Initialize DP table
+  const dp = initializeDP(lattice, ngramDb);
+
+  // 3. Forward pass (with or without UserDB)
+  let backpointer;
+  if (userDB) {
+    backpointer = await forwardPassWithUserDB(lattice, dp, ngramDb, userDB);
+  } else {
+    backpointer = forwardPass(lattice, dp, ngramDb);
+  }
+
+  // 4. Extract top-N paths using beam search on final states
+  const predictions = [];
+  const lastDP = dp[dp.length - 1];
+
+  // Get all final characters with their scores
+  const finalChars = [];
+  for (const char in lastDP) {
+    finalChars.push({ char: char, score: lastDP[char] });
+  }
+
+  // Sort by score (descending)
+  finalChars.sort((a, b) => b.score - a.score);
+
+  // Extract top-N paths
+  const topN = Math.min(n, finalChars.length);
+  for (let i = 0; i < topN; i++) {
+    const finalChar = finalChars[i].char;
+
+    // Backtrack from this final character
+    const path = [];
+    let currentChar = finalChar;
+
+    for (let t = lattice.length - 1; t >= 0; t--) {
+      path.unshift(currentChar);
+      currentChar = backpointer[t][currentChar];
+    }
+
+    // Build detailed path with candidates
+    const detailedPath = [];
+    for (let t = 0; t < lattice.length; t++) {
+      const char = path[t];
+      const code = codes[t];
+      const candidatesForCode = lattice[t].map(c => ({ char: c.char, freq: c.freq }));
+
+      detailedPath.push({
+        char: char,
+        code: code,
+        candidates: candidatesForCode
+      });
+    }
+
+    predictions.push({
+      sentence: path.join(''),
+      score: finalChars[i].score,
+      path: detailedPath
+    });
+  }
+
+  return predictions;
+}
+
+/**
  * Detect learning opportunities by comparing prediction with user selection.
  *
  * Identifies positions where user selected non-default characters.
@@ -552,10 +630,11 @@ function showLearningFeedback(learningData) {
 
 // 🆕 Phase 1 F-4.0: Export functions to global scope
 window.viterbiWithUserDB = viterbiWithUserDB;
+window.getTopNPredictions = getTopNPredictions; // 🆕 Session 10.11 Part 5: Top-N predictions for sentence mode UX
 window.detectLearning = detectLearning;
 window.applyLearning = applyLearning;
 window.showLearningFeedback = showLearningFeedback;
 
 // Functions are now globally available in browser context
 console.log('✓ Viterbi module loaded (v2.7 HYBRID + UserDB Integration - Phase 1)');
-console.log('✓ Phase 1 F-4.0 functions exported: viterbiWithUserDB, detectLearning, applyLearning, showLearningFeedback');
+console.log('✓ Phase 1 F-4.0 functions exported: viterbiWithUserDB, getTopNPredictions, detectLearning, applyLearning, showLearningFeedback');

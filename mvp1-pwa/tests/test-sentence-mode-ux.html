@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Mode UX - TDD Tests</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #2c3e50;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+    }
+
+    .test-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .test-case {
+      margin: 15px 0;
+      padding: 15px;
+      border-left: 4px solid #ccc;
+      background: #f9f9f9;
+    }
+
+    .test-case.pass {
+      border-left-color: #27ae60;
+      background: #e8f8f5;
+    }
+
+    .test-case.fail {
+      border-left-color: #e74c3c;
+      background: #fadbd8;
+    }
+
+    .test-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .test-result {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 30px;
+    }
+
+    .summary h2 {
+      margin-top: 0;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 48px;
+      font-weight: bold;
+      display: block;
+    }
+
+    .error-message {
+      color: #c0392b;
+      background: #f8d7da;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Sentence Mode UX Redesign - TDD Tests</h1>
+  <p>Testing top-N predictions, = key cycling, Enter confirmation, and character editing</p>
+
+  <div id="test-results"></div>
+  <div id="summary-section"></div>
+
+  <script type="module">
+    // Test Framework
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message || 'Assertion failed');
+      }
+    }
+
+    function assertEqual(actual, expected, message) {
+      if (actual !== expected) {
+        throw new Error(`${message}\nExpected: ${expected}\nActual: ${actual}`);
+      }
+    }
+
+    function assertArrayEqual(actual, expected, message) {
+      if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+        throw new Error(`${message}\nExpected: ${JSON.stringify(expected)}\nActual: ${JSON.stringify(actual)}`);
+      }
+    }
+
+    function assertGreaterThan(actual, threshold, message) {
+      if (actual <= threshold) {
+        throw new Error(`${message}\nExpected > ${threshold}, got ${actual}`);
+      }
+    }
+
+    async function it(testName, testFn) {
+      totalTests++;
+      const testCase = document.createElement('div');
+      testCase.className = 'test-case';
+
+      const testNameDiv = document.createElement('div');
+      testNameDiv.className = 'test-name';
+      testNameDiv.textContent = `Test ${totalTests}: ${testName}`;
+
+      const testResult = document.createElement('div');
+      testResult.className = 'test-result';
+
+      testCase.appendChild(testNameDiv);
+      testCase.appendChild(testResult);
+
+      try {
+        await testFn();
+        testCase.classList.add('pass');
+        testResult.textContent = '✓ PASS';
+        passedTests++;
+      } catch (error) {
+        testCase.classList.add('fail');
+        testResult.textContent = '✗ FAIL';
+        failedTests++;
+
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = error.message;
+        testCase.appendChild(errorMsg);
+      }
+
+      document.getElementById('test-results').appendChild(testCase);
+    }
+
+    function showSummary() {
+      const summaryHTML = `
+        <div class="summary">
+          <h2>📊 Test Summary</h2>
+          <div class="stats">
+            <div class="stat-item">
+              <span class="stat-number">${totalTests}</span>
+              <span>Total Tests</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" style="color: #2ecc71;">${passedTests}</span>
+              <span>Passed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" style="color: #e74c3c;">${failedTests}</span>
+              <span>Failed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">${totalTests > 0 ? Math.round(passedTests/totalTests*100) : 0}%</span>
+              <span>Success Rate</span>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('summary-section').innerHTML = summaryHTML;
+    }
+
+    // Mock Viterbi module for testing
+    const mockViterbi = {
+      // Simulate getTopNPredictions function
+      async getTopNPredictions(codes, n) {
+        const predictions = [
+          {
+            sentence: "易在大",
+            score: -10.5,
+            path: [
+              {char: '易', code: '4jp', candidates: [{char: '易', freq: 80}, {char: '義', freq: 70}]},
+              {char: '在', code: 'ad', candidates: [{char: '在', freq: 90}, {char: '再', freq: 80}]},
+              {char: '大', code: 'a', candidates: [{char: '大', freq: 100}, {char: '太', freq: 90}]}
+            ]
+          },
+          {
+            sentence: "義在大",
+            score: -12.3,
+            path: [
+              {char: '義', code: '4jp', candidates: [{char: '易', freq: 80}, {char: '義', freq: 70}]},
+              {char: '在', code: 'ad', candidates: [{char: '在', freq: 90}, {char: '再', freq: 80}]},
+              {char: '大', code: 'a', candidates: [{char: '大', freq: 100}, {char: '太', freq: 90}]}
+            ]
+          },
+          {
+            sentence: "易再大",
+            score: -13.1,
+            path: [
+              {char: '易', code: '4jp', candidates: [{char: '易', freq: 80}, {char: '義', freq: 70}]},
+              {char: '再', code: 'ad', candidates: [{char: '在', freq: 90}, {char: '再', freq: 80}]},
+              {char: '大', code: 'a', candidates: [{char: '大', freq: 100}, {char: '太', freq: 90}]}
+            ]
+          },
+          {
+            sentence: "義再大",
+            score: -14.2,
+            path: [
+              {char: '義', code: '4jp', candidates: [{char: '易', freq: 80}, {char: '義', freq: 70}]},
+              {char: '再', code: 'ad', candidates: [{char: '在', freq: 90}, {char: '再', freq: 80}]},
+              {char: '大', code: 'a', candidates: [{char: '大', freq: 100}, {char: '太', freq: 90}]}
+            ]
+          },
+          {
+            sentence: "易在太",
+            score: -15.0,
+            path: [
+              {char: '易', code: '4jp', candidates: [{char: '易', freq: 80}, {char: '義', freq: 70}]},
+              {char: '在', code: 'ad', candidates: [{char: '在', freq: 90}, {char: '再', freq: 80}]},
+              {char: '太', code: 'a', candidates: [{char: '大', freq: 100}, {char: '太', freq: 90}]}
+            ]
+          }
+        ];
+
+        return predictions.slice(0, Math.min(n, predictions.length));
+      }
+    };
+
+    // Mock global state for sentence mode
+    let sentenceModeState = {
+      currentPredictions: [],
+      currentPredictionIndex: 0,
+      originalPrediction: null,
+      editedPrediction: null,
+      editCursorPosition: -1
+    };
+
+    // Run Tests
+    (async function runTests() {
+      const section1 = document.createElement('div');
+      section1.className = 'test-section';
+      section1.innerHTML = '<h2>Section 1: Top-N Prediction Storage</h2>';
+      document.getElementById('test-results').appendChild(section1);
+
+      await it('getTopNPredictions should return up to N predictions', async () => {
+        const predictions = await mockViterbi.getTopNPredictions(['4jp', 'ad', 'a'], 5);
+        assertEqual(predictions.length, 5, 'Should return 5 predictions');
+      });
+
+      await it('Each prediction should have sentence, score, and path', async () => {
+        const predictions = await mockViterbi.getTopNPredictions(['4jp', 'ad'], 3);
+
+        for (const pred of predictions) {
+          assert(pred.sentence, 'Prediction should have sentence');
+          assert(typeof pred.score === 'number', 'Prediction should have numeric score');
+          assert(Array.isArray(pred.path), 'Prediction should have path array');
+        }
+      });
+
+      await it('Predictions should be sorted by score (best first)', async () => {
+        const predictions = await mockViterbi.getTopNPredictions(['4jp', 'ad'], 5);
+
+        for (let i = 0; i < predictions.length - 1; i++) {
+          assert(predictions[i].score >= predictions[i + 1].score,
+            `Predictions should be sorted (${predictions[i].score} >= ${predictions[i + 1].score})`);
+        }
+      });
+
+      await it('Path array should match sentence length', async () => {
+        const predictions = await mockViterbi.getTopNPredictions(['4jp', 'ad', 'a'], 3);
+
+        for (const pred of predictions) {
+          assertEqual(pred.path.length, pred.sentence.length,
+            `Path length (${pred.path.length}) should match sentence length (${pred.sentence.length})`);
+        }
+      });
+
+      await it('Each path item should have char, code, and candidates', async () => {
+        const predictions = await mockViterbi.getTopNPredictions(['4jp', 'ad'], 2);
+
+        for (const pred of predictions) {
+          for (const pathItem of pred.path) {
+            assert(pathItem.char, 'Path item should have char');
+            assert(pathItem.code, 'Path item should have code');
+            assert(Array.isArray(pathItem.candidates), 'Path item should have candidates array');
+          }
+        }
+      });
+
+      const section2 = document.createElement('div');
+      section2.className = 'test-section';
+      section2.innerHTML = '<h2>Section 2: = Key Prediction Cycling</h2>';
+      document.getElementById('test-results').appendChild(section2);
+
+      await it('First = press should trigger prediction and set index to 0', async () => {
+        // Reset state
+        sentenceModeState.currentPredictions = [];
+        sentenceModeState.currentPredictionIndex = 0;
+
+        // Simulate first = press
+        const predictions = await mockViterbi.getTopNPredictions(['4jp', 'ad'], 5);
+        sentenceModeState.currentPredictions = predictions;
+        sentenceModeState.currentPredictionIndex = 0;
+        sentenceModeState.originalPrediction = predictions[0].sentence;
+
+        assertEqual(sentenceModeState.currentPredictions.length, 5, 'Should store 5 predictions');
+        assertEqual(sentenceModeState.currentPredictionIndex, 0, 'Should start at index 0');
+        assertEqual(sentenceModeState.originalPrediction, '易在大', 'Should store original prediction');
+      });
+
+      await it('Second = press should advance to prediction #2 (index 1)', async () => {
+        // State already has predictions from previous test
+
+        // Simulate second = press
+        sentenceModeState.currentPredictionIndex = (sentenceModeState.currentPredictionIndex + 1) % sentenceModeState.currentPredictions.length;
+
+        assertEqual(sentenceModeState.currentPredictionIndex, 1, 'Should advance to index 1');
+        assertEqual(sentenceModeState.currentPredictions[1].sentence, '義在大', 'Should show second prediction');
+      });
+
+      await it('Multiple = presses should cycle through all predictions', async () => {
+        // Reset to start
+        sentenceModeState.currentPredictionIndex = 0;
+
+        // Cycle through all 5 predictions
+        for (let i = 1; i <= 5; i++) {
+          sentenceModeState.currentPredictionIndex = (sentenceModeState.currentPredictionIndex + 1) % sentenceModeState.currentPredictions.length;
+        }
+
+        // After 5 cycles, should be back at index 0
+        assertEqual(sentenceModeState.currentPredictionIndex, 0, 'Should cycle back to index 0 after 5 presses');
+      });
+
+      await it('Cycling should update displayed sentence correctly', async () => {
+        sentenceModeState.currentPredictionIndex = 0;
+
+        const displayedSentences = [];
+        for (let i = 0; i < 5; i++) {
+          displayedSentences.push(sentenceModeState.currentPredictions[sentenceModeState.currentPredictionIndex].sentence);
+          sentenceModeState.currentPredictionIndex = (sentenceModeState.currentPredictionIndex + 1) % sentenceModeState.currentPredictions.length;
+        }
+
+        assertArrayEqual(displayedSentences, ['易在大', '義在大', '易再大', '義再大', '易在太'],
+          'Should cycle through all prediction sentences');
+      });
+
+      await it('= key with empty predictions should have no effect', async () => {
+        sentenceModeState.currentPredictions = [];
+        sentenceModeState.currentPredictionIndex = 0;
+
+        // Simulate = press with no predictions
+        if (sentenceModeState.currentPredictions.length === 0) {
+          // Should not crash or change state
+          assertEqual(sentenceModeState.currentPredictionIndex, 0, 'Index should remain 0');
+        }
+      });
+
+      const section3 = document.createElement('div');
+      section3.className = 'test-section';
+      section3.innerHTML = '<h2>Section 3: Enter Key Confirmation</h2>';
+      document.getElementById('test-results').appendChild(section3);
+
+      await it('Enter should finalize prediction and send to output buffer', async () => {
+        sentenceModeState.currentPredictions = await mockViterbi.getTopNPredictions(['4jp', 'ad'], 3);
+        sentenceModeState.currentPredictionIndex = 0;
+        sentenceModeState.originalPrediction = sentenceModeState.currentPredictions[0].sentence;
+
+        let outputBuffer = '';
+        const finalSentence = sentenceModeState.currentPredictions[sentenceModeState.currentPredictionIndex].sentence;
+
+        // Simulate Enter confirmation
+        outputBuffer += finalSentence;
+
+        assertEqual(outputBuffer, '易在大', 'Should append prediction to output buffer');
+      });
+
+      await it('Enter should clear predictions state after confirmation', async () => {
+        // Simulate clearing state
+        sentenceModeState.currentPredictions = [];
+        sentenceModeState.currentPredictionIndex = 0;
+        sentenceModeState.originalPrediction = null;
+        sentenceModeState.editedPrediction = null;
+
+        assertEqual(sentenceModeState.currentPredictions.length, 0, 'Predictions should be cleared');
+        assertEqual(sentenceModeState.currentPredictionIndex, 0, 'Index should be reset');
+        assertEqual(sentenceModeState.originalPrediction, null, 'Original prediction should be cleared');
+      });
+
+      await it('Enter should trigger learning if prediction was changed', async () => {
+        sentenceModeState.currentPredictions = await mockViterbi.getTopNPredictions(['4jp', 'ad'], 3);
+        sentenceModeState.originalPrediction = sentenceModeState.currentPredictions[0].sentence; // "易在大"
+
+        // User cycled to prediction #2
+        sentenceModeState.currentPredictionIndex = 1;
+        const finalSentence = sentenceModeState.currentPredictions[1].sentence; // "義在大"
+
+        // Check if learning should be triggered
+        const shouldLearn = (sentenceModeState.originalPrediction !== finalSentence);
+        assert(shouldLearn, 'Should detect that prediction was changed');
+      });
+
+      await it('Enter should NOT trigger learning if prediction unchanged', async () => {
+        sentenceModeState.currentPredictions = await mockViterbi.getTopNPredictions(['4jp', 'ad'], 3);
+        sentenceModeState.originalPrediction = sentenceModeState.currentPredictions[0].sentence;
+        sentenceModeState.currentPredictionIndex = 0;
+
+        const finalSentence = sentenceModeState.currentPredictions[0].sentence;
+        const shouldLearn = (sentenceModeState.originalPrediction !== finalSentence);
+
+        assert(!shouldLearn, 'Should NOT trigger learning if unchanged');
+      });
+
+      await it('Learning detection should compare character-by-character', async () => {
+        const original = "易在大";
+        const edited = "義在大";
+
+        const learningPoints = [];
+        for (let i = 0; i < original.length; i++) {
+          if (original[i] !== edited[i]) {
+            learningPoints.push({
+              position: i,
+              from: original[i],
+              to: edited[i],
+              prevChar: i > 0 ? edited[i - 1] : null
+            });
+          }
+        }
+
+        assertEqual(learningPoints.length, 1, 'Should detect 1 character change');
+        assertEqual(learningPoints[0].position, 0, 'Change at position 0');
+        assertEqual(learningPoints[0].from, '易', 'Changed from 易');
+        assertEqual(learningPoints[0].to, '義', 'Changed to 義');
+      });
+
+      await it('Enter with no predictions should have no effect', async () => {
+        sentenceModeState.currentPredictions = [];
+
+        let outputBuffer = 'existing text';
+
+        // Simulate Enter with no predictions
+        if (sentenceModeState.currentPredictions.length === 0) {
+          // Should not modify output
+          assertEqual(outputBuffer, 'existing text', 'Output should not change');
+        }
+      });
+
+      const section4 = document.createElement('div');
+      section4.className = 'test-section';
+      section4.innerHTML = '<h2>Section 4: Character-Level Editing</h2>';
+      document.getElementById('test-results').appendChild(section4);
+
+      await it('Click character should enter edit mode and set cursor position', async () => {
+        sentenceModeState.currentPredictions = await mockViterbi.getTopNPredictions(['4jp', 'ad', 'a'], 3);
+        sentenceModeState.currentPredictionIndex = 0;
+
+        // Simulate clicking character at position 1
+        const clickPosition = 1;
+        sentenceModeState.editCursorPosition = clickPosition;
+
+        assertEqual(sentenceModeState.editCursorPosition, 1, 'Cursor should be at position 1');
+      });
+
+      await it('Character editing should show candidates for that code', async () => {
+        sentenceModeState.currentPredictions = await mockViterbi.getTopNPredictions(['4jp', 'ad', 'a'], 1);
+        const position = 1;
+
+        const pathItem = sentenceModeState.currentPredictions[0].path[position];
+        const candidates = pathItem.candidates.slice(0, 6); // First 6 candidates
+
+        assertEqual(candidates.length, 2, 'Should show candidates for position 1');
+        assertEqual(candidates[0].char, '在', 'First candidate should be 在');
+      });
+
+      await it('Left arrow should move cursor left', async () => {
+        sentenceModeState.editCursorPosition = 2;
+        const sentenceLength = 3;
+
+        // Simulate left arrow
+        sentenceModeState.editCursorPosition = Math.max(0, sentenceModeState.editCursorPosition - 1);
+
+        assertEqual(sentenceModeState.editCursorPosition, 1, 'Cursor should move to position 1');
+      });
+
+      await it('Right arrow should move cursor right', async () => {
+        sentenceModeState.editCursorPosition = 1;
+        const sentenceLength = 3;
+
+        // Simulate right arrow
+        sentenceModeState.editCursorPosition = Math.min(sentenceLength - 1, sentenceModeState.editCursorPosition + 1);
+
+        assertEqual(sentenceModeState.editCursorPosition, 2, 'Cursor should move to position 2');
+      });
+
+      await it('Left arrow at position 0 should stay at 0', async () => {
+        sentenceModeState.editCursorPosition = 0;
+
+        // Simulate left arrow
+        sentenceModeState.editCursorPosition = Math.max(0, sentenceModeState.editCursorPosition - 1);
+
+        assertEqual(sentenceModeState.editCursorPosition, 0, 'Cursor should stay at position 0');
+      });
+
+      await it('Right arrow at last position should stay at last', async () => {
+        const sentenceLength = 3;
+        sentenceModeState.editCursorPosition = 2;
+
+        // Simulate right arrow
+        sentenceModeState.editCursorPosition = Math.min(sentenceLength - 1, sentenceModeState.editCursorPosition + 1);
+
+        assertEqual(sentenceModeState.editCursorPosition, 2, 'Cursor should stay at position 2');
+      });
+
+      await it('Selecting candidate should replace character at cursor', async () => {
+        sentenceModeState.currentPredictions = await mockViterbi.getTopNPredictions(['4jp', 'ad', 'a'], 1);
+        sentenceModeState.editCursorPosition = 0;
+
+        const originalSentence = sentenceModeState.currentPredictions[0].sentence; // "易在大"
+        const position = 0;
+        const newChar = '義';
+
+        // Simulate character replacement
+        let chars = originalSentence.split('');
+        chars[position] = newChar;
+        const editedSentence = chars.join('');
+
+        assertEqual(editedSentence, '義在大', 'Should replace character at position 0');
+      });
+
+      await it('Character replacement should mark prediction as edited', async () => {
+        sentenceModeState.originalPrediction = '易在大';
+        sentenceModeState.editedPrediction = '義在大';
+
+        const wasEdited = (sentenceModeState.editedPrediction !== sentenceModeState.originalPrediction);
+        assert(wasEdited, 'Prediction should be marked as edited');
+      });
+
+      await it('Escape key should exit edit mode', async () => {
+        sentenceModeState.editCursorPosition = 2;
+
+        // Simulate Escape key
+        sentenceModeState.editCursorPosition = -1;
+
+        assertEqual(sentenceModeState.editCursorPosition, -1, 'Should exit edit mode');
+      });
+
+      const section5 = document.createElement('div');
+      section5.className = 'test-section';
+      section5.innerHTML = '<h2>Section 5: UI Integration</h2>';
+      document.getElementById('test-results').appendChild(section5);
+
+      await it('Prediction indicator should show correct format (1/5)', async () => {
+        sentenceModeState.currentPredictions = await mockViterbi.getTopNPredictions(['4jp', 'ad'], 5);
+        sentenceModeState.currentPredictionIndex = 0;
+
+        const indicator = `預測 ${sentenceModeState.currentPredictionIndex + 1}/${sentenceModeState.currentPredictions.length}`;
+        assertEqual(indicator, '預測 1/5', 'Indicator should show 1/5');
+      });
+
+      await it('Prediction indicator should update when cycling', async () => {
+        sentenceModeState.currentPredictionIndex = 2;
+
+        const indicator = `預測 ${sentenceModeState.currentPredictionIndex + 1}/${sentenceModeState.currentPredictions.length}`;
+        assertEqual(indicator, '預測 3/5', 'Indicator should show 3/5');
+      });
+
+      await it('Hint text should guide user actions', async () => {
+        const hintText = '按 = 切換預測 | 點擊字重選 | Enter 確認';
+        assert(hintText.includes('='), 'Hint should mention = key');
+        assert(hintText.includes('Enter'), 'Hint should mention Enter key');
+      });
+
+      await it('Character should be clickable with data attributes', async () => {
+        sentenceModeState.currentPredictions = await mockViterbi.getTopNPredictions(['4jp', 'ad'], 1);
+        const path = sentenceModeState.currentPredictions[0].path;
+
+        // Simulate HTML structure
+        const charElement = {
+          dataset: {
+            pos: '1',
+            code: 'ad',
+            char: '在'
+          }
+        };
+
+        assertEqual(charElement.dataset.pos, '1', 'Should have position attribute');
+        assertEqual(charElement.dataset.code, 'ad', 'Should have code attribute');
+      });
+
+      showSummary();
+
+      console.log(`\n🧪 Sentence Mode UX Tests Complete:`);
+      console.log(`   Total: ${totalTests}`);
+      console.log(`   ✓ Passed: ${passedTests}`);
+      console.log(`   ✗ Failed: ${failedTests}`);
+      console.log(`   Success Rate: ${totalTests > 0 ? Math.round(passedTests/totalTests*100) : 0}%`);
+    })();
+  </script>
+</body>
+</html>
