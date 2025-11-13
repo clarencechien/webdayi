@@ -806,6 +806,15 @@
       box-shadow: 0 0 12px rgba(78, 201, 176, 0.6);
     }
 
+    /* 🆕 Phase 1.10.3: Focused state for arrow navigation */
+    .char-span.focused {
+      background: rgba(78, 201, 176, 0.2);
+      border: 2px solid rgba(78, 201, 176, 0.6);
+      box-shadow: 0 0 8px rgba(78, 201, 176, 0.4);
+      outline: 2px solid rgba(78, 201, 176, 0.3);
+      outline-offset: 2px;
+    }
+
     @media (max-width: 640px) {
       .mode-btn span:not(.material-symbols-outlined) {
         display: none;
