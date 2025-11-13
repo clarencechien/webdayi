@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IndexedDB Module Tests - WebDaYi PWA</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    h1 {
+      color: #4ec9b0;
+      border-bottom: 2px solid #4ec9b0;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #dcdcaa;
+      margin-top: 30px;
+    }
+    .test-section {
+      background: #252526;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .test-item {
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+    .pass {
+      background: #1e3a1e;
+      color: #4ec9b0;
+      border-left: 4px solid #4ec9b0;
+    }
+    .fail {
+      background: #3a1e1e;
+      color: #f48771;
+      border-left: 4px solid #f48771;
+    }
+    .summary {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 4px;
+      background: #2d2d30;
+    }
+    .summary.all-pass {
+      color: #4ec9b0;
+      border: 2px solid #4ec9b0;
+    }
+    .summary.has-fail {
+      color: #f48771;
+      border: 2px solid #f48771;
+    }
+    pre {
+      background: #1e1e1e;
+      border: 1px solid #3c3c3c;
+      padding: 10px;
+      border-radius: 3px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .error-detail {
+      color: #ce9178;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 IndexedDB Module Tests (TDD)</h1>
+  <p>Testing: <code>user_db_indexeddb.js</code> - UserDB IndexedDB Wrapper</p>
+
+  <div id="test-results"></div>
+  <div id="summary"></div>
+
+  <script type="module">
+    // Import the UserDB module (we'll create this next)
+    import { UserDB } from '../js/user_db_indexeddb.js';
+
+    const results = [];
+    let passCount = 0;
+    let failCount = 0;
+
+    function assert(condition, testName, errorMsg = '') {
+      if (condition) {
+        results.push({ pass: true, name: testName });
+        passCount++;
+      } else {
+        results.push({ pass: false, name: testName, error: errorMsg });
+        failCount++;
+      }
+    }
+
+    function assertThrows(fn, testName) {
+      try {
+        fn();
+        results.push({ pass: false, name: testName, error: 'Expected function to throw' });
+        failCount++;
+      } catch (e) {
+        results.push({ pass: true, name: testName });
+        passCount++;
+      }
+    }
+
+    async function assertAsync(promise, testName) {
+      try {
+        const result = await promise;
+        if (result) {
+          results.push({ pass: true, name: testName });
+          passCount++;
+        } else {
+          results.push({ pass: false, name: testName, error: 'Assertion failed' });
+          failCount++;
+        }
+      } catch (e) {
+        results.push({ pass: false, name: testName, error: e.message });
+        failCount++;
+      }
+    }
+
+    function renderResults() {
+      const container = document.getElementById('test-results');
+      const summaryContainer = document.getElementById('summary');
+
+      let html = '';
+      let currentCategory = '';
+
+      results.forEach(result => {
+        const category = result.name.split(':')[0];
+        if (category !== currentCategory) {
+          if (currentCategory !== '') {
+            html += '</div>';
+          }
+          html += `<h2>${category}</h2><div class="test-section">`;
+          currentCategory = category;
+        }
+
+        const testLabel = result.name.split(':')[1] || result.name;
+        const cssClass = result.pass ? 'pass' : 'fail';
+        const icon = result.pass ? '✓' : '✗';
+
+        html += `<div class="test-item ${cssClass}">
+          ${icon} ${testLabel}
+          ${result.error ? `<div class="error-detail">Error: ${result.error}</div>` : ''}
+        </div>`;
+      });
+
+      if (currentCategory !== '') {
+        html += '</div>';
+      }
+
+      container.innerHTML = html;
+
+      const total = passCount + failCount;
+      const percentage = total > 0 ? Math.round((passCount / total) * 100) : 0;
+      const summaryClass = failCount === 0 ? 'all-pass' : 'has-fail';
+
+      summaryContainer.innerHTML = `
+        <div class="summary ${summaryClass}">
+          Test Results: ${passCount}/${total} passed (${percentage}%)
+          ${failCount > 0 ? `<br>❌ ${failCount} test(s) failed` : '<br>✅ All tests passed!'}
+        </div>
+      `;
+    }
+
+    // ============================================
+    // TEST SUITE: IndexedDB Module (TDD)
+    // ============================================
+
+    async function runTests() {
+      console.log('🧪 Starting IndexedDB Module Tests...\n');
+
+      // Test 1: Database Structure
+      console.log('Category 1: Database Structure (5 tests)');
+
+      try {
+        const db = new UserDB();
+        assert(db !== null, 'DB Structure: UserDB class instantiates');
+        assert(typeof db.open === 'function', 'DB Structure: open() method exists');
+        assert(typeof db.getWeight === 'function', 'DB Structure: getWeight() method exists');
+        assert(typeof db.setWeight === 'function', 'DB Structure: setWeight() method exists');
+        assert(typeof db.getAllWeights === 'function', 'DB Structure: getAllWeights() method exists');
+      } catch (e) {
+        assert(false, 'DB Structure: UserDB class instantiates', e.message);
+        assert(false, 'DB Structure: open() method exists', 'Class failed to instantiate');
+        assert(false, 'DB Structure: getWeight() method exists', 'Class failed to instantiate');
+        assert(false, 'DB Structure: setWeight() method exists', 'Class failed to instantiate');
+        assert(false, 'DB Structure: getAllWeights() method exists', 'Class failed to instantiate');
+      }
+
+      // Test 2: Database Initialization
+      console.log('Category 2: Database Initialization (4 tests)');
+
+      try {
+        const db = new UserDB();
+        await assertAsync(
+          db.open().then(() => true),
+          'DB Init: open() completes successfully'
+        );
+
+        // Test that database is accessible after open
+        await assertAsync(
+          db.getWeight('天', '氣').then(weight => weight === 0),
+          'DB Init: getWeight() returns 0 for new entry'
+        );
+
+        await assertAsync(
+          db.setWeight('天', '氣', 0.5).then(() => true),
+          'DB Init: setWeight() completes successfully'
+        );
+
+        await assertAsync(
+          db.getWeight('天', '氣').then(weight => Math.abs(weight - 0.5) < 0.001),
+          'DB Init: getWeight() returns correct value after setWeight()'
+        );
+
+      } catch (e) {
+        assert(false, 'DB Init: Tests failed', e.message);
+      }
+
+      // Test 3: Weight Operations (6 tests)
+      console.log('Category 3: Weight Operations (6 tests)');
+
+      try {
+        const db = new UserDB();
+        await db.open();
+
+        // Clear any existing data
+        const allWeights = await db.getAllWeights();
+        for (const key in allWeights) {
+          const [prev, curr] = key.split('→');
+          await db.setWeight(prev, curr, 0);
+        }
+
+        // Test 3.1: Set weight for new bigram
+        await db.setWeight('大', '易', 1.0);
+        await assertAsync(
+          db.getWeight('大', '易').then(w => Math.abs(w - 1.0) < 0.001),
+          'Weight Ops: Set weight for new bigram'
+        );
+
+        // Test 3.2: Update existing weight
+        await db.setWeight('大', '易', 1.5);
+        await assertAsync(
+          db.getWeight('大', '易').then(w => Math.abs(w - 1.5) < 0.001),
+          'Weight Ops: Update existing weight'
+        );
+
+        // Test 3.3: Set weight to 0
+        await db.setWeight('大', '易', 0);
+        await assertAsync(
+          db.getWeight('大', '易').then(w => Math.abs(w) < 0.001),
+          'Weight Ops: Set weight to 0'
+        );
+
+        // Test 3.4: Set negative weight
+        await db.setWeight('天', '真', -0.5);
+        await assertAsync(
+          db.getWeight('天', '真').then(w => Math.abs(w + 0.5) < 0.001),
+          'Weight Ops: Set negative weight'
+        );
+
+        // Test 3.5: Get weight for non-existent bigram
+        await assertAsync(
+          db.getWeight('不', '存在').then(w => Math.abs(w) < 0.001),
+          'Weight Ops: Get weight for non-existent bigram returns 0'
+        );
+
+        // Test 3.6: Multiple bigrams
+        await db.setWeight('天', '氣', 0.8);
+        await db.setWeight('天', '真', 0.3);
+        const w1 = await db.getWeight('天', '氣');
+        const w2 = await db.getWeight('天', '真');
+        assert(
+          Math.abs(w1 - 0.8) < 0.001 && Math.abs(w2 - 0.3) < 0.001,
+          'Weight Ops: Multiple bigrams stored independently'
+        );
+
+      } catch (e) {
+        assert(false, 'Weight Ops: Tests failed', e.message);
+      }
+
+      // Test 4: Export/Import (5 tests)
+      console.log('Category 4: Export/Import (5 tests)');
+
+      try {
+        const db1 = new UserDB();
+        await db1.open();
+
+        // Set some test data
+        await db1.setWeight('出', '口', 2.0);
+        await db1.setWeight('入', '口', 1.5);
+        await db1.setWeight('人', '口', 1.2);
+
+        // Test 4.1: Export data
+        const exported = await db1.getAllWeights();
+        assert(
+          Object.keys(exported).length >= 3,
+          'Export/Import: getAllWeights() returns data'
+        );
+
+        // Test 4.2: Export format
+        assert(
+          exported['出→口'] === 2.0,
+          'Export/Import: Exported data has correct format'
+        );
+
+        // Test 4.3: Import data to new instance
+        const db2 = new UserDB();
+        await db2.open();
+        await assertAsync(
+          db2.importWeights(exported).then(() => true),
+          'Export/Import: importWeights() completes successfully'
+        );
+
+        // Test 4.4: Verify imported data
+        await assertAsync(
+          db2.getWeight('出', '口').then(w => Math.abs(w - 2.0) < 0.001),
+          'Export/Import: Imported data matches exported data'
+        );
+
+        // Test 4.5: Import overwrites existing data
+        await db2.setWeight('出', '口', 5.0);
+        await db2.importWeights({ '出→口': 3.0 });
+        await assertAsync(
+          db2.getWeight('出', '口').then(w => Math.abs(w - 3.0) < 0.001),
+          'Export/Import: Import overwrites existing data'
+        );
+
+      } catch (e) {
+        assert(false, 'Export/Import: Tests failed', e.message);
+      }
+
+      // Test 5: Edge Cases (4 tests)
+      console.log('Category 5: Edge Cases (4 tests)');
+
+      try {
+        const db = new UserDB();
+        await db.open();
+
+        // Test 5.1: Empty string characters
+        await db.setWeight('', '', 0.5);
+        await assertAsync(
+          db.getWeight('', '').then(w => Math.abs(w - 0.5) < 0.001),
+          'Edge Cases: Empty string characters'
+        );
+
+        // Test 5.2: Special characters
+        await db.setWeight('😀', '🎉', 1.0);
+        await assertAsync(
+          db.getWeight('😀', '🎉').then(w => Math.abs(w - 1.0) < 0.001),
+          'Edge Cases: Emoji characters'
+        );
+
+        // Test 5.3: Very large weight
+        await db.setWeight('大', '數', 1000000.0);
+        await assertAsync(
+          db.getWeight('大', '數').then(w => Math.abs(w - 1000000.0) < 0.001),
+          'Edge Cases: Very large weight value'
+        );
+
+        // Test 5.4: Very small weight
+        await db.setWeight('小', '數', 0.0000001);
+        await assertAsync(
+          db.getWeight('小', '數').then(w => Math.abs(w - 0.0000001) < 0.00000001),
+          'Edge Cases: Very small weight value'
+        );
+
+      } catch (e) {
+        assert(false, 'Edge Cases: Tests failed', e.message);
+      }
+
+      // Test 6: Performance (2 tests)
+      console.log('Category 6: Performance (2 tests)');
+
+      try {
+        const db = new UserDB();
+        await db.open();
+
+        // Test 6.1: Batch write performance
+        const startWrite = performance.now();
+        for (let i = 0; i < 100; i++) {
+          await db.setWeight(`char${i}`, `next${i}`, i * 0.01);
+        }
+        const writeTime = performance.now() - startWrite;
+        assert(
+          writeTime < 5000, // Should complete in < 5 seconds
+          'Performance: 100 writes complete in < 5 seconds',
+          `Took ${writeTime.toFixed(2)}ms`
+        );
+
+        // Test 6.2: Batch read performance
+        const startRead = performance.now();
+        for (let i = 0; i < 100; i++) {
+          await db.getWeight(`char${i}`, `next${i}`);
+        }
+        const readTime = performance.now() - startRead;
+        assert(
+          readTime < 2000, // Should complete in < 2 seconds
+          'Performance: 100 reads complete in < 2 seconds',
+          `Took ${readTime.toFixed(2)}ms`
+        );
+
+      } catch (e) {
+        assert(false, 'Performance: Tests failed', e.message);
+      }
+
+      // Test 7: Concurrent Operations (2 tests)
+      console.log('Category 7: Concurrent Operations (2 tests)');
+
+      try {
+        const db = new UserDB();
+        await db.open();
+
+        // Test 7.1: Concurrent writes to different keys
+        await Promise.all([
+          db.setWeight('A', 'B', 1.0),
+          db.setWeight('C', 'D', 2.0),
+          db.setWeight('E', 'F', 3.0)
+        ]);
+        const [w1, w2, w3] = await Promise.all([
+          db.getWeight('A', 'B'),
+          db.getWeight('C', 'D'),
+          db.getWeight('E', 'F')
+        ]);
+        assert(
+          Math.abs(w1 - 1.0) < 0.001 && Math.abs(w2 - 2.0) < 0.001 && Math.abs(w3 - 3.0) < 0.001,
+          'Concurrent Ops: Concurrent writes to different keys'
+        );
+
+        // Test 7.2: Concurrent writes to same key (last write wins)
+        await Promise.all([
+          db.setWeight('同', '步', 1.0),
+          db.setWeight('同', '步', 2.0),
+          db.setWeight('同', '步', 3.0)
+        ]);
+        const finalWeight = await db.getWeight('同', '步');
+        assert(
+          [1.0, 2.0, 3.0].some(v => Math.abs(finalWeight - v) < 0.001),
+          'Concurrent Ops: Concurrent writes to same key (one value wins)'
+        );
+
+      } catch (e) {
+        assert(false, 'Concurrent Ops: Tests failed', e.message);
+      }
+
+      console.log('\n✅ All test categories completed!\n');
+      renderResults();
+    }
+
+    // Run tests when page loads
+    window.addEventListener('load', () => {
+      setTimeout(runTests, 100);
+    });
+  </script>
+</body>
+</html>
