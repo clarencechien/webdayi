@@ -913,12 +913,18 @@
         userDB = new UserDB();
         await userDB.open();
         userDBReady = true;
+
+        // 🆕 Phase 1: Make UserDB globally accessible for Viterbi integration
+        window.userDB = userDB;
+        window.userDBReady = true;
+
         console.log('%c[PWA] IndexedDB initialized successfully', 'color: #4ec9b0; font-weight: bold');
+        console.log('%c[Phase 1] UserDB now available globally for learning integration', 'color: #4ec9b0; font-weight: bold');
 
         // Update UI
         const dbStatus = document.getElementById('userdb-status');
         if (dbStatus) {
-          dbStatus.innerHTML = '✓ IndexedDB Ready';
+          dbStatus.innerHTML = '✓ IndexedDB Ready (Learning Enabled)';
           dbStatus.className = 'text-green-500 text-sm';
         }
 
@@ -926,6 +932,9 @@
         updateUserDBStats();
       } catch (error) {
         console.error('[PWA] IndexedDB initialization failed:', error);
+        window.userDB = null;
+        window.userDBReady = false;
+
         const dbStatus = document.getElementById('userdb-status');
         if (dbStatus) {
           dbStatus.innerHTML = '✗ IndexedDB Error';
@@ -1126,23 +1135,59 @@
           // Animate button
           animateKeyPress(button);
 
-          // Simulate keyboard event for existing core_logic.js
-          const event = new KeyboardEvent('keydown', {
-            key: key,
-            code: key === ' ' ? 'Space' : (key === 'Backspace' ? 'Backspace' : `Key${key.toUpperCase()}`),
-            keyCode: key.charCodeAt(0),
-            which: key.charCodeAt(0),
-            bubbles: true,
-            cancelable: true
-          });
-
-          // Dispatch to input box
+          // Get input box
           const inputBox = document.getElementById('input-box');
-          if (inputBox) {
-            inputBox.dispatchEvent(event);
-          }
+          if (!inputBox) return;
 
-          console.log(`[PWA] Mobile key pressed: ${key}`);
+          // Handle different key types
+          // Note: Synthetic KeyboardEvent doesn't update input.value automatically (browser security)
+          // We need to manually update the value and trigger events
+
+          if (key === 'Backspace') {
+            // Remove last character
+            inputBox.value = inputBox.value.slice(0, -1);
+
+            // Trigger input event so core_logic.js processes the change
+            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+            inputBox.dispatchEvent(inputEvent);
+
+            console.log(`[PWA] Mobile Backspace pressed, value: "${inputBox.value}"`);
+          } else if (key === 'Enter') {
+            // Dispatch Enter keydown event
+            const enterEvent = new KeyboardEvent('keydown', {
+              key: 'Enter',
+              code: 'Enter',
+              keyCode: 13,
+              which: 13,
+              bubbles: true,
+              cancelable: true
+            });
+            inputBox.dispatchEvent(enterEvent);
+
+            console.log(`[PWA] Mobile Enter pressed`);
+          } else if (key === ' ') {
+            // Dispatch Space keydown event (for sentence mode prediction)
+            const spaceEvent = new KeyboardEvent('keydown', {
+              key: ' ',
+              code: 'Space',
+              keyCode: 32,
+              which: 32,
+              bubbles: true,
+              cancelable: true
+            });
+            inputBox.dispatchEvent(spaceEvent);
+
+            console.log(`[PWA] Mobile Space pressed`);
+          } else {
+            // Regular character key - manually update input value
+            inputBox.value += key;
+
+            // Trigger input event so core_logic.js can process it
+            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+            inputBox.dispatchEvent(inputEvent);
+
+            console.log(`[PWA] Mobile key pressed: ${key}, input value: "${inputBox.value}"`);
+          }
         });
 
         // Also add click for desktop testing

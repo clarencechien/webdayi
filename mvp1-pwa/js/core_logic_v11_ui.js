@@ -272,11 +272,14 @@
       return;
     }
 
-    // Run Viterbi prediction
-    const result = predictSentenceFromBuffer(buffer, dayiMap, ngram);
+    // 🆕 Phase 1: Run Viterbi prediction (now async with UserDB)
+    const result = await predictSentenceFromBuffer(buffer, dayiMap, ngram);
 
     if (result) {
       console.log(`[v11 UI] Prediction: "${result.sentence}" (score: ${result.score.toFixed(3)})`);
+
+      // 🆕 Phase 1: Store prediction for learning detection
+      window.lastPrediction = result.sentence;
 
       // Display prediction
       displaySentencePrediction(result);
@@ -308,6 +311,10 @@
     }
   }
 
+  /**
+   * Display sentence prediction with editable result
+   * 🆕 Phase 1: Prediction is now editable for manual correction + learning
+   */
   function displaySentencePrediction(result) {
     if (!candidateArea) return;
 
@@ -319,18 +326,46 @@
         <div class="prediction-header">
           <span class="material-symbols-outlined">auto_awesome</span>
           <span>智慧預測結果 (Prediction)</span>
+          <span class="text-xs ml-2 opacity-70">✏️ 可編輯 (Editable)</span>
         </div>
-        <div class="predicted-sentence">${sentence}</div>
+        <div
+          id="prediction-result-text"
+          class="predicted-sentence"
+          contenteditable="true"
+          spellcheck="false"
+          style="cursor: text; border: 2px dashed transparent; padding: 8px; border-radius: 4px; transition: all 0.2s;"
+          onfocus="this.style.borderColor='#4ec9b0'; this.style.background='rgba(78, 201, 176, 0.05)';"
+          onblur="this.style.borderColor='transparent'; this.style.background='transparent';"
+        >${sentence}</div>
         <div class="prediction-details">
           <div class="char-breakdown">
             ${chars.map((char, i) => `${char} (${buffer[i]})`).join(' → ')}
           </div>
           <div class="prediction-score">機率分數: ${score.toFixed(3)}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            💡 提示：點擊預測結果可編輯，編輯後按 = 確認，系統將學習您的偏好
+          </div>
         </div>
       </div>
     `;
 
     candidateArea.innerHTML = html;
+
+    // Focus the editable prediction for immediate editing
+    setTimeout(() => {
+      const editableArea = document.getElementById('prediction-result-text');
+      if (editableArea) {
+        // Set cursor at end of text
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(editableArea);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+
+        console.log('[Phase 1] Prediction displayed and ready for editing');
+      }
+    }, 100);
   }
 
   // ============================================
@@ -360,12 +395,15 @@
       return;
     }
 
-    // Run Viterbi prediction
+    // 🆕 Phase 1: Run Viterbi prediction (now async with UserDB)
     if (typeof predictSentenceFromBuffer === 'function') {
-      const result = predictSentenceFromBuffer(buffer, dayiMap, ngram);
+      const result = await predictSentenceFromBuffer(buffer, dayiMap, ngram);
 
       if (result) {
         console.log(`[Prediction] Result: "${result.sentence}" (score: ${result.score.toFixed(3)})`);
+
+        // 🆕 Phase 1: Store prediction for learning detection
+        window.lastPrediction = result.sentence;
 
         // Update prediction display ONLY (don't output yet)
         updatePredictionDisplay(result.sentence, result.score);
@@ -377,24 +415,66 @@
 
   /**
    * Confirm prediction and output to buffer
+   * 🆕 Phase 1: Now includes learning workflow (detect + apply + feedback)
    * Called when = is pressed in sentence mode
    */
-  window.confirmPrediction = function confirmPrediction() {
+  window.confirmPrediction = async function confirmPrediction() {
     const predictionArea = document.getElementById('prediction-result-text');
     if (!predictionArea) {
       console.warn('[Confirm] Prediction area not found');
       return;
     }
 
-    const predictedSentence = predictionArea.textContent;
+    const finalSentence = predictionArea.textContent;
 
-    if (predictedSentence && predictedSentence !== '(等待預測)') {
-      console.log(`[Confirm] Outputting prediction: "${predictedSentence}"`);
+    if (finalSentence && finalSentence !== '(等待預測)') {
+      console.log(`[Confirm] Outputting: "${finalSentence}"`);
+
+      // 🆕 Phase 1: Learning Detection
+      // Compare prediction with final output (for manual corrections)
+      const originalPrediction = window.lastPrediction || finalSentence;
+
+      if (originalPrediction !== finalSentence) {
+        console.log(`[Learning] Detected correction: "${originalPrediction}" → "${finalSentence}"`);
+
+        // Detect learning points
+        if (typeof detectLearning === 'function') {
+          const learningData = detectLearning(originalPrediction, finalSentence);
+
+          if (learningData && learningData.length > 0) {
+            console.log(`[Learning] Found ${learningData.length} learning points`, learningData);
+
+            // Apply learning to UserDB
+            if (window.userDB && window.userDBReady && typeof applyLearning === 'function') {
+              try {
+                await applyLearning(learningData, window.userDB);
+                console.log('[Learning] Successfully applied learning to UserDB');
+
+                // Show feedback to user
+                if (typeof showLearningFeedback === 'function') {
+                  showLearningFeedback(learningData);
+                }
+
+                // Update stats display
+                if (typeof updateUserDBStats === 'function') {
+                  setTimeout(() => updateUserDBStats(), 500);
+                }
+              } catch (error) {
+                console.error('[Learning] Failed to apply learning:', error);
+              }
+            } else {
+              console.warn('[Learning] UserDB not ready, skipping learning');
+            }
+          }
+        }
+      } else {
+        console.log('[Learning] No correction detected (prediction accepted as-is)');
+      }
 
       // Append to output
       const outputBuffer = document.getElementById('output-buffer');
       if (outputBuffer) {
-        outputBuffer.value += predictedSentence;
+        outputBuffer.value += finalSentence;
 
         // Auto-copy if enabled
         if (typeof autoCopyEnabled !== 'undefined' && autoCopyEnabled) {
@@ -413,8 +493,9 @@
       updateLivePreviewDisplay();
       predictionArea.textContent = '(等待預測)';
 
-      // Clear input box
+      // Clear input box and stored prediction
       if (inputBox) inputBox.value = '';
+      window.lastPrediction = null;
 
       console.log('[Confirm] Prediction confirmed and output');
     } else {

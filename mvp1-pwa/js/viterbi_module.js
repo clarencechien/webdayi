@@ -277,5 +277,278 @@ function viterbi(codes, dayiDb, ngramDb) {
   };
 }
 
+// ============================================================================
+// UserDB Integration (Phase 1 - F-4.0 Enhancement)
+// ============================================================================
+
+/**
+ * Viterbi algorithm with UserDB integration for personalized learning.
+ *
+ * This async version integrates user-learned bigram weights from IndexedDB.
+ * Formula: Final Score = Base N-gram Score + UserDB Weight
+ *
+ * @param {string[]} codes - Array of Dayi codes
+ * @param {Map} dayiDb - Dictionary mapping codes to candidates
+ * @param {Object} ngramDb - N-gram database
+ * @param {Object|null} userDB - UserDB instance (optional, can be null)
+ * @returns {Promise<Object>} Result with sentence, chars, and score
+ */
+async function viterbiWithUserDB(codes, dayiDb, ngramDb, userDB) {
+  // 1. Build lattice
+  const lattice = buildLattice(codes, dayiDb);
+
+  // 2. Initialize DP table
+  const dp = initializeDP(lattice, ngramDb);
+
+  // 3. Forward pass with UserDB integration
+  const backpointer = await forwardPassWithUserDB(lattice, dp, ngramDb, userDB);
+
+  // 4. Backtrack
+  const chars = backtrack(lattice, dp, backpointer);
+
+  // 5. Calculate final score
+  const sentence = chars.join('');
+  const finalScore = dp[dp.length - 1][chars[chars.length - 1]];
+
+  return {
+    sentence: sentence,
+    chars: chars,
+    score: finalScore
+  };
+}
+
+/**
+ * Forward pass with UserDB weight integration (async).
+ *
+ * @param {Array[]} lattice - Lattice of candidates
+ * @param {Array} dp - DP table
+ * @param {Object} ngramDb - N-gram database
+ * @param {Object|null} userDB - UserDB instance (optional)
+ * @returns {Promise<Object>} Backpointer table
+ */
+async function forwardPassWithUserDB(lattice, dp, ngramDb, userDB) {
+  const backpointer = [];
+  backpointer.push({});
+
+  for (let t = 1; t < lattice.length; t++) {
+    backpointer.push({});
+
+    for (const candidate of lattice[t]) {
+      const char2 = candidate.char;
+
+      let maxProb = -Infinity;
+      let maxPrevChar = null;
+
+      // Try all previous characters
+      for (const prevChar in dp[t-1]) {
+        // --- v2.7 核心：70/30 加權 + Laplace Smoothing ---
+
+        // 1. Bigram 分數 (前後關係) - 使用 Laplace smoothing
+        const bigramProb = getLaplaceBigram(prevChar, char2, ngramDb);
+        const bigramScore = Math.log(Math.max(bigramProb, MIN_PROB));
+
+        // 2. Unigram 分數 (自身熱度) - 使用 Laplace smoothing
+        const unigramProb = getLaplaceUnigram(char2, ngramDb);
+        const unigramScore = Math.log(Math.max(unigramProb, MIN_PROB));
+
+        // 3. 混合加權分數 - v2.5 的黃金比例 70/30
+        let transitionScore = (BIGRAM_WEIGHT * bigramScore) +
+                               (UNIGRAM_WEIGHT * unigramScore);
+
+        // 4. 🆕 UserDB 加權 (Phase 1 - F-4.0)
+        if (userDB) {
+          try {
+            const userWeight = await userDB.getWeight(prevChar, char2);
+            transitionScore += userWeight; // Add user-learned weight
+          } catch (error) {
+            // Gracefully handle UserDB errors (don't break prediction)
+            console.warn('[Viterbi] UserDB error:', error);
+          }
+        }
+
+        const prob = dp[t-1][prevChar] + transitionScore;
+
+        if (prob > maxProb) {
+          maxProb = prob;
+          maxPrevChar = prevChar;
+        }
+      }
+
+      dp[t][char2] = maxProb;
+      backpointer[t][char2] = maxPrevChar;
+    }
+  }
+
+  return backpointer;
+}
+
+/**
+ * Detect learning opportunities by comparing prediction with user selection.
+ *
+ * Identifies positions where user selected non-default characters.
+ *
+ * @param {string[]} prediction - Predicted sentence (default path)
+ * @param {string[]} userSelection - User's actual selection
+ * @returns {Array} Learning data [{prevChar, from, to, nextChar, weight}]
+ */
+function detectLearning(prediction, userSelection) {
+  const learningData = [];
+
+  if (!prediction || !userSelection || prediction.length !== userSelection.length) {
+    return learningData;
+  }
+
+  for (let i = 0; i < prediction.length; i++) {
+    if (prediction[i] !== userSelection[i]) {
+      // User selected a different character (non-default)
+      const learningPoint = {
+        prevChar: i > 0 ? userSelection[i - 1] : null,
+        from: prediction[i],
+        to: userSelection[i],
+        nextChar: i < userSelection.length - 1 ? userSelection[i + 1] : null,
+        position: i,
+        weight: 1.0 // Default learning weight
+      };
+
+      learningData.push(learningPoint);
+    }
+  }
+
+  return learningData;
+}
+
+/**
+ * Apply learning data to UserDB (persist learned preferences).
+ *
+ * Updates bigram weights based on user corrections.
+ *
+ * @param {Array} learningData - Learning points from detectLearning()
+ * @param {Object} userDB - UserDB instance
+ * @returns {Promise<void>}
+ */
+async function applyLearning(learningData, userDB) {
+  if (!userDB || !learningData || learningData.length === 0) {
+    return;
+  }
+
+  for (const point of learningData) {
+    if (point.prevChar) {
+      // Update bigram weight: prevChar → to (increase preference)
+      try {
+        const currentWeight = await userDB.getWeight(point.prevChar, point.to);
+        const newWeight = currentWeight + point.weight;
+        await userDB.setWeight(point.prevChar, point.to, newWeight);
+
+        // Optionally decrease weight for prevChar → from (discourage)
+        // const currentFromWeight = await userDB.getWeight(point.prevChar, point.from);
+        // await userDB.setWeight(point.prevChar, point.from, currentFromWeight - point.weight * 0.5);
+      } catch (error) {
+        console.warn('[Learning] Failed to apply learning:', error);
+      }
+    }
+  }
+}
+
+/**
+ * Show learning feedback UI to user.
+ *
+ * Displays a temporary notification showing what the system learned.
+ *
+ * @param {Array} learningData - Learning points from detectLearning()
+ */
+function showLearningFeedback(learningData) {
+  if (!learningData || learningData.length === 0) {
+    return;
+  }
+
+  // Create feedback container
+  let feedbackContainer = document.querySelector('.learning-feedback-container');
+  if (!feedbackContainer) {
+    feedbackContainer = document.createElement('div');
+    feedbackContainer.className = 'learning-feedback-container';
+    feedbackContainer.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10000;
+      max-width: 300px;
+    `;
+    document.body.appendChild(feedbackContainer);
+  }
+
+  // Create feedback element for each learning point
+  learningData.forEach((point, index) => {
+    const feedbackElement = document.createElement('div');
+    feedbackElement.className = 'learning-feedback';
+    feedbackElement.style.cssText = `
+      background: linear-gradient(135deg, #4ec9b0 0%, #3aa88f 100%);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      font-size: 14px;
+      animation: slideIn 0.3s ease-out;
+    `;
+
+    // Add animation keyframes
+    if (!document.querySelector('#learning-feedback-styles')) {
+      const style = document.createElement('style');
+      style.id = 'learning-feedback-styles';
+      style.textContent = `
+        @keyframes slideIn {
+          from {
+            transform: translateX(400px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        @keyframes fadeOut {
+          from {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    let feedbackText = `✓ 已學習：`;
+    if (point.prevChar) {
+      feedbackText += `${point.prevChar}${point.to} > ${point.prevChar}${point.from}`;
+    } else {
+      feedbackText += `${point.to} (位置 ${point.position + 1})`;
+    }
+
+    feedbackElement.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 18px;">✓</span>
+        <span>${feedbackText}</span>
+      </div>
+    `;
+
+    feedbackContainer.appendChild(feedbackElement);
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+      feedbackElement.style.animation = 'fadeOut 0.3s ease-out';
+      setTimeout(() => {
+        feedbackElement.remove();
+        // Remove container if empty
+        if (feedbackContainer.children.length === 0) {
+          feedbackContainer.remove();
+        }
+      }, 300);
+    }, 3000);
+  });
+}
+
 // Functions are now globally available in browser context
-console.log('✓ Viterbi module loaded (v2.7 HYBRID - OOP + 70/30 + Laplace)');
+console.log('✓ Viterbi module loaded (v2.7 HYBRID + UserDB Integration - Phase 1)');
