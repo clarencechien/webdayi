@@ -2,7 +2,7 @@
   "name": "WebDaYi - 網頁大易輸入法 PWA",
   "short_name": "WebDaYi PWA",
   "description": "Progressive Web App for Dayi Chinese Input Method with personalized N-gram learning",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#1e1e1e",
   "theme_color": "#4ec9b0",
@@ -89,7 +89,7 @@
     }
   ],
   "prefer_related_applications": false,
-  "scope": "/",
+  "scope": "./",
   "lang": "zh-TW",
   "dir": "ltr"
 }

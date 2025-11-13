@@ -15,21 +15,21 @@ const RUNTIME_CACHE = 'webdayi-runtime-v1.0.0';
 
 // Assets to cache on install
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/user_db_indexeddb.js',
-  '/js/core_logic.js',
-  '/js/core_logic_v11.js',
-  '/js/core_logic_v11_ui.js',
-  '/js/viterbi_module.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './css/style.css',
+  './js/user_db_indexeddb.js',
+  './js/core_logic.js',
+  './js/core_logic_v11.js',
+  './js/core_logic_v11_ui.js',
+  './js/viterbi_module.js',
+  './manifest.json'
 ];
 
 // Large database files to cache separately
 const DATABASE_ASSETS = [
-  '/dayi_db.json',
-  '/ngram_db.json'
+  './dayi_db.json',
+  './ngram_db.json'
 ];
 
 /**
