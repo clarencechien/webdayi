@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export/Import Functionality - TDD Tests</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #2c3e50;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+    }
+
+    .test-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .test-case {
+      margin: 15px 0;
+      padding: 15px;
+      border-left: 4px solid #ccc;
+      background: #f9f9f9;
+    }
+
+    .test-case.pass {
+      border-left-color: #27ae60;
+      background: #e8f8f5;
+    }
+
+    .test-case.fail {
+      border-left-color: #e74c3c;
+      background: #fadbd8;
+    }
+
+    .test-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .test-result {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 30px;
+    }
+
+    .summary h2 {
+      margin-top: 0;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 48px;
+      font-weight: bold;
+      display: block;
+    }
+
+    .error-message {
+      color: #c0392b;
+      background: #f8d7da;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+
+    .code-block {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin-top: 10px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Export/Import Functionality - TDD Tests</h1>
+  <p>Testing UserDB export and import features with character mode learning</p>
+
+  <div id="test-results"></div>
+  <div id="summary-section"></div>
+
+  <script type="module">
+    // Import UserDB
+    import { UserDB } from '../js/user_db_indexeddb.js';
+
+    // Test Framework
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message || 'Assertion failed');
+      }
+    }
+
+    function assertEqual(actual, expected, message) {
+      if (actual !== expected) {
+        throw new Error(`${message}\nExpected: ${expected}\nActual: ${actual}`);
+      }
+    }
+
+    function assertNotEqual(actual, notExpected, message) {
+      if (actual === notExpected) {
+        throw new Error(`${message}\nExpected not to be: ${notExpected}\nActual: ${actual}`);
+      }
+    }
+
+    async function it(testName, testFn) {
+      totalTests++;
+      const testCase = document.createElement('div');
+      testCase.className = 'test-case';
+
+      const testNameDiv = document.createElement('div');
+      testNameDiv.className = 'test-name';
+      testNameDiv.textContent = `Test ${totalTests}: ${testName}`;
+
+      const testResult = document.createElement('div');
+      testResult.className = 'test-result';
+
+      testCase.appendChild(testNameDiv);
+      testCase.appendChild(testResult);
+
+      try {
+        await testFn();
+        testCase.classList.add('pass');
+        testResult.textContent = '✓ PASS';
+        passedTests++;
+      } catch (error) {
+        testCase.classList.add('fail');
+        testResult.textContent = '✗ FAIL';
+        failedTests++;
+
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = error.message;
+        testCase.appendChild(errorMsg);
+      }
+
+      document.getElementById('test-results').appendChild(testCase);
+    }
+
+    function showSummary() {
+      const summaryHTML = `
+        <div class="summary">
+          <h2>📊 Test Summary</h2>
+          <div class="stats">
+            <div class="stat-item">
+              <span class="stat-number">${totalTests}</span>
+              <span>Total Tests</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" style="color: #2ecc71;">${passedTests}</span>
+              <span>Passed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" style="color: #e74c3c;">${failedTests}</span>
+              <span>Failed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">${totalTests > 0 ? Math.round(passedTests/totalTests*100) : 0}%</span>
+              <span>Success Rate</span>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('summary-section').innerHTML = summaryHTML;
+    }
+
+    // Run Tests
+    (async function runTests() {
+      const section1 = document.createElement('div');
+      section1.className = 'test-section';
+      section1.innerHTML = '<h2>Section 1: Basic Export Functionality</h2>';
+      document.getElementById('test-results').appendChild(section1);
+
+      // Test 1: Export empty database
+      await it('Export should work with empty database', async () => {
+        const db = new UserDB('test_export_empty_' + Date.now());
+        await db.open();
+
+        const exported = await db.getAllWeights();
+        assertEqual(Object.keys(exported).length, 0, 'Empty database should export 0 entries');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 2: Export single entry
+      await it('Export should include single learned pattern', async () => {
+        const db = new UserDB('test_export_single_' + Date.now());
+        await db.open();
+
+        await db.setWeight('易', '在', 3.5);
+        const exported = await db.getAllWeights();
+
+        assertEqual(Object.keys(exported).length, 1, 'Should export 1 entry');
+        assertEqual(exported['易→在'], 3.5, 'Should export correct weight');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 3: Export multiple entries
+      await it('Export should include all learned patterns', async () => {
+        const db = new UserDB('test_export_multiple_' + Date.now());
+        await db.open();
+
+        await db.setWeight('易', '在', 3.5);
+        await db.setWeight('在', '大', 5.0);
+        await db.setWeight('大', '學', 2.0);
+
+        const exported = await db.getAllWeights();
+
+        assertEqual(Object.keys(exported).length, 3, 'Should export 3 entries');
+        assertEqual(exported['易→在'], 3.5, 'Should export correct weight for 易→在');
+        assertEqual(exported['在→大'], 5.0, 'Should export correct weight for 在→大');
+        assertEqual(exported['大→學'], 2.0, 'Should export correct weight for 大→學');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 4: Export character mode learning (unigram with ^ marker)
+      await it('Export should handle character mode learning with ^ marker', async () => {
+        const db = new UserDB('test_export_char_mode_' + Date.now());
+        await db.open();
+
+        await db.setWeight('^', '商', 1.0);
+        await db.setWeight('^', '艙', 1.0);
+        await db.setWeight('^', '鐵', 1.0);
+
+        const exported = await db.getAllWeights();
+
+        assertEqual(Object.keys(exported).length, 3, 'Should export 3 character mode entries');
+        assertEqual(exported['^→商'], 1.0, 'Character mode weight should not be null');
+        assertEqual(exported['^→艙'], 1.0, 'Character mode weight should not be null');
+        assertEqual(exported['^→鐵'], 1.0, 'Character mode weight should not be null');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 5: Export should NOT contain null weights
+      await it('Export should never contain null weights', async () => {
+        const db = new UserDB('test_export_no_nulls_' + Date.now());
+        await db.open();
+
+        await db.setWeight('^', '商', 1.0);
+        await db.setWeight('易', '在', 3.5);
+
+        const exported = await db.getAllWeights();
+
+        for (const [key, weight] of Object.entries(exported)) {
+          assertNotEqual(weight, null, `Weight for ${key} should not be null`);
+          assertNotEqual(weight, undefined, `Weight for ${key} should not be undefined`);
+          assert(typeof weight === 'number', `Weight for ${key} should be a number (got ${typeof weight})`);
+        }
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      const section2 = document.createElement('div');
+      section2.className = 'test-section';
+      section2.innerHTML = '<h2>Section 2: Basic Import Functionality</h2>';
+      document.getElementById('test-results').appendChild(section2);
+
+      // Test 6: Import into empty database
+      await it('Import should work with empty database', async () => {
+        const db = new UserDB('test_import_empty_' + Date.now());
+        await db.open();
+
+        const importData = {
+          '易→在': 3.5,
+          '在→大': 5.0,
+          '大→學': 2.0
+        };
+
+        await db.importWeights(importData);
+
+        const weight1 = await db.getWeight('易', '在');
+        const weight2 = await db.getWeight('在', '大');
+        const weight3 = await db.getWeight('大', '學');
+
+        assertEqual(weight1, 3.5, 'Should import correct weight for 易→在');
+        assertEqual(weight2, 5.0, 'Should import correct weight for 在→大');
+        assertEqual(weight3, 2.0, 'Should import correct weight for 大→學');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 7: Import should overwrite existing data
+      await it('Import should overwrite existing weights', async () => {
+        const db = new UserDB('test_import_overwrite_' + Date.now());
+        await db.open();
+
+        await db.setWeight('易', '在', 1.0);
+        await db.setWeight('在', '大', 1.0);
+
+        const importData = {
+          '易→在': 5.0,
+          '在→大': 10.0
+        };
+
+        await db.importWeights(importData);
+
+        const weight1 = await db.getWeight('易', '在');
+        const weight2 = await db.getWeight('在', '大');
+
+        assertEqual(weight1, 5.0, 'Should overwrite weight for 易→在');
+        assertEqual(weight2, 10.0, 'Should overwrite weight for 在→大');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 8: Import character mode learning
+      await it('Import should handle character mode learning with ^ marker', async () => {
+        const db = new UserDB('test_import_char_mode_' + Date.now());
+        await db.open();
+
+        const importData = {
+          '^→商': 1.0,
+          '^→艙': 2.0,
+          '^→鐵': 1.5
+        };
+
+        await db.importWeights(importData);
+
+        const weight1 = await db.getWeight('^', '商');
+        const weight2 = await db.getWeight('^', '艙');
+        const weight3 = await db.getWeight('^', '鐵');
+
+        assertEqual(weight1, 1.0, 'Should import character mode weight for ^→商');
+        assertEqual(weight2, 2.0, 'Should import character mode weight for ^→艙');
+        assertEqual(weight3, 1.5, 'Should import character mode weight for ^→鐵');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      const section3 = document.createElement('div');
+      section3.className = 'test-section';
+      section3.innerHTML = '<h2>Section 3: Export/Import Round-Trip</h2>';
+      document.getElementById('test-results').appendChild(section3);
+
+      // Test 9: Export and re-import should preserve all data
+      await it('Export then import should preserve all weights', async () => {
+        const db1 = new UserDB('test_round_trip_1_' + Date.now());
+        await db1.open();
+
+        await db1.setWeight('易', '在', 3.5);
+        await db1.setWeight('在', '大', 5.0);
+        await db1.setWeight('^', '商', 1.0);
+
+        const exported = await db1.getAllWeights();
+        await db1.close();
+
+        const db2 = new UserDB('test_round_trip_2_' + Date.now());
+        await db2.open();
+        await db2.importWeights(exported);
+
+        const weight1 = await db2.getWeight('易', '在');
+        const weight2 = await db2.getWeight('在', '大');
+        const weight3 = await db2.getWeight('^', '商');
+
+        assertEqual(weight1, 3.5, 'Round-trip should preserve 易→在');
+        assertEqual(weight2, 5.0, 'Round-trip should preserve 在→大');
+        assertEqual(weight3, 1.0, 'Round-trip should preserve ^→商');
+
+        await db1.deleteDatabase();
+        await db2.close();
+        await db2.deleteDatabase();
+      });
+
+      // Test 10: Export format should be valid JSON
+      await it('Export should produce valid JSON-serializable data', async () => {
+        const db = new UserDB('test_json_valid_' + Date.now());
+        await db.open();
+
+        await db.setWeight('易', '在', 3.5);
+        await db.setWeight('^', '商', 1.0);
+
+        const exported = await db.getAllWeights();
+
+        let jsonString;
+        let parsed;
+
+        try {
+          jsonString = JSON.stringify(exported);
+          parsed = JSON.parse(jsonString);
+        } catch (error) {
+          throw new Error('Export data should be JSON-serializable: ' + error.message);
+        }
+
+        assertEqual(parsed['易→在'], 3.5, 'JSON parsed data should match original');
+        assertEqual(parsed['^→商'], 1.0, 'JSON parsed data should match original');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      const section4 = document.createElement('div');
+      section4.className = 'test-section';
+      section4.innerHTML = '<h2>Section 4: Edge Cases</h2>';
+      document.getElementById('test-results').appendChild(section4);
+
+      // Test 11: Import empty data
+      await it('Import should handle empty data gracefully', async () => {
+        const db = new UserDB('test_import_empty_data_' + Date.now());
+        await db.open();
+
+        await db.setWeight('易', '在', 3.5);
+        await db.importWeights({});
+
+        const weight = await db.getWeight('易', '在');
+        assertEqual(weight, 3.5, 'Existing data should remain after importing empty object');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 12: Import negative weights
+      await it('Import should support negative weights', async () => {
+        const db = new UserDB('test_import_negative_' + Date.now());
+        await db.open();
+
+        const importData = {
+          '易→在': -2.5,
+          '在→大': -1.0
+        };
+
+        await db.importWeights(importData);
+
+        const weight1 = await db.getWeight('易', '在');
+        const weight2 = await db.getWeight('在', '大');
+
+        assertEqual(weight1, -2.5, 'Should import negative weight for 易→在');
+        assertEqual(weight2, -1.0, 'Should import negative weight for 在→大');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 13: Import very large weights
+      await it('Import should handle very large weights', async () => {
+        const db = new UserDB('test_import_large_' + Date.now());
+        await db.open();
+
+        const importData = {
+          '易→在': 9999.999,
+          '在→大': 1e10
+        };
+
+        await db.importWeights(importData);
+
+        const weight1 = await db.getWeight('易', '在');
+        const weight2 = await db.getWeight('在', '大');
+
+        assertEqual(weight1, 9999.999, 'Should import large weight for 易→在');
+        assertEqual(weight2, 1e10, 'Should import very large weight for 在→大');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 14: Export should exclude sample data if not added
+      await it('Fresh database export should not contain sample patterns', async () => {
+        const db = new UserDB('test_no_sample_' + Date.now());
+        await db.open();
+
+        const exported = await db.getAllWeights();
+
+        const samplePatterns = ['並→發', '在→大', '大→學', '易→在', '測→試', '義→再'];
+        for (const pattern of samplePatterns) {
+          assert(!(pattern in exported), `Fresh database should not contain sample pattern ${pattern}`);
+        }
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      const section5 = document.createElement('div');
+      section5.className = 'test-section';
+      section5.innerHTML = '<h2>Section 5: Character Mode Integration</h2>';
+      document.getElementById('test-results').appendChild(section5);
+
+      // Test 15: Character mode learning data structure
+      await it('Character mode learning should use correct data structure', async () => {
+        const db = new UserDB('test_char_mode_struct_' + Date.now());
+        await db.open();
+
+        // Simulate character mode learning data (from core_logic.js)
+        const learningData = {
+          from: '義',
+          to: '易',
+          prevChar: '^',
+          position: 0,
+          originalRank: 0,
+          selectedRank: 2,
+          mode: 'character',
+          weight: 1.0
+        };
+
+        // Apply learning
+        await db.setWeight(learningData.prevChar, learningData.to, learningData.weight);
+
+        const exported = await db.getAllWeights();
+        assertEqual(exported['^→易'], 1.0, 'Character mode learning should export with correct format');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      // Test 16: Character mode multiple selections accumulate
+      await it('Character mode should accumulate weights over multiple selections', async () => {
+        const db = new UserDB('test_char_mode_accumulate_' + Date.now());
+        await db.open();
+
+        // User selects '易' three times (each time adds weight: 1.0)
+        for (let i = 0; i < 3; i++) {
+          const currentWeight = await db.getWeight('^', '易');
+          const newWeight = currentWeight + 1.0;
+          await db.setWeight('^', '易', newWeight);
+        }
+
+        const weight = await db.getWeight('^', '易');
+        assertEqual(weight, 3.0, 'Character mode weights should accumulate');
+
+        await db.close();
+        await db.deleteDatabase();
+      });
+
+      showSummary();
+
+      console.log(`\n🧪 Export/Import Tests Complete:`);
+      console.log(`   Total: ${totalTests}`);
+      console.log(`   ✓ Passed: ${passedTests}`);
+      console.log(`   ✗ Failed: ${failedTests}`);
+      console.log(`   Success Rate: ${totalTests > 0 ? Math.round(passedTests/totalTests*100) : 0}%`);
+    })();
+  </script>
+</body>
+</html>

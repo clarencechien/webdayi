@@ -1256,7 +1256,8 @@ function handleSelection(index) {
         position: 0,
         originalRank: 0,
         selectedRank: actualIndex,
-        mode: 'character'
+        mode: 'character',
+        weight: 1.0 // Learning weight (required by applyLearning)
       }];
 
       // Apply learning asynchronously
