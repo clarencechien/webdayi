@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI Layout Fixes - TDD Tests</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #2c3e50;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+    }
+
+    .test-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .test-case {
+      margin: 15px 0;
+      padding: 15px;
+      border-left: 4px solid #ccc;
+      background: #f9f9f9;
+    }
+
+    .test-case.pass {
+      border-left-color: #27ae60;
+      background: #e8f8f5;
+    }
+
+    .test-case.fail {
+      border-left-color: #e74c3c;
+      background: #fadbd8;
+    }
+
+    .test-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .test-result {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 30px;
+    }
+
+    .summary h2 {
+      margin-top: 0;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 48px;
+      font-weight: bold;
+      display: block;
+    }
+
+    .error-message {
+      color: #c0392b;
+      background: #f8d7da;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 UI Layout Fixes - TDD Tests</h1>
+  <p>Testing desktop controls overlap fix and mobile import/export features</p>
+
+  <div id="test-results"></div>
+  <div id="summary-section"></div>
+
+  <script type="module">
+    // Test Framework
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message || 'Assertion failed');
+      }
+    }
+
+    function assertEqual(actual, expected, message) {
+      if (actual !== expected) {
+        throw new Error(`${message}\nExpected: ${expected}\nActual: ${actual}`);
+      }
+    }
+
+    function assertGreaterThan(actual, threshold, message) {
+      if (actual <= threshold) {
+        throw new Error(`${message}\nExpected > ${threshold}, got ${actual}`);
+      }
+    }
+
+    async function it(testName, testFn) {
+      totalTests++;
+      const testCase = document.createElement('div');
+      testCase.className = 'test-case';
+
+      const testNameDiv = document.createElement('div');
+      testNameDiv.className = 'test-name';
+      testNameDiv.textContent = `Test ${totalTests}: ${testName}`;
+
+      const testResult = document.createElement('div');
+      testResult.className = 'test-result';
+
+      testCase.appendChild(testNameDiv);
+      testCase.appendChild(testResult);
+
+      try {
+        await testFn();
+        testCase.classList.add('pass');
+        testResult.textContent = '✓ PASS';
+        passedTests++;
+      } catch (error) {
+        testCase.classList.add('fail');
+        testResult.textContent = '✗ FAIL';
+        failedTests++;
+
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = error.message;
+        testCase.appendChild(errorMsg);
+      }
+
+      document.getElementById('test-results').appendChild(testCase);
+    }
+
+    function showSummary() {
+      const summaryHTML = `
+        <div class="summary">
+          <h2>📊 Test Summary</h2>
+          <div class="stats">
+            <div class="stat-item">
+              <span class="stat-number">${totalTests}</span>
+              <span>Total Tests</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" style="color: #2ecc71;">${passedTests}</span>
+              <span>Passed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" style="color: #e74c3c;">${failedTests}</span>
+              <span>Failed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">${totalTests > 0 ? Math.round(passedTests/totalTests*100) : 0}%</span>
+              <span>Success Rate</span>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('summary-section').innerHTML = summaryHTML;
+    }
+
+    // Helper: Load index.html DOM for inspection
+    async function loadIndexHTML() {
+      const response = await fetch('../index.html');
+      const html = await response.text();
+      const parser = new DOMParser();
+      return parser.parseFromString(html, 'text/html');
+    }
+
+    // Run Tests
+    (async function runTests() {
+      const section1 = document.createElement('div');
+      section1.className = 'test-section';
+      section1.innerHTML = '<h2>Section 1: Desktop Controls Overlap Fix</h2>';
+      document.getElementById('test-results').appendChild(section1);
+
+      const doc = await loadIndexHTML();
+
+      await it('Desktop controls panel should exist', async () => {
+        const desktopControls = doc.getElementById('desktop-controls');
+        assert(desktopControls, 'Desktop controls panel not found');
+      });
+
+      await it('Desktop controls should NOT contain UserDB management buttons', async () => {
+        const desktopControls = doc.getElementById('desktop-controls');
+        const buttons = desktopControls.querySelectorAll('button');
+
+        // Check that Export/Import/Clear buttons are NOT in desktop controls
+        const buttonTexts = Array.from(buttons).map(btn => btn.textContent);
+        const hasExport = buttonTexts.some(text => text.includes('Export'));
+        const hasImport = buttonTexts.some(text => text.includes('Import'));
+        const hasClear = buttonTexts.some(text => text.includes('Clear'));
+
+        assert(!hasExport, 'Export button should not be in desktop controls (moved to main interface)');
+        assert(!hasImport, 'Import button should not be in desktop controls (moved to main interface)');
+        assert(!hasClear, 'Clear button should not be in desktop controls (moved to main interface)');
+      });
+
+      await it('Desktop controls should have exactly 7 buttons (down from 11)', async () => {
+        const desktopControls = doc.getElementById('desktop-controls');
+        const buttons = desktopControls.querySelectorAll('button');
+
+        // Should have: Dark, Focus, Auto-Copy, Char Mode, Sentence Mode, Font-, Font+
+        // That's 7 buttons (removed 4: Export, Import, Clear, and UserDB Status div)
+        assertEqual(buttons.length, 7, `Desktop controls should have exactly 7 buttons to prevent overlap (found ${buttons.length})`);
+      });
+
+      await it('Learning Statistics section should contain Export/Import/Clear buttons', async () => {
+        const statsSection = doc.getElementById('userdb-stats-section');
+        assert(statsSection, 'Learning Statistics section not found');
+
+        const exportBtn = statsSection.querySelector('button[onclick*="exportLearnedPatterns"]');
+        const importBtn = statsSection.querySelector('button[onclick*="importLearnedPatterns"]');
+        const clearBtn = statsSection.querySelector('button[onclick*="clearAllPatterns"]');
+
+        assert(exportBtn, 'Export button not found in Learning Statistics section');
+        assert(importBtn, 'Import button not found in Learning Statistics section');
+        assert(clearBtn, 'Clear button not found in Learning Statistics section');
+      });
+
+      await it('Learning Statistics section should have UserDB status indicator', async () => {
+        const statsSection = doc.getElementById('userdb-stats-section');
+        const statusDiv = statsSection.querySelector('#userdb-status');
+
+        assert(statusDiv, 'UserDB status indicator not found in Learning Statistics section');
+      });
+
+      const section2 = document.createElement('div');
+      section2.className = 'test-section';
+      section2.innerHTML = '<h2>Section 2: Mobile Controls - Import/Export Features</h2>';
+      document.getElementById('test-results').appendChild(section2);
+
+      await it('Mobile controls panel should exist', async () => {
+        const mobilePanel = doc.getElementById('mobile-controls-panel');
+        assert(mobilePanel, 'Mobile controls panel not found');
+      });
+
+      await it('Mobile controls should contain Export button', async () => {
+        const mobilePanel = doc.getElementById('mobile-controls-panel');
+        const exportBtn = mobilePanel.querySelector('button[onclick*="exportLearnedPatterns"]');
+
+        assert(exportBtn, 'Export button not found in mobile controls');
+        assert(exportBtn.textContent.includes('Export'), 'Export button should have "Export" text');
+      });
+
+      await it('Mobile controls should contain Import button', async () => {
+        const mobilePanel = doc.getElementById('mobile-controls-panel');
+        const importBtn = mobilePanel.querySelector('button[onclick*="importLearnedPatterns"]');
+
+        assert(importBtn, 'Import button not found in mobile controls');
+        assert(importBtn.textContent.includes('Import'), 'Import button should have "Import" text');
+      });
+
+      await it('Mobile controls should contain Clear All button', async () => {
+        const mobilePanel = doc.getElementById('mobile-controls-panel');
+        const clearBtn = mobilePanel.querySelector('button[onclick*="clearAllPatterns"]');
+
+        assert(clearBtn, 'Clear All button not found in mobile controls');
+        assert(clearBtn.textContent.includes('Clear'), 'Clear button should have "Clear" text');
+      });
+
+      await it('Mobile controls should have UserDB status indicator', async () => {
+        const mobilePanel = doc.getElementById('mobile-controls-panel');
+        const statusDiv = mobilePanel.querySelector('#userdb-status-mobile');
+
+        assert(statusDiv, 'UserDB status indicator not found in mobile controls');
+      });
+
+      const section3 = document.createElement('div');
+      section3.className = 'test-section';
+      section3.innerHTML = '<h2>Section 3: UserDB Status Synchronization</h2>';
+      document.getElementById('test-results').appendChild(section3);
+
+      await it('Both desktop and mobile UserDB status elements should exist', async () => {
+        const desktopStatus = doc.getElementById('userdb-status');
+        const mobileStatus = doc.getElementById('userdb-status-mobile');
+
+        assert(desktopStatus, 'Desktop UserDB status element not found');
+        assert(mobileStatus, 'Mobile UserDB status element not found');
+      });
+
+      await it('Desktop UserDB status should have initial loading text', async () => {
+        const desktopStatus = doc.getElementById('userdb-status');
+        const text = desktopStatus.textContent;
+
+        assert(text.includes('Loading') || text.includes('載入中'),
+          'Desktop UserDB status should have initial loading text');
+      });
+
+      await it('Mobile UserDB status should have initial loading text', async () => {
+        const mobileStatus = doc.getElementById('userdb-status-mobile');
+        const text = mobileStatus.textContent;
+
+        assert(text.includes('Loading') || text.includes('載入中'),
+          'Mobile UserDB status should have initial loading text');
+      });
+
+      const section4 = document.createElement('div');
+      section4.className = 'test-section';
+      section4.innerHTML = '<h2>Section 4: Button Accessibility & Styling</h2>';
+      document.getElementById('test-results').appendChild(section4);
+
+      await it('All Export/Import/Clear buttons should have aria-label attributes', async () => {
+        const allButtons = doc.querySelectorAll('button[onclick*="exportLearnedPatterns"], button[onclick*="importLearnedPatterns"], button[onclick*="clearAllPatterns"]');
+
+        for (const btn of allButtons) {
+          const ariaLabel = btn.getAttribute('aria-label');
+          assert(ariaLabel, `Button "${btn.textContent.trim()}" missing aria-label attribute`);
+        }
+      });
+
+      await it('Mobile buttons should have consistent styling with gap-3', async () => {
+        const mobilePanel = doc.getElementById('mobile-controls-panel');
+        const learningBtns = mobilePanel.querySelectorAll('button[onclick*="exportLearnedPatterns"], button[onclick*="importLearnedPatterns"], button[onclick*="clearAllPatterns"]');
+
+        for (const btn of learningBtns) {
+          const classes = btn.className;
+          assert(classes.includes('gap-3'), `Mobile button should have gap-3 class`);
+          assert(classes.includes('w-full'), `Mobile button should have w-full class`);
+        }
+      });
+
+      await it('Desktop Learning Stats buttons should use flex-wrap for responsiveness', async () => {
+        const statsSection = doc.getElementById('userdb-stats-section');
+        const buttonContainer = statsSection.querySelector('.flex.flex-wrap');
+
+        assert(buttonContainer, 'Button container should use flex-wrap for responsiveness');
+      });
+
+      showSummary();
+
+      console.log(`\n🧪 UI Layout Fixes Tests Complete:`);
+      console.log(`   Total: ${totalTests}`);
+      console.log(`   ✓ Passed: ${passedTests}`);
+      console.log(`   ✗ Failed: ${failedTests}`);
+      console.log(`   Success Rate: ${totalTests > 0 ? Math.round(passedTests/totalTests*100) : 0}%`);
+    })();
+  </script>
+</body>
+</html>
