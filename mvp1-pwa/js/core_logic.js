@@ -1233,12 +1233,43 @@ function handleSelection(index) {
     const selected = pageCandidates[index];
     appendToOutputBuffer(selected.char);
 
-    // Update user model with selection (MVP1.8)
+    // Update user model with selection (MVP1.8 - localStorage)
     if (userModel && currentCandidates) {
       const actualIndex = currentPage * 6 + index; // Convert page index to actual index
       updateUserModel(currentCode, currentCandidates, actualIndex, userModel);
       saveUserModel(userModel);
       console.log(`[WebDaYi] User preference saved for code: ${currentCode}`);
+    }
+
+    // 🆕 Phase 1 F-4.0: Character Mode Learning (IndexedDB)
+    // If user selected non-first candidate, record as learning preference
+    if (index > 0 && window.userDB && window.userDBReady && typeof applyLearning === 'function') {
+      const actualIndex = currentPage * 6 + index;
+      const firstCandidate = currentCandidates[0]; // What system predicted
+      const selectedCandidate = selected; // What user actually chose
+
+      // Record as unigram preference (using special prevChar '^' for context-free)
+      const learningData = [{
+        from: firstCandidate.char,
+        to: selectedCandidate.char,
+        prevChar: '^', // Special marker for unigram/character mode
+        position: 0,
+        originalRank: 0,
+        selectedRank: actualIndex,
+        mode: 'character'
+      }];
+
+      // Apply learning asynchronously
+      applyLearning(learningData, window.userDB).then(() => {
+        console.log(`[Phase 1] Character mode learning recorded: ${currentCode} → ${selectedCandidate.char} (rank ${actualIndex})`);
+
+        // Update stats display
+        if (typeof updateUserDBStats === 'function') {
+          setTimeout(() => updateUserDBStats(), 100);
+        }
+      }).catch(error => {
+        console.error('[Phase 1] Character mode learning failed:', error);
+      });
     }
 
     clearInputBox();

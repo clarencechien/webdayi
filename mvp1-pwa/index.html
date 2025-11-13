@@ -13,11 +13,11 @@
   <meta name="apple-mobile-web-app-title" content="WebDaYi PWA">
 
   <!-- PWA Manifest -->
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="./manifest.json">
 
   <!-- PWA Icons -->
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180x180.png">
 
   <!-- Version Information (for testing verification) -->
   <meta name="app-version" content="0.5.0">
@@ -980,7 +980,7 @@
     // Register Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('./sw.js')
           .then(registration => {
             console.log('%c[PWA] Service Worker registered successfully', 'color: #4ec9b0; font-weight: bold');
             console.log('Scope:', registration.scope);
