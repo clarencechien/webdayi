@@ -1,11 +1,11 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-13 (✅ Phase 1.10.1 COMPLETE - Character Span Architecture Implemented!)
-**Current Phase**: ✅ Phase 1.10.1 COMPLETE - Character-Level Editing UI Foundation
-**Current Version**: 0.5.0 (Build: 20251113-008, Phase 1.10.1 Character Spans)
+**Last Updated**: 2025-11-13 (✅ Phase 1.10.2 COMPLETE - Candidate Selection Modal Implemented!)
+**Current Phase**: ✅ Phase 1.10.2 COMPLETE - Candidate Selection Modal
+**Current Version**: 0.5.0 (Build: 20251113-009, Phase 1.10.2 Candidate Modal)
 **Main Branch Status**: ✅ v2.7 Hybrid (OOP + 70/30 + Laplace) + Full ngram_db.json (Production Ready)
 **Feature Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
-**Next Milestone**: Phase 1.10.2 - Candidate Selection Modal
+**Next Milestone**: Phase 1.10.3 - Auto-Advance + Arrow Navigation
 
 **Latest Achievements** (Mobile NaN Fix + Phase 1.10 Design):
 - ✅ **CRITICAL MOBILE FIX**: Fixed NaN bug in Android character mode learning (triple-layer validation)!
@@ -7886,6 +7886,298 @@ Implemented character-level editing UI with individual clickable spans.
 - Phase 1.10.2: Implement candidate selection modal
 - Phase 1.10.3: Keyboard navigation (arrows, quick keys, escape)
 ```
+
+---
+
+
+## 🆕 PHASE 1.10.2: Candidate Selection Modal (2025-11-13)
+
+**Status**: ✅ COMPLETE | Full Mouse + Keyboard Support
+**Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
+**Commit**: b96a2e6
+**Files Modified**: 3 files, 1187 insertions(+), 7 deletions(-)
+
+### Overview
+
+Implemented full candidate selection modal with both mouse and keyboard support. Users can now click any character in a prediction to see alternative candidates and select using either mouse clicks or keyboard shortcuts.
+
+### Implementation Details
+
+#### 1. HTML Structure (index.html)
+
+**Modal Backdrop** (#modal-backdrop):
+- Fixed overlay covering entire viewport
+- Semi-transparent black background (rgba(0, 0, 0, 0.5))
+- Backdrop blur effect for visual depth
+- z-index: 999
+
+**Candidate Modal** (#candidate-modal):
+- Fixed position, centered (top: 50%, left: 50%, transform: translate(-50%, -50%))
+- Gradient background (135deg, #667eea → #764ba2)
+- White text with rounded corners
+- Min-width: 400px (320px on mobile)
+- z-index: 1000 (above backdrop)
+
+**Modal Components**:
+- **Header**: Title (position + code) + close button (✕)
+- **Candidates Grid**: 2-column grid of candidate buttons
+- **Hint**: Keyboard shortcuts guide
+
+#### 2. CSS Styling (index.html, lines 822-975)
+
+**Animations**:
+```css
+@keyframes modal-fade-in {
+  from { opacity: 0; transform: translate(-50%, -48%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+```
+
+**Key Styles**:
+- **.candidate-btn**: Large interactive buttons with hover/active states
+  - Font-size: 1.3em (character), 0.7em (keyboard shortcut)
+  - Hover: Brighter background, scale 1.05x
+  - Active: Scale 0.98x (press feedback)
+- **.candidate-key**: Keyboard shortcut badge (teal background)
+- **Mobile responsive**: Smaller fonts, adjusted padding (max-width: 640px)
+
+#### 3. JavaScript Functions (core_logic_v11_ui.js)
+
+**showCandidateModal(charIndex, code, candidates)** (lines 598-649):
+- **Purpose**: Display modal with candidate selection options
+- **Steps**:
+  1. Update modal title: `"選擇字元 (位置 ${charIndex}: ${code})"`
+  2. Highlight editing character: Add `.editing` class to charSpans[charIndex]
+  3. Build candidates grid HTML:
+     - Map candidates to buttons with index and char data attributes
+     - Add keyboard shortcut labels (Space, ', [, ], -, \)
+  4. Attach click handlers to all candidate buttons
+  5. Show modal and backdrop (remove `.hidden` class)
+  6. Store editing context: `window.currentEditingIndex = charIndex`
+- **Logging**: `[Phase 1.10.2] Modal shown for character ${charIndex} (${code}) with ${candidates.length} candidates`
+
+**closeCandidateModal()** (lines 654-669):
+- **Purpose**: Close modal and clean up state
+- **Steps**:
+  1. Hide modal and backdrop (add `.hidden` class)
+  2. Remove `.editing` class from all character spans
+  3. Clear editing context: `window.currentEditingIndex = -1`
+- **Logging**: `[Phase 1.10.2] Modal closed`
+
+**selectCandidate(charIndex, newChar)** (lines 676-703):
+- **Purpose**: Update character text and close modal
+- **Steps**:
+  1. Validate charIndex (must be within range)
+  2. Update character text: `charSpans[charIndex].textContent = newChar`
+  3. Mark as edited: `charSpans[charIndex].dataset.edited = "true"`
+  4. Close modal automatically
+  5. **(TODO)** Auto-advance to next character (Phase 1.10.3)
+- **Logging**: `[Phase 1.10.2] Character ${charIndex} updated: "${oldChar}" → "${newChar}"`
+
+**attachCharacterClickHandlers()** - UPDATED (lines 568-590):
+- **Change**: Replaced console.log with showCandidateModal() call
+- **Now**: Click character → Show modal with candidates
+- **Logging**: `[Phase 1.10.2] Character clicked` + modal shown
+
+#### 4. Event Handlers (core_logic_v11_ui.js, lines 1078-1147)
+
+**Close Button** (lines 1083-1088):
+```javascript
+const closeModalBtn = document.getElementById('close-modal-btn');
+closeModalBtn.addEventListener('click', () => {
+  closeCandidateModal();
+});
+```
+
+**Backdrop Click** (lines 1091-1096):
+```javascript
+const modalBackdrop = document.getElementById('modal-backdrop');
+modalBackdrop.addEventListener('click', () => {
+  closeCandidateModal();
+});
+```
+
+**Keyboard Shortcuts** (lines 1099-1147):
+- **Condition**: Only active when modal is visible (`!modal.classList.contains('hidden')`)
+- **Escape**: Close modal (preventDefault)
+- **Quick Selection Keys**:
+  - **Space** → Candidate 0
+  - **'** (single quote) → Candidate 1
+  - **[** → Candidate 2
+  - **]** → Candidate 3
+  - **-** → Candidate 4
+  - **\** (backslash) → Candidate 5
+- **Implementation**:
+  1. Check key in shortcutKeys object
+  2. Prevent default behavior
+  3. Get charIndex from window.currentEditingIndex
+  4. Query candidate button by index
+  5. Read data-char attribute
+  6. Call selectCandidate(charIndex, selectedChar)
+
+#### 5. TDD Tests (test-phase-1.10.2-candidate-modal.html)
+
+**NEW FILE**: 27+ comprehensive tests
+
+**Section 1: Modal Structure** (6 tests):
+- Test 1.1: Modal element exists (#candidate-modal)
+- Test 1.2: Backdrop element exists (#modal-backdrop)
+- Test 1.3: Modal is initially hidden
+- Test 1.4: Modal title element exists (#modal-title)
+- Test 1.5: Close button exists (#close-modal-btn)
+- Test 1.6: Candidates grid exists (#candidates-grid)
+
+**Section 2: showCandidateModal()** (6 tests):
+- Test 2.1: Function exists in window scope
+- Test 2.2: Function shows modal
+- Test 2.3: Modal title updates with character info
+- Test 2.4: Candidates grid populated with buttons
+- Test 2.5: Clicked character gets .editing class
+- Test 2.6: Backdrop becomes visible
+
+**Section 3: closeCandidateModal()** (5 tests):
+- Test 3.1: Function exists in window scope
+- Test 3.2: Function hides modal
+- Test 3.3: Function hides backdrop
+- Test 3.4: Removes .editing class from all characters
+- Test 3.5: Close button triggers closeCandidateModal
+
+**Section 4: selectCandidate()** (5 tests):
+- Test 4.1: Function exists in window scope
+- Test 4.2: Updates character text
+- Test 4.3: Marks character as edited (data-edited="true")
+- Test 4.4: Closes modal after selection
+- Test 4.5: Candidate button click triggers selectCandidate
+
+**Section 5: Keyboard Shortcuts** (8 tests):
+- Test 5.1: Escape key closes modal
+- Test 5.2: Space key selects candidate 0
+- Test 5.3: ' key selects candidate 1
+- Test 5.4: [ key selects candidate 2
+- Test 5.5: ] key selects candidate 3
+- Test 5.6: - key selects candidate 4
+- Test 5.7: \ key selects candidate 5
+- Test 5.8: (Future) Auto-advance to next character
+
+**Section 6: Integration Tests** (3 tests):
+- Test 6.1: Full workflow (click → select → close)
+- Test 6.2: Multiple character edits in sequence
+- Test 6.3: Backdrop click closes modal
+
+### User Experience Flow
+
+**Step-by-Step Workflow**:
+1. User types codes in sentence mode: `4jp ad a`
+2. User presses `=` key → Prediction displays: `易在大`
+3. User clicks on `易` character
+   - Modal opens with 6 candidates: 易, 義, 移, 異, 逸, 益
+   - Character `易` highlighted with `.editing` class
+   - Modal title: "選擇字元 (位置 0: 4jp)"
+4. **Selection Method A** (Mouse):
+   - User clicks `義` button
+   - Character updates: `易` → `義`
+   - Modal closes automatically
+5. **Selection Method B** (Keyboard):
+   - User presses `'` key (shortcut for candidate 1)
+   - Character updates: `易` → `義`
+   - Modal closes automatically
+6. **Cancel Options**:
+   - Press `Escape` → Modal closes, no change
+   - Click backdrop → Modal closes, no change
+   - Click close button (✕) → Modal closes, no change
+
+### Features Implemented
+
+✅ **Click to Edit**: Click any character → Show modal
+✅ **Mouse Selection**: Click candidate button → Update character
+✅ **Keyboard Shortcuts**: Space/'[]\\- for quick selection (0-5)
+✅ **Escape to Cancel**: Close modal without changing
+✅ **Backdrop Close**: Click outside → Close modal
+✅ **Close Button**: ✕ button in top-right corner
+✅ **Visual Feedback**: Character highlighted during editing
+✅ **Learning Ready**: Characters marked with data-edited="true"
+✅ **Mobile Responsive**: Touch-friendly layout
+✅ **Smooth Animation**: Fade-in effect (@keyframes)
+
+### What Works Now
+
+1. **Sentence Prediction**: Type codes → Press = → See prediction
+2. **Character Editing**: Click any character → See 6 candidates
+3. **Mouse Selection**: Click any candidate to replace character
+4. **Keyboard Selection**: Use shortcuts (Space/'[]\\-) for quick selection
+5. **Multiple Edits**: Edit multiple characters in a row
+6. **Learning Detection**: confirmPrediction() detects edited characters
+7. **Enter Confirmation**: Press Enter → Output final sentence to buffer
+
+### What's Next (Phase 1.10.3)
+
+**Auto-Advance** (1-2 hours estimated):
+- After selecting a candidate, automatically open the next character's modal
+- Skip if last character selected
+- Streamlines multi-character editing workflow
+
+**Arrow Key Navigation** (1-2 hours estimated):
+- Left/Right arrows to move between characters without opening modal
+- Opens modal for currently focused character
+- Better keyboard-only navigation
+
+### Files Modified
+
+1. **mvp1-pwa/index.html**: +154 lines (modal HTML + CSS)
+   - Modal backdrop and modal container
+   - Complete CSS styling with animations
+2. **mvp1-pwa/js/core_logic_v11_ui.js**: +129 lines (3 functions + event handlers)
+   - showCandidateModal(), closeCandidateModal(), selectCandidate()
+   - Keyboard event handlers for shortcuts
+3. **mvp1-pwa/tests/test-phase-1.10.2-candidate-modal.html**: +904 lines (NEW FILE - 27+ TDD tests)
+
+### Testing Instructions
+
+**Unit Tests**:
+1. Open `mvp1-pwa/tests/test-phase-1.10.2-candidate-modal.html`
+2. Verify all 27+ tests pass
+3. Try clicking characters in the test UI
+
+**Integration Test**:
+1. Open `mvp1-pwa/index.html`
+2. Switch to sentence mode
+3. Type codes: `4jp ad a`
+4. Press `=` → See prediction `易在大`
+5. **Test Mouse Selection**:
+   - Click `易` → Modal opens
+   - Click `義` → Character changes, modal closes
+6. **Test Keyboard Selection**:
+   - Click `在` → Modal opens
+   - Press `'` key → Character changes to 2nd candidate
+7. **Test Cancel**:
+   - Click `大` → Modal opens
+   - Press `Escape` → Modal closes, character unchanged
+8. Press `Enter` → Sentence output to buffer
+
+### Technical Notes
+
+**Why Keyboard Shortcuts Work**:
+- Event handler only activates when modal is visible
+- Prevents interference with normal typing
+- Uses data-char attribute from buttons (not hardcoded candidate list)
+- Works for any number of candidates (up to 6 with shortcuts)
+
+**Learning Integration**:
+- Characters with data-edited="true" are detected in confirmPrediction()
+- Learning algorithm compares original vs edited sentence
+- Bigram adjustments recorded to UserDB (IndexedDB)
+
+**Mobile Considerations**:
+- Larger touch targets (12px padding, 1.1em font)
+- 2-column grid for better thumb reach
+- Backdrop click is touch-friendly
+- No hover states on touch devices
+
+**Performance**:
+- Modal uses CSS animations (GPU-accelerated)
+- No jQuery or heavy libraries
+- Event delegation for candidate buttons
+- Modal HTML built only once per character click
 
 ---
 
