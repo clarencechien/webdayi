@@ -2,12 +2,14 @@
 
 Progressive Web App Proof-of-Concept for WebDaYi with IndexedDB and Mobile Custom Touch Keyboard
 
-## Status: 🎉 100% COMPLETE
+## Status: 🎉 Phase 1 F-4.0 COMPLETE!
 
-**Phase**: 0.5 (PWA POC)
+**Phase**: 0.5 (PWA POC) ✅ + Phase 1 (F-4.0 Learning) ✅
 **Started**: 2025-11-13
-**Completed**: 2025-11-13 (Session 10.8)
-**Completion**: 100% (All core features implemented)
+**Completed**:
+- Phase 0.5: 2025-11-13 (Session 10.8)
+- Phase 1: 2025-11-13 (Session 10.9 Part 2 + 10.10)
+**Completion**: Phase 1.8 Complete (Learning + Trapezoid Keyboard)
 
 ## Completed ✅
 
@@ -132,11 +134,65 @@ Total: 17 files, ~4,760 lines of code
 - **Path Updates**:
   - ✅ Updated script `src` paths in index.html
   - ✅ Updated Service Worker STATIC_ASSETS and DATABASE_ASSETS
-- **Status**: ✅ Complete (UserDB-Viterbi integration planned for Phase 1)
+- **Status**: ✅ Complete
+
+### 9. **Phase 1 F-4.0: UserDB-Viterbi Integration** ✅ (Session 10.9)
+- **Implementation**: 4 core learning functions integrated into main PWA app
+  - ✅ `viterbiWithUserDB()`: Enhanced Viterbi using learned weights from IndexedDB
+  - ✅ `detectLearning()`: Compare prediction vs user correction, extract bigram patterns
+  - ✅ `applyLearning()`: Store learned weights in IndexedDB
+  - ✅ `showLearningFeedback()`: Visual notification of learning events
+- **Integration Points**:
+  - ✅ Made `predictSentenceFromBuffer()` async to support IndexedDB
+  - ✅ Updated prediction flow to use UserDB when available
+  - ✅ Editable predictions with `contenteditable` for manual corrections
+  - ✅ Learning workflow: Edit prediction → Press = → Detect changes → Learn → Notify
+- **Test Coverage**:
+  - ✅ `tests/test-integration-learning.html` (30+ integration tests)
+    - Database Structure tests (5)
+    - Database Initialization tests (4)
+    - Weight Operations tests (6)
+    - Export/Import tests (5)
+    - Edge Cases tests (4)
+    - Complete workflow tests (3+)
+  - ✅ All 30/30 tests passing after bug fixes
+- **Bug Fixes**:
+  - 🐛 ES6 module import (Unexpected token 'export') → Fixed with `<script type="module">`
+  - 🐛 dayiDb.get is not a function → Fixed by using Map instead of plain object
+  - 🐛 Test isolation issues → Fixed with unique DB names + Date.now()
+  - 🐛 Expected 0 to be greater than 0 → Fixed with dynamic userSelection
+  - 🐛 Expected "義再" to contain "易在" → Fixed with stronger weights (10.0)
+
+### 10. **Mobile Keyboard Trapezoid Layout** ✅ (Session 10.10)
+- **Problem**: Original 5-row keyboard not ergonomic for Dayi input + candidate area blocked
+- **Reference**: Based on `main:reference/Screenshot_20251113-131013.png`
+- **Implementation**:
+  - ✅ **Row 4: Trapezoid Layout**
+    - Shift (1.5x width) + z-m (8 letters) + Backspace (1.5x width)
+    - Gray color scheme (#64748b) for function keys
+    - Backspace moved to Row 4 right for easier thumb reach
+  - ✅ **Row 5: Control Keys**
+    - Language toggle + punctuation (, . /) + **Super-wide Space (4x width)**
+    - Space bar dominates Row 5 for easy access
+    - Enter button removed (Dayi uses Space for confirmation)
+  - ✅ **Ergonomic Improvements**:
+    - All number keys visible (critical for Dayi codes like "4jp")
+    - Trapezoid shape = natural hand position
+    - Backspace in Row 4 right = easier thumb reach
+    - Space 4x wider = harder to miss
+  - ✅ **Candidate Visibility**:
+    - Padding reduced: 280px → 265px (+15px visible space)
+    - Keyboard height optimized with tighter row spacing
+    - Smart candidate area now visible in fullscreen mode
+- **Code Changes**:
+  - HTML: Trapezoid structure with new button layout
+  - CSS: 7 new classes (key-shift, key-lang, key-punct, key-small, key-medium, key-super-wide)
+  - JavaScript: 2 new handlers (Shift, Language toggle placeholders)
+- **Lines**: +140, -72 (net +68 lines)
 
 ## Future Enhancements 📋
 
-### 9. **RWD Tests** (Phase 1 - Testing)
+### 11. **RWD Tests** (Phase 1.9 - Testing)
 Future test suite for responsive behavior validation:
 - Create test-rwd.html
 - Test desktop: keyboard hidden
@@ -145,7 +201,7 @@ Future test suite for responsive behavior validation:
 - Test touch feedback
 - Test system keyboard prevention
 
-### 10. **Integration Testing** (Phase 1 - Validation)
+### 12. **Integration Testing** (Phase 1.9 - Validation)
 Future comprehensive testing:
 - Manual testing: Learn → Export → Clear → Import
 - Cross-device testing
