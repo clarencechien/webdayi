@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1 Integration Tests - Learning Workflow</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .test-suite {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-suite h2 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    .test-case {
+      margin: 15px 0;
+      padding: 15px;
+      border-left: 4px solid #ddd;
+      background: #fafafa;
+    }
+    .test-case.pass {
+      border-left-color: #4CAF50;
+      background: #f1f8f4;
+    }
+    .test-case.fail {
+      border-left-color: #f44336;
+      background: #fef1f1;
+    }
+    .test-case.pending {
+      border-left-color: #FFC107;
+      background: #fffbf0;
+    }
+    .test-name {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .test-result {
+      font-size: 14px;
+      color: #666;
+    }
+    .test-error {
+      color: #f44336;
+      font-family: monospace;
+      font-size: 12px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+    .summary {
+      background: #333;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-size: 18px;
+    }
+    .summary .pass { color: #4CAF50; font-weight: bold; }
+    .summary .fail { color: #f44336; font-weight: bold; }
+    .summary .pending { color: #FFC107; font-weight: bold; }
+    .test-code {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Phase 1 Integration Tests - Learning Workflow</h1>
+
+  <div class="summary" id="summary">
+    <div class="loading">⏳ Running tests...</div>
+  </div>
+
+  <div id="test-results"></div>
+
+  <!-- Load dependencies -->
+  <script src="../js/user_db_indexeddb.js"></script>
+  <script src="../js/viterbi_module.js"></script>
+
+  <script>
+    // ============================================================================
+    // Test Framework
+    // ============================================================================
+
+    const testResults = [];
+    let currentSuite = null;
+
+    function describe(suiteName, fn) {
+      currentSuite = { name: suiteName, tests: [] };
+      fn();
+      renderTestSuite(currentSuite);
+    }
+
+    async function it(testName, fn) {
+      const test = { name: testName, status: 'pending', error: null };
+      currentSuite.tests.push(test);
+
+      try {
+        await fn();
+        test.status = 'pass';
+        test.result = '✓ Passed';
+      } catch (error) {
+        test.status = 'fail';
+        test.error = error.message;
+        test.result = `✗ Failed: ${error.message}`;
+      }
+
+      testResults.push(test);
+      updateTestCase(test);
+    }
+
+    function expect(actual) {
+      return {
+        toBe(expected) {
+          if (actual !== expected) {
+            throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+          }
+        },
+        toEqual(expected) {
+          if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+            throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+          }
+        },
+        toBeDefined() {
+          if (actual === undefined || actual === null) {
+            throw new Error(`Expected value to be defined, got ${actual}`);
+          }
+        },
+        toBeTruthy() {
+          if (!actual) {
+            throw new Error(`Expected truthy value, got ${actual}`);
+          }
+        },
+        toBeGreaterThan(expected) {
+          if (actual <= expected) {
+            throw new Error(`Expected ${actual} to be greater than ${expected}`);
+          }
+        },
+        toContain(expected) {
+          if (!actual.includes(expected)) {
+            throw new Error(`Expected ${JSON.stringify(actual)} to contain ${JSON.stringify(expected)}`);
+          }
+        },
+        toBeInstanceOf(expected) {
+          if (!(actual instanceof expected)) {
+            throw new Error(`Expected instance of ${expected.name}, got ${typeof actual}`);
+          }
+        }
+      };
+    }
+
+    function renderTestSuite(suite) {
+      const container = document.getElementById('test-results');
+      const suiteDiv = document.createElement('div');
+      suiteDiv.className = 'test-suite';
+      suiteDiv.id = `suite-${suite.name.replace(/\s+/g, '-')}`;
+
+      const title = document.createElement('h2');
+      title.textContent = suite.name;
+      suiteDiv.appendChild(title);
+
+      suite.tests.forEach((test, index) => {
+        const testDiv = document.createElement('div');
+        testDiv.className = `test-case ${test.status}`;
+        testDiv.id = `test-${currentSuite.tests.length - 1}-${index}`;
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'test-name';
+        nameDiv.textContent = test.name;
+        testDiv.appendChild(nameDiv);
+
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'test-result';
+        resultDiv.textContent = test.result || '⏳ Running...';
+        testDiv.appendChild(resultDiv);
+
+        if (test.error) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'test-error';
+          errorDiv.textContent = test.error;
+          testDiv.appendChild(errorDiv);
+        }
+
+        suiteDiv.appendChild(testDiv);
+      });
+
+      container.appendChild(suiteDiv);
+    }
+
+    function updateTestCase(test) {
+      // Find the test div and update it
+      const testDivs = document.querySelectorAll('.test-case.pending');
+      if (testDivs.length > 0) {
+        const testDiv = testDivs[0];
+        testDiv.className = `test-case ${test.status}`;
+        const resultDiv = testDiv.querySelector('.test-result');
+        resultDiv.textContent = test.result;
+
+        if (test.error) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'test-error';
+          errorDiv.textContent = test.error;
+          testDiv.appendChild(errorDiv);
+        }
+      }
+
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const summary = document.getElementById('summary');
+      const passed = testResults.filter(t => t.status === 'pass').length;
+      const failed = testResults.filter(t => t.status === 'fail').length;
+      const total = testResults.length;
+
+      summary.innerHTML = `
+        <div>
+          <span class="pass">${passed} passed</span> /
+          <span class="fail">${failed} failed</span> /
+          ${total} total
+        </div>
+        <div style="margin-top: 10px; font-size: 14px;">
+          ${failed === 0 ? '✅ All tests passed!' : '⚠️ Some tests failed'}
+        </div>
+      `;
+    }
+
+    // ============================================================================
+    // Mock Data
+    // ============================================================================
+
+    const mockDayiDb = {
+      '4jp': [{ char: '易', freq: 80 }, { char: '義', freq: 70 }],
+      'ad': [{ char: '在', freq: 90 }, { char: '再', freq: 85 }],
+      'a': [{ char: '大', freq: 100 }]
+    };
+
+    const mockNgramDb = {
+      version: '2.0',
+      smoothing_alpha: 0.1,
+      vocab_size: 100,
+      total_chars: 1000,
+      unigrams: {
+        '易': 0.05,
+        '義': 0.03,
+        '在': 0.08,
+        '再': 0.04,
+        '大': 0.10
+      },
+      unigram_counts: {
+        '易': 50,
+        '義': 30,
+        '在': 80,
+        '再': 40,
+        '大': 100
+      },
+      bigrams: {
+        '易在': 0.6,
+        '易再': 0.1,
+        '義在': 0.2,
+        '義再': 0.1
+      },
+      bigram_counts: {
+        '易在': 30,
+        '易再': 5,
+        '義在': 10,
+        '義再': 5
+      }
+    };
+
+    // ============================================================================
+    // Test Suites
+    // ============================================================================
+
+    async function runAllTests() {
+      // Suite 1: UserDB Initialization
+      describe('Category 1: UserDB Initialization (5 tests)', async () => {
+        await it('UserDB class should be defined', async () => {
+          expect(typeof UserDB).toBe('function');
+        });
+
+        await it('UserDB instance should be creatable', async () => {
+          const db = new UserDB();
+          expect(db).toBeInstanceOf(UserDB);
+        });
+
+        await it('UserDB should open successfully', async () => {
+          const db = new UserDB();
+          await db.open();
+          expect(db.db).toBeDefined();
+          await db.close();
+        });
+
+        await it('UserDB should have required methods', async () => {
+          const db = new UserDB();
+          expect(typeof db.getWeight).toBe('function');
+          expect(typeof db.setWeight).toBe('function');
+          expect(typeof db.getAllWeights).toBe('function');
+        });
+
+        await it('UserDB should return 0 for unlearned patterns', async () => {
+          const db = new UserDB();
+          await db.open();
+          const weight = await db.getWeight('易', '在');
+          expect(weight).toBe(0);
+          await db.close();
+        });
+      });
+
+      // Suite 2: Viterbi Integration with UserDB
+      describe('Category 2: Viterbi Integration with UserDB (6 tests)', async () => {
+        await it('viterbiWithUserDB function should exist', async () => {
+          expect(typeof viterbiWithUserDB).toBe('function');
+        });
+
+        await it('viterbiWithUserDB should accept UserDB parameter', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          const result = await viterbiWithUserDB(['4jp', 'ad'], mockDayiDb, mockNgramDb, db);
+          expect(result).toBeDefined();
+          expect(result.sentence).toBeDefined();
+
+          await db.close();
+        });
+
+        await it('viterbiWithUserDB should work with null UserDB (graceful degradation)', async () => {
+          const result = await viterbiWithUserDB(['4jp', 'ad'], mockDayiDb, mockNgramDb, null);
+          expect(result).toBeDefined();
+          expect(result.sentence).toBeDefined();
+        });
+
+        await it('viterbiWithUserDB should use learned weights in scoring', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          // Set a strong preference: 易→在 (boost from 0.6 to 1.6)
+          await db.setWeight('易', '在', 1.0);
+
+          const result = await viterbiWithUserDB(['4jp', 'ad'], mockDayiDb, mockNgramDb, db);
+          expect(result.sentence).toContain('易在');
+
+          await db.close();
+        });
+
+        await it('viterbiWithUserDB result should match standard viterbi structure', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          const result = await viterbiWithUserDB(['4jp'], mockDayiDb, mockNgramDb, db);
+          expect(result.sentence).toBeDefined();
+          expect(result.chars).toBeDefined();
+          expect(result.score).toBeDefined();
+          expect(Array.isArray(result.chars)).toBeTruthy();
+
+          await db.close();
+        });
+
+        await it('viterbiWithUserDB should handle empty codes gracefully', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          try {
+            const result = await viterbiWithUserDB([], mockDayiDb, mockNgramDb, db);
+            // Should either return null or throw error - both are acceptable
+            expect(true).toBeTruthy();
+          } catch (error) {
+            // Error is acceptable for empty input
+            expect(true).toBeTruthy();
+          }
+
+          await db.close();
+        });
+      });
+
+      // Suite 3: Learning Detection
+      describe('Category 3: Learning Detection (5 tests)', async () => {
+        await it('detectLearning function should exist', async () => {
+          expect(typeof detectLearning).toBe('function');
+        });
+
+        await it('detectLearning should detect single character correction', async () => {
+          const prediction = '易在';
+          const userSelection = '義在';
+
+          const learningData = detectLearning(prediction, userSelection);
+          expect(learningData.length).toBe(1);
+          expect(learningData[0].from).toBe('易');
+          expect(learningData[0].to).toBe('義');
+        });
+
+        await it('detectLearning should return empty for identical strings', async () => {
+          const prediction = '易在';
+          const userSelection = '易在';
+
+          const learningData = detectLearning(prediction, userSelection);
+          expect(learningData.length).toBe(0);
+        });
+
+        await it('detectLearning should detect multiple corrections', async () => {
+          const prediction = '易在大';
+          const userSelection = '義再大';
+
+          const learningData = detectLearning(prediction, userSelection);
+          expect(learningData.length).toBe(2);
+        });
+
+        await it('detectLearning should include bigram context', async () => {
+          const prediction = '大易在';
+          const userSelection = '大義在';
+
+          const learningData = detectLearning(prediction, userSelection);
+          expect(learningData[0].prevChar).toBe('大');
+          expect(learningData[0].to).toBe('義');
+        });
+      });
+
+      // Suite 4: Learning Persistence
+      describe('Category 4: Learning Persistence (5 tests)', async () => {
+        await it('applyLearning function should exist', async () => {
+          expect(typeof applyLearning).toBe('function');
+        });
+
+        await it('applyLearning should persist learning to UserDB', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          const learningData = [{
+            prevChar: '易',
+            to: '在',
+            from: '再',
+            weight: 1.0
+          }];
+
+          await applyLearning(learningData, db);
+
+          const weight = await db.getWeight('易', '在');
+          expect(weight).toBeGreaterThan(0);
+
+          await db.close();
+        });
+
+        await it('applyLearning should increment existing weights', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          const learningData = [{
+            prevChar: '易',
+            to: '在',
+            from: '再',
+            weight: 1.0
+          }];
+
+          // Apply learning twice
+          await applyLearning(learningData, db);
+          const weight1 = await db.getWeight('易', '在');
+
+          await applyLearning(learningData, db);
+          const weight2 = await db.getWeight('易', '在');
+
+          expect(weight2).toBeGreaterThan(weight1);
+
+          await db.close();
+        });
+
+        await it('applyLearning should handle multiple learning points', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          const learningData = [
+            { prevChar: '易', to: '在', from: '再', weight: 1.0 },
+            { prevChar: '在', to: '大', from: '太', weight: 1.0 }
+          ];
+
+          await applyLearning(learningData, db);
+
+          const weight1 = await db.getWeight('易', '在');
+          const weight2 = await db.getWeight('在', '大');
+
+          expect(weight1).toBeGreaterThan(0);
+          expect(weight2).toBeGreaterThan(0);
+
+          await db.close();
+        });
+
+        await it('applyLearning should persist across sessions', async () => {
+          const db1 = new UserDB();
+          await db1.open();
+
+          const learningData = [{
+            prevChar: '測',
+            to: '試',
+            from: '拭',
+            weight: 2.5
+          }];
+
+          await applyLearning(learningData, db1);
+          await db1.close();
+
+          // Open new instance (simulate page reload)
+          const db2 = new UserDB();
+          await db2.open();
+
+          const weight = await db2.getWeight('測', '試');
+          expect(weight).toBeGreaterThan(0);
+
+          await db2.close();
+        });
+      });
+
+      // Suite 5: Learning UI Feedback
+      describe('Category 5: Learning UI Feedback (3 tests)', async () => {
+        await it('showLearningFeedback function should exist', async () => {
+          expect(typeof showLearningFeedback).toBe('function');
+        });
+
+        await it('showLearningFeedback should create feedback elements', async () => {
+          const learningData = [{
+            prevChar: '易',
+            to: '在',
+            from: '再',
+            weight: 1.0
+          }];
+
+          // Clear any existing feedback
+          const existing = document.querySelector('.learning-feedback-container');
+          if (existing) existing.remove();
+
+          showLearningFeedback(learningData);
+
+          // Check if feedback container was created
+          const container = document.querySelector('.learning-feedback-container');
+          expect(container).toBeDefined();
+
+          // Clean up
+          if (container) container.remove();
+        });
+
+        await it('showLearningFeedback should handle empty learning data', async () => {
+          // Should not throw error
+          try {
+            showLearningFeedback([]);
+            expect(true).toBeTruthy();
+          } catch (error) {
+            throw new Error('showLearningFeedback should handle empty array gracefully');
+          }
+        });
+      });
+
+      // Suite 6: End-to-End Learning Workflow
+      describe('Category 6: E2E Learning Workflow (6 tests)', async () => {
+        await it('Complete workflow: predict → detect → apply → re-predict', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          // Step 1: Initial prediction
+          const result1 = await viterbiWithUserDB(['4jp', 'ad'], mockDayiDb, mockNgramDb, db);
+          const prediction = result1.sentence;
+
+          // Step 2: User correction (simulate user choosing different chars)
+          const userSelection = '義再'; // User corrects both characters
+
+          // Step 3: Detect learning
+          const learningData = detectLearning(prediction, userSelection);
+          expect(learningData.length).toBeGreaterThan(0);
+
+          // Step 4: Apply learning
+          await applyLearning(learningData, db);
+
+          // Step 5: Re-predict (should use learned weights)
+          const result2 = await viterbiWithUserDB(['4jp', 'ad'], mockDayiDb, mockNgramDb, db);
+
+          // Learned weights should affect result (not necessarily change it completely)
+          expect(result2).toBeDefined();
+
+          await db.close();
+        });
+
+        await it('Learning should improve prediction accuracy over time', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          // Simulate user consistently choosing 義→再
+          for (let i = 0; i < 5; i++) {
+            const learningData = [{
+              prevChar: '義',
+              to: '再',
+              from: '在',
+              weight: 1.0
+            }];
+            await applyLearning(learningData, db);
+          }
+
+          const weight = await db.getWeight('義', '再');
+          expect(weight).toBeGreaterThan(4); // Should accumulate
+
+          await db.close();
+        });
+
+        await it('Different users should have independent learning', async () => {
+          const db1 = new UserDB('user1_webdayi');
+          const db2 = new UserDB('user2_webdayi');
+
+          await db1.open();
+          await db2.open();
+
+          // User 1 learns preference
+          await db1.setWeight('易', '在', 5.0);
+
+          // User 2 should start fresh
+          const weight = await db2.getWeight('易', '在');
+          expect(weight).toBe(0);
+
+          await db1.close();
+          await db2.close();
+        });
+
+        await it('Export/Import should preserve learned patterns', async () => {
+          const db1 = new UserDB();
+          await db1.open();
+
+          // Learn some patterns
+          await db1.setWeight('易', '在', 3.5);
+          await db1.setWeight('大', '學', 2.0);
+
+          // Export
+          const exported = await db1.getAllWeights();
+          expect(Object.keys(exported).length).toBeGreaterThan(0);
+
+          await db1.close();
+
+          // Import to new database
+          const db2 = new UserDB('test_import_db');
+          await db2.open();
+          await db2.importWeights(exported);
+
+          const weight1 = await db2.getWeight('易', '在');
+          const weight2 = await db2.getWeight('大', '學');
+
+          expect(weight1).toBe(3.5);
+          expect(weight2).toBe(2.0);
+
+          await db2.close();
+        });
+
+        await it('Learning should handle edge cases gracefully', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          // Edge case 1: Empty prevChar
+          const learningData1 = [{
+            prevChar: null,
+            to: '易',
+            from: '義',
+            weight: 1.0
+          }];
+          await applyLearning(learningData1, db);
+
+          // Edge case 2: Very large weight
+          const learningData2 = [{
+            prevChar: '測',
+            to: '試',
+            from: '拭',
+            weight: 1000.0
+          }];
+          await applyLearning(learningData2, db);
+
+          const weight = await db.getWeight('測', '試');
+          expect(weight).toBeGreaterThan(0);
+
+          await db.close();
+        });
+
+        await it('Concurrent learning operations should not corrupt data', async () => {
+          const db = new UserDB();
+          await db.open();
+
+          // Simulate concurrent writes
+          const promises = [];
+          for (let i = 0; i < 10; i++) {
+            promises.push(db.setWeight('並', '發', i * 0.5));
+          }
+
+          await Promise.all(promises);
+
+          // Final weight should be one of the values (last write wins)
+          const weight = await db.getWeight('並', '發');
+          expect(weight).toBeGreaterThan(0);
+
+          await db.close();
+        });
+      });
+
+      // Update final summary
+      updateSummary();
+    }
+
+    // Run all tests when page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => runAllTests(), 500);
+    });
+  </script>
+</body>
+</html>

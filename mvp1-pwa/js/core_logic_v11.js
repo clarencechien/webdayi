@@ -236,12 +236,13 @@ function generateLivePreview(codes, dayiMap, userModel = null) {
 
 /**
  * Predict sentence from buffered codes
+ * 🆕 Phase 1: Now uses viterbiWithUserDB for personalized predictions
  * @param {string[]} codes - Buffered codes
  * @param {Map} dayiMap - Dayi database
  * @param {Object} ngramDb - N-gram database
- * @returns {Object|null} Prediction result or null
+ * @returns {Promise<Object|null>} Prediction result or null
  */
-function predictSentenceFromBuffer(codes, dayiMap, ngramDb) {
+async function predictSentenceFromBuffer(codes, dayiMap, ngramDb) {
   if (!codes || codes.length === 0) {
     return null;
   }
@@ -251,9 +252,20 @@ function predictSentenceFromBuffer(codes, dayiMap, ngramDb) {
   }
 
   try {
-    // Call Viterbi algorithm (defined in viterbi_module.js)
-    const result = viterbi(codes, dayiMap, ngramDb);
-    return result;
+    // 🆕 Phase 1: Use viterbiWithUserDB for personalized learning
+    // Check if UserDB is available (defined in viterbi_module.js)
+    const userDB = window.userDB || null;
+
+    if (userDB && window.userDBReady) {
+      console.log('[v11] Using viterbiWithUserDB (learning enabled)');
+      const result = await viterbiWithUserDB(codes, dayiMap, ngramDb, userDB);
+      return result;
+    } else {
+      // Fallback to standard Viterbi if UserDB not ready
+      console.log('[v11] Using standard viterbi (UserDB not ready)');
+      const result = viterbi(codes, dayiMap, ngramDb);
+      return result;
+    }
   } catch (error) {
     console.error('[v11] Viterbi prediction failed:', error);
     return null;
@@ -290,11 +302,12 @@ function formatPredictionResult(result, codes) {
 
 /**
  * Predict sentence with current state
+ * 🆕 Phase 1: Now async to support viterbiWithUserDB
  * @param {Map} dayiMap - Dayi database
- * @returns {Object|null} Prediction result or null
+ * @returns {Promise<Object|null>} Prediction result or null
  */
-function predictSentenceWithCurrentState(dayiMap) {
-  return predictSentenceFromBuffer(codeBuffer, dayiMap, ngramDb);
+async function predictSentenceWithCurrentState(dayiMap) {
+  return await predictSentenceFromBuffer(codeBuffer, dayiMap, ngramDb);
 }
 
 // ============================================
