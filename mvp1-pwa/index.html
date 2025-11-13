@@ -8,6 +8,7 @@
   <!-- PWA Meta Tags -->
   <meta name="description" content="Progressive Web App for Dayi Chinese Input Method with personalized N-gram learning">
   <meta name="theme-color" content="#4ec9b0">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="WebDaYi PWA">
@@ -1098,18 +1099,50 @@
           data: weights
         };
 
-        // Create blob and download
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        const jsonString = JSON.stringify(exportData, null, 2);
+        const fileName = `webdayi_learned_patterns_${new Date().toISOString().split('T')[0]}.json`;
+
+        // Mobile: Use Web Share API if available (better mobile support)
+        if (isMobile() && navigator.canShare && navigator.share) {
+          try {
+            const file = new File([jsonString], fileName, {
+              type: 'application/json'
+            });
+
+            // Check if files can be shared
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: 'WebDaYi 學習記錄',
+                text: `匯出 ${exportData.count} 筆學習記錄`
+              });
+              console.log(`[PWA] Shared ${exportData.count} learned patterns via Web Share API`);
+              return;
+            }
+          } catch (shareError) {
+            // If share was cancelled or failed, fall through to download
+            console.log('[PWA] Share cancelled or not supported, falling back to download');
+          }
+        }
+
+        // Desktop or fallback: Create blob and download
+        const blob = new Blob([jsonString], {
           type: 'application/json'
         });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `webdayi_learned_patterns_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = fileName;
+
+        // For mobile: must append to body before click (iOS requirement)
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+
+        // Clean up after a delay (iOS needs time)
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
 
         console.log(`[PWA] Exported ${exportData.count} learned patterns`);
         alert(`Successfully exported ${exportData.count} learned patterns!`);

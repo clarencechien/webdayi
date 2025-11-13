@@ -77,14 +77,14 @@
       "name": "Character Mode",
       "short_name": "逐字",
       "description": "Open in character-by-character input mode",
-      "url": "/?mode=character",
+      "url": "./?mode=character",
       "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {
       "name": "Sentence Mode",
       "short_name": "整句",
       "description": "Open in sentence prediction mode",
-      "url": "/?mode=sentence",
+      "url": "./?mode=sentence",
       "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
     }
   ],

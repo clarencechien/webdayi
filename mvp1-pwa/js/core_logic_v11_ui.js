@@ -16,7 +16,7 @@
   // Wait for DOM and dayiMap to be ready
   // FIX: Use named function instead of arguments.callee (strict mode compatible)
   if (typeof dayiMap === 'undefined' || !dayiMap) {
-    console.error('[v11 UI] dayiMap not loaded yet, retrying...');
+    console.log('[v11 UI] Waiting for dayiMap to load... (retrying in 100ms)');
     setTimeout(initV11UI, 100);
     return;
   }
