@@ -33,6 +33,16 @@
   let editedPrediction = null; // User's final selection after edits
   let editCursorPosition = -1; // -1 = not editing, 0+ = editing at position
 
+  // 🆕 Phase 1.10.5: Clear prediction state (called by clearCodeBuffer)
+  window.clearPredictionState = function clearPredictionState() {
+    currentPredictions = [];
+    currentPredictionIndex = 0;
+    originalPrediction = null;
+    editedPrediction = null;
+    editCursorPosition = -1;
+    console.log('[Phase 1.10.5] clearPredictionState: All prediction state cleared');
+  }
+
   // ============================================
   // UI Element References
   // ============================================
@@ -1356,11 +1366,13 @@
         openModalForFocusedChar();
       }
     } else if (key === 'Enter') {
-      // 🆕 Phase 1.10.4: Enter key submits edited sentence (only when finish hint visible)
-      const finishHint = document.getElementById('finish-hint');
-      if (finishHint && !finishHint.classList.contains('hidden')) {
+      // 🆕 Phase 1.10.5: Enter key submits edited sentence anytime (not just when hint visible)
+      const sentenceDisplay = document.getElementById('sentence-display');
+      const charSpans = sentenceDisplay ? sentenceDisplay.querySelectorAll('.char-span') : [];
+      if (charSpans.length > 0) {
         e.preventDefault();
         submitEditedSentence();
+        console.log('[Phase 1.10.5] Enter pressed: Submitting sentence from any character');
       }
     }
   });

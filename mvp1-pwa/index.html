@@ -170,9 +170,9 @@
     <span class="material-symbols-outlined text-xl">settings</span>
   </button>
 
-  <!-- Mobile Control Panel -->
+  <!-- Mobile Control Panel (🆕 Phase 1.10.5: Also usable from desktop Stats button) -->
   <div id="mobile-controls-panel"
-       class="fixed inset-0 z-50 hidden sm:hidden">
+       class="fixed inset-0 z-50 hidden">
     <!-- Backdrop -->
     <div class="backdrop absolute inset-0 bg-black/50 backdrop-blur-sm"
          onclick="document.getElementById('mobile-controls-panel').classList.add('hidden')"></div>
@@ -436,7 +436,8 @@
                   <span class="hidden sm:inline">即時預覽</span>
                   <span class="sm:hidden">預覽</span>
                 </div>
-                <div id="preview-text" class="text-lg sm:text-2xl font-bold text-center sm:text-center text-slate-800 dark:text-slate-100 tracking-wider py-1 sm:py-2"></div>
+                <!-- 🆕 Phase 1.10.5: Reduced font size and padding for compact layout -->
+                <div id="preview-text" class="text-base sm:text-lg font-bold text-center sm:text-center text-slate-800 dark:text-slate-100 tracking-wider py-0.5 sm:py-1"></div>
               </div>
 
               <!-- Code Buffer Display (Compact on mobile) -->
@@ -452,15 +453,16 @@
                     <span class="hidden sm:inline">清除</span>
                   </button>
                 </div>
-                <div id="buffered-codes" class="flex flex-wrap gap-1 sm:gap-2 min-h-6 sm:min-h-10 items-center">
+                <!-- 🆕 Phase 1.10.5: Reduced min-height for compact layout -->
+                <div id="buffered-codes" class="flex flex-wrap gap-1 sm:gap-2 min-h-4 sm:min-h-6 items-center">
                   <span class="text-xs sm:text-sm text-slate-400 dark:text-slate-500 italic">尚無編碼</span>
                 </div>
               </div>
             </div>
 
-            <!-- Confirm Prediction Button (compact on mobile) -->
+            <!-- Confirm Prediction Button (🆕 Phase 1.10.5: Reduced padding for compact layout) -->
             <button id="predict-sentence-btn"
-                    class="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-3 rounded-lg bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white font-semibold text-sm transition-all shadow-md hover:shadow-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-lg bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white font-semibold text-sm transition-all shadow-md hover:shadow-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed">
               <span class="material-symbols-outlined text-base sm:text-lg">check_circle</span>
               <span class="text-xs sm:text-sm">確認預測 (=)</span>
             </button>
@@ -487,8 +489,9 @@
             <label class="text-sm font-medium text-slate-700 dark:text-slate-300">
               候選字 (Candidates)
             </label>
+            <!-- 🆕 Phase 1.10.5: Reduced min-height and padding for compact layout -->
             <div id="candidate-area"
-                 class="flex min-h-12 flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-2 transition-colors">
+                 class="flex min-h-8 flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-1.5 transition-colors">
               <div class="w-full text-center text-sm text-slate-400 py-1">請輸入大易碼</div>
             </div>
           </div>

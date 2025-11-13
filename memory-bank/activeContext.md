@@ -22,23 +22,29 @@
 
 ---
 
-## 🔧 Latest Session: Phase 1.10.5 Critical Fixes (2025-11-13)
+## 🔧 Latest Session: Phase 1.10.5 Complete State Management Fixes (2025-11-13)
 
 ### Session Summary
 
-This session addressed **3 critical user-reported bugs** after Phase 1.10.4 release:
+This session addressed **5 critical user-reported bugs** that made the application unusable in production. The root cause was **incomplete state management** - global prediction state variables were not being cleared.
 
 **User Issues**:
-1. ❌ 清空後舊句子仍出現 (Ghost sentences after backspace)
-2. ❌ 按下 Enter 不會送出 (Enter key not submitting)
-3. ❌ Learning stats 佔太多版面 (Learning stats taking too much space)
+1. ❌ Desktop Stats button 不會彈出視窗 (Stats button not opening)
+2. ❌ 整句模式版面太多需要上下捲動 (Layout too tall)
+3. ❌ 應該任一個字按 Enter 就送出 (Enter should work anywhere)
+4. ❌ 清空後按 = 還是上次內容，完全不能用 (Ghost sentences - CRITICAL)
+5. ❌ (Continuation of issue 4)
 
 **Fixes Implemented**:
-1. ✅ Enhanced clearCodeBuffer() to clear ALL state (not just array)
-2. ✅ Verified Enter key submit workflow (Phase 1.10.4 implementation correct)
-3. ✅ Integrated learning stats into mobile/desktop menus (~150px saved)
+1. ✅ Desktop Stats button: Removed `sm:hidden` class from mobile-controls-panel
+2. ✅ Layout compact: Reduced live preview, code buffer, candidates, button (~62px saved)
+3. ✅ Enter anywhere: Works from any character, not just last one
+4. ✅ clearPredictionState(): Clears currentPredictions, originalPrediction, editedPrediction
+5. ✅ Complete state reset: clearCodeBuffer() now calls clearPredictionState()
 
-**Commit**: `b772d33` - fix: Phase 1.10.5 - Critical UX fixes
+**Commits**:
+- `b772d33` - fix: Phase 1.10.5 - Critical UX fixes (initial)
+- `6e562d3` - fix: Phase 1.10.5 - Complete state management fixes (5 critical bugs)
 
 ---
 
