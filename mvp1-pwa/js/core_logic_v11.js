@@ -184,7 +184,34 @@ function removeLastCodeFromBuffer() {
  * Clear code buffer
  */
 function clearCodeBuffer() {
+  // Clear code buffer array
   codeBuffer = [];
+
+  // 🆕 Phase 1.10.5: Clear sentence display
+  const sentenceDisplay = document.getElementById('sentence-display');
+  if (sentenceDisplay) {
+    sentenceDisplay.innerHTML = '';
+  }
+
+  // 🆕 Phase 1.10.5: Hide finish hint
+  const finishHint = document.getElementById('finish-hint');
+  if (finishHint) {
+    finishHint.classList.add('hidden');
+  }
+
+  // 🆕 Phase 1.10.5: Clear candidate area
+  const candidateArea = document.getElementById('candidate-area');
+  if (candidateArea) {
+    candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 = 預測句子</div>';
+  }
+
+  // 🆕 Phase 1.10.5: Clear code buffer display
+  const codeBufferDisplay = document.getElementById('code-buffer-display');
+  if (codeBufferDisplay) {
+    codeBufferDisplay.innerHTML = '';
+  }
+
+  console.log('[Phase 1.10.5] clearCodeBuffer: All state cleared (code buffer, sentence display, finish hint, candidate area)');
 }
 
 /**
