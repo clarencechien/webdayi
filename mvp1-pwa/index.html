@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html class="dark" lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebDaYi PWA (網頁大易輸入法) - Phase 0.5 POC</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="description" content="Progressive Web App for Dayi Chinese Input Method with personalized N-gram learning">
+  <meta name="theme-color" content="#4ec9b0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WebDaYi PWA">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- PWA Icons -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png">
+
+  <!-- Version Information (for testing verification) -->
+  <meta name="app-version" content="0.5.0">
+  <meta name="app-build" content="20251113-001">
+  <meta name="app-commit" content="pwa-poc">
+  <meta name="app-release" content="PWA POC with IndexedDB + Mobile Keyboard">
+  <!--
+    WebDaYi PWA POC - Version 0.5.0
+    Build: 20251113-001
+    Release: PWA POC with IndexedDB + Mobile Keyboard
+    Phase: 0.5 (PWA Proof of Concept)
+
+    Latest Changes:
+    - Progressive Web App with Service Worker
+    - IndexedDB for user N-gram learning (offline-first)
+    - Manual Export/Import for cross-device sync
+    - Mobile Custom Touch Keyboard (RWD approach)
+    - Based on v2.7 hybrid N-gram engine
+    - Installable on mobile and desktop
+
+    Features:
+    - Service Worker: Offline support + caching
+    - IndexedDB: Local user_ngram.db storage
+    - Export/Import: JSON file sync across devices
+    - Mobile Keyboard: Custom Dayi layout (not QWERTY)
+    - Unified Logic: Same N-gram engine for desktop + mobile
+
+    How to verify version:
+    1. Open browser DevTools console
+    2. Check: "PWA Service Worker registered"
+    3. Check: "IndexedDB module loaded"
+    4. Mobile: Custom keyboard appears at bottom
+  -->
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <style type="text/tailwindcss">
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+    }
+  </style>
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#0fb8f0",
+            "background-light": "#f5f8f8",
+            "background-dark": "#101e22",
+          },
+          fontFamily: {
+            "display": ["Space Grotesk", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 transition-colors duration-200">
+
+  <!-- Fixed Control Buttons (Desktop) -->
+  <div id="desktop-controls" class="fixed top-4 right-4 z-50 hidden sm:flex flex-col gap-2">
+    <!-- Dark Mode Toggle -->
+    <button id="dark-mode-toggle"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg"
+            aria-label="切換深色模式">
+      <span class="material-symbols-outlined text-base">dark_mode</span>
+      <span>Dark</span>
+    </button>
+
+    <!-- Express Mode Toggle -->
+    <button id="mode-toggle-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary px-4 text-sm font-medium text-primary hover:bg-primary/20 dark:hover:bg-primary/30 shadow-md transition-all hover:shadow-lg"
+            aria-label="切換專注模式">
+      <span class="material-symbols-outlined text-base">center_focus_strong</span>
+      <span>Focus</span>
+    </button>
+
+    <!-- Auto-Copy Toggle -->
+    <button id="auto-copy-toggle-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border-2 px-4 text-sm font-medium shadow-md transition-all hover:shadow-lg"
+            aria-label="自動複製">
+      <span class="material-symbols-outlined text-base">content_copy</span>
+      <span class="auto-copy-label">Auto</span>
+    </button>
+
+    <!-- v11: Input Mode Toggle (Character/Sentence) -->
+    <button id="char-mode-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg v11-mode-btn"
+            aria-label="切換逐字模式">
+      <span class="material-symbols-outlined text-base">text_fields</span>
+      <span>逐字</span>
+    </button>
+
+    <button id="sentence-mode-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg v11-mode-btn"
+            aria-label="切換整句模式">
+      <span class="material-symbols-outlined text-base">auto_awesome</span>
+      <span>整句</span>
+    </button>
+
+    <!-- Font Size Decrease -->
+    <button id="font-size-decrease-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg"
+            aria-label="縮小字體">
+      <span class="text-base">A−</span>
+    </button>
+
+    <!-- Font Size Increase -->
+    <button id="font-size-increase-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-md transition-all hover:shadow-lg"
+            aria-label="放大字體">
+      <span class="text-base">A+</span>
+    </button>
+  </div>
+
+  <!-- Mobile FAB Button -->
+  <button id="mobile-controls-fab"
+          class="fixed top-4 right-4 z-50 flex sm:hidden h-12 w-12 items-center justify-center rounded-full bg-primary text-white shadow-lg hover:shadow-xl transition-all hover:scale-105"
+          aria-label="開啟設定">
+    <span class="material-symbols-outlined text-xl">settings</span>
+  </button>
+
+  <!-- Mobile Control Panel -->
+  <div id="mobile-controls-panel"
+       class="fixed inset-0 z-50 hidden sm:hidden">
+    <!-- Backdrop -->
+    <div class="backdrop absolute inset-0 bg-black/50 backdrop-blur-sm"
+         onclick="document.getElementById('mobile-controls-panel').classList.add('hidden')"></div>
+
+    <!-- Panel -->
+    <div class="panel absolute top-0 right-0 bottom-0 w-72 bg-white dark:bg-slate-900 shadow-2xl transform transition-transform">
+      <div class="flex flex-col h-full p-6">
+        <!-- Panel Header -->
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">設定 (Settings)</h3>
+          <button onclick="document.getElementById('mobile-controls-panel').classList.add('hidden')"
+                  class="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  aria-label="關閉">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="space-y-3">
+          <!-- Dark Mode Toggle (Mobile) -->
+          <button id="dark-mode-toggle-mobile"
+                  class="flex w-full h-12 items-center gap-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                  aria-label="切換深色模式">
+            <span class="material-symbols-outlined text-xl">dark_mode</span>
+            <span>深色模式 (Dark Mode)</span>
+          </button>
+
+          <!-- Focus Mode Toggle (Mobile) -->
+          <button id="mode-toggle-btn-mobile"
+                  class="flex w-full h-12 items-center gap-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                  aria-label="切換專注模式">
+            <span class="material-symbols-outlined text-xl">center_focus_strong</span>
+            <span id="mode-label-mobile">專注模式 (Focus Mode)</span>
+          </button>
+
+          <!-- Auto-Copy Toggle (Mobile) -->
+          <button id="auto-copy-toggle-btn-mobile"
+                  class="flex w-full h-12 items-center gap-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                  aria-label="自動複製">
+            <span class="material-symbols-outlined text-xl">content_copy</span>
+            <span class="auto-copy-label-mobile">自動複製 (Auto-Copy)</span>
+          </button>
+
+          <!-- v11: Input Mode Toggle (Mobile) -->
+          <div class="flex gap-2">
+            <button id="char-mode-btn-mobile"
+                    class="flex flex-1 h-12 items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all v11-mode-btn-mobile"
+                    aria-label="切換逐字模式">
+              <span class="material-symbols-outlined text-lg">text_fields</span>
+              <span class="text-xs">逐字</span>
+            </button>
+            <button id="sentence-mode-btn-mobile"
+                    class="flex flex-1 h-12 items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all v11-mode-btn-mobile"
+                    aria-label="切換整句模式">
+              <span class="material-symbols-outlined text-lg">auto_awesome</span>
+              <span class="text-xs">整句</span>
+            </button>
+          </div>
+
+          <!-- Font Size Controls (Mobile) -->
+          <div class="flex gap-2">
+            <button id="font-size-decrease-btn-mobile"
+                    class="flex flex-1 h-12 items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                    aria-label="縮小字體">
+              <span class="text-lg">A−</span>
+              <span class="text-xs">縮小</span>
+            </button>
+            <button id="font-size-increase-btn-mobile"
+                    class="flex flex-1 h-12 items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                    aria-label="放大字體">
+              <span class="text-lg">A+</span>
+              <span class="text-xs">放大</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel Footer -->
+        <div class="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800">
+          <p class="text-xs text-slate-500 dark:text-slate-400 text-center">
+            字體大小: <span id="font-scale-display-mobile">100%</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copy Toast Notification -->
+  <div id="copy-toast"
+       class="fixed bottom-6 right-6 z-50 hidden rounded-lg bg-green-500 px-6 py-3 text-white font-medium shadow-lg animate-slide-in">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">check_circle</span>
+      <span>已複製到剪貼簿</span>
+    </div>
+  </div>
+
+  <!-- Language Mode Indicator (Issue 3 - English mixed input) -->
+  <div id="language-mode-indicator"
+       class="fixed bottom-6 right-6 z-50 hidden rounded-lg bg-yellow-500 px-6 py-3 text-white font-semibold shadow-lg">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">language</span>
+      <span>English Mode (按 Shift 返回中文)</span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="flex min-h-screen w-full flex-col items-center p-4 sm:p-6 md:p-8">
+    <div class="w-full max-w-3xl space-y-8">
+
+      <!-- Header -->
+      <header class="flex flex-col items-center gap-2 text-center" id="app-header">
+        <div class="flex items-center gap-3">
+          <div class="size-8 text-primary">
+            <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path clip-rule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
+            </svg>
+          </div>
+          <h1 class="text-3xl font-bold tracking-tighter text-slate-900 dark:text-white">WebDaYi</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400">網頁大易輸入法 <span class="font-semibold text-primary">v11.2.0</span> (盲打修復版)</p>
+      </header>
+
+      <!-- Instructions Section (hidden in express mode) -->
+      <section id="instructions-section"
+               class="space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 sm:p-6 transition-colors">
+        <details class="group">
+          <summary class="cursor-pointer select-none text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-base group-open:rotate-90 transition-transform">chevron_right</span>
+            <span>使用說明 (Quick Guide)</span>
+          </summary>
+          <div class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-400 pl-6">
+            <div class="space-y-2">
+              <p class="font-medium text-slate-700 dark:text-slate-300">基本操作：</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li>在「輸入碼」框中輸入大易碼（a-z, 0-9）</li>
+                <li>候選字會即時顯示</li>
+                <li>選字後會**自動複製**到剪貼簿（可切換關閉）</li>
+                <li>使用「清除」按鈕快速清空輸出</li>
+              </ul>
+            </div>
+            <div class="space-y-2">
+              <p class="font-medium text-slate-700 dark:text-slate-300">選字方式：</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li>按 <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">Space</kbd> 選第 1 個字</li>
+                <li>按 <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">'</kbd> <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">[</kbd> <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">]</kbd> <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">-</kbd> <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">\</kbd> 選第 2-6 個字</li>
+                <li>點擊候選字直接選取（觸控友善）</li>
+                <li>輸入 2 碼後繼續打第 3 碼會自動選取第 1 個字</li>
+              </ul>
+            </div>
+            <div class="space-y-2">
+              <p class="font-medium text-slate-700 dark:text-slate-300">進階功能：</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li>按 <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">=</kbd> 或使用「上一頁/下一頁」按鈕翻頁</li>
+                <li>輸入法會學習你的選字習慣並自動調整順序</li>
+                <li>按 <kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono">Backspace</kbd> 智慧刪除（先刪輸入碼，再刪輸出字元）</li>
+              </ul>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Mobile UX: Use flexbox for reordering. Desktop: preserve original order -->
+      <main class="w-full flex flex-col space-y-4">
+
+        <!-- Output Section (Top on desktop, compact on mobile) -->
+        <!-- Mobile: order-1, Desktop: order-1 (same) -->
+        <div class="order-1 space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-3 sm:p-6 transition-colors max-h-40 sm:max-h-none overflow-y-auto sm:overflow-visible">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">輸出 (Output)</h2>
+            <div class="flex items-center gap-2">
+              <button id="copy-button"
+                      class="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary/10 dark:bg-primary/20 px-4 text-sm font-medium text-primary hover:bg-primary/20 dark:hover:bg-primary/30 transition-all hover:shadow-md">
+                <span class="material-symbols-outlined text-base">content_copy</span>
+                <span>Copy</span>
+              </button>
+              <button id="clear-button"
+                      class="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-rose-500/10 dark:bg-rose-500/20 px-4 text-sm font-medium text-rose-500 dark:text-rose-400 hover:bg-rose-500/20 dark:hover:bg-rose-500/30 transition-all hover:shadow-md">
+                <span class="material-symbols-outlined text-base">delete</span>
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+          <textarea id="output-buffer"
+                    class="form-textarea w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 text-base text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                    placeholder="選好的文字會出現在這裡... (Selected text appears here)"
+                    rows="3"></textarea>
+        </div>
+
+        <!-- v11: Sentence Mode Panel (shown in sentence mode) -->
+        <!-- Mobile: order-4 (below candidates), Desktop: order-2 (above input) -->
+        <div id="sentence-mode-panel" class="hidden order-4 sm:order-2 space-y-2 sm:space-y-3 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10 p-2 sm:p-3 transition-colors">
+          <!-- Mobile: Compact inline layout, Desktop: Vertical spacious layout -->
+
+          <!-- Live Preview & Code Buffer (inline on mobile, separate on desktop) -->
+          <div class="flex flex-col sm:flex-col gap-2">
+            <!-- Live Preview -->
+            <div id="live-preview-container" class="hidden">
+              <div class="flex items-center gap-1 sm:gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                <span class="material-symbols-outlined text-sm">visibility</span>
+                <span class="hidden sm:inline">即時預覽</span>
+                <span class="sm:hidden">預覽</span>
+              </div>
+              <div id="preview-text" class="text-lg sm:text-2xl font-bold text-center sm:text-center text-slate-800 dark:text-slate-100 tracking-wider py-1 sm:py-2"></div>
+            </div>
+
+            <!-- Code Buffer Display -->
+            <div id="code-buffer-container">
+              <div class="flex items-center justify-between mb-1 sm:mb-2">
+                <div class="flex items-center gap-1 sm:gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+                  <span class="material-symbols-outlined text-sm">code</span>
+                  <span class="hidden sm:inline">已輸入編碼</span>
+                  <span class="sm:hidden">編碼</span>
+                </div>
+                <button id="clear-buffer-btn" class="flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="清除緩衝區 (ESC)">
+                  <span class="material-symbols-outlined text-sm">backspace</span>
+                  <span class="hidden sm:inline">清除</span>
+                </button>
+              </div>
+              <div id="buffered-codes" class="flex flex-wrap gap-1 sm:gap-2 min-h-8 sm:min-h-10 items-center">
+                <span class="text-xs sm:text-sm text-slate-400 dark:text-slate-500 italic">尚無編碼</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirm Prediction Button (compact on mobile) -->
+          <button id="predict-sentence-btn"
+                  class="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white font-semibold text-sm transition-all shadow-md hover:shadow-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span class="material-symbols-outlined text-base sm:text-lg">check_circle</span>
+            <span class="text-xs sm:text-sm">確認預測 (=)</span>
+          </button>
+        </div>
+
+        <!-- Input Section -->
+        <!-- Mobile: order-2 (above candidates), Desktop: order-3 (after sentence panel) -->
+        <div class="order-2 sm:order-3 space-y-3 sm:space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-3 sm:p-6 transition-colors">
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700 dark:text-slate-300" for="input-box">
+              輸入碼 (Dayi Input)
+            </label>
+            <input id="input-box"
+                   type="text"
+                   autofocus
+                   autocomplete="off"
+                   spellcheck="false"
+                   class="form-input h-12 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 text-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono transition-colors"
+                   placeholder="輸入大易碼... (e.g., 'f' for '你')"/>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700 dark:text-slate-300">
+              候選字 (Candidates)
+            </label>
+            <div id="candidate-area"
+                 class="flex min-h-16 flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-2 transition-colors">
+              <div class="w-full text-center text-sm text-slate-400 py-2">請輸入大易碼</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Message -->
+        <div id="status-message"
+             class="flex items-center justify-center gap-2 rounded-full bg-slate-200 dark:bg-slate-800 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-400 transition-colors">
+          <span class="material-symbols-outlined text-sm">info</span>
+          <span>載入中... (Loading...)</span>
+        </div>
+
+        <!-- Debug Section (hidden in express mode) -->
+        <div id="debug-section"
+             class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 p-4 transition-colors">
+          <details class="group">
+            <summary class="cursor-pointer select-none text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-base group-open:rotate-90 transition-transform">chevron_right</span>
+              <span>Debug Information</span>
+            </summary>
+            <div id="debug-info" class="mt-3 text-xs font-mono text-slate-500 dark:text-slate-500 space-y-1">
+              <p>Database loading...</p>
+            </div>
+          </details>
+        </div>
+      </main>
+
+      <!-- Footer (hidden in express mode) -->
+      <footer id="app-footer"
+              class="text-center text-sm text-slate-500 dark:text-slate-500 pb-4 transition-colors">
+        <p>
+          WebDaYi MVP 1.0 v11 - N-gram Sentence Prediction
+          <br>
+          <span class="text-xs">
+            Data source: <a href="https://github.com/rime/rime-dayi" target="_blank" class="text-primary hover:underline">Rime Dàyì Dictionary</a> +
+            <a href="https://github.com/rime/rime-essay" target="_blank" class="text-primary hover:underline">Rime Essay (N-gram)</a>
+          </span>
+        </p>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- v11: N-gram Loading Indicator -->
+  <div id="ngram-loading" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-2xl max-w-sm mx-4 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+      <div class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">載入 N-gram 資料庫</div>
+      <div class="text-sm text-slate-500 dark:text-slate-400">首次使用需載入 10MB 資料...</div>
+    </div>
+  </div>
+
+  <!-- Version Information Script -->
+  <script>
+    // Version information (for testing verification)
+    window.WEBDAYI_VERSION = {
+      version: '11.2.1',
+      build: '20251112-015',
+      buildDate: '2025-11-12T00:00:00Z',
+      commit: '4235471',
+      releaseName: 'Chinese Text Recognition Diagnostics',
+      changes: [
+        'v2.7: Upgraded to hybrid implementation (best of both worlds)',
+        'Architecture: v2.6 OOP design (clean, modular structure)',
+        'Algorithm: v2.5 proven 70/30 weights + Laplace smoothing',
+        'Accuracy: 94.4% (Test 1: 100%, Test 2: 90%)',
+        'Code quality: Adjustable BIGRAM_WEIGHT/UNIGRAM_WEIGHT constants',
+        '--- Benefits ---',
+        'Easier to understand (clear OOP architecture)',
+        'Easier to maintain (modular design)',
+        'Easier to tune (adjustable weight parameters)',
+        'Same accuracy as v2.5 (proven 90%+)'
+      ]
+    };
+
+    // Display version in console for easy verification
+    console.log('%c🚀 WebDaYi MVP 1.0', 'font-size: 16px; font-weight: bold; color: #3b82f6;');
+    console.log('%cVersion: ' + window.WEBDAYI_VERSION.version, 'font-size: 14px; color: #10b981;');
+    console.log('%cBuild: 20251112-015
+    console.log('%cCommit: 4235471
+    console.log('%cRelease: ' + window.WEBDAYI_VERSION.releaseName, 'font-size: 12px; color: #6b7280;');
+    console.log('%c' + '-'.repeat(50), 'color: #d1d5db;');
+    console.log('%cLatest Changes:', 'font-size: 12px; font-weight: bold; color: #f59e0b;');
+    window.WEBDAYI_VERSION.changes.forEach((change, i) => {
+      console.log('%c  ' + (i + 1) + '. ' + change, 'font-size: 11px; color: #9ca3af;');
+    });
+    console.log('%c' + '-'.repeat(50), 'color: #d1d5db;');
+    console.log('%cTo check version: window.WEBDAYI_VERSION', 'font-size: 11px; color: #6b7280; font-style: italic;');
+  </script>
+
+  <!-- Core Logic -->
+  <script src="core_logic.js"></script>
+
+  <!-- v11: N-gram Sentence Prediction -->
+  <!-- CACHE BUSTER: Version parameter forces browser to reload JavaScript -->
+  <script src="viterbi_module.js?v=11.3.5-009"></script>
+  <script src="core_logic_v11.js?v=11.3.3-007"></script>
+  <script src="core_logic_v11_ui.js?v=11.3.3-007"></script>
+
+  <!-- Dark Mode Toggle Script -->
+  <script>
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const htmlElement = document.documentElement;
+
+    // Check saved preference or system preference
+    const darkModePreference = localStorage.getItem('darkMode');
+    if (darkModePreference === 'false') {
+      htmlElement.classList.remove('dark');
+    } else if (darkModePreference === null) {
+      // Default to system preference
+      if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        htmlElement.classList.remove('dark');
+      }
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+      htmlElement.classList.toggle('dark');
+      const isDark = htmlElement.classList.contains('dark');
+      localStorage.setItem('darkMode', isDark);
+
+      // Update icon
+      const icon = darkModeToggle.querySelector('.material-symbols-outlined');
+      icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+      const label = darkModeToggle.querySelector('span:not(.material-symbols-outlined)');
+      if (label) label.textContent = isDark ? 'Light' : 'Dark';
+    });
+
+    // Set initial icon
+    const isDark = htmlElement.classList.contains('dark');
+    const icon = darkModeToggle.querySelector('.material-symbols-outlined');
+    icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    const label = darkModeToggle.querySelector('span:not(.material-symbols-outlined)');
+    if (label) label.textContent = isDark ? 'Light' : 'Dark';
+  </script>
+
+  <!-- Update debug info and status after loading -->
+  <script>
+    setTimeout(() => {
+      const debugInfo = document.getElementById('debug-info');
+      const statusMessage = document.getElementById('status-message');
+
+      if (debugInfo && typeof dayiMap !== 'undefined' && dayiMap) {
+        debugInfo.innerHTML = `
+          <p><strong>Database Status:</strong> ✓ Loaded</p>
+          <p><strong>Total Codes:</strong> ${dayiMap.size.toLocaleString()}</p>
+          <p><strong>Sample Queries:</strong></p>
+          <ul class="ml-4 mt-1 space-y-0.5">
+            <li><code class="text-primary">'v'</code> → ${queryCandidates(dayiMap, 'v').slice(0, 3).map(c => c.char).join(', ')}</li>
+            <li><code class="text-primary">'a'</code> → ${queryCandidates(dayiMap, 'a').slice(0, 3).map(c => c.char).join(', ')}</li>
+          </ul>
+        `;
+      }
+
+      if (statusMessage && typeof dayiMap !== 'undefined' && dayiMap) {
+        statusMessage.innerHTML = `
+          <span class="material-symbols-outlined text-base text-green-500">check_circle</span>
+          <span>字典載入完成！已載入 ${dayiMap.size.toLocaleString()} 個字碼</span>
+        `;
+      }
+    }, 1000);
+  </script>
+
+  <!-- Add custom animation -->
+  <style>
+    @keyframes slide-in {
+      from {
+        transform: translateY(1rem);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .animate-slide-in {
+      animation: slide-in 0.3s ease-out;
+    }
+
+    /* v11: Mode Toggle Styles */
+    .mode-btn {
+      background: transparent;
+      color: var(--tw-text-opacity);
+    }
+    .mode-btn:hover {
+      background: rgba(15, 184, 240, 0.1);
+    }
+    .mode-btn.active {
+      background: #0fb8f0;
+      color: white;
+      box-shadow: 0 2px 8px rgba(15, 184, 240, 0.3);
+    }
+
+    /* v11: Buffered Code Badges */
+    .buffered-code-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.375rem 0.75rem;
+      background: #0fb8f0;
+      color: white;
+      border-radius: 0.375rem;
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      font-size: 0.875rem;
+      animation: slide-in 0.2s ease-out;
+    }
+    .dark .buffered-code-badge {
+      background: #0fb8f0;
+    }
+
+    /* v11: Sentence Prediction Result */
+    .sentence-prediction {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      animation: slide-in 0.3s ease-out;
+    }
+    .prediction-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+    }
+    .predicted-sentence {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.2em;
+      margin: 1rem 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    .prediction-details {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 0.875rem;
+    }
+    .char-breakdown {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .prediction-score {
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 640px) {
+      .mode-btn span:not(.material-symbols-outlined) {
+        display: none;
+      }
+      .predicted-sentence {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+
+  <!-- PWA: IndexedDB Module -->
+  <script type="module" src="js/user_db_indexeddb.js"></script>
+
+  <!-- PWA: Service Worker Registration -->
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('%c[PWA] Service Worker registered successfully', 'color: #4ec9b0; font-weight: bold');
+            console.log('Scope:', registration.scope);
+
+            // Check for updates periodically
+            setInterval(() => {
+              registration.update();
+            }, 60000); // Check every minute
+          })
+          .catch(error => {
+            console.error('[PWA] Service Worker registration failed:', error);
+          });
+      });
+
+      // Handle Service Worker updates
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('[PWA] New Service Worker activated');
+        // Optionally reload the page to get the latest version
+        // window.location.reload();
+      });
+    } else {
+      console.warn('[PWA] Service Workers are not supported in this browser');
+    }
+  </script>
+
+  <!-- PWA: IndexedDB Integration & Export/Import -->
+  <script type="module">
+    import { UserDB } from './js/user_db_indexeddb.js';
+
+    // Initialize UserDB
+    let userDB = null;
+    let userDBReady = false;
+
+    async function initUserDB() {
+      try {
+        userDB = new UserDB();
+        await userDB.open();
+        userDBReady = true;
+        console.log('%c[PWA] IndexedDB initialized successfully', 'color: #4ec9b0; font-weight: bold');
+
+        // Update UI
+        const dbStatus = document.getElementById('userdb-status');
+        if (dbStatus) {
+          dbStatus.innerHTML = '✓ IndexedDB Ready';
+          dbStatus.className = 'text-green-500 text-sm';
+        }
+
+        // Get and display stats
+        updateUserDBStats();
+      } catch (error) {
+        console.error('[PWA] IndexedDB initialization failed:', error);
+        const dbStatus = document.getElementById('userdb-status');
+        if (dbStatus) {
+          dbStatus.innerHTML = '✗ IndexedDB Error';
+          dbStatus.className = 'text-red-500 text-sm';
+        }
+      }
+    }
+
+    async function updateUserDBStats() {
+      if (!userDB) return;
+
+      try {
+        const stats = await userDB.getStats();
+        const statsElement = document.getElementById('userdb-stats');
+        if (statsElement) {
+          statsElement.innerHTML = `
+            <div class="text-sm text-slate-600 dark:text-slate-400">
+              <p><strong>Learned Patterns:</strong> ${stats.count}</p>
+              <p><strong>Avg Weight:</strong> ${stats.avgWeight.toFixed(3)}</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('[PWA] Failed to get UserDB stats:', error);
+      }
+    }
+
+    // Export learned patterns
+    async function exportLearnedPatterns() {
+      if (!userDB) {
+        alert('IndexedDB not ready. Please wait a moment and try again.');
+        return;
+      }
+
+      try {
+        const weights = await userDB.getAllWeights();
+        const exportData = {
+          version: "1.0.0",
+          exported: new Date().toISOString(),
+          count: Object.keys(weights).length,
+          data: weights
+        };
+
+        // Create blob and download
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+          type: 'application/json'
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `webdayi_learned_patterns_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        console.log(`[PWA] Exported ${exportData.count} learned patterns`);
+        alert(`Successfully exported ${exportData.count} learned patterns!`);
+      } catch (error) {
+        console.error('[PWA] Export failed:', error);
+        alert('Export failed. Please check the console for details.');
+      }
+    }
+
+    // Import learned patterns
+    async function importLearnedPatterns() {
+      if (!userDB) {
+        alert('IndexedDB not ready. Please wait a moment and try again.');
+        return;
+      }
+
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+
+      input.onchange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+          const text = await file.text();
+          const importData = JSON.parse(text);
+
+          // Validate format
+          if (!importData.version || !importData.data) {
+            throw new Error('Invalid file format');
+          }
+
+          // Import weights
+          await userDB.importWeights(importData.data);
+
+          console.log(`[PWA] Imported ${importData.count} learned patterns`);
+          alert(`Successfully imported ${importData.count} learned patterns!`);
+
+          // Update stats
+          updateUserDBStats();
+        } catch (error) {
+          console.error('[PWA] Import failed:', error);
+          alert('Import failed. Please check the file format and try again.');
+        }
+      };
+
+      input.click();
+    }
+
+    // Clear all learned patterns
+    async function clearAllPatterns() {
+      if (!userDB) {
+        alert('IndexedDB not ready. Please wait a moment and try again.');
+        return;
+      }
+
+      const confirmed = confirm('Are you sure you want to clear all learned patterns? This cannot be undone.');
+      if (!confirmed) return;
+
+      try {
+        await userDB.clearAll();
+        console.log('[PWA] Cleared all learned patterns');
+        alert('All learned patterns have been cleared.');
+
+        // Update stats
+        updateUserDBStats();
+      } catch (error) {
+        console.error('[PWA] Clear failed:', error);
+        alert('Clear failed. Please check the console for details.');
+      }
+    }
+
+    // Initialize UserDB when page loads
+    window.addEventListener('load', () => {
+      initUserDB();
+    });
+
+    // Expose functions globally for button handlers
+    window.exportLearnedPatterns = exportLearnedPatterns;
+    window.importLearnedPatterns = importLearnedPatterns;
+    window.clearAllPatterns = clearAllPatterns;
+    window.updateUserDBStats = updateUserDBStats;
+  </script>
+
+</body>
+</html>

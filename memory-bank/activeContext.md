@@ -1,23 +1,308 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-12 (📋 v3.0 Smart Upgrade Planning!)
-**Current Phase**: 📋 Planning MVP 3.0 v2 - Personalized Learning & Context-Aware
-**Current Version**: 11.3.5 (Build: 20251112-009, Commit: 752397f)
+**Last Updated**: 2025-11-13 (🚧 Phase 0.5 PWA POC Implementation!)
+**Current Phase**: 🚧 Implementing Phase 0.5 - PWA POC with IndexedDB + Mobile Keyboard
+**Current Version**: 0.5.0-alpha (Build: 20251113-001, PWA POC)
 **Main Branch Status**: ✅ v2.7 Hybrid (OOP + 70/30 + Laplace) + Full ngram_db.json (Production Ready)
 **Feature Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
-**Next Milestone**: Begin Phase 1 - F-4.0 UserDB.js Implementation
+**Next Milestone**: Complete Phase 0.5 implementation (~60% done)
 
 **Latest Achievements**:
-- ✅ Smart Engine 94.4% accuracy (17/18) - v2.7 Production Ready
-- ✅ Comprehensive v3.0 design document (DESIGN-v3-smart-upgrade.md v1.2 with PWA POC + Mobile Keyboard)
-- ✅ PRD updated to v1.4 with F-4.0, F-5.0, PWA POC, and Mobile Custom Keyboard
-- ✅ Architecture evolution planned (v2.7 → PWA POC → v3.0 → Extension)
-- ✅ Implementation roadmap adjusted (9-week plan with PWA POC first)
-- ✅ Mobile strategy: Custom touch keyboard (RWD approach, ~300 lines)
+- ✅ Phase 0 (Foundation): 100% Complete - Planning & Documentation
+- 🚧 Phase 0.5 (PWA POC): 60% Complete - Core infrastructure implemented
+  - ✅ Directory structure (mvp1-pwa/)
+  - ✅ IndexedDB module with 30 TDD tests
+  - ✅ PWA manifest.json
+  - ✅ Service Worker with offline caching
+  - ✅ PWA index.html with Service Worker + IndexedDB integration
+  - ⏳ Export/Import UI (pending)
+  - ⏳ Mobile custom touch keyboard (pending)
+  - ⏳ Core N-gram integration (pending)
 
 ---
 
-## 🆕 SESSION 10.5: PWA POC Strategy Adjustment (2025-11-12) - ✅ COMPLETE!
+## 🆕 SESSION 10.7: Phase 0.5 Implementation (2025-11-13) - 🚧 IN PROGRESS (60%)
+
+**Status**: 🚧 Implementing | ✅ Core Infrastructure Complete | ⏳ UI & Integration Pending
+
+### Implementation Approach: TDD (Test-Driven Development)
+
+Following best practices, implemented with tests-first approach:
+1. Write tests first (test-indexeddb.html - 30 tests)
+2. Implement code to pass tests (user_db_indexeddb.js - 320 lines)
+3. Verify all tests pass
+4. Integrate with PWA infrastructure
+
+### Completed Components ✅
+
+**1. Directory Structure** (mvp1-pwa/)
+```
+mvp1-pwa/
+├── js/
+│   └── user_db_indexeddb.js     ✅ 320 lines
+├── tests/
+│   └── test-indexeddb.html      ✅ 30 tests (7 categories)
+├── manifest.json                 ✅ PWA manifest
+├── sw.js                         ✅ 240 lines (Service Worker)
+├── index.html                    ✅ 880 lines (PWA entry)
+└── README.md                     ✅ Documentation
+```
+
+**2. IndexedDB Module** (user_db_indexeddb.js - 320 lines)
+- **Schema**: `{ id: "prevChar→currChar", weight, lastUpdated }`
+- **Methods**:
+  - `open()`: Initialize database
+  - `getWeight(prev, curr)`: Query learned weight (returns 0 if not found)
+  - `setWeight(prev, curr, weight)`: Update weight
+  - `getAllWeights()`: Export all data as `{ "天→氣": 0.8, ... }`
+  - `importWeights(data)`: Import from JSON
+  - `clearAll()`: Clear all patterns
+  - `getStats()`: Database statistics (count, totalWeight, avgWeight)
+  - `close()`: Close connection
+  - `deleteDatabase()`: Complete reset
+
+**3. TDD Test Suite** (test-indexeddb.html - 30 tests)
+- **Category 1**: Database Structure (5 tests)
+  - Class instantiation
+  - Method existence validation
+- **Category 2**: Database Initialization (4 tests)
+  - open() success
+  - Initial getWeight() returns 0
+  - setWeight() + getWeight() round-trip
+- **Category 3**: Weight Operations (6 tests)
+  - Set weight for new bigram
+  - Update existing weight
+  - Set weight to 0
+  - Set negative weight
+  - Get non-existent bigram (returns 0)
+  - Multiple bigrams stored independently
+- **Category 4**: Export/Import (5 tests)
+  - getAllWeights() returns data
+  - Export format validation
+  - importWeights() completes
+  - Imported data matches exported
+  - Import overwrites existing
+- **Category 5**: Edge Cases (4 tests)
+  - Empty string characters
+  - Emoji characters (😀, 🎉)
+  - Very large weight values (1M)
+  - Very small weight values (0.0000001)
+- **Category 6**: Performance (2 tests)
+  - 100 writes < 5 seconds
+  - 100 reads < 2 seconds
+- **Category 7**: Concurrent Operations (2 tests)
+  - Concurrent writes to different keys
+  - Concurrent writes to same key (last write wins)
+
+**Test Results**: 30/30 passing ✅
+
+**4. PWA Manifest** (manifest.json)
+- App metadata (name, description, icons)
+- Standalone display mode
+- Theme color: #4ec9b0
+- Shortcuts: Character mode, Sentence mode
+- Categories: productivity, utilities
+- Language: zh-TW
+
+**5. Service Worker** (sw.js - 240 lines)
+- **Caching Strategy**: Cache First, Network Fallback
+- **Pre-cache on install**:
+  - Static assets (HTML, CSS, JS)
+  - Database files (dayi_db.json, ngram_db.json)
+- **Runtime caching**: Dynamic requests cached as accessed
+- **Background updates**: Large database files updated in background
+- **Event Handlers**:
+  - install: Pre-cache assets
+  - activate: Clean old caches
+  - fetch: Cache-first strategy
+  - message: Skip waiting, clear cache
+  - sync: Background sync (placeholder)
+  - push: Push notifications (placeholder)
+
+**6. PWA Index.html** (880 lines)
+- **Base**: Copied from MVP 1.0 v11.3.5
+- **Added**:
+  - PWA meta tags (theme-color, apple-mobile-web-app-*)
+  - Manifest link
+  - Service Worker registration (lines 683-711)
+  - IndexedDB module import (line 680)
+  - IndexedDB integration functions (lines 713-877):
+    - `initUserDB()`: Initialize database
+    - `updateUserDBStats()`: Display statistics
+    - `exportLearnedPatterns()`: Download JSON file
+    - `importLearnedPatterns()`: Upload JSON file
+    - `clearAllPatterns()`: Clear with confirmation
+  - Global function exposure for UI buttons
+
+### Pending Work ⏳
+
+**7. Export/Import UI Elements** (Est. 0.5 days)
+- [ ] Add "Export Learned Patterns" button
+- [ ] Add "Import Learned Patterns" button
+- [ ] Add "Clear All Data" button
+- [ ] Add UserDB status indicator (`#userdb-status`)
+- [ ] Add learned patterns statistics display (`#userdb-stats`)
+- [ ] Style buttons consistently with existing UI
+
+**8. Core Files Migration** (Est. 0.5 days)
+- [ ] Copy from mvp1/ to mvp1-pwa/:
+  - `core_logic.js`
+  - `viterbi_module.js`
+  - `core_logic_v11.js`
+  - `core_logic_v11_ui.js`
+  - `dayi_db.json` (9MB)
+  - `ngram_db.json` (10.4MB)
+- [ ] Update script paths in index.html
+- [ ] Test basic input functionality
+
+**9. Mobile Custom Touch Keyboard** (Est. 2 days)
+- [ ] HTML: ~50 buttons for Dayi layout (~100 lines)
+- [ ] CSS: Grid layout + RWD breakpoints (~150 lines)
+  - Desktop: `display: none`
+  - Mobile: `display: grid; position: fixed; bottom: 0`
+- [ ] JavaScript: Unified input handler (~50 lines)
+  - Desktop: `keydown` events → `viterbi.processInput(code)`
+  - Mobile: `click`/`touchstart` → `viterbi.processInput(code)`
+- [ ] Prevent system keyboard: `inputmode="none"`
+- [ ] Touch feedback:
+  - Haptic: `navigator.vibrate(50)`
+  - Visual: Active state animation
+  - Audio: Optional beep
+
+**10. UserDB Integration with N-gram Engine** (Est. 1 day)
+- [ ] Modify Viterbi scoring to query UserDB
+- [ ] Formula: `Final Score = Base N-gram Score + UserDB Weight`
+- [ ] Add learning detection logic
+- [ ] Add learning feedback UI ("✓ Learned: 天氣 > 天真")
+- [ ] Test learning persistence
+
+**11. RWD Tests** (Est. 0.5 days)
+- [ ] Create test-rwd.html
+- [ ] Test desktop: keyboard hidden
+- [ ] Test mobile: keyboard shown
+- [ ] Test input parity (desktop vs mobile results)
+- [ ] Test touch feedback
+- [ ] Test system keyboard prevention
+- [ ] 10+ tests covering all RWD scenarios
+
+**12. Integration Testing** (Est. 0.5 days)
+- [ ] Manual: Learn → Export → Clear → Import → Verify
+- [ ] Cross-device: Export on Device A → Import on Device B
+- [ ] Offline: Service Worker caching works
+- [ ] Performance: IndexedDB queries < 5ms
+- [ ] Mobile: Touch keyboard triggers N-gram correctly
+- [ ] Mobile: System keyboard blocked (Gboard/iOS)
+
+### Technical Details
+
+**IndexedDB Schema**:
+```javascript
+{
+  id: "天→氣",              // Key (bigram)
+  prevChar: "天",            // Previous character
+  currChar: "氣",            // Current character
+  weight: 0.8,              // Learned weight (float)
+  lastUpdated: "2025-11-13T01:00:00Z"  // ISO timestamp
+}
+```
+
+**Export/Import Format**:
+```json
+{
+  "version": "1.0.0",
+  "exported": "2025-11-13T01:00:00Z",
+  "count": 42,
+  "data": {
+    "天→氣": 0.8,
+    "天→真": 0.3,
+    "大→易": 1.5
+  }
+}
+```
+
+**Service Worker Cache Strategy**:
+```
+1. Request → Check Cache
+2. Cache Hit? → Return Cached Response + Background Update (for DBs)
+3. Cache Miss? → Fetch from Network
+4. Network Success? → Cache Response + Return
+5. Network Fail? → Return Offline Page or 503 Error
+```
+
+**RWD Architecture**:
+```
+Single index.html:
+  - Desktop: Physical keyboard (keydown) → core_logic.js
+  - Mobile: Touch keyboard (click) → core_logic.js
+  - Same Viterbi engine for both!
+```
+
+### Files Modified/Created (Session 10.7)
+
+**New Files**:
+1. `mvp1-pwa/js/user_db_indexeddb.js` (320 lines)
+2. `mvp1-pwa/tests/test-indexeddb.html` (530 lines)
+3. `mvp1-pwa/manifest.json` (70 lines)
+4. `mvp1-pwa/sw.js` (240 lines)
+5. `mvp1-pwa/index.html` (880 lines, modified from MVP 1.0)
+6. `mvp1-pwa/README.md` (comprehensive documentation)
+7. `mvp1-pwa/css/` (directory created)
+
+**Total New Code**: ~2,040 lines (excluding copied MVP 1.0 base)
+
+### Current Progress Summary
+
+| Component | Status | Completion |
+|-----------|--------|------------|
+| Directory Structure | ✅ Complete | 100% |
+| IndexedDB Module | ✅ Complete | 100% |
+| TDD Tests | ✅ Complete | 100% (30/30) |
+| PWA Manifest | ✅ Complete | 100% |
+| Service Worker | ✅ Complete | 100% |
+| PWA Index.html Base | ✅ Complete | 100% |
+| Export/Import Functions | ✅ Complete | 100% |
+| Export/Import UI | ⏳ Pending | 0% |
+| Core Files Migration | ⏳ Pending | 0% |
+| Mobile Touch Keyboard | ⏳ Pending | 0% |
+| UserDB-N-gram Integration | ⏳ Pending | 0% |
+| RWD Tests | ⏳ Pending | 0% |
+| Integration Testing | ⏳ Pending | 0% |
+| **Overall Phase 0.5** | 🚧 In Progress | **60%** |
+
+### Next Steps
+
+**Immediate** (Complete remaining 40%):
+1. Add Export/Import UI elements (buttons + status indicators)
+2. Copy core logic files from mvp1/
+3. Implement mobile custom touch keyboard
+4. Integrate UserDB with Viterbi scoring
+5. Write RWD tests (10+)
+6. Perform integration testing
+
+**Estimated Time Remaining**: 4-5 days
+
+### Success Criteria (from Planning)
+
+- ✅ **PWA installable on mobile/desktop** (manifest + SW ready)
+- ⏳ **User can learn preferences** (UserDB ready, integration pending)
+- ⏳ **Export/Import works across devices** (functions ready, UI pending)
+- ⏳ **Offline mode functional** (SW ready, testing pending)
+- ⏳ **Performance: < 10ms total overhead** (testing pending)
+- ⏳ **Mobile: Custom Dayi keyboard works** (pending implementation)
+- ⏳ **Mobile: Same N-gram predictions as desktop** (pending testing)
+- ⏳ **Mobile: Touch feedback works** (pending implementation)
+
+### Notes
+
+- **TDD Approach**: All core modules developed with tests first ✅
+- **Code Quality**: Well-documented, modular, extensible
+- **Browser Compatibility**: Requires modern browser (ES6 modules, IndexedDB, Service Worker)
+- **Testing Server**: Requires HTTP server for Service Worker (Python `http.server` or similar)
+- **Mobile Testing**: Requires actual mobile device or emulator for touch keyboard testing
+
+---
+
+## 📋 SESSION 10.6: Mobile Custom Touch Keyboard Strategy (2025-11-12) - ✅ COMPLETE!
 
 **Status**: ✅ Design Updated | ✅ PRD Updated | ✅ Roadmap Adjusted
 
