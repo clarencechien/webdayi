@@ -120,23 +120,32 @@
     let currentSuite = null;
 
     function describe(suiteName, fn) {
+      console.log(`\n📋 [TEST SUITE] ${suiteName}`);
+      console.log(`${'='.repeat(60)}`);
       currentSuite = { name: suiteName, tests: [] };
       fn();
       renderTestSuite(currentSuite);
+      console.log(`${'='.repeat(60)}\n`);
     }
 
     async function it(testName, fn) {
       const test = { name: testName, status: 'pending', error: null };
       currentSuite.tests.push(test);
 
+      console.log(`🧪 [TEST START] ${currentSuite.name} → ${testName}`);
+
       try {
         await fn();
         test.status = 'pass';
         test.result = '✓ Passed';
+        console.log(`✅ [TEST PASS] ${testName}`);
       } catch (error) {
         test.status = 'fail';
         test.error = error.message;
         test.result = `✗ Failed: ${error.message}`;
+        console.error(`❌ [TEST FAIL] ${testName}`);
+        console.error(`   Error: ${error.message}`);
+        console.error(`   Stack:`, error.stack);
       }
 
       testResults.push(test);
@@ -146,36 +155,43 @@
     function expect(actual) {
       return {
         toBe(expected) {
+          console.log(`   Checking: ${JSON.stringify(actual)} === ${JSON.stringify(expected)}`);
           if (actual !== expected) {
             throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
           }
         },
         toEqual(expected) {
+          console.log(`   Checking equal:`, { actual, expected });
           if (JSON.stringify(actual) !== JSON.stringify(expected)) {
             throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
           }
         },
         toBeDefined() {
+          console.log(`   Checking defined:`, actual);
           if (actual === undefined || actual === null) {
             throw new Error(`Expected value to be defined, got ${actual}`);
           }
         },
         toBeTruthy() {
+          console.log(`   Checking truthy:`, actual);
           if (!actual) {
             throw new Error(`Expected truthy value, got ${actual}`);
           }
         },
         toBeGreaterThan(expected) {
+          console.log(`   Checking: ${actual} > ${expected}`);
           if (actual <= expected) {
             throw new Error(`Expected ${actual} to be greater than ${expected}`);
           }
         },
         toContain(expected) {
+          console.log(`   Checking contains:`, { actual, expected });
           if (!actual.includes(expected)) {
             throw new Error(`Expected ${JSON.stringify(actual)} to contain ${JSON.stringify(expected)}`);
           }
         },
         toBeInstanceOf(expected) {
+          console.log(`   Checking instanceof:`, { actual: typeof actual, expected: expected.name });
           if (!(actual instanceof expected)) {
             throw new Error(`Expected instance of ${expected.name}, got ${typeof actual}`);
           }
@@ -727,6 +743,30 @@
 
       // Update final summary
       updateSummary();
+
+      // Log detailed test summary to console
+      const passed = testResults.filter(t => t.status === 'pass').length;
+      const failed = testResults.filter(t => t.status === 'fail').length;
+      const total = testResults.length;
+
+      console.log(`\n${'*'.repeat(60)}`);
+      console.log(`🏁 TEST SUMMARY`);
+      console.log(`${'*'.repeat(60)}`);
+      console.log(`✅ Passed: ${passed}/${total}`);
+      console.log(`❌ Failed: ${failed}/${total}`);
+      console.log(`📊 Success Rate: ${((passed/total)*100).toFixed(1)}%`);
+
+      if (failed > 0) {
+        console.log(`\n❌ FAILING TESTS:`);
+        testResults.filter(t => t.status === 'fail').forEach((test, i) => {
+          console.log(`\n${i+1}. ${test.name}`);
+          console.log(`   Error: ${test.error}`);
+        });
+      } else {
+        console.log(`\n🎉 ALL TESTS PASSED!`);
+      }
+
+      console.log(`${'*'.repeat(60)}\n`);
     }
 
     // Run all tests when page loads
