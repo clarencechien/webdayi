@@ -1,11 +1,11 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-13 (🎉 Phase 1 F-4.0 COMPLETE + PWA Ready!)
-**Current Phase**: ✅ Phase 1.8 COMPLETE - F-4.0 Learning (Character + Sentence) + PWA Installation
-**Current Version**: 0.5.0 (Build: 20251113-004, PWA Production Ready)
+**Last Updated**: 2025-11-13 (🚀 Phase 1.9 - Sentence Mode UX Redesign!)
+**Current Phase**: 🚧 Phase 1.9 IN PROGRESS - Sentence Mode UX Improvement
+**Current Version**: 0.5.0 (Build: 20251113-005, UX Redesign)
 **Main Branch Status**: ✅ v2.7 Hybrid (OOP + 70/30 + Laplace) + Full ngram_db.json (Production Ready)
 **Feature Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
-**Next Milestone**: Phase 1.9 - F-5.0 Context-Adaptive Weights
+**Next Milestone**: Phase 1.9 Complete - Top-N Prediction Cycling + Character-Level Editing
 
 **Latest Achievements**:
 - ✅ **CHARACTER MODE LEARNING**: Character mode now records to Phase 1 UserDB (both modes unified!)
@@ -418,6 +418,447 @@ const DATABASE_ASSETS = [
    - All critical bugs fixed
    - TDD coverage for UI fixes
    - Comprehensive documentation
+
+---
+
+## 🆕 SESSION 10.11 PART 3: Sentence Mode UX Redesign (2025-11-13)
+
+**Status**: 🚧 PLANNING | UX Redesign for Minimal User Actions
+**Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
+**Goal**: Minimize user actions, unify prediction and output buffer workflow
+
+### Problem Analysis 🔍
+
+**User Feedback**:
+> "這個邏輯跟我想的不一樣 智慧預測與output buffer用處好像有點重疊 而且按下 = 並沒有學習"
+> "整句模式可以用 = 切換五種整句的猜測 看哪個最接近 並且點擊單一個字可以重選候選字 enter 後送到buffer區"
+> "ultrathink 逐字模式與整句模式的ux 試著讓 user 的動作最少 以便能快速打字"
+
+**Current Problems**:
+
+1. **Confusing Workflow** ❌:
+   - Prediction displayed in separate area (not in output buffer)
+   - No clear confirmation flow (how to finalize prediction?)
+   - = key doesn't work after prediction (buffer empty)
+   - Overlapping purpose: prediction area vs output buffer
+
+2. **No Prediction Cycling** ❌:
+   - Only shows top-1 prediction
+   - Cannot see alternative predictions (top-2, top-3, ...)
+   - User has no choice if top-1 is wrong
+
+3. **No Learning Trigger** ❌:
+   - User edits prediction but no learning happens
+   - = key doesn't trigger learning (buffer empty)
+   - Editing is possible but pointless (no confirmation)
+
+4. **Too Many Actions** ❌:
+   - Current: Type codes → Space → [edit?] → [???] → unclear
+   - User wants: Minimal actions for fast typing
+
+---
+
+### Ultrathinking: Character Mode vs Sentence Mode UX 💭
+
+**Character Mode** - ✅ Clear and Efficient:
+```
+Action Flow:
+1. Type code (e.g., "c8")
+2. See candidates
+3. Press number key (Space or '[]-)
+4. Character → output buffer
+5. Repeat
+
+Actions per character: 2-3 keys
+User experience: Fast, predictable, no confusion
+```
+
+**Sentence Mode (Current)** - ❌ Confusing:
+```
+Action Flow:
+1. Type codes (e.g., "4jp ad c8")
+2. Press Space → prediction shows in separate area
+3. Can edit prediction (contenteditable)
+4. Press = → ERROR (buffer empty, cannot predict again)
+5. ??? How to confirm? No Enter handler
+
+Actions per sentence: Unclear, broken workflow
+User experience: Confusing, incomplete, broken
+```
+
+**Sentence Mode (Redesigned)** - ✅ Clear and Efficient:
+```
+Action Flow:
+1. Type codes (e.g., "4jp ad c8")
+2. Press Space → show prediction #1 (top-1)
+3. [Optional] Press = → cycle to prediction #2 (top-2)
+4. [Optional] Press = → cycle to prediction #3 (top-3)
+5. [Optional] Press = → ... up to #5, then back to #1
+6. [Optional] Click character → popup candidates → replace
+7. Press Enter → confirm, learn, → output buffer
+
+Actions per sentence: 2-5 keys
+User experience: Fast, clear confirmation, full control
+```
+
+**Key Improvements**:
+- ✅ = key: Cycle through top-5 predictions (not broken anymore)
+- ✅ Enter key: Clear confirmation action (finalize + learn + output)
+- ✅ Character-level editing: Click to change individual characters
+- ✅ Minimal actions: Most common case = Space + Enter (2 keys)
+- ✅ Learning: Triggered on Enter (compares original vs final)
+
+---
+
+### New UX Design 🎨
+
+**Core Principles**:
+1. **Space = Trigger prediction** (show top-1)
+2. **= = Cycle predictions** (top-1 → top-2 → ... → top-5 → loop)
+3. **Click character = Fine-tune** (show candidates for that position)
+4. **Enter = Confirm** (learn + output buffer + clear)
+
+**User Actions Comparison**:
+
+| Scenario | Current (broken) | New (optimized) |
+|----------|------------------|-----------------|
+| Accept top-1 | Space + ??? | Space + Enter (2 keys) ✅ |
+| Try top-2 | Not possible | Space + = + Enter (3 keys) ✅ |
+| Edit 1 char | Space + click + edit + ??? | Space + click + select + Enter (4 actions) ✅ |
+| Full edit | Space + manual edit + ??? | Space + [= cycle] + [click edits] + Enter ✅ |
+
+**Minimum Actions**: 2 keys (Space + Enter) for most common case ✅
+
+---
+
+### Data Structures
+
+**Global State**:
+```javascript
+// Top-N predictions storage
+let currentPredictions = []; // Array of {sentence, score, path}
+let currentPredictionIndex = 0; // Which one displayed (0-4)
+let originalPrediction = null; // First prediction for learning
+let editedPrediction = null; // User's final version
+
+// Example structure
+currentPredictions = [
+  {
+    sentence: "高鐵站務艙",
+    score: -31.778,
+    path: [
+      {char: '高', code: '4jp', candidates: ['高', '搞', '膏']},
+      {char: '鐵', code: 'ad', candidates: ['鐵', '貼', '帖']},
+      {char: '站', code: 'c8', candidates: ['站', '佔', '粘']}
+    ]
+  },
+  {sentence: "高鐵站物倉", score: -33.123, path: [...]},
+  // ... up to 5 predictions
+];
+```
+
+---
+
+### Key Handlers Logic
+
+**Space Key** (trigger prediction):
+```javascript
+if (sentenceMode && codesBuffer.length > 0) {
+  // 1. Run Viterbi to get top-5 predictions
+  currentPredictions = await getTopNPredictions(codesBuffer, 5);
+  currentPredictionIndex = 0;
+  originalPrediction = currentPredictions[0].sentence;
+
+  // 2. Display first prediction
+  displayPrediction(currentPredictions[0]);
+
+  // 3. Show hint: "按 = 切換預測 | 點擊字重選 | Enter 確認"
+  showPredictionHint();
+}
+```
+
+**= Key** (cycle predictions):
+```javascript
+if (sentenceMode && currentPredictions.length > 0) {
+  // 1. Cycle to next prediction
+  currentPredictionIndex = (currentPredictionIndex + 1) % currentPredictions.length;
+
+  // 2. Display new prediction
+  displayPrediction(currentPredictions[currentPredictionIndex]);
+
+  // 3. Update indicator: "預測 2/5"
+  updatePredictionIndicator(currentPredictionIndex + 1, currentPredictions.length);
+
+  // 4. Reset edited flag
+  editedPrediction = null;
+}
+```
+
+**Enter Key** (confirm and finalize):
+```javascript
+if (sentenceMode && currentPrediction) {
+  const finalSentence = getCurrentPredictionText();
+
+  // 1. Detect learning (compare original vs final)
+  if (originalPrediction !== finalSentence) {
+    const learningData = detectLearning(originalPrediction, finalSentence);
+
+    if (learningData.length > 0) {
+      await applyLearning(learningData, window.userDB);
+      showLearningFeedback(learningData); // Toast notification
+      updateUserDBStats(); // Update stats display
+    }
+  }
+
+  // 2. Append to output buffer
+  appendToOutputBuffer(finalSentence);
+
+  // 3. Clear codes buffer and predictions
+  clearCodesBuffer();
+  clearPredictions();
+  currentPredictions = [];
+  currentPredictionIndex = 0;
+
+  // 4. Auto-copy if enabled
+  if (autoCopyEnabled) {
+    performAutoCopy(outputBuffer.value);
+  }
+
+  // 5. Focus back to input
+  focusInputBox();
+}
+```
+
+**Character Click** (fine-tune editing):
+```javascript
+function onCharacterClick(position) {
+  const predictionPath = currentPredictions[currentPredictionIndex].path;
+  const charInfo = predictionPath[position];
+  const code = charInfo.code;
+
+  // 1. Get all candidates for this code
+  const candidates = dayiDb.get(code);
+
+  // 2. Show popup at character position
+  showCandidatePopup(position, candidates);
+}
+
+function onCandidateSelect(position, newChar) {
+  // 1. Replace character at position
+  replaceCharacterAt(position, newChar);
+
+  // 2. Mark as edited
+  editedPrediction = getCurrentPredictionText();
+
+  // 3. Hide popup
+  hideCandidatePopup();
+}
+```
+
+---
+
+### UI Changes
+
+**Prediction Display Area** (Before):
+```html
+<div id="prediction-result">
+  <div contenteditable="true">高鐵站務艙</div>
+</div>
+```
+
+**Prediction Display Area** (After):
+```html
+<div id="prediction-result">
+  <!-- Indicator: which prediction is shown -->
+  <div class="prediction-indicator">
+    <span class="material-symbols-outlined">lightbulb</span>
+    <span>預測 <strong id="pred-current">1</strong>/<span id="pred-total">5</span></span>
+  </div>
+
+  <!-- Clickable characters -->
+  <div class="prediction-text" id="prediction-text">
+    <span class="char" data-pos="0" data-code="4jp">高</span>
+    <span class="char" data-pos="1" data-code="ad">鐵</span>
+    <span class="char" data-pos="2" data-code="c8">站</span>
+    <!-- ... -->
+  </div>
+
+  <!-- Hint text -->
+  <div class="prediction-hint">
+    <kbd>=</kbd> 切換預測 | 點擊字重選 | <kbd>Enter</kbd> 確認
+  </div>
+</div>
+
+<!-- Candidate popup (shown on character click) -->
+<div id="char-candidate-popup" class="hidden absolute">
+  <div class="candidate-list">
+    <div class="candidate-item" data-char="站">1. 站</div>
+    <div class="candidate-item" data-char="佔">2. 佔</div>
+    <div class="candidate-item" data-char="粘">3. 粘</div>
+  </div>
+</div>
+```
+
+---
+
+### TDD Test Plan
+
+**Test Suite**: `test-sentence-mode-ux.html` (25 comprehensive tests)
+
+**Section 1: Top-N Prediction Storage** (5 tests)
+1. Space key should trigger Viterbi and store top-5 predictions
+2. currentPredictions array should have max 5 items
+3. Each prediction should have {sentence, score, path} structure
+4. originalPrediction should store first prediction text
+5. currentPredictionIndex should initialize to 0
+
+**Section 2: = Key Prediction Cycling** (5 tests)
+6. First = press should advance to prediction #2
+7. Second = press should advance to prediction #3
+8. After 5th press, should cycle back to prediction #1
+9. Prediction indicator should update correctly (1/5, 2/5, ...)
+10. = key should have no effect when predictions array empty
+
+**Section 3: Enter Confirmation** (6 tests)
+11. Enter should append prediction text to output buffer
+12. Enter should clear codes buffer after confirmation
+13. Enter should clear predictions state (reset to empty)
+14. Enter should trigger learning if prediction was edited
+15. Enter should NOT trigger learning if prediction unchanged
+16. Enter should auto-copy to clipboard if enabled
+
+**Section 4: Character-Level Editing** (5 tests)
+17. Click on character should show candidate popup
+18. Popup should contain all candidates for that code
+19. Selecting candidate should replace character in prediction
+20. Edited prediction should be marked with editedPrediction flag
+21. Character replacement should preserve position
+
+**Section 5: Learning Integration** (4 tests)
+22. detectLearning should identify differences (original vs final)
+23. Learning should include character position information
+24. applyLearning should update UserDB with corrections
+25. Learning feedback toast should display to user
+
+**Total**: 25 tests across 5 categories
+
+---
+
+### Implementation Plan
+
+**Phase 1: Data Storage** (core_logic_v11.js)
+- [ ] Add `currentPredictions` array storage
+- [ ] Add `currentPredictionIndex` tracking
+- [ ] Modify Viterbi to return top-N predictions (not just top-1)
+- [ ] Store original prediction for learning comparison
+
+**Phase 2: = Key Cycling** (core_logic_v11_ui.js)
+- [ ] Update = key handler to cycle predictions
+- [ ] Add prediction indicator UI update
+- [ ] Add loop logic (5 → 1)
+- [ ] Add boundary checks (empty array)
+
+**Phase 3: Enter Confirmation** (core_logic_v11_ui.js)
+- [ ] Add Enter key handler for sentence mode
+- [ ] Implement learning detection (original vs final)
+- [ ] Implement buffer append + clear workflow
+- [ ] Integrate auto-copy functionality
+
+**Phase 4: Character-Level Editing** (core_logic_v11_ui.js + index.html)
+- [ ] Make prediction text clickable (span elements)
+- [ ] Implement candidate popup (positioning, styling)
+- [ ] Add character click handlers
+- [ ] Add candidate selection logic
+- [ ] Update prediction text after replacement
+
+**Phase 5: UI Updates** (index.html)
+- [ ] Add prediction indicator (N/5)
+- [ ] Add hint text (= 切換 | 點擊 | Enter)
+- [ ] Add candidate popup HTML
+- [ ] Style clickable characters (hover effects)
+
+**Phase 6: TDD Coverage** (tests/test-sentence-mode-ux.html)
+- [ ] Write 25 comprehensive tests (5 sections)
+- [ ] Verify all key handlers
+- [ ] Verify learning integration
+- [ ] Verify UI state management
+
+---
+
+### Expected User Experience
+
+**Scenario 1: Accept Top-1 Prediction** (Most Common)
+```
+User types: 4 j p Space a d Space c 8 Space
+System shows: "高鐵站" (top-1)
+User presses: Enter
+Result: "高鐵站" → output buffer
+Actions: 2 keys (Space + Enter) ✅
+```
+
+**Scenario 2: Try Alternative Predictions**
+```
+User types: 4 j p Space a d Space c 8 Space
+System shows: "高鐵站" (top-1)
+User presses: =
+System shows: "高鉄站" (top-2)
+User presses: =
+System shows: "膏鐵站" (top-3)
+User presses: Enter
+Result: "膏鐵站" → output buffer
+Actions: 3 keys (Space + = + = + Enter)
+```
+
+**Scenario 3: Character-Level Editing**
+```
+User types: 4 j p Space a d Space c 8 Space
+System shows: "高鐵站" (top-1)
+User clicks: "站" (3rd character)
+System shows: Popup [1.站 2.佔 3.粘]
+User clicks: "2.佔"
+System updates: "高鐵佔"
+User presses: Enter
+Result: "高鐵佔" → output buffer + learning triggered
+Actions: 4 actions (Space + click + select + Enter)
+```
+
+**Scenario 4: Full Manual Edit**
+```
+User types: 4 j p Space a d Space c 8 Space
+System shows: "高鐵站" (top-1)
+User presses: = (cycle to #2)
+System shows: "高鉄站" (top-2)
+User clicks: "鉄" → selects "鐵"
+System updates: "高鐵站"
+User presses: Enter
+Result: "高鐵站" → output buffer + learning
+```
+
+---
+
+### Key Achievements (Expected)
+
+1. **Clear Workflow** ✅:
+   - Space → [= cycle] → [click edit] → Enter
+   - Every step has clear purpose
+   - No confusion about how to finalize
+
+2. **Minimal Actions** ✅:
+   - Common case: 2 keys (Space + Enter)
+   - Alternative: +1 key per cycle attempt
+   - Character edit: +2 actions (click + select)
+
+3. **Learning Integration** ✅:
+   - Automatically triggered on Enter
+   - Compares original vs final
+   - Updates UserDB with corrections
+   - Shows feedback to user
+
+4. **Full Control** ✅:
+   - Can see top-5 alternatives
+   - Can edit any character individually
+   - Can confirm when satisfied
+   - Can cancel (Backspace to clear buffer)
 
 ---
 
