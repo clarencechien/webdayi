@@ -152,6 +152,15 @@
             aria-label="放大字體">
       <span class="text-base">A+</span>
     </button>
+
+    <!-- 🆕 Phase 1.10.5: Learning Stats (Desktop) -->
+    <button id="learning-stats-btn"
+            class="flex h-10 items-center gap-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 px-4 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 shadow-md transition-all hover:shadow-lg"
+            aria-label="學習統計"
+            onclick="document.getElementById('mobile-controls-panel').classList.remove('hidden')">
+      <span class="material-symbols-outlined text-base">query_stats</span>
+      <span>Stats</span>
+    </button>
   </div>
 
   <!-- Mobile FAB Button -->
@@ -248,6 +257,19 @@
               ⏳ IndexedDB Loading...
             </div>
           </div>
+
+          <!-- 🆕 Phase 1.10.5: Learning Statistics (Mobile) - Collapsible -->
+          <details class="mt-3 group">
+            <summary class="cursor-pointer select-none text-xs font-medium text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+              <span class="material-symbols-outlined text-sm group-open:rotate-90 transition-transform">chevron_right</span>
+              <span>Learning Statistics</span>
+            </summary>
+
+            <!-- Stats Display -->
+            <div id="userdb-stats-mobile" class="mt-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-400 space-y-1 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+              <p class="text-slate-500 dark:text-slate-500">No learning data yet. Start using the input method to learn your preferences!</p>
+            </div>
+          </details>
 
           <!-- PWA: Learning Data Management (Mobile) -->
           <div class="space-y-2 mt-3">
@@ -490,53 +512,7 @@
         </div>
 
         <!-- Debug Section (hidden in express mode) -->
-        <!-- PWA: UserDB Statistics Section -->
-        <div id="userdb-stats-section"
-             class="rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-3 transition-colors mb-3">
-          <details class="group">
-            <summary class="cursor-pointer select-none text-sm font-medium text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors flex items-center gap-2">
-              <span class="material-symbols-outlined text-base group-open:rotate-90 transition-transform">chevron_right</span>
-              <span>Learning Statistics (PWA)</span>
-            </summary>
-
-            <!-- UserDB Status -->
-            <div id="userdb-status" class="mt-3 px-3 py-2 text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 rounded-lg border border-green-200 dark:border-green-700">
-              ⏳ IndexedDB Loading...
-            </div>
-
-            <!-- Stats Display -->
-            <div id="userdb-stats" class="mt-3 text-xs text-slate-600 dark:text-slate-400 space-y-1">
-              <p class="text-slate-500 dark:text-slate-500">No learning data yet. Start using the input method to learn your preferences!</p>
-            </div>
-
-            <!-- Learning Data Management Buttons -->
-            <div class="mt-4 flex flex-wrap gap-2">
-              <!-- Export Button -->
-              <button onclick="exportLearnedPatterns()"
-                      class="flex h-9 items-center gap-2 rounded-lg bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 px-3 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50 transition-all"
-                      aria-label="匯出學習資料">
-                <span class="material-symbols-outlined text-sm">download</span>
-                <span>Export</span>
-              </button>
-
-              <!-- Import Button -->
-              <button onclick="importLearnedPatterns()"
-                      class="flex h-9 items-center gap-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 px-3 text-xs font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all"
-                      aria-label="匯入學習資料">
-                <span class="material-symbols-outlined text-sm">upload</span>
-                <span>Import</span>
-              </button>
-
-              <!-- Clear All Button -->
-              <button onclick="clearAllPatterns()"
-                      class="flex h-9 items-center gap-2 rounded-lg bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 px-3 text-xs font-medium text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all"
-                      aria-label="清除所有學習資料">
-                <span class="material-symbols-outlined text-sm">delete_sweep</span>
-                <span>Clear</span>
-              </button>
-            </div>
-          </details>
-        </div>
+        <!-- 🗑️ Phase 1.10.5: Learning Statistics moved to Mobile/Desktop Controls (removed standalone section to save space) -->
 
         <div id="debug-section"
              class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 p-4 transition-colors">
@@ -1285,10 +1261,11 @@
 
       try {
         const stats = await userDB.getStats();
-        const statsElement = document.getElementById('userdb-stats');
-        if (statsElement) {
-          statsElement.innerHTML = `
-            <div class="text-sm text-slate-600 dark:text-slate-400">
+        // 🆕 Phase 1.10.5: Update mobile panel stats (removed standalone section)
+        const statsElementMobile = document.getElementById('userdb-stats-mobile');
+        if (statsElementMobile) {
+          statsElementMobile.innerHTML = `
+            <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
               <p><strong>Learned Patterns:</strong> ${stats.count}</p>
               <p><strong>Avg Weight:</strong> ${stats.avgWeight.toFixed(3)}</p>
             </div>
