@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1.10.2 TDD Tests - Candidate Selection Modal</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+
+    h1 {
+      color: #4ec9b0;
+      border-bottom: 2px solid #4ec9b0;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      color: #569cd6;
+      margin-top: 30px;
+    }
+
+    .test-section {
+      background: #252526;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border-left: 4px solid #569cd6;
+    }
+
+    .test {
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 4px;
+      background: #2d2d30;
+    }
+
+    .test.pass {
+      border-left: 4px solid #4ec9b0;
+    }
+
+    .test.fail {
+      border-left: 4px solid #f48771;
+      background: #3f2d2d;
+    }
+
+    .test-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .test-result {
+      font-size: 0.9em;
+      font-family: 'Courier New', monospace;
+    }
+
+    .summary {
+      background: #0e639c;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+
+    .summary.all-pass {
+      background: #0e7a0d;
+    }
+
+    .summary.some-fail {
+      background: #a80000;
+    }
+
+    /* Test UI Components */
+    .test-ui {
+      background: #1e1e1e;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border: 1px solid #3e3e42;
+    }
+
+    /* Character Spans (from Phase 1.10.1) */
+    .sentence-display {
+      display: flex;
+      gap: 4px;
+      padding: 12px;
+      background: rgba(78, 201, 176, 0.05);
+      border-radius: 8px;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+
+    .char-span {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 2rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      user-select: none;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .char-span:hover {
+      background: rgba(78, 201, 176, 0.3);
+      transform: scale(1.1);
+    }
+
+    .char-span.editing {
+      background: rgba(78, 201, 176, 0.4);
+      border: 2px solid #4ec9b0;
+    }
+
+    /* Candidate Modal (Phase 1.10.2) */
+    .candidate-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      min-width: 400px;
+      max-width: 90vw;
+    }
+
+    .candidate-modal.hidden {
+      display: none;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-title {
+      font-size: 1.1em;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .candidates-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .candidate-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 1.2em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .candidate-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: scale(1.05);
+    }
+
+    .candidate-key {
+      background: rgba(78, 201, 176, 0.3);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-family: monospace;
+    }
+
+    .modal-hint {
+      text-align: center;
+      font-size: 0.85em;
+      opacity: 0.8;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .modal-backdrop.hidden {
+      display: none;
+    }
+
+    kbd {
+      background: #3e3e42;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+
+    code {
+      background: #3e3e42;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Phase 1.10.2 TDD Tests - Candidate Selection Modal</h1>
+
+  <p><strong>Test File:</strong> test-phase-1.10.2-candidate-modal.html</p>
+  <p><strong>Testing:</strong> Candidate selection modal with keyboard shortcuts</p>
+  <p><strong>Requirements:</strong> Show modal on character click, select with keys/mouse, auto-advance</p>
+
+  <h2>Test UI Preview</h2>
+  <div class="test-ui">
+    <p><strong>Character Spans (Click to open modal):</strong></p>
+    <div class="sentence-display" id="test-display">
+      <span class="char-span" data-index="0" data-code="4jp" data-candidates='["易","義","移","異","逸","益"]'>易</span>
+      <span class="char-span" data-index="1" data-code="ad" data-candidates='["在","再","載","宰"]'>在</span>
+      <span class="char-span" data-index="2" data-code="a" data-candidates='["大","太","夫"]'>大</span>
+    </div>
+    <p><em>Click a character to see the candidate modal (if implemented)</em></p>
+  </div>
+
+  <!-- Modal Backdrop -->
+  <div id="modal-backdrop" class="modal-backdrop hidden"></div>
+
+  <!-- Candidate Modal -->
+  <div id="candidate-modal" class="candidate-modal hidden">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">選擇字元</span>
+      <button class="close-btn" id="close-modal-btn">✕</button>
+    </div>
+    <div class="candidates-grid" id="candidates-grid">
+      <!-- Candidates will be populated here -->
+    </div>
+    <div class="modal-hint">
+      使用鍵盤快捷鍵或點擊選擇 | <kbd>Esc</kbd> 取消
+    </div>
+  </div>
+
+  <div id="test-results"></div>
+  <div id="summary" class="summary"></div>
+
+  <script>
+    // Test Results Container
+    const resultsContainer = document.getElementById('test-results');
+    const summaryContainer = document.getElementById('summary');
+
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+
+    // Helper: Create test result element
+    function reportTest(sectionName, testName, passed, details = '') {
+      totalTests++;
+      if (passed) passedTests++;
+      else failedTests++;
+
+      let section = document.getElementById(`section-${sectionName}`);
+      if (!section) {
+        section = document.createElement('div');
+        section.id = `section-${sectionName}`;
+        section.className = 'test-section';
+        section.innerHTML = `<h2>${sectionName}</h2>`;
+        resultsContainer.appendChild(section);
+      }
+
+      const testDiv = document.createElement('div');
+      testDiv.className = `test ${passed ? 'pass' : 'fail'}`;
+      testDiv.innerHTML = `
+        <div class="test-name">${passed ? '✅' : '❌'} ${testName}</div>
+        <div class="test-result">${details}</div>
+      `;
+      section.appendChild(testDiv);
+    }
+
+    // ========================================
+    // Section 1: Modal Structure
+    // ========================================
+
+    (function testModalStructure() {
+      const sectionName = '1. Modal Structure';
+
+      // Test 1.1: Modal element exists
+      const modal = document.getElementById('candidate-modal');
+      const hasModal = modal !== null;
+      reportTest(sectionName, 'Test 1.1: Modal element exists', hasModal,
+        hasModal ? 'candidate-modal found' : 'candidate-modal not found');
+
+      // Test 1.2: Modal backdrop exists
+      const backdrop = document.getElementById('modal-backdrop');
+      const hasBackdrop = backdrop !== null;
+      reportTest(sectionName, 'Test 1.2: Modal backdrop exists', hasBackdrop,
+        hasBackdrop ? 'modal-backdrop found' : 'modal-backdrop not found');
+
+      // Test 1.3: Modal is initially hidden
+      if (modal) {
+        const isHidden = modal.classList.contains('hidden') ||
+                        window.getComputedStyle(modal).display === 'none';
+        reportTest(sectionName, 'Test 1.3: Modal is initially hidden', isHidden,
+          isHidden ? 'Modal has .hidden class or display:none' : 'Modal is visible by default');
+      }
+
+      // Test 1.4: Modal title element exists
+      const modalTitle = document.getElementById('modal-title');
+      const hasTitle = modalTitle !== null;
+      reportTest(sectionName, 'Test 1.4: Modal title element exists', hasTitle,
+        hasTitle ? 'modal-title found' : 'modal-title not found');
+
+      // Test 1.5: Close button exists
+      const closeBtn = document.getElementById('close-modal-btn');
+      const hasCloseBtn = closeBtn !== null;
+      reportTest(sectionName, 'Test 1.5: Close button exists', hasCloseBtn,
+        hasCloseBtn ? 'close-modal-btn found' : 'close-modal-btn not found');
+
+      // Test 1.6: Candidates grid exists
+      const grid = document.getElementById('candidates-grid');
+      const hasGrid = grid !== null;
+      reportTest(sectionName, 'Test 1.6: Candidates grid exists', hasGrid,
+        hasGrid ? 'candidates-grid found' : 'candidates-grid not found');
+    })();
+
+    // ========================================
+    // Section 2: showCandidateModal() Function
+    // ========================================
+
+    (function testShowCandidateModal() {
+      const sectionName = '2. showCandidateModal() Function';
+
+      // Test 2.1: Function exists
+      const functionExists = typeof window.showCandidateModal === 'function';
+      reportTest(sectionName, 'Test 2.1: showCandidateModal() exists', functionExists,
+        functionExists ? 'Function found in window scope' : 'Function not found');
+
+      if (!functionExists) {
+        reportTest(sectionName, 'Test 2.2-2.6: Skipped', false, 'showCandidateModal() not found');
+        return;
+      }
+
+      // Test 2.2: Function accepts correct parameters
+      try {
+        const testCandidates = ['易', '義', '移'];
+        window.showCandidateModal(0, '4jp', testCandidates);
+        const modal = document.getElementById('candidate-modal');
+        const isVisible = !modal.classList.contains('hidden');
+        reportTest(sectionName, 'Test 2.2: Function shows modal', isVisible,
+          isVisible ? 'Modal is visible after calling showCandidateModal()' : 'Modal is still hidden');
+
+        // Clean up
+        if (typeof window.closeCandidateModal === 'function') {
+          window.closeCandidateModal();
+        } else {
+          modal.classList.add('hidden');
+        }
+      } catch (e) {
+        reportTest(sectionName, 'Test 2.2: Function shows modal', false, `Error: ${e.message}`);
+      }
+
+      // Test 2.3: Modal title updates with character info
+      try {
+        window.showCandidateModal(1, 'ad', ['在', '再']);
+        const modalTitle = document.getElementById('modal-title');
+        const titleText = modalTitle.textContent;
+        const containsIndex = titleText.includes('1') || titleText.includes('Position 1');
+        const containsCode = titleText.includes('ad');
+        const titleCorrect = containsIndex && containsCode;
+        reportTest(sectionName, 'Test 2.3: Modal title updates correctly', titleCorrect,
+          titleCorrect ? `Title: "${titleText}"` : `Title missing index or code: "${titleText}"`);
+
+        // Clean up
+        const modal = document.getElementById('candidate-modal');
+        modal.classList.add('hidden');
+      } catch (e) {
+        reportTest(sectionName, 'Test 2.3: Modal title updates correctly', false, `Error: ${e.message}`);
+      }
+
+      // Test 2.4: Candidates grid populated
+      try {
+        const testCandidates = ['易', '義', '移', '異', '逸', '益'];
+        window.showCandidateModal(0, '4jp', testCandidates);
+        const grid = document.getElementById('candidates-grid');
+        const candidateButtons = grid.querySelectorAll('.candidate-btn');
+        const correctCount = candidateButtons.length === testCandidates.length;
+        reportTest(sectionName, 'Test 2.4: Candidates grid populated', correctCount,
+          correctCount ? `${candidateButtons.length} candidate buttons created` :
+          `Expected ${testCandidates.length}, got ${candidateButtons.length}`);
+
+        // Clean up
+        const modal = document.getElementById('candidate-modal');
+        modal.classList.add('hidden');
+      } catch (e) {
+        reportTest(sectionName, 'Test 2.4: Candidates grid populated', false, `Error: ${e.message}`);
+      }
+
+      // Test 2.5: Character spans get .editing class
+      try {
+        const charSpans = document.querySelectorAll('.char-span');
+        if (charSpans.length > 0) {
+          window.showCandidateModal(0, '4jp', ['易', '義']);
+          const firstSpan = charSpans[0];
+          const hasEditing = firstSpan.classList.contains('editing');
+          reportTest(sectionName, 'Test 2.5: Clicked character gets .editing class', hasEditing,
+            hasEditing ? 'Character span highlighted' : 'Character span not highlighted');
+
+          // Clean up
+          const modal = document.getElementById('candidate-modal');
+          modal.classList.add('hidden');
+          firstSpan.classList.remove('editing');
+        } else {
+          reportTest(sectionName, 'Test 2.5: Clicked character gets .editing class', false,
+            'No character spans found');
+        }
+      } catch (e) {
+        reportTest(sectionName, 'Test 2.5: Clicked character gets .editing class', false, `Error: ${e.message}`);
+      }
+
+      // Test 2.6: Backdrop becomes visible
+      try {
+        window.showCandidateModal(0, '4jp', ['易', '義']);
+        const backdrop = document.getElementById('modal-backdrop');
+        const isVisible = !backdrop.classList.contains('hidden');
+        reportTest(sectionName, 'Test 2.6: Backdrop becomes visible', isVisible,
+          isVisible ? 'Backdrop is visible' : 'Backdrop is still hidden');
+
+        // Clean up
+        const modal = document.getElementById('candidate-modal');
+        modal.classList.add('hidden');
+        backdrop.classList.add('hidden');
+      } catch (e) {
+        reportTest(sectionName, 'Test 2.6: Backdrop becomes visible', false, `Error: ${e.message}`);
+      }
+    })();
+
+    // ========================================
+    // Section 3: closeCandidateModal() Function
+    // ========================================
+
+    (function testCloseCandidateModal() {
+      const sectionName = '3. closeCandidateModal() Function';
+
+      // Test 3.1: Function exists
+      const functionExists = typeof window.closeCandidateModal === 'function';
+      reportTest(sectionName, 'Test 3.1: closeCandidateModal() exists', functionExists,
+        functionExists ? 'Function found in window scope' : 'Function not found');
+
+      if (!functionExists) {
+        reportTest(sectionName, 'Test 3.2-3.5: Skipped', false, 'closeCandidateModal() not found');
+        return;
+      }
+
+      // Test 3.2: Function hides modal
+      try {
+        // First show the modal
+        if (typeof window.showCandidateModal === 'function') {
+          window.showCandidateModal(0, '4jp', ['易', '義']);
+        }
+
+        // Then close it
+        window.closeCandidateModal();
+        const modal = document.getElementById('candidate-modal');
+        const isHidden = modal.classList.contains('hidden');
+        reportTest(sectionName, 'Test 3.2: Function hides modal', isHidden,
+          isHidden ? 'Modal is hidden after closing' : 'Modal is still visible');
+      } catch (e) {
+        reportTest(sectionName, 'Test 3.2: Function hides modal', false, `Error: ${e.message}`);
+      }
+
+      // Test 3.3: Function hides backdrop
+      try {
+        if (typeof window.showCandidateModal === 'function') {
+          window.showCandidateModal(0, '4jp', ['易', '義']);
+        }
+        window.closeCandidateModal();
+        const backdrop = document.getElementById('modal-backdrop');
+        const isHidden = backdrop.classList.contains('hidden');
+        reportTest(sectionName, 'Test 3.3: Function hides backdrop', isHidden,
+          isHidden ? 'Backdrop is hidden after closing' : 'Backdrop is still visible');
+      } catch (e) {
+        reportTest(sectionName, 'Test 3.3: Function hides backdrop', false, `Error: ${e.message}`);
+      }
+
+      // Test 3.4: Removes .editing class from characters
+      try {
+        const charSpans = document.querySelectorAll('.char-span');
+        if (charSpans.length > 0 && typeof window.showCandidateModal === 'function') {
+          window.showCandidateModal(0, '4jp', ['易', '義']);
+          window.closeCandidateModal();
+          const hasEditing = Array.from(charSpans).some(span => span.classList.contains('editing'));
+          reportTest(sectionName, 'Test 3.4: Removes .editing class', !hasEditing,
+            !hasEditing ? 'All .editing classes removed' : 'Some spans still have .editing class');
+        } else {
+          reportTest(sectionName, 'Test 3.4: Removes .editing class', false, 'No character spans found');
+        }
+      } catch (e) {
+        reportTest(sectionName, 'Test 3.4: Removes .editing class', false, `Error: ${e.message}`);
+      }
+
+      // Test 3.5: Close button triggers closeCandidateModal
+      try {
+        if (typeof window.showCandidateModal === 'function') {
+          window.showCandidateModal(0, '4jp', ['易', '義']);
+        }
+        const closeBtn = document.getElementById('close-modal-btn');
+        closeBtn.click();
+        const modal = document.getElementById('candidate-modal');
+        const isHidden = modal.classList.contains('hidden');
+        reportTest(sectionName, 'Test 3.5: Close button works', isHidden,
+          isHidden ? 'Modal closed when close button clicked' : 'Modal still visible after clicking close button');
+      } catch (e) {
+        reportTest(sectionName, 'Test 3.5: Close button works', false, `Error: ${e.message}`);
+      }
+    })();
+
+    // ========================================
+    // Section 4: selectCandidate() Function
+    // ========================================
+
+    (function testSelectCandidate() {
+      const sectionName = '4. selectCandidate() Function';
+
+      // Test 4.1: Function exists
+      const functionExists = typeof window.selectCandidate === 'function';
+      reportTest(sectionName, 'Test 4.1: selectCandidate() exists', functionExists,
+        functionExists ? 'Function found in window scope' : 'Function not found');
+
+      if (!functionExists) {
+        reportTest(sectionName, 'Test 4.2-4.5: Skipped', false, 'selectCandidate() not found');
+        return;
+      }
+
+      // Test 4.2: Function updates character text
+      try {
+        const charSpans = document.querySelectorAll('.char-span');
+        if (charSpans.length > 0) {
+          const originalText = charSpans[0].textContent;
+          window.selectCandidate(0, '義');
+          const newText = charSpans[0].textContent;
+          const textUpdated = newText === '義';
+          reportTest(sectionName, 'Test 4.2: Updates character text', textUpdated,
+            textUpdated ? `Changed from "${originalText}" to "${newText}"` :
+            `Expected "義", got "${newText}"`);
+
+          // Restore original
+          charSpans[0].textContent = originalText;
+        } else {
+          reportTest(sectionName, 'Test 4.2: Updates character text', false, 'No character spans found');
+        }
+      } catch (e) {
+        reportTest(sectionName, 'Test 4.2: Updates character text', false, `Error: ${e.message}`);
+      }
+
+      // Test 4.3: Function marks character as edited
+      try {
+        const charSpans = document.querySelectorAll('.char-span');
+        if (charSpans.length > 0) {
+          window.selectCandidate(0, '義');
+          const isEdited = charSpans[0].dataset.edited === 'true';
+          reportTest(sectionName, 'Test 4.3: Marks character as edited', isEdited,
+            isEdited ? 'data-edited="true" set' : 'data-edited not set');
+
+          // Clean up
+          delete charSpans[0].dataset.edited;
+        } else {
+          reportTest(sectionName, 'Test 4.3: Marks character as edited', false, 'No character spans found');
+        }
+      } catch (e) {
+        reportTest(sectionName, 'Test 4.3: Marks character as edited', false, `Error: ${e.message}`);
+      }
+
+      // Test 4.4: Function closes modal
+      try {
+        if (typeof window.showCandidateModal === 'function') {
+          window.showCandidateModal(0, '4jp', ['易', '義']);
+        }
+        window.selectCandidate(0, '義');
+        const modal = document.getElementById('candidate-modal');
+        const isHidden = modal.classList.contains('hidden');
+        reportTest(sectionName, 'Test 4.4: Closes modal after selection', isHidden,
+          isHidden ? 'Modal closed after selecting candidate' : 'Modal still visible');
+      } catch (e) {
+        reportTest(sectionName, 'Test 4.4: Closes modal after selection', false, `Error: ${e.message}`);
+      }
+
+      // Test 4.5: Candidate buttons trigger selectCandidate
+      try {
+        if (typeof window.showCandidateModal === 'function') {
+          window.showCandidateModal(0, '4jp', ['易', '義', '移']);
+        }
+        const grid = document.getElementById('candidates-grid');
+        const candidateButtons = grid.querySelectorAll('.candidate-btn');
+        if (candidateButtons.length > 0) {
+          const charSpans = document.querySelectorAll('.char-span');
+          const originalText = charSpans[0].textContent;
+          candidateButtons[1].click(); // Click second candidate (義)
+          const newText = charSpans[0].textContent;
+          const textChanged = newText !== originalText;
+          reportTest(sectionName, 'Test 4.5: Candidate button click works', textChanged,
+            textChanged ? `Character changed from "${originalText}" to "${newText}"` :
+            'Character text did not change');
+
+          // Restore
+          charSpans[0].textContent = originalText;
+        } else {
+          reportTest(sectionName, 'Test 4.5: Candidate button click works', false, 'No candidate buttons found');
+        }
+      } catch (e) {
+        reportTest(sectionName, 'Test 4.5: Candidate button click works', false, `Error: ${e.message}`);
+      }
+    })();
+
+    // ========================================
+    // Section 5: Keyboard Shortcuts
+    // ========================================
+
+    (function testKeyboardShortcuts() {
+      const sectionName = '5. Keyboard Shortcuts';
+
+      const shortcutKeys = [' ', "'", '[', ']', '-', '\\'];
+      const shortcutNames = ['Space', "'", '[', ']', '-', '\\'];
+
+      // Test 5.1: Escape key closes modal
+      try {
+        if (typeof window.showCandidateModal === 'function') {
+          window.showCandidateModal(0, '4jp', ['易', '義']);
+        }
+        const modal = document.getElementById('candidate-modal');
+        const escEvent = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+        document.dispatchEvent(escEvent);
+
+        // Wait a bit for event to process
+        setTimeout(() => {
+          const isHidden = modal.classList.contains('hidden');
+          reportTest(sectionName, 'Test 5.1: Escape key closes modal', isHidden,
+            isHidden ? 'Modal closed with Escape key' : 'Modal still visible after Escape');
+        }, 50);
+      } catch (e) {
+        reportTest(sectionName, 'Test 5.1: Escape key closes modal', false, `Error: ${e.message}`);
+      }
+
+      // Test 5.2-5.7: Quick selection keys
+      shortcutKeys.forEach((key, index) => {
+        try {
+          const testNum = index + 2;
+          if (typeof window.showCandidateModal === 'function') {
+            const testCandidates = ['易', '義', '移', '異', '逸', '益'];
+            window.showCandidateModal(0, '4jp', testCandidates);
+          }
+
+          const charSpans = document.querySelectorAll('.char-span');
+          if (charSpans.length > 0) {
+            const originalText = charSpans[0].textContent;
+            const keyEvent = new KeyboardEvent('keydown', { key: key, bubbles: true });
+            document.dispatchEvent(keyEvent);
+
+            setTimeout(() => {
+              const newText = charSpans[0].textContent;
+              const textChanged = newText !== originalText;
+              reportTest(sectionName, `Test 5.${testNum}: ${shortcutNames[index]} key selects candidate ${index}`,
+                textChanged,
+                textChanged ? `Changed from "${originalText}" to "${newText}"` :
+                'Character text did not change');
+
+              // Restore
+              charSpans[0].textContent = originalText;
+            }, 50);
+          } else {
+            reportTest(sectionName, `Test 5.${testNum}: ${shortcutNames[index]} key selects candidate ${index}`,
+              false, 'No character spans found');
+          }
+        } catch (e) {
+          reportTest(sectionName, `Test 5.${testNum}: ${shortcutNames[index]} key selects candidate ${index}`,
+            false, `Error: ${e.message}`);
+        }
+      });
+    })();
+
+    // ========================================
+    // Section 6: Integration Tests
+    // ========================================
+
+    (function testIntegration() {
+      const sectionName = '6. Integration Tests';
+
+      // Test 6.1: Full workflow - click → select → close
+      try {
+        const charSpans = document.querySelectorAll('.char-span');
+        if (charSpans.length > 0 && typeof window.showCandidateModal === 'function') {
+          const originalText = charSpans[0].textContent;
+
+          // Step 1: Click character
+          charSpans[0].click();
+
+          setTimeout(() => {
+            // Step 2: Click candidate
+            const grid = document.getElementById('candidates-grid');
+            const candidateButtons = grid.querySelectorAll('.candidate-btn');
+            if (candidateButtons.length > 1) {
+              candidateButtons[1].click();
+
+              setTimeout(() => {
+                // Step 3: Verify modal closed and text changed
+                const modal = document.getElementById('candidate-modal');
+                const isHidden = modal.classList.contains('hidden');
+                const newText = charSpans[0].textContent;
+                const workflowSuccess = isHidden && newText !== originalText;
+
+                reportTest(sectionName, 'Test 6.1: Full workflow (click → select → close)', workflowSuccess,
+                  workflowSuccess ? `Workflow completed: "${originalText}" → "${newText}"` :
+                  'Workflow incomplete');
+
+                // Restore
+                charSpans[0].textContent = originalText;
+              }, 50);
+            }
+          }, 50);
+        } else {
+          reportTest(sectionName, 'Test 6.1: Full workflow', false,
+            'Character spans or showCandidateModal not available');
+        }
+      } catch (e) {
+        reportTest(sectionName, 'Test 6.1: Full workflow', false, `Error: ${e.message}`);
+      }
+
+      // Test 6.2: Multiple character edits in sequence
+      try {
+        const charSpans = document.querySelectorAll('.char-span');
+        if (charSpans.length >= 2 && typeof window.selectCandidate === 'function') {
+          const original0 = charSpans[0].textContent;
+          const original1 = charSpans[1].textContent;
+
+          window.selectCandidate(0, '義');
+          window.selectCandidate(1, '再');
+
+          const changed0 = charSpans[0].textContent === '義';
+          const changed1 = charSpans[1].textContent === '再';
+          const bothChanged = changed0 && changed1;
+
+          reportTest(sectionName, 'Test 6.2: Multiple character edits', bothChanged,
+            bothChanged ? 'Both characters updated successfully' :
+            `Char 0: ${changed0 ? '✓' : '✗'}, Char 1: ${changed1 ? '✓' : '✗'}`);
+
+          // Restore
+          charSpans[0].textContent = original0;
+          charSpans[1].textContent = original1;
+        } else {
+          reportTest(sectionName, 'Test 6.2: Multiple character edits', false,
+            'Not enough character spans or selectCandidate not available');
+        }
+      } catch (e) {
+        reportTest(sectionName, 'Test 6.2: Multiple character edits', false, `Error: ${e.message}`);
+      }
+
+      // Test 6.3: Backdrop click closes modal
+      try {
+        if (typeof window.showCandidateModal === 'function') {
+          window.showCandidateModal(0, '4jp', ['易', '義']);
+        }
+        const backdrop = document.getElementById('modal-backdrop');
+        backdrop.click();
+
+        setTimeout(() => {
+          const modal = document.getElementById('candidate-modal');
+          const isHidden = modal.classList.contains('hidden');
+          reportTest(sectionName, 'Test 6.3: Backdrop click closes modal', isHidden,
+            isHidden ? 'Modal closed when backdrop clicked' : 'Modal still visible');
+        }, 50);
+      } catch (e) {
+        reportTest(sectionName, 'Test 6.3: Backdrop click closes modal', false, `Error: ${e.message}`);
+      }
+    })();
+
+    // ========================================
+    // Display Summary (after slight delay for async tests)
+    // ========================================
+
+    setTimeout(() => {
+      const allPassed = failedTests === 0;
+      summaryContainer.className = allPassed ? 'summary all-pass' : 'summary some-fail';
+      summaryContainer.innerHTML = `
+        <strong>Test Summary:</strong> ${passedTests}/${totalTests} tests passed
+        ${allPassed ? '🎉 All tests passed!' : `⚠️ ${failedTests} test(s) failed`}
+      `;
+    }, 500);
+  </script>
+</body>
+</html>

@@ -819,6 +819,161 @@
       }
     }
 
+    /* 🆕 Phase 1.10.2: Candidate Selection Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-backdrop.hidden {
+      display: none;
+    }
+
+    .candidate-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      min-width: 400px;
+      max-width: 90vw;
+      animation: modal-fade-in 0.2s ease-out;
+    }
+
+    .candidate-modal.hidden {
+      display: none;
+    }
+
+    @keyframes modal-fade-in {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-title {
+      font-size: 1.1em;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .candidates-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .candidate-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 1.3em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .candidate-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: scale(1.05);
+    }
+
+    .candidate-btn:active {
+      transform: scale(0.98);
+    }
+
+    .candidate-char {
+      font-size: 1.2em;
+    }
+
+    .candidate-key {
+      background: rgba(78, 201, 176, 0.4);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.7em;
+      font-family: 'Courier New', monospace;
+      font-weight: 500;
+    }
+
+    .modal-hint {
+      text-align: center;
+      font-size: 0.85em;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 640px) {
+      .candidate-modal {
+        min-width: 320px;
+        max-width: 95vw;
+        padding: 20px;
+      }
+
+      .candidates-grid {
+        gap: 8px;
+      }
+
+      .candidate-btn {
+        padding: 10px 12px;
+        font-size: 1.1em;
+      }
+
+      .candidate-key {
+        font-size: 0.65em;
+        padding: 3px 7px;
+      }
+    }
+
     /* PWA: Mobile Custom Touch Keyboard (RWD) */
     .mobile-keyboard {
       display: none; /* Hidden on desktop */
@@ -1563,6 +1718,24 @@
       </button>
       <button class="key-btn key-punct key-small" data-key=".">.</button>
       <button class="key-btn key-punct key-small" data-key="/">/</button>
+    </div>
+  </div>
+
+  <!-- 🆕 Phase 1.10.2: Candidate Selection Modal -->
+  <!-- Modal Backdrop -->
+  <div id="modal-backdrop" class="modal-backdrop hidden"></div>
+
+  <!-- Candidate Modal -->
+  <div id="candidate-modal" class="candidate-modal hidden">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">選擇字元</span>
+      <button class="close-btn" id="close-modal-btn" aria-label="關閉">✕</button>
+    </div>
+    <div class="candidates-grid" id="candidates-grid">
+      <!-- Candidates will be populated dynamically -->
+    </div>
+    <div class="modal-hint">
+      使用鍵盤快捷鍵或點擊選擇 | <kbd>Esc</kbd> 取消
     </div>
   </div>
 
