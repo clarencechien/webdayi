@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1.10.1 TDD Tests - Character Span Display</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+
+    h1 {
+      color: #4ec9b0;
+      border-bottom: 2px solid #4ec9b0;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      color: #569cd6;
+      margin-top: 30px;
+    }
+
+    .test-section {
+      background: #252526;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border-left: 4px solid #569cd6;
+    }
+
+    .test {
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 4px;
+      background: #2d2d30;
+    }
+
+    .test.pass {
+      border-left: 4px solid #4ec9b0;
+    }
+
+    .test.fail {
+      border-left: 4px solid #f48771;
+      background: #3f2d2d;
+    }
+
+    .test-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .test-result {
+      font-size: 0.9em;
+      font-family: 'Courier New', monospace;
+    }
+
+    .summary {
+      background: #0e639c;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+
+    .summary.all-pass {
+      background: #0e7a0d;
+    }
+
+    .summary.some-fail {
+      background: #a80000;
+    }
+
+    /* Test UI Components */
+    .test-ui {
+      background: #1e1e1e;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border: 1px solid #3e3e42;
+    }
+
+    .sentence-display {
+      display: flex;
+      gap: 2px;
+      padding: 12px;
+      background: rgba(78, 201, 176, 0.05);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .char {
+      display: inline-block;
+      padding: 6px 10px;
+      font-size: 24px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .char:hover {
+      background: rgba(78, 201, 176, 0.2);
+      transform: scale(1.1);
+    }
+
+    .char.editing {
+      background: rgba(78, 201, 176, 0.3);
+      border: 2px solid #4ec9b0;
+    }
+
+    code {
+      background: #3e3e42;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Phase 1.10.1 TDD Tests - Character Span Display</h1>
+
+  <p><strong>Test File:</strong> test-phase-1.10.1-character-spans.html</p>
+  <p><strong>Testing:</strong> Character span display replacing contenteditable</p>
+  <p><strong>Requirements:</strong> Individual clickable characters with data attributes</p>
+
+  <h2>Test UI Preview</h2>
+  <div class="test-ui">
+    <p><strong>Expected Structure:</strong></p>
+    <div class="sentence-display" id="test-display" tabindex="0">
+      <span class="char" data-index="0" data-code="4jp" data-candidates='["易","義","移","異","逸","益"]'>易</span>
+      <span class="char" data-index="1" data-code="ad" data-candidates='["在","再","載","宰"]'>在</span>
+      <span class="char" data-index="2" data-code="a" data-candidates='["大","太","夫"]'>大</span>
+    </div>
+    <p><em>Try hovering over characters to see interaction states</em></p>
+  </div>
+
+  <div id="test-results"></div>
+  <div id="summary" class="summary"></div>
+
+  <script>
+    // Test Results Container
+    const resultsContainer = document.getElementById('test-results');
+    const summaryContainer = document.getElementById('summary');
+
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+
+    // Helper: Create test result element
+    function reportTest(sectionName, testName, passed, details = '') {
+      totalTests++;
+      if (passed) passedTests++;
+      else failedTests++;
+
+      let section = document.getElementById(`section-${sectionName}`);
+      if (!section) {
+        section = document.createElement('div');
+        section.id = `section-${sectionName}`;
+        section.className = 'test-section';
+        section.innerHTML = `<h2>${sectionName}</h2>`;
+        resultsContainer.appendChild(section);
+      }
+
+      const testDiv = document.createElement('div');
+      testDiv.className = `test ${passed ? 'pass' : 'fail'}`;
+      testDiv.innerHTML = `
+        <div class="test-name">${passed ? '✅' : '❌'} ${testName}</div>
+        <div class="test-result">${details}</div>
+      `;
+      section.appendChild(testDiv);
+    }
+
+    // Helper: Check if element exists
+    function assertExists(element, name) {
+      if (element) {
+        return { pass: true, message: `${name} exists` };
+      } else {
+        return { pass: false, message: `${name} not found` };
+      }
+    }
+
+    // Helper: Check attribute value
+    function assertAttributeEquals(element, attr, expected, name) {
+      const actual = element.getAttribute(attr);
+      if (actual === expected) {
+        return { pass: true, message: `${name}: ${attr}="${actual}"` };
+      } else {
+        return { pass: false, message: `${name}: Expected ${attr}="${expected}", got "${actual}"` };
+      }
+    }
+
+    // ========================================
+    // Section 1: Character Span Structure
+    // ========================================
+
+    (function testCharacterSpanStructure() {
+      const sectionName = '1. Character Span Structure';
+
+      // Test 1.1: sentence-display container exists
+      const display = document.querySelector('.sentence-display');
+      const result1 = assertExists(display, 'sentence-display container');
+      reportTest(sectionName, 'Test 1.1: sentence-display container exists', result1.pass, result1.message);
+
+      // Test 1.2: Multiple char spans exist
+      const chars = document.querySelectorAll('.char');
+      const hasChars = chars.length >= 3;
+      reportTest(sectionName, 'Test 1.2: Multiple char spans exist', hasChars,
+        hasChars ? `Found ${chars.length} character spans` : 'No character spans found');
+
+      // Test 1.3: Each char is a span element
+      const allSpans = Array.from(chars).every(el => el.tagName === 'SPAN');
+      reportTest(sectionName, 'Test 1.3: Each char is a <span> element', allSpans,
+        allSpans ? 'All characters are span elements' : 'Some characters are not span elements');
+
+      // Test 1.4: Display is focusable (has tabindex)
+      if (display) {
+        const hasFocus = display.hasAttribute('tabindex');
+        reportTest(sectionName, 'Test 1.4: Display is focusable (tabindex)', hasFocus,
+          hasFocus ? `tabindex="${display.getAttribute('tabindex')}"` : 'No tabindex attribute');
+      }
+
+      // Test 1.5: Display has flex layout (CSS)
+      if (display) {
+        const style = window.getComputedStyle(display);
+        const isFlex = style.display === 'flex';
+        reportTest(sectionName, 'Test 1.5: Display uses flex layout', isFlex,
+          isFlex ? 'display: flex' : `display: ${style.display}`);
+      }
+    })();
+
+    // ========================================
+    // Section 2: Data Attributes
+    // ========================================
+
+    (function testDataAttributes() {
+      const sectionName = '2. Data Attributes';
+      const chars = document.querySelectorAll('.char');
+
+      if (chars.length === 0) {
+        reportTest(sectionName, 'Test 2.1-2.4: Skipped', false, 'No character spans found');
+        return;
+      }
+
+      const firstChar = chars[0];
+
+      // Test 2.1: data-index attribute
+      const hasIndex = firstChar.hasAttribute('data-index');
+      reportTest(sectionName, 'Test 2.1: data-index attribute exists', hasIndex,
+        hasIndex ? `data-index="${firstChar.dataset.index}"` : 'No data-index attribute');
+
+      // Test 2.2: data-code attribute
+      const hasCode = firstChar.hasAttribute('data-code');
+      reportTest(sectionName, 'Test 2.2: data-code attribute exists', hasCode,
+        hasCode ? `data-code="${firstChar.dataset.code}"` : 'No data-code attribute');
+
+      // Test 2.3: data-candidates attribute
+      const hasCandidates = firstChar.hasAttribute('data-candidates');
+      reportTest(sectionName, 'Test 2.3: data-candidates attribute exists', hasCandidates,
+        hasCandidates ? `data-candidates="${firstChar.dataset.candidates.substring(0, 30)}..."` : 'No data-candidates attribute');
+
+      // Test 2.4: data-candidates is valid JSON
+      if (hasCandidates) {
+        try {
+          const candidates = JSON.parse(firstChar.dataset.candidates);
+          const isArray = Array.isArray(candidates);
+          reportTest(sectionName, 'Test 2.4: data-candidates is valid JSON array', isArray,
+            isArray ? `Parsed ${candidates.length} candidates: [${candidates.slice(0, 3).join(', ')}...]` : 'Not an array');
+        } catch (e) {
+          reportTest(sectionName, 'Test 2.4: data-candidates is valid JSON array', false, `JSON parse error: ${e.message}`);
+        }
+      }
+
+      // Test 2.5: Sequential indices
+      let sequentialIndices = true;
+      chars.forEach((char, i) => {
+        const index = parseInt(char.dataset.index, 10);
+        if (index !== i) sequentialIndices = false;
+      });
+      reportTest(sectionName, 'Test 2.5: Indices are sequential (0, 1, 2...)', sequentialIndices,
+        sequentialIndices ? 'All indices are sequential' : 'Indices are not sequential');
+
+      // Test 2.6: Char content matches first candidate
+      const firstCandidates = JSON.parse(firstChar.dataset.candidates);
+      const contentMatches = firstChar.textContent === firstCandidates[0];
+      reportTest(sectionName, 'Test 2.6: Char content matches first candidate', contentMatches,
+        contentMatches ? `"${firstChar.textContent}" === "${firstCandidates[0]}"` :
+        `"${firstChar.textContent}" !== "${firstCandidates[0]}"`);
+    })();
+
+    // ========================================
+    // Section 3: Click Event Handling
+    // ========================================
+
+    (function testClickEvents() {
+      const sectionName = '3. Click Event Handling';
+      const chars = document.querySelectorAll('.char');
+
+      if (chars.length === 0) {
+        reportTest(sectionName, 'Test 3.1-3.4: Skipped', false, 'No character spans found');
+        return;
+      }
+
+      const firstChar = chars[0];
+
+      // Test 3.1: Characters are clickable (cursor: pointer)
+      const style = window.getComputedStyle(firstChar);
+      const isPointer = style.cursor === 'pointer';
+      reportTest(sectionName, 'Test 3.1: Characters have cursor: pointer', isPointer,
+        isPointer ? 'cursor: pointer' : `cursor: ${style.cursor}`);
+
+      // Test 3.2: Click event can be attached
+      let clickAttached = false;
+      try {
+        const testHandler = () => { clickAttached = true; };
+        firstChar.addEventListener('click', testHandler);
+        firstChar.removeEventListener('click', testHandler);
+        clickAttached = true;
+      } catch (e) {
+        clickAttached = false;
+      }
+      reportTest(sectionName, 'Test 3.2: Click event can be attached', clickAttached,
+        clickAttached ? 'addEventListener works' : 'addEventListener failed');
+
+      // Test 3.3: Simulate click event
+      let clickFired = false;
+      const clickHandler = () => { clickFired = true; };
+      firstChar.addEventListener('click', clickHandler);
+      firstChar.click();
+      firstChar.removeEventListener('click', clickHandler);
+      reportTest(sectionName, 'Test 3.3: Click event fires successfully', clickFired,
+        clickFired ? 'Click event fired' : 'Click event did not fire');
+
+      // Test 3.4: Click event provides dataset
+      let datasetAvailable = false;
+      const datasetHandler = (e) => {
+        const target = e.target;
+        datasetAvailable = target.dataset && target.dataset.index !== undefined;
+      };
+      firstChar.addEventListener('click', datasetHandler);
+      firstChar.click();
+      firstChar.removeEventListener('click', datasetHandler);
+      reportTest(sectionName, 'Test 3.4: Click event provides dataset', datasetAvailable,
+        datasetAvailable ? 'dataset.index available in click handler' : 'dataset.index not available');
+    })();
+
+    // ========================================
+    // Section 4: CSS States (Hover, Editing)
+    // ========================================
+
+    (function testCSSStates() {
+      const sectionName = '4. CSS States (Hover, Editing)';
+      const chars = document.querySelectorAll('.char');
+
+      if (chars.length === 0) {
+        reportTest(sectionName, 'Test 4.1-4.5: Skipped', false, 'No character spans found');
+        return;
+      }
+
+      const firstChar = chars[0];
+
+      // Test 4.1: Hover state defined in CSS
+      // (We can't simulate :hover, but we can check if CSS rules exist)
+      const hasHoverRule = Array.from(document.styleSheets).some(sheet => {
+        try {
+          const rules = Array.from(sheet.cssRules || []);
+          return rules.some(rule => rule.selectorText && rule.selectorText.includes('.char:hover'));
+        } catch (e) {
+          return false;
+        }
+      });
+      reportTest(sectionName, 'Test 4.1: :hover CSS rule defined', hasHoverRule,
+        hasHoverRule ? '.char:hover rule found in stylesheets' : '.char:hover rule not found');
+
+      // Test 4.2: .editing class can be added
+      firstChar.classList.add('editing');
+      const hasEditingClass = firstChar.classList.contains('editing');
+      reportTest(sectionName, 'Test 4.2: .editing class can be added', hasEditingClass,
+        hasEditingClass ? '.editing class added successfully' : '.editing class not added');
+
+      // Test 4.3: .editing class changes style
+      const normalStyle = window.getComputedStyle(chars[1]); // Use second char (not edited)
+      const editingStyle = window.getComputedStyle(firstChar); // First char (with .editing)
+      const stylesDiffer = normalStyle.background !== editingStyle.background ||
+                           normalStyle.border !== editingStyle.border;
+      reportTest(sectionName, 'Test 4.3: .editing class changes visual style', stylesDiffer,
+        stylesDiffer ? 'Background or border changed' : 'No visual difference detected');
+
+      // Test 4.4: .editing class can be removed
+      firstChar.classList.remove('editing');
+      const removedEditing = !firstChar.classList.contains('editing');
+      reportTest(sectionName, 'Test 4.4: .editing class can be removed', removedEditing,
+        removedEditing ? '.editing class removed successfully' : '.editing class still present');
+
+      // Test 4.5: user-select: none prevents text selection
+      const style = window.getComputedStyle(firstChar);
+      const noSelect = style.userSelect === 'none' || style.webkitUserSelect === 'none';
+      reportTest(sectionName, 'Test 4.5: user-select: none prevents selection', noSelect,
+        noSelect ? 'user-select: none' : `user-select: ${style.userSelect}`);
+    })();
+
+    // ========================================
+    // Section 5: Integration Tests
+    // ========================================
+
+    (function testIntegration() {
+      const sectionName = '5. Integration Tests';
+      const chars = document.querySelectorAll('.char');
+
+      if (chars.length === 0) {
+        reportTest(sectionName, 'Test 5.1-5.3: Skipped', false, 'No character spans found');
+        return;
+      }
+
+      // Test 5.1: Complete character span structure
+      let allValid = true;
+      let invalidReason = '';
+      chars.forEach((char, i) => {
+        if (!char.hasAttribute('data-index')) {
+          allValid = false;
+          invalidReason = `Character ${i} missing data-index`;
+        }
+        if (!char.hasAttribute('data-code')) {
+          allValid = false;
+          invalidReason = `Character ${i} missing data-code`;
+        }
+        if (!char.hasAttribute('data-candidates')) {
+          allValid = false;
+          invalidReason = `Character ${i} missing data-candidates`;
+        }
+      });
+      reportTest(sectionName, 'Test 5.1: All characters have complete data attributes', allValid,
+        allValid ? `All ${chars.length} characters have complete attributes` : invalidReason);
+
+      // Test 5.2: Click each character sequentially
+      let allClickable = true;
+      let clickCounts = 0;
+      chars.forEach((char, i) => {
+        const handler = () => { clickCounts++; };
+        char.addEventListener('click', handler);
+        char.click();
+        char.removeEventListener('click', handler);
+      });
+      allClickable = clickCounts === chars.length;
+      reportTest(sectionName, 'Test 5.2: All characters are clickable', allClickable,
+        allClickable ? `${clickCounts}/${chars.length} characters clicked` : `Only ${clickCounts}/${chars.length} characters clicked`);
+
+      // Test 5.3: Toggle editing state on all characters
+      chars.forEach(char => char.classList.add('editing'));
+      const allEditing = Array.from(chars).every(char => char.classList.contains('editing'));
+      chars.forEach(char => char.classList.remove('editing'));
+      const noneEditing = Array.from(chars).every(char => !char.classList.contains('editing'));
+      const toggleWorks = allEditing && noneEditing;
+      reportTest(sectionName, 'Test 5.3: Toggle editing state on all characters', toggleWorks,
+        toggleWorks ? 'All characters can toggle editing state' : 'Editing toggle failed');
+    })();
+
+    // ========================================
+    // Display Summary
+    // ========================================
+
+    (function displaySummary() {
+      const allPassed = failedTests === 0;
+      summaryContainer.className = allPassed ? 'summary all-pass' : 'summary some-fail';
+      summaryContainer.innerHTML = `
+        <strong>Test Summary:</strong> ${passedTests}/${totalTests} tests passed
+        ${allPassed ? '🎉 All tests passed!' : `⚠️ ${failedTests} test(s) failed`}
+      `;
+    })();
+  </script>
+</body>
+</html>
