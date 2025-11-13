@@ -1,11 +1,11 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-13 (🐛 Critical Mobile NaN Bug Fixed + Phase 1.10 Design Ready!)
-**Current Phase**: ⏳ Phase 1.10 IN PROGRESS - Character-Level Editing UI
-**Current Version**: 0.5.0 (Build: 20251113-007, Mobile NaN Fix + contenteditable Quick Fix)
+**Last Updated**: 2025-11-13 (✅ Phase 1.10.1 COMPLETE - Character Span Architecture Implemented!)
+**Current Phase**: ✅ Phase 1.10.1 COMPLETE - Character-Level Editing UI Foundation
+**Current Version**: 0.5.0 (Build: 20251113-008, Phase 1.10.1 Character Spans)
 **Main Branch Status**: ✅ v2.7 Hybrid (OOP + 70/30 + Laplace) + Full ngram_db.json (Production Ready)
 **Feature Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
-**Next Milestone**: Phase 1.10 - Character Span Architecture Implementation
+**Next Milestone**: Phase 1.10.2 - Candidate Selection Modal
 
 **Latest Achievements** (Mobile NaN Fix + Phase 1.10 Design):
 - ✅ **CRITICAL MOBILE FIX**: Fixed NaN bug in Android character mode learning (triple-layer validation)!
@@ -7667,3 +7667,225 @@ Based on main branch reference/Screenshot_20251113-131013.png
 
 ---
 **Next Session Focus**: Browser E2E testing → Mobile UX validation → MVP 2a database optimization planning
+
+---
+
+## 🆕 PHASE 1.10.1: Character Span Architecture Implementation (2025-11-13)
+
+**Status**: ✅ COMPLETE | Character-Level Editing UI Foundation
+**Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
+**Commit**: 5ae0f93
+**Files Modified**: 3 files, 580 insertions(+), 61 deletions(-)
+
+### Overview
+
+Replaced contenteditable with individual clickable character spans to enable proper character-level editing. This is the foundation for Session 10.11 Part 6 requirements (click character → show candidates).
+
+### Implementation Details
+
+#### 1. JavaScript Changes (core_logic_v11_ui.js)
+
+**displayPredictionWithIndicator()** (lines 504-560):
+- **Before**: Single contenteditable div with sentence text
+- **After**: Individual `<span class="char-span">` elements per character
+- **Data Attributes Added**:
+  - `data-index`: Character position (0-based)
+  - `data-code`: Dayi code for this character (e.g., "4jp")
+  - `data-candidates`: JSON array of all candidates for this code
+- **Implementation**:
+  ```javascript
+  const charSpans = path.map((p, i) => {
+    const candidates = dayiMap.get(p.code) || [];
+    const candidateChars = candidates.map(c => c.char);
+    return `<span class="char-span" data-index="${i}" data-code="${p.code}" data-candidates='${JSON.stringify(candidateChars)}'>${p.char}</span>`;
+  }).join('');
+  ```
+
+**attachCharacterClickHandlers()** (lines 566-590) - NEW FUNCTION:
+- Attaches click event listeners to all `.char-span` elements
+- Logs click events with full context (index, char, code, candidates)
+- Highlights clicked character with `.editing` class
+- **Purpose**: Foundation for Phase 1.10.2 candidate modal
+- **Current Behavior**: Click → console log + highlight (modal TODO)
+
+**confirmPrediction()** (lines 352-363) - UPDATED:
+- **Before**: Read from `document.getElementById('prediction-result-text').textContent`
+- **After**: Query all `.char-span` elements and concatenate their `textContent`
+- **Implementation**:
+  ```javascript
+  const sentenceDisplay = document.getElementById('sentence-display');
+  const charSpans = sentenceDisplay.querySelectorAll('.char-span');
+  const finalSentence = Array.from(charSpans).map(span => span.textContent).join('');
+  ```
+- **Learning Detection**: Still works correctly (compares original vs final sentence)
+
+#### 2. CSS Changes (index.html)
+
+**`.sentence-display`** (lines 772-782):
+- Flex container with centered, wrapped layout
+- Background highlight: `rgba(78, 201, 176, 0.05)`
+- Focusable with `tabindex="0"` (for keyboard navigation in future phases)
+
+**`.char-span`** (lines 784-795):
+- Large font: 2rem (desktop), 1.5rem (mobile)
+- Bold weight, cursor pointer
+- No text selection (`user-select: none`)
+- Smooth transitions (0.2s)
+- Background: `rgba(255, 255, 255, 0.1)`
+
+**`.char-span:hover`** (lines 797-801):
+- Scale transform: 1.15x
+- Brighter background: `rgba(78, 201, 176, 0.3)`
+- Drop shadow for depth
+
+**`.char-span.editing`** (lines 803-807):
+- Bright teal background: `rgba(78, 201, 176, 0.4)`
+- 2px solid border with glow effect
+- Box shadow: `0 0 12px rgba(78, 201, 176, 0.6)`
+
+#### 3. TDD Tests (test-phase-1.10.1-character-spans.html)
+
+**NEW FILE**: 24 comprehensive tests (all passing)
+
+**Section 1: Character Span Structure** (5 tests):
+- Test 1.1: `sentence-display` container exists
+- Test 1.2: Multiple char spans exist
+- Test 1.3: Each char is a `<span>` element
+- Test 1.4: Display is focusable (tabindex)
+- Test 1.5: Display uses flex layout
+
+**Section 2: Data Attributes** (6 tests):
+- Test 2.1: `data-index` attribute exists
+- Test 2.2: `data-code` attribute exists
+- Test 2.3: `data-candidates` attribute exists
+- Test 2.4: `data-candidates` is valid JSON array
+- Test 2.5: Indices are sequential (0, 1, 2...)
+- Test 2.6: Char content matches first candidate
+
+**Section 3: Click Event Handling** (4 tests):
+- Test 3.1: Characters have `cursor: pointer`
+- Test 3.2: Click event can be attached
+- Test 3.3: Click event fires successfully
+- Test 3.4: Click event provides dataset
+
+**Section 4: CSS States** (5 tests):
+- Test 4.1: `:hover` CSS rule defined
+- Test 4.2: `.editing` class can be added
+- Test 4.3: `.editing` class changes visual style
+- Test 4.4: `.editing` class can be removed
+- Test 4.5: `user-select: none` prevents selection
+
+**Section 5: Integration Tests** (3 tests):
+- Test 5.1: All characters have complete data attributes
+- Test 5.2: All characters are clickable
+- Test 5.3: Toggle editing state on all characters
+
+### Design Reference
+
+**Document**: `docs/design/PHASE-1.10-CHARACTER-EDITING-UI.md` (430 lines)
+- Comprehensive design for character span architecture
+- Migration path from contenteditable
+- UX benefits comparison table
+- Technical comparison: contenteditable vs character spans
+- Implementation checklist for Phases 1.10.2-1.10.5
+
+### Benefits Achieved
+
+✅ **Click Character**: Event logged with full context (ready for candidate modal)
+✅ **Clear Visual Feedback**: Hover (scale + glow) + editing (bright highlight)
+✅ **Structured Editing**: Foundation for selecting from candidates only
+✅ **Keyboard Events**: Events now propagate correctly (no more contenteditable capture)
+✅ **Mobile Touch-Friendly**: Large touch targets, no text selection interference
+✅ **Learning Detection**: Still works (reads final sentence from spans)
+
+### What Works Now
+
+1. **Character Display**: Prediction displays as individual clickable characters
+2. **Hover Feedback**: Characters scale and glow on hover
+3. **Click Events**: Click logs character details and highlights it
+4. **Confirm Prediction**: Enter key reads sentence from character spans
+5. **Learning Integration**: Detects changes by comparing span text to original
+
+### What's Next (Phase 1.10.2)
+
+**Goal**: Implement candidate selection modal
+
+**Requirements**:
+1. Click character → Show modal with 6 candidates
+2. Each candidate shows keyboard shortcut (Space/'[]\\-)
+3. Click candidate → Replace character text
+4. Auto-advance to next character
+5. Escape key → Close modal
+
+**Estimated Time**: 2-3 hours
+
+### Testing Instructions
+
+**Browser Test**:
+1. Open `mvp1-pwa/tests/test-phase-1.10.1-character-spans.html`
+2. Verify all 24 tests pass
+3. Hover over characters in the test UI to see visual feedback
+
+**Integration Test**:
+1. Open `mvp1-pwa/index.html`
+2. Switch to sentence mode
+3. Type codes: `4jp ad a`
+4. Press `=` to get prediction
+5. **Expected**: See 3 clickable characters (易, 在, 大)
+6. Hover over each character → Should scale and glow
+7. Click a character → Should highlight and log to console
+8. Press Enter → Should confirm and output to buffer
+
+### Technical Notes
+
+**Why This Architecture is Better**:
+- ❌ **contenteditable**: Captures events, hard to intercept, free-form editing
+- ✅ **Character Spans**: Events propagate, easy click handlers, structured editing
+
+**Data Flow**:
+1. Viterbi prediction → path array [{char, code}, ...]
+2. displayPredictionWithIndicator() → Build character spans with data attributes
+3. attachCharacterClickHandlers() → Bind click events
+4. User clicks character → Log event + highlight (TODO: show modal)
+5. User presses Enter → confirmPrediction() reads from spans
+
+**Candidate Data Availability**:
+- Each span has `data-candidates` with full list from dayiMap
+- Example: `data-candidates='["易","義","移","異","逸","益"]'`
+- Ready for Phase 1.10.2 to parse and display in modal
+
+### Files Modified
+
+1. **mvp1-pwa/js/core_logic_v11_ui.js**: +95 lines (character span architecture)
+2. **mvp1-pwa/index.html**: +52 lines (CSS for character spans)
+3. **mvp1-pwa/tests/test-phase-1.10.1-character-spans.html**: +433 lines (NEW FILE - 24 TDD tests)
+
+### Commit Message
+
+```
+feat: Phase 1.10.1 - Character span architecture replaces contenteditable
+
+Implemented character-level editing UI with individual clickable spans.
+
+## Changes Made:
+- displayPredictionWithIndicator(): Replaced contenteditable with character spans
+- attachCharacterClickHandlers(): New function for click event handling
+- confirmPrediction(): Updated to read from character spans
+- CSS: Added .sentence-display, .char-span, :hover, .editing styles
+- TDD: 24 comprehensive tests (test-phase-1.10.1-character-spans.html)
+
+## Benefits:
+✅ Click any character → Event logged (ready for candidate modal)
+✅ Clear visual feedback (hover + editing states)
+✅ Structured editing (select from candidates only)
+✅ Keyboard events now propagate correctly
+✅ Mobile touch-friendly
+✅ Learning detection still works (reads from spans)
+
+## Next Steps:
+- Phase 1.10.2: Implement candidate selection modal
+- Phase 1.10.3: Keyboard navigation (arrows, quick keys, escape)
+```
+
+---
+
