@@ -4,8 +4,8 @@
 
 > 輕量、透明、網頁優先的大易中文輸入法引擎
 
-[![Status](https://img.shields.io/badge/status-Phase%201.10.5%20COMPLETE-brightgreen)]()
-[![Version](https://img.shields.io/badge/version-0.5.0--build.012-blue)]()
+[![Status](https://img.shields.io/badge/status-Phase%201.10.5%20PRODUCTION%20READY-brightgreen)]()
+[![Version](https://img.shields.io/badge/version-0.5.0--build.013-blue)]()
 [![Tests](https://img.shields.io/badge/tests-103%2F103%20passing-brightgreen)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
@@ -17,11 +17,12 @@
 
 **核心特色**:
 - 🧠 **雙模式輸入**: 逐字模式 ↔ 整句模式（智慧預測）
-- ✏️ **字元級編輯**: 點擊字元、方向鍵導航、Space 開啟候選、Enter 送出
+- ✏️ **字元級編輯**: 點擊字元、方向鍵導航、Space 開啟候選、Enter 任意位置送出
 - ⚡ **Viterbi 演算法**: 基於 rime-essay 語料庫 (717M 字元，94.4% 準確度)
 - 📊 **Laplace 平滑**: 完整統計平滑處理
 - 📱 **跨平台**: 完美支援桌面與手機，單頁無捲動設計
 - 🎨 **現代 UI**: Tailwind CSS + 深色模式 + PWA 支援
+- 🐛 **穩定可靠**: 完整狀態管理，無 ghost sentences 問題
 
 ---
 
@@ -35,10 +36,10 @@
 
 ## 🎯 現況一覽
 
-**最新版本**: v0.5.0 (Build: 20251113-012) - Phase 1.10.5 COMPLETE
+**最新版本**: v0.5.0 (Build: 20251113-013) - Phase 1.10.5 PRODUCTION READY
 
-### Phase 1.10: 字元級編輯系統 ✅
-完整的智慧字元編輯工作流程，讓句子修正變得前所未有的簡單！
+### Phase 1.10: 字元級編輯系統 ✅ 生產就緒
+完整的智慧字元編輯工作流程 + 完整狀態管理修復，讓句子修正變得前所未有的簡單且可靠！
 
 | 階段 | 功能 | 測試 | 狀態 |
 |------|------|------|------|
@@ -46,7 +47,7 @@
 | **Phase 1.10.2** | 候選選擇視窗 | 22 tests | ✅ |
 | **Phase 1.10.3** | 自動前進 + 方向鍵 | 20 tests | ✅ |
 | **Phase 1.10.4** | 完成編輯 + 送出 | 19 tests | ✅ |
-| **Phase 1.10.5** | 關鍵修復 + UX 優化 | 18 tests | ✅ |
+| **Phase 1.10.5** | 完整狀態管理修復 (5個關鍵bug) | 18 tests | ✅ |
 | **總計** | 完整工作流程 | **103 tests** | ✅ |
 
 ### 完整工作流程
@@ -54,16 +55,30 @@
 1️⃣ 輸入：4jp ad a → 按 =
 2️⃣ 預測：易在大（立即可用方向鍵）
 3️⃣ 編輯：→ → 移到「大」→ Space 開啟候選 → 選「移」
-4️⃣ 完成：綠色提示「按 Enter 送出」
-5️⃣ 送出：Enter → 「義在移」到輸出區
+4️⃣ 送出：Enter（任意位置均可送出）→ 「易在移」到輸出區
+5️⃣ 清空：狀態完整重置，無 ghost sentences
 ```
 
 **鍵盤快捷鍵**:
 - **← →**: 字元間導航
 - **Space**: 開啟候選視窗
-- **Enter**: 送出編輯結果
+- **Enter**: 送出編輯結果（任意位置均可）
 - **Space/'[]\\-**: 選擇候選字 #0-5（視窗內）
 - **Escape**: 關閉視窗
+
+### 🆕 Phase 1.10.5 關鍵修復 (Build 013)
+
+此版本修復了 **5 個阻擋正式上線的關鍵 bug**：
+
+1. ✅ **Desktop Stats 按鈕**: 修復桌面版 Stats 按鈕無法開啟面板的問題
+2. ✅ **版面優化**: 整句模式縮減 ~62px 高度，實現單頁無捲動設計
+3. ✅ **Enter 任意位置送出**: Enter 鍵現在可在任意字元位置送出，不限最後一個字
+4. ✅ **完整狀態清除**: 修復 ghost sentences 問題（最關鍵！）
+   - 根本原因：`currentPredictions` 等全局變數未被清空
+   - 解決方案：新增 `clearPredictionState()` 確保完整狀態重置
+5. ✅ **穩定可靠**: 所有操作後（backspace/enter/submit）完整清空記憶體
+
+**影響**: 修復前應用程式**完全不能用**（ghost sentences 一直出現），修復後**可正式上線**。
 
 ---
 
