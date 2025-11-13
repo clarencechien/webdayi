@@ -100,10 +100,18 @@
   <div id="test-results"></div>
 
   <!-- Load dependencies -->
-  <script src="../js/user_db_indexeddb.js"></script>
   <script src="../js/viterbi_module.js"></script>
 
-  <script>
+  <script type="module">
+    // ============================================================================
+    // Import Dependencies
+    // ============================================================================
+
+    import { UserDB } from '../js/user_db_indexeddb.js';
+
+    // Make UserDB available globally for tests
+    window.UserDB = UserDB;
+
     // ============================================================================
     // Test Framework
     // ============================================================================
