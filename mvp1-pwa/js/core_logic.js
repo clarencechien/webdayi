@@ -1449,6 +1449,74 @@ async function initialize() {
           return; // Skip all Chinese logic
         }
 
+        // 🐛 CRITICAL FIX (Phase 1.10.5.1): Android tablet virtual keyboard fix
+        // Android virtual keyboards don't fire keydown events for space/selection keys
+        // Instead, they add the character directly via input event
+        // We need to detect selection keys in the input value and trigger selection manually
+        const inputValue = e.target.value;
+        const lastChar = inputValue.slice(-1); // Get last character
+
+        // Check if last character is a selection key
+        const selectionKeys = {
+          ' ': 0,   // Space → 1st candidate
+          "'": 1,   // ' → 2nd candidate
+          '[': 2,   // [ → 3rd candidate
+          ']': 3,   // ] → 4th candidate
+          '-': 4,   // - → 5th candidate
+          '\\': 5   // \ → 6th candidate
+        };
+
+        if (lastChar in selectionKeys && inputValue.length > 1) {
+          // Extract code without the selection key
+          const codeWithoutKey = inputValue.slice(0, -1).trim().toLowerCase();
+
+          console.log(`[Android Fix] Detected selection key "${lastChar}" in input, code: "${codeWithoutKey}"`);
+
+          // Check if in sentence mode
+          const isInSentenceMode = (typeof isSentenceMode === 'function' && isSentenceMode());
+
+          if (isInSentenceMode) {
+            // Sentence mode: Add code to buffer (space key only)
+            if (lastChar === ' ' && codeWithoutKey.length > 0) {
+              if (typeof addToCodeBuffer === 'function') {
+                const added = addToCodeBuffer(codeWithoutKey, dayiMap);
+                if (added) {
+                  // Clear input
+                  e.target.value = '';
+
+                  // Update displays
+                  if (typeof window.updateBufferDisplay === 'function') window.updateBufferDisplay();
+                  if (typeof window.updateLivePreviewDisplay === 'function') window.updateLivePreviewDisplay();
+
+                  console.log('[Android Fix] Code added to buffer (sentence mode)');
+                  return; // Skip normal handleInput
+                }
+              }
+            }
+          } else {
+            // Character mode: Trigger candidate selection
+            // First, ensure currentCode and currentCandidates are set
+            handleInput(codeWithoutKey, previousValue);
+
+            // Small delay to ensure handleInput completes
+            setTimeout(() => {
+              if (currentCode && currentCandidates.length > 0) {
+                const selectionIndex = selectionKeys[lastChar];
+                console.log(`[Android Fix] Triggering selection: index ${selectionIndex} for code "${currentCode}"`);
+                handleSelection(selectionIndex);
+                previousValue = '';
+
+                // Clear input box
+                e.target.value = '';
+              } else {
+                console.warn(`[Android Fix] No candidates available for code "${codeWithoutKey}"`);
+              }
+            }, 10);
+
+            return; // Skip normal handleInput below
+          }
+        }
+
         // Chinese mode: Normal processing
         handleInput(e.target.value, previousValue);
         previousValue = e.target.value.trim().toLowerCase();

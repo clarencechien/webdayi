@@ -21,17 +21,24 @@
   <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180x180.png">
 
   <!-- Version Information (for testing verification) -->
-  <meta name="app-version" content="0.5.0">
-  <meta name="app-build" content="20251113-001">
-  <meta name="app-commit" content="pwa-poc">
-  <meta name="app-release" content="PWA POC with IndexedDB + Mobile Keyboard">
+  <meta name="app-version" content="0.5.1">
+  <meta name="app-build" content="20251115-001">
+  <meta name="app-commit" content="android-vk-fix">
+  <meta name="app-release" content="Phase 1.10.5.1 - Android Virtual Keyboard Fix">
   <!--
-    WebDaYi PWA POC - Version 0.5.0
-    Build: 20251113-001
-    Release: PWA POC with IndexedDB + Mobile Keyboard
-    Phase: 0.5 (PWA Proof of Concept)
+    WebDaYi PWA POC - Version 0.5.1
+    Build: 20251115-001
+    Release: Phase 1.10.5.1 - Android Virtual Keyboard Fix
+    Phase: 0.5.1 (Android Tablet Production Fix)
 
-    Latest Changes:
+    Latest Changes (v0.5.1):
+    - CRITICAL FIX: Android tablet virtual keyboard support
+    - Space/selection keys (' [ ] - \) now work on Android tablets
+    - Fix: Detect selection keys in input event (keydown doesn't fire on Android)
+    - Impact: App now fully usable on Android tablets in both character & sentence modes
+    - 20 new TDD tests for Android virtual keyboard scenarios
+
+    Previous Changes (v0.5.0):
     - Progressive Web App with Service Worker
     - IndexedDB for user N-gram learning (offline-first)
     - Manual Export/Import for cross-device sync
