@@ -5,13 +5,18 @@ A lightweight, dependency-free Progressive Web App (PWA) for the Dayi input meth
 ## Features
 
 - **Lightweight**: Pure HTML/CSS/JS, no build steps required.
-- **Offline Capable**: Fully functional offline as a PWA.
-- **Dayi 4 Support**: Standard Dayi 4 character set.
-- **Smart Input**: Prefix-based candidate filtering.
-- **Responsive Design**: Optimized for both mobile and desktop.
-- **Advanced Features**:
-    - **Focus Mode**: Hide distractions for immersive typing.
-    - **Auto-Copy**: Automatically copy selected text.
+- **Offline Capable**: Fully funct- **Virtual Keyboard**:
+  - Optimized 5-row layout.
+  - **English Mode**: Toggle via Shift key.
+  - **Haptic Feedback**: Vibration on key press.
+  - **Smart Input**: Prioritizes valid code extension over candidate selection.
+- **PWA Support**: Installable on Android/iOS/Desktop.
+- **Offline Capable**: Works without internet connection.
+- **Customizable**:
+  - **Themes**: Light / Dark.
+  - **Font Size**: Adjustable scaling.
+  - **Focus Mode**: Distraction-free typing.
+  - **Auto-Copy**: Automatically copy text upon selection.ed text.
     - **Theme Toggle**: Switch between Dark and Light modes.
     - **Font Size Adjustment**: Scale the UI to your preference.
     - **Virtual Keyboard Toggle**: Show/Hide the on-screen keyboard.

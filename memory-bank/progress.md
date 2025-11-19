@@ -538,15 +538,13 @@ webdayi/
 - ⏳ **Usability**: Can compose 100 chars in 3 min
 
 ### Phase 2: WebDayi Lite (PWA)
-- [x] **Project Setup**: Initialize `lite/` directory and structure.
-- [x] **Data Preparation**: Convert `dayi4.cin` to JSON format.
-- [x] **Core Logic**: Implement input handling, candidate lookup, and composition.
-- [x] **UI Implementation**: Create responsive layout, virtual keyboard, and candidate bar.
-- [x] **PWA Features**: Add manifest and basic offline support.
-- [x] **Refinements**:
-    - [x] Smart Input (Prefix checking).
-    - [x] UI Polish (Colors, Spacing).
-    - [x] Advanced Features (Menu, Focus Mode, Auto-Copy, Font Size, Keyboard Toggle).
+- [x] **Basic PWA Structure**: (Manifest, Service Worker)
+- [x] **Dayi 4 CIN Data Conversion**
+- [x] **Core Input Logic**: (Char-by-char)
+- [x] **Virtual Keyboard Implementation**
+- [x] **UI/UX Polish**: (Themes, Focus Mode, Auto-Copy)
+- [x] **Keyboard Redesign**: (Trapezoid, English Mode, Haptics)
+- [x] **Bug Fixes & Verification**: (Font Size, Keyboard Toggle)
 - [x] **Verification**: Manual testing of all features.
 
 ### Phase 3: Smart Engine (MVP3)

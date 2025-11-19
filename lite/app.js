@@ -10,7 +10,8 @@ const state = {
     candidates: [], // Current candidates
     output: '', // Committed text
     page: 0,
-    pageSize: 10
+    pageSize: 10,
+    isEnglishMode: false // English input mode
 };
 
 // DOM Elements
@@ -27,49 +28,32 @@ const els = {
 // Keyboard Layout (Dayi 4)
 const KEYBOARD_LAYOUT = [
     [
-        { code: '1', label: '1', sub: '言' },
-        { code: '2', label: '2', sub: '牛' },
-        { code: '3', label: '3', sub: '目' },
-        { code: '4', label: '4', sub: '四' },
-        { code: '5', label: '5', sub: '王' },
-        { code: '6', label: '6', sub: '車' },
-        { code: '7', label: '7', sub: '田' },
-        { code: '8', label: '8', sub: '八' },
-        { code: '9', label: '9', sub: '足' },
+        { code: '1', label: '1', sub: '言' }, { code: '2', label: '2', sub: '牛' }, { code: '3', label: '3', sub: '目' },
+        { code: '4', label: '4', sub: '四' }, { code: '5', label: '5', sub: '王' }, { code: '6', label: '6', sub: '車' },
+        { code: '7', label: '7', sub: '田' }, { code: '8', label: '8', sub: '八' }, { code: '9', label: '9', sub: '足' },
         { code: '0', label: '0', sub: '金' }
     ],
     [
-        { code: 'q', label: 'Q', sub: '石' },
-        { code: 'w', label: 'W', sub: '山' },
-        { code: 'e', label: 'E', sub: '一' },
-        { code: 'r', label: 'R', sub: '工' },
-        { code: 't', label: 'T', sub: '糸' },
-        { code: 'y', label: 'Y', sub: '火' },
-        { code: 'u', label: 'U', sub: '艸' },
-        { code: 'i', label: 'I', sub: '木' },
-        { code: 'o', label: 'O', sub: '口' },
+        { code: 'q', label: 'Q', sub: '石' }, { code: 'w', label: 'W', sub: '山' }, { code: 'e', label: 'E', sub: '一' },
+        { code: 'r', label: 'R', sub: '工' }, { code: 't', label: 'T', sub: '糸' }, { code: 'y', label: 'Y', sub: '火' },
+        { code: 'u', label: 'U', sub: '艸' }, { code: 'i', label: 'I', sub: '木' }, { code: 'o', label: 'O', sub: '口' },
         { code: 'p', label: 'P', sub: '耳' }
     ],
     [
-        { code: 'a', label: 'A', sub: '人' },
-        { code: 's', label: 'S', sub: '革' },
-        { code: 'd', label: 'D', sub: '日' },
-        { code: 'f', label: 'F', sub: '土' },
-        { code: 'g', label: 'G', sub: '手' },
-        { code: 'h', label: 'H', sub: '鳥' },
-        { code: 'j', label: 'J', sub: '月' },
-        { code: 'k', label: 'K', sub: '立' },
-        { code: 'l', label: 'L', sub: '女' },
+        { code: 'a', label: 'A', sub: '人' }, { code: 's', label: 'S', sub: '革' }, { code: 'd', label: 'D', sub: '日' },
+        { code: 'f', label: 'F', sub: '土' }, { code: 'g', label: 'G', sub: '手' }, { code: 'h', label: 'H', sub: '鳥' },
+        { code: 'j', label: 'J', sub: '月' }, { code: 'k', label: 'K', sub: '立' }, { code: 'l', label: 'L', sub: '女' },
         { code: ';', label: ';', sub: '虫' }
     ],
     [
-        { code: 'z', label: 'Z', sub: '心' },
-        { code: 'x', label: 'X', sub: '水' },
-        { code: 'c', label: 'C', sub: '鹿' },
-        { code: 'v', label: 'V', sub: '禾' },
-        { code: 'b', label: 'B', sub: '馬' },
-        { code: 'n', label: 'N', sub: '魚' },
+        { code: 'Shift', label: '⇧', type: 'special', action: 'toggleEnglish' },
+        { code: 'z', label: 'Z', sub: '心' }, { code: 'x', label: 'X', sub: '水' }, { code: 'c', label: 'C', sub: '鹿' },
+        { code: 'v', label: 'V', sub: '禾' }, { code: 'b', label: 'B', sub: '馬' }, { code: 'n', label: 'N', sub: '魚' },
         { code: 'm', label: 'M', sub: '雨' },
+        { code: 'Backspace', label: '⌫', type: 'special', action: 'backspace' }
+    ],
+    [
+        { code: 'Space', label: 'Space', type: 'special', action: 'space', width: 'wide' },
         { code: ',', label: ',', sub: '力' },
         { code: '.', label: '.', sub: '舟' },
         { code: '/', label: '/', sub: '竹' }
@@ -79,8 +63,8 @@ const KEYBOARD_LAYOUT = [
 // Initialization
 async function init() {
     initTheme(); // Load settings first
-    renderKeyboard();
     setupEventListeners();
+    renderKeyboard();
     setupMenuListeners();
     await loadDatabase();
 }
@@ -241,46 +225,49 @@ async function loadDatabase() {
     }
 }
 
-// Render Keyboard
+// Virtual Keyboard Rendering
 function renderKeyboard() {
     const container = els.keyboard;
     container.innerHTML = '';
 
-    KEYBOARD_LAYOUT.forEach(row => {
+    KEYBOARD_LAYOUT.forEach((row, rowIndex) => {
         const rowDiv = document.createElement('div');
-        rowDiv.style.display = 'flex';
-        rowDiv.style.gap = '4px';
-        rowDiv.style.justifyContent = 'center';
+        rowDiv.className = 'keyboard-row';
+
+        // Trapezoid effect for Row 3 (z-row)
+        if (rowIndex === 3) {
+            rowDiv.classList.add('row-trapezoid');
+        }
 
         row.forEach(key => {
-            const btn = document.createElement('button');
-            btn.className = 'key';
-            btn.dataset.code = key.code;
-            btn.innerHTML = `
-                <span>${key.label}</span>
-                <span class="key-sub">${key.sub}</span>
-            `;
-            btn.addEventListener('click', () => handleInput(key.code));
+            let btn;
+            if (key.type === 'special') {
+                btn = document.createElement('button');
+                btn.className = `key key-special ${key.width === 'wide' ? 'key-space' : ''}`;
+                if (key.code === 'Shift') btn.id = 'key-shift';
+                btn.textContent = key.label;
+
+                if (key.action === 'toggleEnglish') {
+                    btn.addEventListener('click', toggleEnglishMode);
+                } else if (key.action === 'backspace') {
+                    btn.addEventListener('click', handleBackspace);
+                } else if (key.action === 'space') {
+                    btn.addEventListener('click', handleSpace);
+                }
+            } else {
+                btn = document.createElement('button');
+                btn.className = 'key';
+                btn.dataset.code = key.code;
+                btn.innerHTML = `
+                    <span>${key.label}</span>
+                    <span class="key-sub">${key.sub}</span>
+                `;
+                btn.addEventListener('click', () => handleInput(key.code));
+            }
             rowDiv.appendChild(btn);
         });
         container.appendChild(rowDiv);
     });
-
-    // Add special keys row
-    const specialRow = document.createElement('div');
-    specialRow.style.display = 'flex';
-    specialRow.style.gap = '4px';
-    specialRow.style.justifyContent = 'center';
-
-    const backspace = createSpecialKey('⌫', 'Backspace', () => handleBackspace());
-    const space = createSpecialKey('Space', 'Space', () => handleSpace(), true);
-    const enter = createSpecialKey('↵', 'Enter', () => handleEnter());
-
-    specialRow.appendChild(backspace);
-    specialRow.appendChild(space);
-    specialRow.appendChild(enter);
-
-    container.appendChild(specialRow);
 }
 
 function createSpecialKey(label, code, action, isSpace = false) {
@@ -346,65 +333,98 @@ function setupEventListeners() {
     });
 }
 
+// English Mode Toggle
+function toggleEnglishMode() {
+    triggerHaptic();
+    state.isEnglishMode = !state.isEnglishMode;
+    const shiftBtn = document.getElementById('key-shift');
+    if (shiftBtn) {
+        if (state.isEnglishMode) {
+            shiftBtn.classList.add('active');
+        } else {
+            shiftBtn.classList.remove('active');
+        }
+    }
+
+    // Clear buffer when switching modes
+    state.buffer = '';
+    updateComposition();
+    state.candidates = [];
+    renderCandidates();
+}
+
 // Input Handling
 function handleInput(key) {
-    // Check if it's a number
-    const isNumber = key >= '0' && key <= '9';
-
-    if (isNumber) {
-        // Smart Logic:
-        // 1. Check if adding this number creates a valid prefix
-        const potentialBuffer = state.buffer + key;
-        const isPrefix = state.prefixes.has(potentialBuffer);
-
-        // 2. If it's a valid prefix, treat as input (append to buffer)
-        if (isPrefix) {
-            if (state.buffer.length < 4) {
-                state.buffer += key;
-                updateComposition();
-            }
-            return;
-        }
-
-        // 3. If NOT a valid prefix, treat as selection
-        const index = key === '0' ? 9 : parseInt(key) - 1;
-        selectCandidate(state.page * state.pageSize + index);
+    triggerHaptic();
+    // English Mode Logic
+    if (state.isEnglishMode) {
+        state.output += key;
+        updateOutput();
         return;
     }
 
-    // Special Selection Keys (when candidates are present)
+    // Normal Dayi Logic
+    // Check if key is valid Dayi character (a-z, 0-9, etc.) OR a selection key
+    // We allow all keys defined in the layout plus standard keyboard inputs
+    // Added: ' [ ] - \ (selection keys) and Space
+    const validKeys = /^[a-z0-9,./;'\[\]\-\\ ]$/;
+    if (!validKeys.test(key)) return;
+
+    // If we have candidates, number keys select candidates
     if (state.candidates.length > 0) {
-        const selectionMap = {
-            ' ': 0,
-            "'": 1,
-            '[': 2,
-            ']': 3,
-            '-': 4,
-            '\\': 5
-        };
+        // ... (existing candidate selection logic)
+        // But wait, number keys are also Dayi roots.
+        // Standard Dayi: If candidates are open, numbers select.
+        // If buffer is empty, numbers are roots.
+        // Logic below handles this via state.candidates check
+    }
 
-        if (key in selectionMap) {
-            selectCandidate(state.page * state.pageSize + selectionMap[key]);
-            return;
-        }
+    // ... rest of handleInput
 
-        // Pagination
-        if (key === '=') {
-            nextPage();
-            return;
+    // 1. Candidate Selection (if candidates exist)
+    if (state.candidates.length > 0) {
+        // Check if it extends the current code (Priority: Input > Selection)
+        const nextBuffer = state.buffer + key;
+        // Only treat as input if it forms a valid prefix AND we haven't reached limit
+        // Exception: Space is always selection/commit, never input (unless defined in DB?)
+        // In Dayi, Space is not a root.
+        const isInput = state.buffer.length < 4 && state.prefixes.has(nextBuffer);
+
+        if (isInput) {
+            // Valid continuation, let it fall through to append to buffer
+        } else {
+            // Map selection keys
+            const selectionMap = {
+                ' ': 0, "'": 1, '[': 2, ']': 3, '-': 4, '\\': 5,
+                '1': 0, '2': 1, '3': 2, '4': 3, '5': 4,
+                '6': 5, '7': 6, '8': 7, '9': 8, '0': 9
+            };
+
+            if (key in selectionMap) {
+                selectCandidate(selectionMap[key]);
+                return;
+            }
+
+            // Not a valid continuation AND not a selection key
+            // Commit first candidate, then process key
+            selectCandidate(0);
+            // Fall through to process key as new input
         }
     }
 
-    // Normal letter input
-    // Only allow valid Dayi keys (a-z, , . / ;)
-    const validInputKeys = /^[a-z,./;]$/;
-    if (validInputKeys.test(key)) {
-        if (state.buffer.length < 4) {
-            state.buffer += key;
-            updateComposition();
-        }
+    // 2. Buffer Limit (Dayi max 4 codes)
+    if (state.buffer.length >= 4) {
+        return; // Ignore input if buffer full
     }
+
+    // 3. Append to buffer
+    state.buffer += key;
+    updateComposition();
+
+    // 4. Check for candidates
+    // lookupCandidates() is handled by updateComposition()
 }
+
 
 function nextPage() {
     const totalPages = Math.ceil(state.candidates.length / state.pageSize);
@@ -415,6 +435,7 @@ function nextPage() {
 }
 
 function handleBackspace() {
+    triggerHaptic();
     if (state.buffer.length > 0) {
         state.buffer = state.buffer.slice(0, -1);
         state.page = 0; // Reset page on edit
@@ -426,6 +447,7 @@ function handleBackspace() {
 }
 
 function handleSpace() {
+    triggerHaptic();
     if (state.candidates.length > 0) {
         selectCandidate(state.page * state.pageSize + 0); // Select first candidate
     } else {
@@ -439,6 +461,7 @@ function handleSpace() {
 }
 
 function handleEnter() {
+    triggerHaptic();
     if (state.buffer.length > 0) {
         // Commit buffer as is (if needed, or just clear)
         // Standard behavior: clear buffer
@@ -554,6 +577,7 @@ function selectCandidate(index) {
     // and update call sites to calculate it.
 
     if (index >= 0 && index < state.candidates.length) {
+        triggerHaptic();
         const char = state.candidates[index].char;
         state.output += char;
         state.buffer = '';
@@ -583,6 +607,14 @@ function showToast() {
 function updateOutput() {
     els.output.value = state.output;
     els.output.scrollTop = els.output.scrollHeight;
+}
+
+// Haptic Feedback
+function triggerHaptic() {
+    // Only on mobile/touch devices usually, but navigator.vibrate works if hardware supports it
+    if (navigator.vibrate) {
+        navigator.vibrate(10); // Light vibration
+    }
 }
 
 // Start

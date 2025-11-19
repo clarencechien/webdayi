@@ -171,8 +171,9 @@ webdayi/
 │   ├── dayi_db.json            # 大易碼表 (O(1) 查詢)
 │   └── ngram_db.json           # N-gram 資料庫 (279K bigrams)
 │
-├── lite/                       # WebDayi Lite (輕量版 PWA)
-│   ├── index.html              # 主頁面
+├── lite/                       #- **WebDayi Lite**: A pure PWA version optimized for mobile devices.
+  - **Features**: Virtual Keyboard (Trapezoid layout, English Mode, Haptics), Offline Support, Focus Mode.
+  - **Path**: `lite/`          # 主頁面
 │   ├── app.js                  # 核心邏輯
 │   ├── style.css               # 樣式
 │   └── data/                   # 資料檔案

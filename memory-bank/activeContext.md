@@ -41,11 +41,23 @@ This session focused on creating a **"Lite" version** of WebDayi, a pure Web/PWA
 - **Input Mode**: Character-by-character only (classic Dayi).
 - **Data Source**: `dayi4.cin` (standard Dayi 4 table).
 - **Keyboard**:
-    - **Virtual**: On-screen keyboard (hidden by default on laptop, visible on mobile).
+    - **Virtual**: Redesigned layout with trapezoid bottom row.
+    - **English Mode**: Toggle via Shift key (outputs raw characters).
     - **Physical**: Standard keyboard support.
+    - **Haptics**: Vibration feedback on key press (mobile).
 - **UI Improvements**:
     - **FAB**: Positioned at top-right for better accessibility.
     - **Icons**: Optimized PWA icons (67x64).
+    - **Layout**: Row 4 symbols (`Space`, `,`, `.`, `/`).
+
+## Recent Changes
+- **Keyboard Redesign**: Implemented 5-row layout with trapezoid style for Row 3.
+- **English Mode**: Added toggle functionality via Shift key.
+- **Haptic Feedback**: Added `navigator.vibrate` calls for better tactile response.
+- **Bug Fixes**:
+    - Fixed input logic to prioritize valid code extension over candidate selection.
+    - Fixed selection keys (`Space`, `'`, `[]`, `\`) not working.
+    - Fixed `lookupCandidates` reference error.
 
 ---
 

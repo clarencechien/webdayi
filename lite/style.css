@@ -396,25 +396,38 @@ label {
     user-select: none;
 }
 
-/* Row styling handled by grid placement in JS or just flex rows */
-.virtual-keyboard {
+/* Virtual Keyboard */
+.keyboard-container {
+    background-color: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-xs);
+    padding-bottom: max(var(--spacing-xs), env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+    width: 100%;
+    user-select: none;
 }
 
-.virtual-keyboard>div {
+.keyboard-row {
     display: flex;
     gap: 4px;
     justify-content: center;
+    width: 100%;
+}
+
+/* Trapezoid Effect for Z-row */
+.row-trapezoid {
+    padding: 0 2%;
+    /* Indent slightly to create trapezoid look */
 }
 
 .key {
     flex: 1;
     height: 48px;
-    background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
+    background-color: var(--bg-surface);
     color: var(--text-main);
     font-size: 1.125rem;
     font-weight: 500;
@@ -423,33 +436,38 @@ label {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    transition: all 0.1s;
-    position: relative;
-    min-width: 32px;
+    transition: background-color 0.1s;
+    min-width: 0;
+    /* Allow shrinking */
+    padding: 0;
 }
 
 .key:active {
-    transform: translateY(1px);
-    box-shadow: none;
-    background-color: var(--border-light);
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 .key-sub {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
-    position: absolute;
-    bottom: 2px;
-    right: 4px;
+    margin-top: -2px;
 }
 
 .key-special {
     background-color: rgba(0, 0, 0, 0.05);
-    font-size: 0.9rem;
+    font-size: 1rem;
+    flex: 1.5;
+    /* Wider than normal keys */
 }
 
 .key-space {
-    flex: 3 !important;
+    flex: 4;
+    /* Much wider */
+}
+
+#key-shift.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }
 
 /* Status Bar */
