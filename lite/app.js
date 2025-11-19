@@ -87,12 +87,15 @@ async function init() {
 
 // Theme & Settings Logic
 function initTheme() {
+    // Default keyboard state: Hidden on larger screens (laptops/desktops), Visible on mobile
+    const isLargeScreen = window.innerWidth >= 768;
+
     const defaults = {
         focusMode: false,
         autoCopy: false,
         theme: 'dark',
         fontScale: 1.0,
-        showKeyboard: true
+        showKeyboard: !isLargeScreen
     };
 
     // Load settings
