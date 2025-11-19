@@ -483,7 +483,7 @@ label {
 /* FAB & Menu */
 .fab {
     position: fixed;
-    bottom: 20px;
+    top: 20px;
     right: 20px;
     width: 56px;
     height: 56px;
@@ -506,7 +506,7 @@ label {
 
 .menu-panel {
     position: fixed;
-    bottom: 90px;
+    top: 90px;
     right: 20px;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
