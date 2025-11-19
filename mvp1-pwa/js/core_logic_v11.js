@@ -182,14 +182,15 @@ function removeLastCodeFromBuffer() {
 
 /**
  * Clear code buffer
+ * @param {boolean} keepPrediction - If true, preserve prediction state (for triggerPrediction)
  */
-function clearCodeBuffer() {
+function clearCodeBuffer(keepPrediction = false) {
   // Clear code buffer array
   codeBuffer = [];
 
-  // 🆕 Phase 1.10.5: Clear sentence display
+  // 🆕 Phase 1.10.5: Clear sentence display ONLY if not keeping prediction
   const sentenceDisplay = document.getElementById('sentence-display');
-  if (sentenceDisplay) {
+  if (sentenceDisplay && !keepPrediction) {
     sentenceDisplay.innerHTML = '';
   }
 
@@ -199,9 +200,9 @@ function clearCodeBuffer() {
     finishHint.classList.add('hidden');
   }
 
-  // 🆕 Phase 1.10.5: Clear candidate area
+  // 🆕 Phase 1.10.5: Clear candidate area ONLY if not keeping prediction
   const candidateArea = document.getElementById('candidate-area');
-  if (candidateArea) {
+  if (candidateArea && !keepPrediction) {
     candidateArea.innerHTML = '<div class="w-full text-center text-sm text-slate-400 py-4">輸入編碼後按 = 預測句子</div>';
   }
 
@@ -212,11 +213,11 @@ function clearCodeBuffer() {
   }
 
   // 🆕 Phase 1.10.5: Clear prediction state (CRITICAL FIX for ghost sentences)
-  if (typeof window.clearPredictionState === 'function') {
+  if (!keepPrediction && typeof window.clearPredictionState === 'function') {
     window.clearPredictionState();
   }
 
-  console.log('[Phase 1.10.5] clearCodeBuffer: ALL state cleared (buffer, UI, predictions)');
+  console.log(`[Phase 1.10.5] clearCodeBuffer: Buffer cleared (keepPrediction=${keepPrediction})`);
 }
 
 /**

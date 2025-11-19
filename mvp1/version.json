@@ -1,10 +1,46 @@
 {
-  "version": "11.2.1",
-  "build": "20251112-015",
-  "buildDate": "2025-11-12T07:06:19Z",
-  "commit": "4235471",
-  "releaseName": "Chinese Text Recognition Diagnostics",
+  "version": "11.3.8",
+  "build": "20251119-014",
+  "buildDate": "2025-11-19T12:00:00Z",
+  "commit": "pending",
+  "releaseName": "E2E Testing & Critical Fixes",
   "changelog": [
+    {
+      "version": "11.3.8",
+      "build": "014",
+      "date": "2025-11-19",
+      "type": "critical-fix",
+      "title": "E2E Testing Framework & Prediction State Fix",
+      "summary": "Implemented comprehensive E2E testing framework with Puppeteer. Fixed a critical logic bug where prediction results were immediately cleared upon display due to aggressive buffer clearing.",
+      "changes": [
+        "Implemented E2E testing framework using Puppeteer + Mocha",
+        "Added basic flow and sentence mode integration tests",
+        "Fixed critical bug: clearCodeBuffer() now accepts keepPrediction flag",
+        "Updated test selectors to match current DOM structure",
+        "Fixed Android/Mobile compatibility in test interactions"
+      ],
+      "technical_details": [
+        "Added mvp1-pwa/e2e directory with setup.js and test files",
+        "Added install-deps.sh for WSL/Linux environment setup",
+        "Modified core_logic_v11.js to preserve prediction state during triggerPrediction",
+        "Updated package.json with test:e2e script"
+      ]
+    },
+    {
+      "version": "11.3.7",
+      "build": "20251113-013",
+      "date": "2025-11-13",
+      "type": "critical-fix",
+      "title": "Phase 1.10.5 Critical Fixes",
+      "summary": "Addressed 5 critical user-reported bugs including ghost sentences, Enter key submission, and UI layout issues. Complete state management overhaul.",
+      "changes": [
+        "Fixed ghost sentences: clearCodeBuffer() now clears ALL state (UI, hints, candidates)",
+        "Fixed Enter key: Works from any character position",
+        "Fixed UI layout: Compact design eliminates scrolling on mobile/desktop",
+        "Fixed Stats button: Accessible on desktop via mobile panel",
+        "Added 18 new TDD tests for state management"
+      ]
+    },
     {
       "version": "11.3.5",
       "build": "009",

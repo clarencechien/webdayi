@@ -73,13 +73,14 @@ Other Dàyì users whose primary work and communication happens in the browser
 
 ## Project Timeline
 ```
-Phase 0: Data Pipeline (C.1-C.4)    ← Current Focus
+Phase 0: Data Pipeline (C.1-C.4)    ✅ Complete
   └─ Convert Rime YAML → dayi_db.json
 
-Phase 1: MVP 1.0 (Core Engine)
+Phase 1: MVP 1.0 (Core Engine)      ✅ Complete
   └─ Static webpage validation (F-1.1 → F-1.8)
+  └─ Phase 1.10 Character Editing (Complete)
 
-Phase 2: MVP 2a (Browser Plugin)
+Phase 2: MVP 2a (Browser Plugin)    ← Current Focus
   └─ Chrome Extension wrapper (F-2a.1 → F-2a.8)
 
 Phase 3: MVP 2a+ (Future)

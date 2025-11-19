@@ -1,28 +1,79 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-13
-**Current Version**: MVP 1.0 v11.3.7 (Phase 1.10.5 Critical Fixes)
+**Last Updated**: 2025-11-19
+**Current Version**: MVP 1.0 v11.3.8 (Phase 1.10.6 E2E Testing)
 **Branch**: `claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi`
 
 ---
 
 ## 📊 Current Status
 
-### Phase 1.10: Character-Level Editing ✅ FEATURE COMPLETE + FIXES
-**Status**: Production ready with critical bug fixes
-**Completion Date**: 2025-11-13
-**Total Implementation**: 5 phases, 110 TDD tests, 3,900+ lines of code
+### Phase 1.10: Character-Level Editing ✅ FEATURE COMPLETE + E2E TESTED
+**Status**: Production ready with critical bug fixes and E2E verification
+**Completion Date**: 2025-11-19
+**Total Implementation**: 6 phases, 110 TDD tests + 6 E2E tests, 4,000+ lines of code
 
 **All Features Implemented**:
 1. **Phase 1.10.1**: Character span architecture (24 tests) ✅
 2. **Phase 1.10.2**: Candidate selection modal (22 tests) ✅
 3. **Phase 1.10.3**: Auto-advance + arrow navigation (20 tests) ✅
 4. **Phase 1.10.4**: Finish editing + submit workflow (19 tests) ✅
-5. **Phase 1.10.5**: Critical bug fixes + complete state management (25 tests) ✅ **Most comprehensive**
+5. **Phase 1.10.5**: Critical bug fixes + complete state management (25 tests) ✅
+6. **Phase 1.10.6**: E2E Testing Framework + Prediction Fix (6 tests) ✅ **NEW**
 
 ---
 
-## 🔧 Latest Session: Phase 1.10.5 Complete State Management Fixes (2025-11-13)
+## 🔧 Latest Session: Phase 1.10.6 E2E Testing & Critical Fixes (2025-11-19)
+
+### Session Summary
+
+This session focused on establishing a robust **End-to-End (E2E) testing framework** using Puppeteer and fixing a **critical logic bug** discovered during the process.
+
+**Key Achievements**:
+1. ✅ **E2E Framework**: Setup Puppeteer + Mocha + http-server in `mvp1-pwa/e2e/`.
+2. ✅ **Critical Bug Fix**: Fixed `clearCodeBuffer` inadvertently clearing prediction state immediately after generation.
+3. ✅ **Test Coverage**: Implemented `basic-flow.test.js` and `sentence-mode.test.js` covering core user journeys.
+4. ✅ **Environment Support**: Added `install-deps.sh` for WSL/Linux Puppeteer dependencies.
+
+### Critical Bug Fix: Prediction State Clearing
+
+**Issue**:
+The `triggerPrediction` function called `clearCodeBuffer()` to clear the input buffer. However, `clearCodeBuffer` (updated in 1.10.5) was too aggressive and cleared the *entire* UI state, including the just-generated prediction results.
+
+**Fix**:
+Modified `clearCodeBuffer` to accept a `keepPrediction` flag.
+
+```javascript
+// core_logic_v11.js
+function clearCodeBuffer(keepPrediction = false) {
+  codeBuffer = [];
+  // ...
+  if (!keepPrediction) {
+     // Clear UI state (sentence display, candidates, etc.)
+  }
+}
+```
+
+**Result**:
+Prediction results now persist correctly while the input buffer is cleared, allowing the user to interact with the prediction (edit/submit).
+
+### E2E Test Suite
+
+**Run with**: `npm run test:e2e` (in `mvp1-pwa/`)
+
+**Tests Implemented**:
+1. **Basic Flow**:
+   - App load & title verification
+   - Basic input ('x') & candidate display
+   - Candidate selection (Space key) & output verification
+2. **Sentence Mode**:
+   - Mode switching
+   - Sentence prediction ('x a' -> '滿')
+   - Candidate modal interaction (clicking character)
+
+---
+
+## 🔧 Previous Session: Phase 1.10.5 Complete State Management Fixes (2025-11-13)
 
 ### Session Summary
 

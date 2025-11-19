@@ -1,0 +1,16 @@
+{
+    "name": "webdayi-mvp1-pwa",
+    "version": "0.5.0",
+    "description": "WebDaYi MVP 1.0 PWA - E2E Testing",
+    "scripts": {
+        "test:e2e": "mocha e2e/*.test.js --timeout 30000"
+    },
+    "devDependencies": {
+        "puppeteer": "^23.0.0",
+        "mocha": "^10.0.0",
+        "http-server": "^14.1.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

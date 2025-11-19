@@ -325,12 +325,12 @@
       displayPredictionWithIndicator(currentPredictions[0], 0, currentPredictions.length);
 
       // Clear buffer and input (codes are now in prediction state)
-      clearCodeBuffer();
+      clearCodeBuffer(true);
       updateBufferDisplay();
       updateLivePreviewDisplay();
       if (inputBox) inputBox.value = '';
 
-    // Case 2: Predictions exist - CYCLE to next prediction
+      // Case 2: Predictions exist - CYCLE to next prediction
     } else {
       console.log(`[v11 UI] Cycling predictions (current: ${currentPredictionIndex + 1}/${currentPredictions.length})`);
 
@@ -591,7 +591,7 @@
     const charSpans = document.querySelectorAll('.char-span');
 
     charSpans.forEach((span, index) => {
-      span.addEventListener('click', function() {
+      span.addEventListener('click', function () {
         const dataIndex = parseInt(this.dataset.index, 10);
         const dataCode = this.dataset.code;
         const dataCandidates = JSON.parse(this.dataset.candidates);
