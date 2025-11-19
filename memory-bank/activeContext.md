@@ -41,8 +41,11 @@ This session focused on creating a **"Lite" version** of WebDayi, a pure Web/PWA
 - **Input Mode**: Character-by-character only (classic Dayi).
 - **Data Source**: `dayi4.cin` (standard Dayi 4 table).
 - **Keyboard**:
-    - **Virtual**: On-screen keyboard for touch devices.
+    - **Virtual**: On-screen keyboard (hidden by default on laptop, visible on mobile).
     - **Physical**: Standard keyboard support.
+- **UI Improvements**:
+    - **FAB**: Positioned at top-right for better accessibility.
+    - **Icons**: Optimized PWA icons (67x64).
 
 ---
 
