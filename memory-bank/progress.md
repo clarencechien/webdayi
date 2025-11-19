@@ -537,6 +537,23 @@ webdayi/
 - ⏳ **Performance**: Query response < 50ms
 - ⏳ **Usability**: Can compose 100 chars in 3 min
 
+### Phase 2: WebDayi Lite (PWA)
+- [x] **Project Setup**: Initialize `lite/` directory and structure.
+- [x] **Data Preparation**: Convert `dayi4.cin` to JSON format.
+- [x] **Core Logic**: Implement input handling, candidate lookup, and composition.
+- [x] **UI Implementation**: Create responsive layout, virtual keyboard, and candidate bar.
+- [x] **PWA Features**: Add manifest and basic offline support.
+- [x] **Refinements**:
+    - [x] Smart Input (Prefix checking).
+    - [x] UI Polish (Colors, Spacing).
+    - [x] Advanced Features (Menu, Focus Mode, Auto-Copy, Font Size, Keyboard Toggle).
+- [x] **Verification**: Manual testing of all features.
+
+### Phase 3: Smart Engine (MVP3)
+- [ ] **N-gram Model**: Implement bigram/trigram probability model.
+- [ ] **Sentence Segmentation**: Develop algorithm for splitting sentences.
+- [ ] **Learning**: Implement user feedback loop for weight adjustment. 3 min
+
 ### Phase 2: MVP 2a
 - ⏳ **Functional**: All F-2a.x features work
 - ⏳ **Compatibility**: Works in Gmail, Docs, Notion

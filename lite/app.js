@@ -5,6 +5,7 @@
 // State
 const state = {
     db: {},
+    prefixes: new Set(), // Valid code prefixes
     buffer: '', // Current input code (e.g., 'x', 'xo')
     candidates: [], // Current candidates
     output: '', // Committed text
@@ -15,19 +16,30 @@ const state = {
 // DOM Elements
 const els = {
     status: document.getElementById('status-indicator'),
-    buffer: document.getElementById('composition-buffer'),
+    composition: document.getElementById('composition-buffer'),
     candidates: document.getElementById('candidate-bar'),
-    currentCode: document.getElementById('current-code'),
-    keyboard: document.getElementById('virtual-keyboard')
+    output: document.getElementById('output-buffer'),
+    keyboard: document.getElementById('virtual-keyboard'),
+    copyBtn: document.getElementById('copy-btn'),
+    clearBtn: document.getElementById('clear-btn')
 };
 
 // Keyboard Layout (Dayi 4)
-// Row 1: Q W E R T Y U I O P
-// Row 2: A S D F G H J K L ;
-// Row 3: Z X C V B N M , . /
 const KEYBOARD_LAYOUT = [
     [
-        { code: 'q', label: 'Q', sub: '言' },
+        { code: '1', label: '1', sub: '言' },
+        { code: '2', label: '2', sub: '牛' },
+        { code: '3', label: '3', sub: '目' },
+        { code: '4', label: '4', sub: '四' },
+        { code: '5', label: '5', sub: '王' },
+        { code: '6', label: '6', sub: '車' },
+        { code: '7', label: '7', sub: '田' },
+        { code: '8', label: '8', sub: '八' },
+        { code: '9', label: '9', sub: '足' },
+        { code: '0', label: '0', sub: '金' }
+    ],
+    [
+        { code: 'q', label: 'Q', sub: '石' },
         { code: 'w', label: 'W', sub: '山' },
         { code: 'e', label: 'E', sub: '一' },
         { code: 'r', label: 'R', sub: '工' },
@@ -66,9 +78,138 @@ const KEYBOARD_LAYOUT = [
 
 // Initialization
 async function init() {
+    initTheme(); // Load settings first
     renderKeyboard();
     setupEventListeners();
+    setupMenuListeners();
     await loadDatabase();
+}
+
+// Theme & Settings Logic
+function initTheme() {
+    const defaults = {
+        focusMode: false,
+        autoCopy: false,
+        theme: 'dark',
+        fontScale: 1.0,
+        showKeyboard: true
+    };
+
+    // Load settings
+    const savedSettings = localStorage.getItem('webdayi-lite-settings');
+    if (savedSettings) {
+        // Merge defaults with saved settings to ensure new keys exist
+        state.settings = { ...defaults, ...JSON.parse(savedSettings) };
+    } else {
+        state.settings = defaults;
+    }
+
+    applySettings();
+}
+
+function applySettings() {
+    // Theme
+    document.documentElement.setAttribute('data-theme', state.settings.theme);
+    updateToggleStatus('toggle-theme', state.settings.theme === 'dark' ? 'ON' : 'OFF');
+
+    // Focus Mode
+    if (state.settings.focusMode) {
+        document.body.classList.add('focus-mode');
+        updateToggleStatus('toggle-focus', 'ON');
+    } else {
+        document.body.classList.remove('focus-mode');
+        updateToggleStatus('toggle-focus', 'OFF');
+    }
+
+    // Auto Copy
+    updateToggleStatus('toggle-autocopy', state.settings.autoCopy ? 'ON' : 'OFF');
+
+    // Virtual Keyboard
+    if (state.settings.showKeyboard) {
+        document.body.classList.remove('hide-keyboard');
+        updateToggleStatus('toggle-keyboard', 'ON');
+    } else {
+        document.body.classList.add('hide-keyboard');
+        updateToggleStatus('toggle-keyboard', 'OFF');
+    }
+
+    // Font Scale
+    document.documentElement.style.setProperty('--font-scale', state.settings.fontScale);
+    const fontDisplay = document.getElementById('font-size-display');
+    if (fontDisplay) {
+        fontDisplay.textContent = `${Math.round(state.settings.fontScale * 100)}%`;
+    }
+
+    saveSettings();
+}
+
+function updateToggleStatus(id, status) {
+    const el = document.getElementById(id);
+    if (el) {
+        const statusEl = el.querySelector('.toggle-status');
+        if (statusEl) statusEl.textContent = status;
+        if (status === 'ON') el.classList.add('active');
+        else el.classList.remove('active');
+    }
+}
+
+function saveSettings() {
+    localStorage.setItem('webdayi-lite-settings', JSON.stringify(state.settings));
+}
+
+function setupMenuListeners() {
+    const fab = document.getElementById('menu-fab');
+    const panel = document.getElementById('menu-panel');
+
+    if (fab && panel) {
+        fab.addEventListener('click', () => {
+            panel.classList.toggle('hidden');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!panel.contains(e.target) && !fab.contains(e.target)) {
+                panel.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('toggle-focus').addEventListener('click', () => {
+            state.settings.focusMode = !state.settings.focusMode;
+            applySettings();
+        });
+
+        document.getElementById('toggle-autocopy').addEventListener('click', () => {
+            state.settings.autoCopy = !state.settings.autoCopy;
+            applySettings();
+        });
+
+        document.getElementById('toggle-theme').addEventListener('click', () => {
+            state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark';
+            applySettings();
+        });
+
+        document.getElementById('toggle-keyboard').addEventListener('click', () => {
+            state.settings.showKeyboard = !state.settings.showKeyboard;
+            applySettings();
+        });
+
+        // Font Size
+        document.getElementById('font-decrease').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent menu close
+            if (state.settings.fontScale > 0.5) {
+                state.settings.fontScale -= 0.1;
+                applySettings();
+            }
+        });
+
+        document.getElementById('font-increase').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent menu close
+            if (state.settings.fontScale < 2.0) {
+                state.settings.fontScale += 0.1;
+                applySettings();
+            }
+        });
+    }
 }
 
 // Load Data
@@ -78,12 +219,22 @@ async function loadDatabase() {
         const response = await fetch('data/dayi_db.json');
         if (!response.ok) throw new Error('Failed to load database');
         state.db = await response.json();
+
+        // Build prefix set
+        els.status.textContent = 'Building Index...';
+        const keys = Object.keys(state.db);
+        keys.forEach(key => {
+            for (let i = 1; i <= key.length; i++) {
+                state.prefixes.add(key.substring(0, i));
+            }
+        });
+
         els.status.textContent = 'Ready';
-        els.status.style.color = 'lightgreen';
+        els.status.style.color = 'var(--primary)';
     } catch (error) {
         console.error(error);
         els.status.textContent = 'Error Loading Data';
-        els.status.style.color = 'red';
+        els.status.style.color = 'var(--danger)';
     }
 }
 
@@ -93,6 +244,11 @@ function renderKeyboard() {
     container.innerHTML = '';
 
     KEYBOARD_LAYOUT.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.style.display = 'flex';
+        rowDiv.style.gap = '4px';
+        rowDiv.style.justifyContent = 'center';
+
         row.forEach(key => {
             const btn = document.createElement('button');
             btn.className = 'key';
@@ -102,15 +258,16 @@ function renderKeyboard() {
                 <span class="key-sub">${key.sub}</span>
             `;
             btn.addEventListener('click', () => handleInput(key.code));
-            container.appendChild(btn);
+            rowDiv.appendChild(btn);
         });
+        container.appendChild(rowDiv);
     });
 
     // Add special keys row
     const specialRow = document.createElement('div');
-    specialRow.style.gridColumn = '1 / -1';
     specialRow.style.display = 'flex';
     specialRow.style.gap = '4px';
+    specialRow.style.justifyContent = 'center';
 
     const backspace = createSpecialKey('⌫', 'Backspace', () => handleBackspace());
     const space = createSpecialKey('Space', 'Space', () => handleSpace(), true);
@@ -126,7 +283,6 @@ function renderKeyboard() {
 function createSpecialKey(label, code, action, isSpace = false) {
     const btn = document.createElement('button');
     btn.className = `key key-special ${isSpace ? 'key-space' : ''}`;
-    btn.style.flex = isSpace ? '2' : '1';
     btn.textContent = label;
     btn.addEventListener('click', action);
     return btn;
@@ -138,6 +294,16 @@ function setupEventListeners() {
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey || e.altKey || e.metaKey) return;
 
+        // If candidates are present, intercept selection keys
+        if (state.candidates.length > 0) {
+            const selectionKeys = [' ', "'", '[', ']', '-', '\\', '='];
+            if (selectionKeys.includes(e.key)) {
+                handleInput(e.key);
+                e.preventDefault();
+                return;
+            }
+        }
+
         if (e.key === 'Backspace') {
             handleBackspace();
             e.preventDefault();
@@ -148,36 +314,107 @@ function setupEventListeners() {
             handleSpace();
             e.preventDefault();
         } else if (e.key.length === 1) {
-            // Handle alphanumeric keys and punctuation that are in our layout
             const key = e.key.toLowerCase();
-            const validKeys = KEYBOARD_LAYOUT.flat().map(k => k.code);
-            if (validKeys.includes(key) || (key >= '0' && key <= '9')) {
-                handleInput(key);
-                e.preventDefault();
-            }
+            // Allow all keys to pass to handleInput, it will filter valid ones
+            handleInput(key);
+            e.preventDefault();
         }
+    });
+
+    // Copy Button
+    els.copyBtn.addEventListener('click', () => {
+        if (state.output) {
+            navigator.clipboard.writeText(state.output).then(() => {
+                const originalText = els.copyBtn.innerHTML;
+                els.copyBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Copied';
+                setTimeout(() => {
+                    els.copyBtn.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+    });
+
+    // Clear Button
+    els.clearBtn.addEventListener('click', () => {
+        state.output = '';
+        state.buffer = '';
+        updateOutput();
+        updateComposition();
     });
 }
 
 // Input Handling
 function handleInput(key) {
-    // If it's a number selection
-    if (key >= '0' && key <= '9') {
+    // Check if it's a number
+    const isNumber = key >= '0' && key <= '9';
+
+    if (isNumber) {
+        // Smart Logic:
+        // 1. Check if adding this number creates a valid prefix
+        const potentialBuffer = state.buffer + key;
+        const isPrefix = state.prefixes.has(potentialBuffer);
+
+        // 2. If it's a valid prefix, treat as input (append to buffer)
+        if (isPrefix) {
+            if (state.buffer.length < 4) {
+                state.buffer += key;
+                updateComposition();
+            }
+            return;
+        }
+
+        // 3. If NOT a valid prefix, treat as selection
         const index = key === '0' ? 9 : parseInt(key) - 1;
-        selectCandidate(index);
+        selectCandidate(state.page * state.pageSize + index);
         return;
     }
 
-    // Add to buffer
-    if (state.buffer.length < 4) {
-        state.buffer += key;
-        updateComposition();
+    // Special Selection Keys (when candidates are present)
+    if (state.candidates.length > 0) {
+        const selectionMap = {
+            ' ': 0,
+            "'": 1,
+            '[': 2,
+            ']': 3,
+            '-': 4,
+            '\\': 5
+        };
+
+        if (key in selectionMap) {
+            selectCandidate(state.page * state.pageSize + selectionMap[key]);
+            return;
+        }
+
+        // Pagination
+        if (key === '=') {
+            nextPage();
+            return;
+        }
+    }
+
+    // Normal letter input
+    // Only allow valid Dayi keys (a-z, , . / ;)
+    const validInputKeys = /^[a-z,./;]$/;
+    if (validInputKeys.test(key)) {
+        if (state.buffer.length < 4) {
+            state.buffer += key;
+            updateComposition();
+        }
+    }
+}
+
+function nextPage() {
+    const totalPages = Math.ceil(state.candidates.length / state.pageSize);
+    if (totalPages > 1) {
+        state.page = (state.page + 1) % totalPages;
+        renderCandidates();
     }
 }
 
 function handleBackspace() {
     if (state.buffer.length > 0) {
         state.buffer = state.buffer.slice(0, -1);
+        state.page = 0; // Reset page on edit
         updateComposition();
     } else if (state.output.length > 0) {
         state.output = state.output.slice(0, -1);
@@ -187,21 +424,26 @@ function handleBackspace() {
 
 function handleSpace() {
     if (state.candidates.length > 0) {
-        // Select first candidate
-        selectCandidate(0);
+        selectCandidate(state.page * state.pageSize + 0); // Select first candidate
     } else {
-        state.output += ' ';
-        updateOutput();
+        // If buffer empty, add space? Or ignore?
+        // Standard: if buffer empty, add space
+        if (state.buffer.length === 0) {
+            state.output += ' ';
+            updateOutput();
+        }
     }
 }
 
 function handleEnter() {
     if (state.buffer.length > 0) {
-        // Commit raw buffer
-        state.output += state.buffer;
+        // Commit buffer as is (if needed, or just clear)
+        // Standard behavior: clear buffer
         state.buffer = '';
+        state.candidates = [];
+        state.page = 0;
         updateComposition();
-        updateOutput();
+        renderCandidates();
     } else {
         state.output += '\n';
         updateOutput();
@@ -210,7 +452,8 @@ function handleEnter() {
 
 // Logic
 function updateComposition() {
-    els.currentCode.textContent = state.buffer;
+    els.composition.textContent = state.buffer;
+    state.page = 0; // Reset page on new input
 
     if (state.buffer.length === 0) {
         state.candidates = [];
@@ -229,32 +472,114 @@ function renderCandidates() {
 
     if (state.candidates.length === 0) {
         if (state.buffer.length > 0) {
-            els.candidates.textContent = 'No candidates';
+            els.candidates.innerHTML = '<div class="placeholder">No candidates</div>';
+        } else {
+            els.candidates.innerHTML = '<div class="placeholder">請輸入大易碼...</div>';
         }
         return;
     }
 
-    state.candidates.slice(0, 10).forEach((cand, index) => {
+    const start = state.page * state.pageSize;
+    const end = start + state.pageSize;
+    const pageCandidates = state.candidates.slice(start, end);
+
+    // Selection keys mapping for display
+    const selectionKeys = ['Space', "'", '[', ']', '-', '\\', '7', '8', '9', '0'];
+
+    pageCandidates.forEach((cand, index) => {
         const div = document.createElement('div');
         div.className = 'candidate-item';
-        div.innerHTML = `<span class="candidate-index">${(index + 1) % 10}</span>${cand.char}`;
-        div.addEventListener('click', () => selectCandidate(index));
+
+        // Get display key
+        let displayKey = '';
+        if (index < selectionKeys.length) {
+            displayKey = selectionKeys[index];
+        } else {
+            displayKey = (index + 1) % 10; // Fallback
+        }
+
+        // Special handling for Space symbol if desired, or just text
+        if (displayKey === 'Space') displayKey = '␣';
+
+        div.innerHTML = `
+            <span class="candidate-index">${displayKey}</span>
+            <span class="candidate-char">${cand.char}</span>
+        `;
+        div.addEventListener('click', () => selectCandidate(start + index));
         els.candidates.appendChild(div);
     });
+
+    // Add pagination indicator if needed
+    if (state.candidates.length > state.pageSize) {
+        const pageInfo = document.createElement('div');
+        pageInfo.className = 'page-info';
+        pageInfo.style.width = '100%';
+        pageInfo.style.textAlign = 'center';
+        pageInfo.style.fontSize = '0.8rem';
+        pageInfo.style.color = 'var(--text-muted)';
+        pageInfo.style.marginTop = '4px';
+        pageInfo.textContent = `${state.page + 1}/${Math.ceil(state.candidates.length / state.pageSize)} (Press = for next)`;
+        els.candidates.appendChild(pageInfo);
+    }
 }
 
 function selectCandidate(index) {
+    // Adjust index for pagination if selecting by number key (0-9)
+    // But wait, selectCandidate is called with absolute index from click
+    // OR relative index from number keys?
+    // Let's standardize: selectCandidate takes ABSOLUTE index in state.candidates
+
+    // If coming from number key (0-9), it refers to the CURRENT PAGE
+    // We need to handle that in handleInput or here.
+    // Let's handle it in handleInput/callers to pass absolute index?
+    // No, easier to handle "selection by visible slot" logic.
+
+    // Actually, the previous logic passed 0-9.
+    // If we are on page 1, index 0 is actually start + 0.
+
+    // Let's refactor selectCandidate to take "visible index" and convert?
+    // Or just pass absolute index.
+
+    // In handleInput:
+    // const index = key === '0' ? 9 : parseInt(key) - 1;
+    // This is 0-9 relative to page.
+    // So: selectCandidate(state.page * state.pageSize + index)
+
+    // But wait, the selection keys (Space, ', etc) map to 0, 1, 2... relative to page.
+
+    // So let's update selectCandidate to accept absolute index, 
+    // and update call sites to calculate it.
+
     if (index >= 0 && index < state.candidates.length) {
         const char = state.candidates[index].char;
         state.output += char;
         state.buffer = '';
+        state.page = 0;
         updateComposition();
         updateOutput();
+
+        // Auto Copy
+        if (state.settings && state.settings.autoCopy) {
+            navigator.clipboard.writeText(state.output).then(() => {
+                showToast();
+            }).catch(err => console.error('Copy failed', err));
+        }
+    }
+}
+
+function showToast() {
+    const toast = document.getElementById('toast');
+    if (toast) {
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 1500);
     }
 }
 
 function updateOutput() {
-    els.buffer.textContent = state.output;
+    els.output.value = state.output;
+    els.output.scrollTop = els.output.scrollHeight;
 }
 
 // Start

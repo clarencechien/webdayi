@@ -32,11 +32,18 @@
 
 在瀏覽器中直接體驗，無需安裝！
 
+### 🆕 WebDayi Lite (輕量版)
+**[👉 Lite Version](lite/index.html)**
+一個極致輕量、無依賴的 PWA 版本，專注於速度與離線使用。
+- **特色**: 智慧輸入、專注模式、自動複製、字體調整、虛擬鍵盤開關。
+- **適合**: 手機、平板、筆電快速輸入。
+
 ---
 
 ## 🎯 現況一覽
 
 **最新版本**: v0.5.0 (Build: 20251113-013) - Phase 1.10.5 PRODUCTION READY
+**Lite 版本**: v1.0.0 (Initial Release)
 
 ### Phase 1.10: 字元級編輯系統 ✅ 生產就緒
 完整的智慧字元編輯工作流程 + 完整狀態管理修復，讓句子修正變得前所未有的簡單且可靠！
@@ -164,8 +171,15 @@ webdayi/
 │   ├── dayi_db.json            # 大易碼表 (O(1) 查詢)
 │   └── ngram_db.json           # N-gram 資料庫 (279K bigrams)
 │
+├── lite/                       # WebDayi Lite (輕量版 PWA)
+│   ├── index.html              # 主頁面
+│   ├── app.js                  # 核心邏輯
+│   ├── style.css               # 樣式
+│   └── data/                   # 資料檔案
+│
 ├── converter/                  # 資料轉換工具
 │   ├── convert.js              # YAML → JSON 轉換器
+│   ├── convert_cin.js          # CIN → JSON 轉換器
 │   ├── build_ngram.py          # N-gram 資料庫建構
 │   └── raw_data/               # 原始 Rime 資料
 │
