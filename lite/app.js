@@ -12,7 +12,8 @@ const state = {
     page: 0,
     pageSize: 10,
     isEnglishMode: false, // English input mode
-    isMiniMode: false // Mini mode state
+    isMiniMode: false, // Mini mode state
+    lastAltPressTime: 0 // Track Alt key for double-tap
 };
 
 // DOM Elements
@@ -286,8 +287,31 @@ function setupEventListeners() {
     document.addEventListener('keydown', (e) => {
         if (e.repeat) return; // Prevent rapid firing when holding key
 
-        // Mini Mode Alt-Hack: Auto Commit & Copy on Alt press
-        if (e.key === 'Alt' && state.isMiniMode) {
+        // Alt-Hack: Auto Commit & Copy on Alt press (GLOBAL)
+        // Double-Alt to Clear
+        if (e.key === 'Alt') {
+            const now = Date.now();
+            if (now - state.lastAltPressTime < 300) {
+                // Double Tap Detected -> CLEAR
+                clearAll();
+                state.lastAltPressTime = 0; // Reset
+                // Visual feedback for clear
+                if (!state.isMiniMode) showToast('已清除');
+                else {
+                    // Mini mode clear feedback (flash red?)
+                    if (els.miniUi) {
+                        const card = els.miniUi.querySelector('.mini-card');
+                        if (card) {
+                            card.style.borderColor = 'var(--danger)';
+                            setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
+                        }
+                    }
+                }
+                return;
+            }
+            state.lastAltPressTime = now;
+
+            // Single Tap -> COPY logic
             // 1. Commit candidate if composing
             if (state.candidates.length > 0) {
                 selectCandidate(state.page * state.pageSize + 0); // Select first candidate
@@ -297,8 +321,26 @@ function setupEventListeners() {
             if (state.output) {
                 navigator.clipboard.writeText(state.output).then(() => {
                     // 3. Flash feedback
-                    document.body.classList.add('flash-success');
-                    setTimeout(() => document.body.classList.remove('flash-success'), 200);
+                    const target = state.isMiniMode ? els.miniOutput : els.output;
+                    if (target) {
+                        target.style.animation = 'none';
+                        target.offsetHeight; /* trigger reflow */
+                        target.style.animation = 'flash-green 0.3s';
+                    }
+
+                    // Flash mini card
+                    if (state.isMiniMode && els.miniUi) {
+                        const card = els.miniUi.querySelector('.mini-card');
+                        if (card) {
+                            card.style.borderColor = 'var(--primary)';
+                            setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
+                        }
+                    }
+
+                    // Show toast if not in mini mode
+                    if (!state.isMiniMode) {
+                        showToast('已複製');
+                    }
                 }).catch(err => console.error('Auto-copy failed', err));
             }
             // Do NOT prevent default to allow Alt+Tab
@@ -384,6 +426,9 @@ function setupEventListeners() {
         }
     });
 
+    // Remove keyup listener (was used for Shift toggle)
+    // document.addEventListener('keyup', ...); 
+
     // Copy Button
     els.copyBtn.addEventListener('click', () => {
         if (state.output) {
@@ -398,14 +443,21 @@ function setupEventListeners() {
     });
 
     // Clear Button
-    els.clearBtn.addEventListener('click', () => {
-        state.output = '';
-        state.buffer = '';
-        state.candidates = [];
-        updateOutput();
-        updateComposition();
-        renderCandidates();
-        els.output.focus();
+    els.clearBtn.addEventListener('click', clearAll);
+
+    // Auto-Clear on Blur REMOVED (User requested Double-Alt instead)
+    /*
+    const handleBlur = () => { ... }
+    window.addEventListener('blur', handleBlur);
+    ...
+    */
+
+    // Restore focus on return (Mini Mode only)
+    window.addEventListener('focus', () => {
+        if (state.isMiniMode && els.miniOutput) {
+            // Small delay to ensure window is ready
+            setTimeout(() => els.miniOutput.focus(), 50);
+        }
     });
 
     // Mini UI Elements
@@ -424,6 +476,26 @@ function setupEventListeners() {
                 toggleMiniMode();
             }
         }, 100);
+    }
+}
+
+function clearAll() {
+    state.output = '';
+    state.buffer = '';
+    state.candidates = [];
+    state.page = 0;
+    updateOutput();
+    updateComposition();
+    renderCandidates();
+
+    // Only focus if the window is active (to avoid errors or stealing focus)
+    if (document.hasFocus()) {
+        if (state.isMiniMode && els.miniOutput) {
+            els.miniOutput.focus();
+        } else if (!state.isMiniMode && els.output.offsetParent !== null) {
+            // Check if output is visible
+            els.output.focus();
+        }
     }
 }
 
@@ -485,11 +557,14 @@ function handleInput(key) {
     }
 
     // Normal Dayi Logic
+    // Convert to lowercase for Dayi processing
+    const lowerKey = key.toLowerCase();
+
     // Check if key is valid Dayi character (a-z, 0-9, etc.) OR a selection key
     // We allow all keys defined in the layout plus standard keyboard inputs
     // Added: ' [ ] - \ (selection keys) and Space
     const validKeys = /^[a-z0-9,./;'\[\]\-\\ ]$/;
-    if (!validKeys.test(key)) return;
+    if (!validKeys.test(lowerKey)) return;
 
     // If we have candidates, number keys select candidates
     if (state.candidates.length > 0) {
@@ -505,7 +580,7 @@ function handleInput(key) {
     // 1. Candidate Selection (if candidates exist)
     if (state.candidates.length > 0) {
         // Check if it extends the current code (Priority: Input > Selection)
-        const nextBuffer = state.buffer + key;
+        const nextBuffer = state.buffer + lowerKey;
         // Only treat as input if it forms a valid prefix AND we haven't reached limit
         // Exception: Space is always selection/commit, never input (unless defined in DB?)
         // In Dayi, Space is not a root.
@@ -521,8 +596,8 @@ function handleInput(key) {
                 '6': 5, '7': 6, '8': 7, '9': 8, '0': 9
             };
 
-            if (key in selectionMap) {
-                selectCandidate(selectionMap[key]);
+            if (lowerKey in selectionMap) {
+                selectCandidate(selectionMap[lowerKey]);
                 return;
             }
 
@@ -539,7 +614,7 @@ function handleInput(key) {
     }
 
     // 3. Append to buffer
-    state.buffer += key;
+    state.buffer += lowerKey;
     updateComposition();
 
     // 4. Check for candidates
@@ -709,34 +784,36 @@ function selectCandidate(index) {
         updateComposition();
         updateOutput();
 
-        // Copy to clipboard
-        navigator.clipboard.writeText(state.output).then(() => {
-            // Visual feedback
-            const target = state.isMiniMode ? els.miniOutput : els.output;
+        // Copy to clipboard if enabled
+        if (state.settings.autoCopy) {
+            navigator.clipboard.writeText(state.output).then(() => {
+                // Visual feedback
+                const target = state.isMiniMode ? els.miniOutput : els.output;
 
-            if (target) {
-                target.style.animation = 'none';
-                target.offsetHeight; /* trigger reflow */
-                target.style.animation = 'flash-green 0.3s';
-            }
-
-            // Also flash the mini card border for extra visibility
-            if (state.isMiniMode && els.miniUi) {
-                const card = els.miniUi.querySelector('.mini-card');
-                if (card) {
-                    card.style.borderColor = 'var(--primary)';
-                    setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
+                if (target) {
+                    target.style.animation = 'none';
+                    target.offsetHeight; /* trigger reflow */
+                    target.style.animation = 'flash-green 0.3s';
                 }
-            }
 
-            // Show toast if not in mini mode (or maybe a mini toast?)
-            if (!state.isMiniMode) {
-                showToast('已複製');
-            }
-        }).catch(err => {
-            console.error('Copy failed:', err);
-            if (!state.isMiniMode) showToast('複製失敗', true);
-        });
+                // Also flash the mini card border for extra visibility
+                if (state.isMiniMode && els.miniUi) {
+                    const card = els.miniUi.querySelector('.mini-card');
+                    if (card) {
+                        card.style.borderColor = 'var(--primary)';
+                        setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
+                    }
+                }
+
+                // Show toast if not in mini mode
+                if (!state.isMiniMode) {
+                    showToast('已複製');
+                }
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                if (!state.isMiniMode) showToast('複製失敗', true);
+            });
+        }
     }
 }
 

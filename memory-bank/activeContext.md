@@ -43,7 +43,11 @@ This session focused on creating a **"Lite" version** of WebDayi, a pure Web/PWA
 The "Mini Mode" feature for WebDayi Lite is now **COMPLETE**.
 - **Extreme Minimalist UI**: The PWA now launches into a frameless, transparent window with zero clutter.
 - **Terminal Aesthetic**: The input area features a blinking underscore cursor `_` instead of static text.
-- **Hotkeys**: `Delete` and `Escape` keys implemented for quick clearing.
+- **Interaction Model**:
+    - **Shift**: Toggles Chinese/English mode.
+    - **Alt (Single Tap)**: Auto-commits and copies text (Global).
+    - **Alt (Double Tap)**: Clears all text.
+    - **Esc/Delete**: Quick clear.
 - **PWA Integration**: Fully supports `window-controls-overlay` for a native feel.
 
 ### Next Steps

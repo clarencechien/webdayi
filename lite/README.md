@@ -39,9 +39,10 @@ When installed as a PWA on desktop, WebDayi Lite automatically launches in **Min
 - **Extreme Minimalism**: A frameless, transparent window that blends into your desktop.
 - **Terminal Style**: Features a blinking cursor `_` and zero UI clutter.
 - **Hotkeys**:
-    - **`Alt`**: Auto-commits first candidate and copies text to clipboard.
-    - **`Esc`**: Clears current input code (if typing) or clears output area.
-    - **`Delete`**: Instantly clears the output area.
+    - **`Alt` (Tap)**: Auto-commits first candidate and copies text to clipboard.
+    - **`Alt` (Double-Tap)**: Instantly clears all text.
+    - **`Shift`**: Toggles between Chinese and English input modes.
+    - **`Esc` / `Delete`**: Alternative keys to clear text.
 - **Window Controls**: Supports `window-controls-overlay` for a native, integrated feel.
 
 ## Installation

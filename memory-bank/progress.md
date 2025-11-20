@@ -7,7 +7,10 @@
 - **2025-11-20**: Completed "Mini Mode" for WebDayi Lite.
     - Implemented `window-controls-overlay` for frameless PWA experience.
     - Designed "Extreme Minimalist" UI with blinking cursor and transparent background.
-    - Added `Alt` key auto-copy and `Esc`/`Delete` quick clear hotkeys.
+    - Refined Input Logic:
+        - **Global Alt-Copy**: `Alt` key copies text in all modes.
+        - **Double-Alt Clear**: Double-tapping `Alt` clears text.
+        - **Shift**: Simple toggle for English/Chinese mode.
     - Fixed PWA layout issues and removed legacy toggle buttons.
 **Overall Status**: 🎉 WebDayi Lite Implemented! (Phase 1.10.6 E2E Complete)
 **Main Branch**: ~98% (Phase 0-1.10.6 ✅, MVP 2a next)
@@ -554,7 +557,10 @@ webdayi/
     - [x] **Mini Mode (Suspended Widget)**:
         - [x] Frameless PWA Window (`window-controls-overlay`)
         - [x] Extreme Minimalist UI (Blinking Cursor, No Clutter)
-        - [x] Hotkeys (`Alt` to Copy, `Esc`/`Del` to Clear)
+        - [x] **Smart Hotkeys**:
+            - `Alt` (Tap): Copy
+            - `Alt` (Double-Tap): Clear
+            - `Shift`: Toggle Mode
         - [x] Auto-Start in PWA Modeion**
 - [x] **Core Input Logic**: (Char-by-char)
 - [x] **Virtual Keyboard Implementation**
