@@ -106,7 +106,8 @@
 │   ├─ UI/UX (Virtual KB)       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Desktop Shift Support    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Mobile Layout Fix        [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ PWA Icon Fix (SVG)       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ PWA Icon Fix (SVG)       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Ctrl-to-Copy             [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 1.12: MVP 1.0 v12        [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.11: MVP 2a v2.0 Ext    [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% 📋    │
@@ -551,6 +552,7 @@ webdayi/
 - [x] **Desktop Shift Support**: Physical Shift key toggles English mode.
 - [x] **Mobile Layout**: Full-width keyboard on mobile.
 - [x] **PWA Icons**: Scalable SVG icons.
+- [x] **Ctrl-to-Copy**: Press Control key to copy output.
 - [x] **Verification**: Manual testing of all features.
 
 ### Phase 3: Smart Engine (MVP3)

@@ -56,6 +56,7 @@ This session focused on creating a **"Lite" version** of WebDayi, a pure Web/PWA
 - **Haptic Feedback**: Added `navigator.vibrate` calls for better tactile response.
 - **Mobile Layout**: Optimized keyboard width for mobile devices (full width).
 - **PWA Icons**: Updated to scalable SVG icons for better device support.
+- **Ctrl-to-Copy**: Added `Control` key shortcut to copy output to clipboard (with fallback).
 - **Bug Fixes**:
     - Fixed input logic to prioritize valid code extension over candidate selection.
     - Fixed selection keys (`Space`, `'`, `[]`, `\`) not working.

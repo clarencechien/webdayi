@@ -282,7 +282,34 @@ function createSpecialKey(label, code, action, isSpace = false) {
 function setupEventListeners() {
     // Physical Keyboard
     document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        if (e.repeat) return; // Prevent rapid firing when holding key
+
+        if (e.ctrlKey || e.altKey || e.metaKey) {
+            // Allow Ctrl+C/V etc to work normally, BUT intercept Ctrl key itself
+            if (e.key === 'Control') {
+                // Ctrl key pressed alone (or as modifier start)
+                if (state.output) {
+                    // Try modern API first
+                    navigator.clipboard.writeText(state.output).then(() => {
+                        showToast();
+                    }).catch(err => {
+                        console.warn('Clipboard API failed, trying fallback', err);
+                        // Fallback: Select text and execCommand
+                        els.output.select();
+                        try {
+                            const successful = document.execCommand('copy');
+                            if (successful) showToast();
+                            else console.error('Fallback copy failed');
+                        } catch (err) {
+                            console.error('Fallback copy error', err);
+                        }
+                        // Deselect
+                        window.getSelection().removeAllRanges();
+                    });
+                }
+            }
+            return;
+        }
 
         // If candidates are present, intercept selection keys
         if (state.candidates.length > 0) {
@@ -305,16 +332,7 @@ function setupEventListeners() {
             e.preventDefault();
         } else if (e.key === 'Shift') {
             toggleEnglishMode();
-            // Don't prevent default for Shift, it might be needed for other things, 
-            // but here we just want the toggle action. 
-            // Actually, preventing default on Shift is usually fine in this context 
-            // unless we are typing a capital letter.
-            // Wait, if user holds Shift to type Capital, we don't want to toggle mode on every key repeat?
-            // The request is "press shift to toggle". Usually this means "press and release shift alone".
-            // But for simplicity, let's just toggle on down.
-            // However, if they are typing "A" (Shift+a), we don't want to toggle mode.
-            // Standard IME behavior: Shift toggles mode.
-            // Let's try just toggling.
+            // Don't prevent default for Shift
         } else if (e.key.length === 1) {
             const key = e.key.toLowerCase();
             // Allow all keys to pass to handleInput, it will filter valid ones

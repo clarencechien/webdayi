@@ -11,6 +11,9 @@ A lightweight, dependency-free Progressive Web App (PWA) for the Dayi input meth
   - **Haptic Feedback**: Vibration on key press.
   - **Smart Input**: Prioritizes valid code extension over candidate selection.
   - **Responsive**: Full-width layout on mobile devices.
+  - **Shortcuts**:
+    - **Shift**: Toggle English Mode.
+    - **Control**: Copy output to clipboard.
 - **PWA Support**: Installable on Android/iOS/Desktop with scalable SVG icons.
 - **Offline Capable**: Works without internet connection.
 - **Customizable**:
