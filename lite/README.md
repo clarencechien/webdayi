@@ -14,6 +14,8 @@ A lightweight, dependency-free Progressive Web App (PWA) for the Dayi input meth
   - **Shortcuts**:
     - **Shift**: Toggle English Mode.
     - **Control**: Copy output to clipboard.
+    - **Alt**: (In Mini Mode) Commit & Copy.
+- **Mini Mode**: Distraction-free suspended window for "Alt+Tab" workflow.
 - **PWA Support**: Installable on Android/iOS/Desktop with scalable SVG icons.
 - **Offline Capable**: Works without internet connection.
 - **Customizable**:
@@ -31,7 +33,22 @@ A lightweight, dependency-free Progressive Web App (PWA) for the Dayi input meth
     ```bash
     python3 -m http.server 8085 --directory lite
     ```
-2.  **Install**: Open in a browser and click "Install" (if supported) to add to your home screen.
+
+## Mini Mode (PWA Only)
+When installed as a PWA on desktop, WebDayi Lite automatically launches in **Mini Mode**:
+- **Extreme Minimalism**: A frameless, transparent window that blends into your desktop.
+- **Terminal Style**: Features a blinking cursor `_` and zero UI clutter.
+- **Hotkeys**:
+    - **`Alt`**: Auto-commits first candidate and copies text to clipboard.
+    - **`Esc`**: Clears current input code (if typing) or clears output area.
+    - **`Delete`**: Instantly clears the output area.
+- **Window Controls**: Supports `window-controls-overlay` for a native, integrated feel.
+
+## Installation
+1. Open in Chrome/Edge.
+2. Click the "Install" icon in the address bar.
+3. **Important**: In the install dialog, ensure "Allow this app to run on startup" or similar system integration settings are checked if available (optional).
+4. Once installed, launch the app to enter Mini Mode.
 
 ## Development
 

@@ -3,8 +3,12 @@
     "short_name": "WebDayi",
     "start_url": "./index.html",
     "display": "standalone",
-    "background_color": "#f5f5f5",
-    "theme_color": "#2196F3",
+    "display_override": [
+        "window-controls-overlay",
+        "minimal-ui"
+    ],
+    "background_color": "#1e293b",
+    "theme_color": "#1e293b",
     "orientation": "any",
     "icons": [
         {

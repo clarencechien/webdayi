@@ -4,6 +4,11 @@
 **Current Version**: 11.3.8 (MVP 1.0) / 0.5.0 (PWA Build 014)
 **Build**: 20251119-014 (Phase 1.10.6)
 **Git Commits**: pending (E2E Framework)
+- **2025-11-20**: Completed "Mini Mode" for WebDayi Lite.
+    - Implemented `window-controls-overlay` for frameless PWA experience.
+    - Designed "Extreme Minimalist" UI with blinking cursor and transparent background.
+    - Added `Alt` key auto-copy and `Esc`/`Delete` quick clear hotkeys.
+    - Fixed PWA layout issues and removed legacy toggle buttons.
 **Overall Status**: 🎉 WebDayi Lite Implemented! (Phase 1.10.6 E2E Complete)
 **Main Branch**: ~98% (Phase 0-1.10.6 ✅, MVP 2a next)
 **Feature Branch**: Merged into main
@@ -107,7 +112,8 @@
 │   ├─ Desktop Shift Support    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Mobile Layout Fix        [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ PWA Icon Fix (SVG)       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ Ctrl-to-Copy             [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Ctrl-to-Copy             [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Mini Mode                [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 1.12: MVP 1.0 v12        [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.11: MVP 2a v2.0 Ext    [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% 📋    │
@@ -541,18 +547,24 @@ webdayi/
 - ⏳ **Performance**: Query response < 50ms
 - ⏳ **Usability**: Can compose 100 chars in 3 min
 
-### Phase 2: WebDayi Lite (PWA)
-- [x] **Basic PWA Structure**: (Manifest, Service Worker)
-- [x] **Dayi 4 CIN Data Conversion**
+### Phase 2:- **WebDayi Lite PWA**:
+    - [x] Core Dayi 4 Logic
+    - [x] Virtual Keyboard (Responsive)
+    - [x] Dark/Light Theme
+    - [x] **Mini Mode (Suspended Widget)**:
+        - [x] Frameless PWA Window (`window-controls-overlay`)
+        - [x] Extreme Minimalist UI (Blinking Cursor, No Clutter)
+        - [x] Hotkeys (`Alt` to Copy, `Esc`/`Del` to Clear)
+        - [x] Auto-Start in PWA Modeion**
 - [x] **Core Input Logic**: (Char-by-char)
 - [x] **Virtual Keyboard Implementation**
 - [x] **UI/UX Polish**: (Themes, Focus Mode, Auto-Copy)
 - [x] **Keyboard Redesign**: (Trapezoid, English Mode, Haptics)
 - [x] **Bug Fixes & Verification**: (Font Size, Keyboard Toggle)
-- [x] **Desktop Shift Support**: Physical Shift key toggles English mode.
 - [x] **Mobile Layout**: Full-width keyboard on mobile.
 - [x] **PWA Icons**: Scalable SVG icons.
 - [x] **Ctrl-to-Copy**: Press Control key to copy output.
+- [x] **Mini Mode**: Minimal UI with Alt-key auto-copy.
 - [x] **Verification**: Manual testing of all features.
 
 ### Phase 3: Smart Engine (MVP3)

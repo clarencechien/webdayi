@@ -11,7 +11,8 @@ const state = {
     output: '', // Committed text
     page: 0,
     pageSize: 10,
-    isEnglishMode: false // English input mode
+    isEnglishMode: false, // English input mode
+    isMiniMode: false // Mini mode state
 };
 
 // DOM Elements
@@ -22,7 +23,8 @@ const els = {
     output: document.getElementById('output-buffer'),
     keyboard: document.getElementById('virtual-keyboard'),
     copyBtn: document.getElementById('copy-btn'),
-    clearBtn: document.getElementById('clear-btn')
+    clearBtn: document.getElementById('clear-btn'),
+    miniModeBtn: document.getElementById('btn-mini-mode')
 };
 
 // Keyboard Layout (Dayi 4)
@@ -284,6 +286,25 @@ function setupEventListeners() {
     document.addEventListener('keydown', (e) => {
         if (e.repeat) return; // Prevent rapid firing when holding key
 
+        // Mini Mode Alt-Hack: Auto Commit & Copy on Alt press
+        if (e.key === 'Alt' && state.isMiniMode) {
+            // 1. Commit candidate if composing
+            if (state.candidates.length > 0) {
+                selectCandidate(state.page * state.pageSize + 0); // Select first candidate
+            }
+
+            // 2. Copy to clipboard
+            if (state.output) {
+                navigator.clipboard.writeText(state.output).then(() => {
+                    // 3. Flash feedback
+                    document.body.classList.add('flash-success');
+                    setTimeout(() => document.body.classList.remove('flash-success'), 200);
+                }).catch(err => console.error('Auto-copy failed', err));
+            }
+            // Do NOT prevent default to allow Alt+Tab
+            return;
+        }
+
         if (e.ctrlKey || e.altKey || e.metaKey) {
             // Allow Ctrl+C/V etc to work normally, BUT intercept Ctrl key itself
             if (e.key === 'Control') {
@@ -330,6 +351,28 @@ function setupEventListeners() {
         } else if (e.key === ' ') {
             handleSpace();
             e.preventDefault();
+        } else if (e.key === 'Escape') {
+            // ESC: Clear composition first, then output
+            if (state.buffer.length > 0) {
+                state.buffer = '';
+                state.candidates = [];
+                state.page = 0;
+                updateComposition();
+                renderCandidates();
+            } else if (state.output.length > 0) {
+                state.output = '';
+                updateOutput();
+                triggerHaptic();
+            }
+            e.preventDefault();
+        } else if (e.key === 'Delete') {
+            // Delete: Clear output immediately
+            if (state.output.length > 0) {
+                state.output = '';
+                updateOutput();
+                triggerHaptic();
+            }
+            e.preventDefault();
         } else if (e.key === 'Shift') {
             toggleEnglishMode();
             // Don't prevent default for Shift
@@ -358,9 +401,57 @@ function setupEventListeners() {
     els.clearBtn.addEventListener('click', () => {
         state.output = '';
         state.buffer = '';
+        state.candidates = [];
         updateOutput();
         updateComposition();
+        renderCandidates();
+        els.output.focus();
     });
+
+    // Mini UI Elements
+    els.miniUi = document.getElementById('mini-ui');
+    els.miniOutput = document.getElementById('mini-output');
+    els.miniComposition = document.getElementById('mini-composition');
+    els.miniCandidates = document.getElementById('mini-candidates');
+
+    // Auto-Start Mini Mode if PWA
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log("PWA Mode Detected - Initializing Mini Mode");
+        // Use toggleMiniMode to ensure full initialization (events, focus, etc.)
+        // We wrap in setTimeout to ensure DOM is fully painted and styles applied
+        setTimeout(() => {
+            if (!state.isMiniMode) {
+                toggleMiniMode();
+            }
+        }, 100);
+    }
+}
+
+function toggleMiniMode() {
+    console.log('Toggling Mini Mode. Current:', state.isMiniMode);
+    state.isMiniMode = !state.isMiniMode;
+    const isMini = state.isMiniMode;
+
+    // Toggle Classes
+    document.body.classList.toggle('mini-mode', isMini);
+    document.documentElement.classList.toggle('mini-mode', isMini);
+
+    // Toggle UI Visibility
+    if (els.miniUi) {
+        els.miniUi.classList.toggle('hidden', !isMini);
+
+        // Sync State
+        if (isMini) {
+            els.miniOutput.value = state.output;
+            updateComposition(); // Re-render composition/candidates in mini ui
+            setTimeout(() => els.miniOutput.focus(), 50);
+        } else {
+            // Sync back if needed (though state.output is shared)
+            els.output.value = state.output;
+        }
+    }
+
+    console.log('New State:', isMini);
 }
 
 // English Mode Toggle
@@ -509,6 +600,9 @@ function handleEnter() {
 // Logic
 function updateComposition() {
     els.composition.textContent = state.buffer;
+    // Update Mini UI
+    if (els.miniComposition) els.miniComposition.textContent = state.buffer;
+
     state.page = 0; // Reset page on new input
 
     if (state.buffer.length === 0) {
@@ -525,12 +619,16 @@ function updateComposition() {
 
 function renderCandidates() {
     els.candidates.innerHTML = '';
+    if (els.miniCandidates) els.miniCandidates.innerHTML = ''; // Clear Mini UI
 
     if (state.candidates.length === 0) {
         if (state.buffer.length > 0) {
-            els.candidates.innerHTML = '<div class="placeholder">No candidates</div>';
+            els.candidates.innerHTML = '<div class="placeholder">無候選字</div>';
+            if (els.miniCandidates) els.miniCandidates.innerHTML = '<span class="placeholder">無候選字</span>';
         } else {
             els.candidates.innerHTML = '<div class="placeholder">請輸入大易碼...</div>';
+            // Minimalist placeholder: Blinking Cursor
+            if (els.miniCandidates) els.miniCandidates.innerHTML = '<span class="mini-cursor">_</span>';
         }
         return;
     }
@@ -539,37 +637,33 @@ function renderCandidates() {
     const end = start + state.pageSize;
     const pageCandidates = state.candidates.slice(start, end);
 
-    // Selection keys mapping for display
-    const selectionKeys = ['Space', "'", '[', ']', '-', '\\', '7', '8', '9', '0'];
-
     pageCandidates.forEach((cand, index) => {
-        const div = document.createElement('div');
-        div.className = 'candidate-item';
+        // Selection keys mapping for display
+        const selectionKeys = ['Space', "'", '[', ']', '-', '\\', '7', '8', '9', '0'];
+        const key = selectionKeys[index];
 
-        // Get display key
-        let displayKey = '';
-        if (index < selectionKeys.length) {
-            displayKey = selectionKeys[index];
-        } else {
-            displayKey = (index + 1) % 10; // Fallback
-        }
-
-        // Special handling for Space symbol if desired, or just text
-        if (displayKey === 'Space') displayKey = '␣';
-
-        div.innerHTML = `
-            <span class="candidate-index">${displayKey}</span>
+        // Main UI Item
+        const item = document.createElement('div');
+        item.className = 'candidate-item';
+        item.innerHTML = `
+            <span class="candidate-index">${key.toUpperCase()}</span>
             <span class="candidate-char">${cand.char}</span>
         `;
-        div.addEventListener('click', () => selectCandidate(start + index));
-        els.candidates.appendChild(div);
+        item.onclick = () => selectCandidate(start + index);
+        els.candidates.appendChild(item);
+
+        // Mini UI Item
+        if (els.miniCandidates) {
+            const miniItem = document.createElement('span');
+            miniItem.className = 'mini-candidate-item';
+            miniItem.innerHTML = `<span class="mini-candidate-key">${key.toUpperCase()}</span>${cand.char}`;
+            miniItem.onclick = () => selectCandidate(start + index);
+            els.miniCandidates.appendChild(miniItem);
+        }
     });
 
-    // Add pagination indicator if needed
+    // Pagination (Main UI only for now, Mini UI scrolls)
     if (state.candidates.length > state.pageSize) {
-        const pageInfo = document.createElement('div');
-        pageInfo.className = 'page-info';
-        pageInfo.style.width = '100%';
         pageInfo.style.textAlign = 'center';
         pageInfo.style.fontSize = '0.8rem';
         pageInfo.style.color = 'var(--text-muted)';
@@ -615,18 +709,42 @@ function selectCandidate(index) {
         updateComposition();
         updateOutput();
 
-        // Auto Copy
-        if (state.settings && state.settings.autoCopy) {
-            navigator.clipboard.writeText(state.output).then(() => {
-                showToast();
-            }).catch(err => console.error('Copy failed', err));
-        }
+        // Copy to clipboard
+        navigator.clipboard.writeText(state.output).then(() => {
+            // Visual feedback
+            const target = state.isMiniMode ? els.miniOutput : els.output;
+
+            if (target) {
+                target.style.animation = 'none';
+                target.offsetHeight; /* trigger reflow */
+                target.style.animation = 'flash-green 0.3s';
+            }
+
+            // Also flash the mini card border for extra visibility
+            if (state.isMiniMode && els.miniUi) {
+                const card = els.miniUi.querySelector('.mini-card');
+                if (card) {
+                    card.style.borderColor = 'var(--primary)';
+                    setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
+                }
+            }
+
+            // Show toast if not in mini mode (or maybe a mini toast?)
+            if (!state.isMiniMode) {
+                showToast('已複製');
+            }
+        }).catch(err => {
+            console.error('Copy failed:', err);
+            if (!state.isMiniMode) showToast('複製失敗', true);
+        });
     }
 }
 
-function showToast() {
+function showToast(message = '已複製', isError = false) {
     const toast = document.getElementById('toast');
     if (toast) {
+        toast.textContent = message;
+        toast.classList.toggle('error', isError);
         toast.classList.remove('hidden');
         setTimeout(() => {
             toast.classList.add('hidden');
@@ -636,7 +754,9 @@ function showToast() {
 
 function updateOutput() {
     els.output.value = state.output;
+    if (els.miniOutput) els.miniOutput.value = state.output;
     els.output.scrollTop = els.output.scrollHeight;
+    if (els.miniOutput) els.miniOutput.scrollTop = els.miniOutput.scrollHeight;
 }
 
 // Haptic Feedback

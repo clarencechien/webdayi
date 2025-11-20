@@ -39,6 +39,16 @@ This session focused on creating a **"Lite" version** of WebDayi, a pure Web/PWA
 
 - **Pure Static**: No build process, runs directly in browser.
 - **Input Mode**: Character-by-character only (classic Dayi).
+### Current Focus
+The "Mini Mode" feature for WebDayi Lite is now **COMPLETE**.
+- **Extreme Minimalist UI**: The PWA now launches into a frameless, transparent window with zero clutter.
+- **Terminal Aesthetic**: The input area features a blinking underscore cursor `_` instead of static text.
+- **Hotkeys**: `Delete` and `Escape` keys implemented for quick clearing.
+- **PWA Integration**: Fully supports `window-controls-overlay` for a native feel.
+
+### Next Steps
+- Await further user feedback or new feature requests.
+- Potential future work: Cloud sync settings, custom dictionary support.
 - **Data Source**: `dayi4.cin` (standard Dayi 4 table).
 - **Keyboard**:
     - **Virtual**: Redesigned layout with trapezoid bottom row.
@@ -57,8 +67,10 @@ This session focused on creating a **"Lite" version** of WebDayi, a pure Web/PWA
 - **Mobile Layout**: Optimized keyboard width for mobile devices (full width).
 - **PWA Icons**: Updated to scalable SVG icons for better device support.
 - **Ctrl-to-Copy**: Added `Control` key shortcut to copy output to clipboard (with fallback).
+- **Mini Mode**: Implemented a suspended mode with minimal UI and Alt-key auto-copy workflow.
 - **Bug Fixes**:
     - Fixed input logic to prioritize valid code extension over candidate selection.
+    - Fixed Mini Mode UI (hidden menu, transparent background override).
     - Fixed selection keys (`Space`, `'`, `[]`, `\`) not working.
     - Fixed `lookupCandidates` reference error.
     - Fixed PWA manifest icon size mismatch.

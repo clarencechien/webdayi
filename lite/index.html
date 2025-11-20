@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <link rel="apple-touch-icon" href="icon.svg">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=19">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,6 +27,9 @@
                         fill="currentColor" fill-rule="evenodd"></path>
                 </svg>
                 <h1>WebDayi Lite</h1>
+            </div>
+            <div class="header-actions">
+                <!-- Mini Mode button removed -->
             </div>
         </header>
 
@@ -122,8 +125,24 @@
             <span>Copied!</span>
         </div>
     </div>
+    <!-- Mini Mode UI (Overlay) -->
+    <div id="mini-ui" class="mini-ui hidden">
+        <div class="mini-card">
+            <!-- Top: Input Bar (Candidates + Drag + Exit) -->
+            <div class="mini-input-bar">
+                <div class="mini-drag-region"></div>
+                <div id="mini-composition" class="mini-composition"></div>
+                <span class="cursor">|</span>
+                <div id="mini-candidates" class="mini-candidates"></div>
+            </div>
 
-    <script src="app.js"></script>
+            <!-- Bottom: Output Area -->
+            <textarea id="mini-output" readonly></textarea>
+        </div>
+    </div>
+
+    <!-- App Logic -->
+    <script src="app.js?v=19"></script>
 </body>
 
 </html>

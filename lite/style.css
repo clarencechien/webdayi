@@ -625,3 +625,238 @@ body.focus-mode .app-container {
 body.hide-keyboard .keyboard-container {
     display: none !important;
 }
+
+/* --- Mini Mode (Suspended) --- */
+/* --- Mini Mode (Redesigned) --- */
+
+/* 1. Global Overrides */
+html.mini-mode,
+body.mini-mode {
+    background-color: transparent !important;
+    background: transparent !important;
+    overflow: hidden !important;
+}
+
+/* 2. Hide Main App */
+body.mini-mode .app-container,
+body.mini-mode .fab,
+body.mini-mode .menu-panel,
+body.mini-mode .status-bar {
+    display: none !important;
+}
+
+/* 3. Mini UI Overlay */
+.mini-ui {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+    padding: 0;
+}
+
+.mini-ui.hidden {
+    display: none !important;
+}
+
+/* Unified Card Container */
+.mini-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Input Bar (Now on Top) */
+.mini-input-bar {
+    flex: 0 0 auto;
+    background-color: var(--bg-surface);
+    /* Match card bg */
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 12px;
+    /* Add padding for Window Controls Overlay */
+    padding-top: max(8px, env(titlebar-area-height, 0px));
+    padding-right: 120px;
+    /* Space for Window Controls (Traffic Lights/Caption Buttons) */
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    gap: 8px;
+    position: relative;
+}
+
+[data-theme="dark"] .mini-input-bar {
+    background-color: var(--bg-surface);
+}
+
+/* Drag Region (Inside Input Bar) */
+.mini-drag-region {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    /* Full width (underneath controls) */
+    height: 100%;
+    -webkit-app-region: drag;
+    z-index: 1;
+}
+
+/* Output Area (Now on Bottom) */
+#mini-output {
+    flex: 1;
+    width: 100%;
+    background: transparent;
+    border: none;
+    resize: none;
+    outline: none;
+    padding: 4px 12px;
+    /* Reduce top/bottom padding slightly */
+    font-size: 1.25rem;
+    color: var(--text-main);
+    line-height: 1.3;
+    /* Slightly tighter to fit more lines if needed, or 1.5 for breathing room. User asked to "adjust". 1.4 was previous. Let's try 1.3 for compactness. */
+    overflow-y: auto;
+    /* Allow scrolling if needed */
+    scrollbar-width: none;
+    /* Firefox: Hide scrollbar */
+}
+
+/* Chrome/Safari/Edge: Hide scrollbar */
+#mini-output::-webkit-scrollbar {
+    display: none;
+}
+
+[data-theme="dark"] #mini-output {
+    background: transparent;
+    color: #f8fafc;
+}
+
+.mini-composition {
+    font-family: var(--font-mono);
+    font-size: 1.125rem;
+    color: var(--primary);
+    font-weight: 600;
+    min-width: 10px;
+    z-index: 2;
+    /* Above drag region */
+    position: relative;
+}
+
+.mini-candidates {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    font-size: 1rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    scrollbar-width: none;
+    z-index: 2;
+    /* Above drag region */
+    position: relative;
+}
+
+.mini-candidates::-webkit-scrollbar {
+    display: none;
+}
+
+.mini-candidate-item {
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    -webkit-app-region: no-drag;
+    /* Allow clicking */
+}
+
+.mini-candidate-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-main);
+}
+
+.mini-candidate-key {
+    font-size: 0.75em;
+    color: var(--primary);
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+/* Extreme Minimalist Cursor */
+.mini-cursor {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--primary);
+    animation: blink 1.2s infinite;
+    opacity: 0.8;
+    display: inline-block;
+    margin-left: 4px;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* 4. PWA Standalone Overrides (Force Mini Mode) */
+@media all and (display-mode: standalone),
+all and (display-mode: window-controls-overlay) {
+
+    /* Hide Main App Elements */
+    .app-header,
+    .app-container,
+    .fab,
+    .status-bar,
+    .menu-panel {
+        display: none !important;
+    }
+
+    /* Show Mini UI - Override .hidden class */
+    .mini-ui,
+    .mini-ui.hidden {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Force Transparent/Mini Backgrounds */
+    html,
+    body {
+        background-color: transparent !important;
+    }
+
+    /* Ensure html takes full height for transparency */
+    html {
+        height: 100%;
+    }
+}
+
+/* Flash effect for auto-copy */
+@keyframes flash-green {
+    0% {
+        background-color: #e8f5e9;
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+.flash-success {
+    animation: flash-green 0.2s ease-out;
+}
