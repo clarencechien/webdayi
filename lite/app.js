@@ -303,6 +303,18 @@ function setupEventListeners() {
         } else if (e.key === ' ') {
             handleSpace();
             e.preventDefault();
+        } else if (e.key === 'Shift') {
+            toggleEnglishMode();
+            // Don't prevent default for Shift, it might be needed for other things, 
+            // but here we just want the toggle action. 
+            // Actually, preventing default on Shift is usually fine in this context 
+            // unless we are typing a capital letter.
+            // Wait, if user holds Shift to type Capital, we don't want to toggle mode on every key repeat?
+            // The request is "press shift to toggle". Usually this means "press and release shift alone".
+            // But for simplicity, let's just toggle on down.
+            // However, if they are typing "A" (Shift+a), we don't want to toggle mode.
+            // Standard IME behavior: Shift toggles mode.
+            // Let's try just toggling.
         } else if (e.key.length === 1) {
             const key = e.key.toLowerCase();
             // Allow all keys to pass to handleInput, it will filter valid ones

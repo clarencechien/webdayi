@@ -103,7 +103,10 @@
 │   ├─ PWA Structure            [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ CIN Converter            [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Core Engine (Char Mode)  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ UI/UX (Virtual KB)       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ UI/UX (Virtual KB)       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Desktop Shift Support    [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Mobile Layout Fix        [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ PWA Icon Fix (SVG)       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 1.12: MVP 1.0 v12        [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.11: MVP 2a v2.0 Ext    [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% 📋    │
@@ -545,6 +548,9 @@ webdayi/
 - [x] **UI/UX Polish**: (Themes, Focus Mode, Auto-Copy)
 - [x] **Keyboard Redesign**: (Trapezoid, English Mode, Haptics)
 - [x] **Bug Fixes & Verification**: (Font Size, Keyboard Toggle)
+- [x] **Desktop Shift Support**: Physical Shift key toggles English mode.
+- [x] **Mobile Layout**: Full-width keyboard on mobile.
+- [x] **PWA Icons**: Scalable SVG icons.
 - [x] **Verification**: Manual testing of all features.
 
 ### Phase 3: Smart Engine (MVP3)

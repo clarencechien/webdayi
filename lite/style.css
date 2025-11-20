@@ -405,7 +405,10 @@ label {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    width: 100%;
+    /* Full width on mobile */
+    width: calc(100% + var(--spacing-md) * 2);
+    margin-left: calc(var(--spacing-md) * -1);
+    margin-right: calc(var(--spacing-md) * -1);
     user-select: none;
 }
 

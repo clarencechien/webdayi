@@ -7,10 +7,11 @@ A lightweight, dependency-free Progressive Web App (PWA) for the Dayi input meth
 - **Lightweight**: Pure HTML/CSS/JS, no build steps required.
 - **Offline Capable**: Fully funct- **Virtual Keyboard**:
   - Optimized 5-row layout.
-  - **English Mode**: Toggle via Shift key.
+  - **English Mode**: Toggle via Shift key (Virtual & Physical).
   - **Haptic Feedback**: Vibration on key press.
   - **Smart Input**: Prioritizes valid code extension over candidate selection.
-- **PWA Support**: Installable on Android/iOS/Desktop.
+  - **Responsive**: Full-width layout on mobile devices.
+- **PWA Support**: Installable on Android/iOS/Desktop with scalable SVG icons.
 - **Offline Capable**: Works without internet connection.
 - **Customizable**:
   - **Themes**: Light / Dark.
