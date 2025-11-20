@@ -1,6 +1,6 @@
 
 cin_path = '/home/clarencechien/webdayi/lite/data/dayi4.cin'
-targets = ['a,']
+targets = ['oj']
 
 with open(cin_path, 'r', encoding='utf-8') as f:
     for i, line in enumerate(f, 1):
