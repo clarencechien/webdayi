@@ -1,9 +1,13 @@
 # Progress Tracker: WebDaYi
 
-**Last Updated**: 2025-11-19 (🎉 Phase 1.10.6 COMPLETE - E2E Testing & Critical Fixes!)
+**Last Updated**: 2025-11-21 (🎉 Phase 1.11 - Ctrl Double-Click for Mini Mode!)
 **Current Version**: 11.3.8 (MVP 1.0) / 0.5.0 (PWA Build 014)
-**Build**: 20251119-014 (Phase 1.10.6)
-**Git Commits**: pending (E2E Framework)
+**Build**: 20251121-015 (Phase 1.11 - Ctrl Shortcut)
+**Git Commits**: pending
+- **2025-11-21**: Added Ctrl double-click shortcut to toggle Mini Mode in PWA.
+    - Implemented PWA detection using `window.matchMedia('(display-mode: standalone)')`.
+    - Added double-tap logic (300ms window) for Ctrl key.
+    - Preserves existing Ctrl copy functionality.
 - **2025-11-20**: Completed "Mini Mode" for WebDayi Lite.
     - Implemented `window-controls-overlay` for frameless PWA experience.
     - Designed "Extreme Minimalist" UI with blinking cursor and transparent background.
@@ -116,7 +120,8 @@
 │   ├─ Mobile Layout Fix        [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ PWA Icon Fix (SVG)       [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Ctrl-to-Copy             [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ Mini Mode                [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Mini Mode                [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Ctrl Double-Click Toggle [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ⌨️✅  │
 │ Phase 1.12: MVP 1.0 v12        [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.11: MVP 2a v2.0 Ext    [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% 📋    │
@@ -558,10 +563,11 @@ webdayi/
         - [x] Frameless PWA Window (`window-controls-overlay`)
         - [x] Extreme Minimalist UI (Blinking Cursor, No Clutter)
         - [x] **Smart Hotkeys**:
+            - `Ctrl` (Double-Tap): Toggle Mini Mode (PWA only)
             - `Alt` (Tap): Copy
             - `Alt` (Double-Tap): Clear
             - `Shift`: Toggle Mode
-        - [x] Auto-Start in PWA Modeion**
+        - [x] Auto-Start in PWA Mode
 - [x] **Core Input Logic**: (Char-by-char)
 - [x] **Virtual Keyboard Implementation**
 - [x] **UI/UX Polish**: (Themes, Focus Mode, Auto-Copy)

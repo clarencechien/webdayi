@@ -1,8 +1,8 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-19
-**Current Version**: MVP 1.0 v11.3.8 (Phase 1.10.6 E2E Testing)
-**Branch**: `claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi`
+**Last Updated**: 2025-11-21
+**Current Version**: MVP 1.0 v11.3.8 (Phase 1.11 WebDayi Lite)
+**Branch**: `main`
 
 ---
 
@@ -23,7 +23,35 @@
 
 ---
 
-## 🔧 Latest Session: WebDayi Lite Implementation (2025-11-19)
+## 🔧 Latest Session: Ctrl Double-Click for Mini Mode (2025-11-21)
+
+### Session Summary
+
+This session implemented a **keyboard shortcut** for toggling Mini Mode in PWA, specifically for Chromebook users who were not automatically entering Mini Mode.
+
+**Key Achievements**:
+1. ✅ **Ctrl Double-Click Shortcut**: Added Ctrl double-tap (within 300ms) to toggle Mini Mode.
+2. ✅ **PWA Detection**: Uses `window.matchMedia('(display-mode: standalone)')` to detect PWA mode.
+3. ✅ **Non-Breaking**: Preserves existing Ctrl key functionality (copy operations).
+4. ✅ **State Tracking**: Added `lastCtrlPressTime` to track double-click detection.
+
+### Implementation Details
+
+**Changes Made**:
+- `lite/app.js`:
+  - Added `lastCtrlPressTime` state variable for tracking Ctrl key presses
+  - Implemented double-click detection logic (300ms window)
+  - Toggle only works in PWA mode (standalone display mode)
+  - Preserves single Ctrl press behavior for copy operations
+
+**User Experience**:
+- In PWA mode, users can quickly double-tap Ctrl to switch between Mini Mode and Normal Mode
+- Provides a quick way to toggle UI visibility without mouse interaction
+- Particularly useful on Chromebook where Mini Mode might not auto-start
+
+---
+
+## 🔧 Previous Session: WebDayi Lite Implementation (2025-11-19)
 
 ### Session Summary
 
@@ -65,12 +93,13 @@ The "Mini Mode" feature for WebDayi Lite is now **COMPLETE**.
     - **Layout**: Row 4 symbols (`Space`, `,`, `.`, `/`).
 
 ## Recent Changes
+- **Ctrl-to-Copy**: Added `Control` key shortcut to copy output to clipboard (with fallback).
+- **Ctrl Double-Click Toggle**: Added `Ctrl` double-tap to toggle Mini Mode in PWA (Chromebook support).
 - **Keyboard Redesign**: Implemented 5-row layout with trapezoid style for Row 3.
 - **English Mode**: Added toggle functionality via Shift key (Virtual & Physical).
 - **Haptic Feedback**: Added `navigator.vibrate` calls for better tactile response.
 - **Mobile Layout**: Optimized keyboard width for mobile devices (full width).
 - **PWA Icons**: Updated to scalable SVG icons for better device support.
-- **Ctrl-to-Copy**: Added `Control` key shortcut to copy output to clipboard (with fallback).
 - **Mini Mode**: Implemented a suspended mode with minimal UI and Alt-key auto-copy workflow.
 - **Bug Fixes**:
     - Fixed input logic to prioritize valid code extension over candidate selection.

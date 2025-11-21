@@ -13,7 +13,8 @@ const state = {
     pageSize: 10,
     isEnglishMode: false, // English input mode
     isMiniMode: false, // Mini mode state
-    lastAltPressTime: 0 // Track Alt key for double-tap
+    lastAltPressTime: 0, // Track Alt key for double-tap
+    lastCtrlPressTime: 0 // Track Ctrl key for double-tap
 };
 
 // DOM Elements
@@ -350,6 +351,19 @@ function setupEventListeners() {
         if (e.ctrlKey || e.altKey || e.metaKey) {
             // Allow Ctrl+C/V etc to work normally, BUT intercept Ctrl key itself
             if (e.key === 'Control') {
+                // Double-Ctrl -> Toggle Mini Mode (PWA only)
+                const now = Date.now();
+                if (now - state.lastCtrlPressTime < 300) {
+                    const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+                    // Allow toggle if PWA detected
+                    if (isPWA) {
+                        toggleMiniMode();
+                        state.lastCtrlPressTime = 0;
+                        return;
+                    }
+                }
+                state.lastCtrlPressTime = now;
+
                 // Ctrl key pressed alone (or as modifier start)
                 if (state.output) {
                     // Try modern API first
