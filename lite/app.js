@@ -207,7 +207,7 @@ function setupMenuListeners() {
 async function loadDatabase() {
     try {
         els.status.textContent = 'Loading Data...';
-        const response = await fetch('data/dayi_db.json');
+        const response = await fetch('dayi_db.json');
         if (!response.ok) throw new Error('Failed to load database');
         state.db = await response.json();
 
