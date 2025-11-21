@@ -8,7 +8,870 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <link rel="apple-touch-icon" href="icon.svg">
-    <link rel="stylesheet" href="style.css?v=29">
+    <style>
+:root {
+    /* Colors - Matching MVP1 Tailwind Theme */
+    --primary: #0fb8f0;
+    --primary-dark: #0ca5d6;
+    --bg-light: #f5f8f8;
+    --bg-dark: #101e22;
+    --surface-light: #ffffff;
+    --surface-dark: #1a2c32;
+    /* Slightly lighter than bg-dark */
+    --text-light: #1e293b;
+    /* slate-800 */
+    --text-dark: #e2e8f0;
+    /* slate-200 */
+    --text-muted-light: #64748b;
+    /* slate-500 */
+    --text-muted-dark: #94a3b8;
+    /* slate-400 */
+    --border-light: #e2e8f0;
+    /* slate-200 */
+    --border-dark: #334155;
+    /* slate-700 */
+    --danger: #f43f5e;
+    /* rose-500 */
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+
+    /* Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-full: 9999px;
+
+    /* Font */
+    --font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    --font-mono: 'Courier New', monospace;
+}
+
+/* Light Mode Variables (Default) */
+:root {
+    /* Colors - Light Theme (Default) */
+    --primary: #0fb8f0;
+    --primary-hover: #0da2d4;
+    --bg-main: #f5f8f8;
+    --bg-surface: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    --danger: #ef4444;
+    --success: #22c55e;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    /* Font Scale */
+    --font-scale: 1;
+}
+
+/* Dark Mode Variables */
+[data-theme="dark"] {
+    --bg-main: #0f172a;
+    --bg-surface: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --border-light: #1e293b;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    font-size: calc(16px * var(--font-scale));
+    height: 100%;
+    overflow: hidden;
+    /* Prevent body scroll */
+}
+
+body {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    transition: background-color 0.3s, color 0.3s;
+    height: 100%;
+    overflow: hidden;
+    /* Prevent body scroll */
+}
+
+.app-container {
+    max-width: 100%;
+    /* Full width */
+    margin: 0 auto;
+    padding: var(--spacing-md);
+    min-height: 100%;
+    height: 100%;
+    /* Full height */
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+/* Menu Controls */
+.menu-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 4px 0;
+}
+
+.menu-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+}
+
+.control-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+    cursor: pointer;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+#font-size-display {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* Header */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--spacing-sm);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--primary);
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.icon-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    color: var(--text-main);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    overflow-y: auto;
+    min-height: 0;
+    /* Crucial for nested flex scrolling */
+    padding-bottom: var(--spacing-md);
+}
+
+.card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Output Section */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.primary-text {
+    color: var(--primary);
+}
+
+.danger-text {
+    color: var(--danger);
+}
+
+#output-buffer {
+    width: 100%;
+    height: 80px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: rgba(0, 0, 0, 0.02);
+    padding: var(--spacing-sm);
+    font-size: 1.125rem;
+    color: var(--text-main);
+    resize: none;
+    outline: none;
+    /* Ensure scrolling is enabled but bars are hidden */
+    overflow: auto;
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+#output-buffer::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+    width: 0;
+    height: 0;
+}
+
+/* Input Section */
+.input-group {
+    margin-bottom: var(--spacing-md);
+}
+
+label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-muted);
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-surface);
+    padding: 0 var(--spacing-md);
+    height: 48px;
+}
+
+.composition-display {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+    min-width: 10px;
+}
+
+.cursor {
+    animation: blink 1s step-end infinite;
+    color: var(--text-muted);
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Candidate Bar */
+.candidate-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    min-height: 60px;
+    /* Taller for key+char */
+    padding: var(--spacing-sm);
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    align-items: flex-start;
+}
+
+.candidate-item {
+    display: flex;
+    flex-direction: column;
+    /* Stack key and char */
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.1s;
+    min-width: 48px;
+    height: 56px;
+}
+
+.candidate-item:active {
+    transform: scale(0.95);
+    border-color: var(--primary);
+}
+
+.candidate-index {
+    font-size: 0.7rem;
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 2px;
+    font-family: var(--font-mono);
+}
+
+.candidate-char {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-main);
+    line-height: 1;
+}
+
+/* Virtual Keyboard */
+.keyboard-container {
+    margin-top: auto;
+    /* Push to bottom */
+    padding-top: var(--spacing-sm);
+    flex-shrink: 0;
+    /* Don't shrink */
+}
+
+.virtual-keyboard {
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    /* 4 rows now */
+    gap: 6px;
+    user-select: none;
+}
+
+/* Virtual Keyboard */
+.keyboard-container {
+    background-color: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-xs);
+    padding-bottom: max(var(--spacing-xs), env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    /* Full width on mobile */
+    width: calc(100% + var(--spacing-md) * 2);
+    margin-left: calc(var(--spacing-md) * -1);
+    margin-right: calc(var(--spacing-md) * -1);
+    user-select: none;
+}
+
+.keyboard-row {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Trapezoid Effect for Z-row */
+.row-trapezoid {
+    padding: 0 2%;
+    /* Indent slightly to create trapezoid look */
+}
+
+.key {
+    flex: 1;
+    height: 48px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    font-size: 1.125rem;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    min-width: 0;
+    /* Allow shrinking */
+    padding: 0;
+}
+
+.key:active {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.key-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: -2px;
+}
+
+.key-special {
+    background-color: rgba(0, 0, 0, 0.05);
+    font-size: 1rem;
+    flex: 1.5;
+    /* Wider than normal keys */
+}
+
+.key-space {
+    flex: 4;
+    /* Much wider */
+}
+
+#key-shift.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Status Bar */
+.status-bar {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    padding-top: var(--spacing-sm);
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+    .app-container {
+        padding: var(--spacing-lg);
+        max-width: 600px;
+        /* Limit width on desktop for better mobile simulation */
+    }
+
+    .key {
+        height: 56px;
+        font-size: 1.25rem;
+    }
+
+    .key-sub {
+        font-size: 0.75rem;
+        bottom: 4px;
+        right: 6px;
+    }
+}
+
+/* FAB & Menu */
+.fab {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: transform 0.2s;
+}
+
+.fab:active {
+    transform: scale(0.95);
+}
+
+.menu-panel {
+    position: fixed;
+    top: 90px;
+    right: 20px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 99;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.menu-panel.hidden {
+    display: none;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.menu-item .material-symbols-outlined {
+    color: var(--primary);
+}
+
+.toggle-status {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.menu-item.active .toggle-status {
+    color: var(--primary);
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--success);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 200;
+    font-weight: 500;
+    animation: slideDown 0.3s ease-out;
+}
+
+.toast.hidden {
+    display: none;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translate(-50%, -20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+/* Focus Mode */
+body.focus-mode .app-header,
+body.focus-mode .status-bar {
+    display: none;
+}
+
+body.focus-mode .app-container {
+    padding: var(--spacing-sm);
+    /* Minimal padding */
+}
+
+/* Hide Keyboard Mode */
+body.hide-keyboard .keyboard-container {
+    display: none !important;
+}
+
+/* --- Mini Mode (Suspended) --- */
+/* --- Mini Mode (Redesigned) --- */
+
+/* 1. Global Overrides */
+html.mini-mode,
+body.mini-mode {
+    background-color: transparent !important;
+    background: transparent !important;
+    overflow: hidden !important;
+}
+
+/* 2. Hide Main App */
+body.mini-mode .app-container,
+body.mini-mode .fab,
+body.mini-mode .menu-panel,
+body.mini-mode .status-bar {
+    display: none !important;
+}
+
+/* 3. Mini UI Overlay */
+.mini-ui {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+    padding: 0;
+}
+
+.mini-ui.hidden {
+    display: none !important;
+}
+
+/* Unified Card Container */
+.mini-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Input Bar (Now on Top) */
+.mini-input-bar {
+    flex: 0 0 auto;
+    background-color: var(--bg-surface);
+    /* Match card bg */
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 12px;
+    /* Add padding for Window Controls Overlay */
+    padding-top: max(8px, env(titlebar-area-height, 0px));
+    padding-right: 120px;
+    /* Space for Window Controls (Traffic Lights/Caption Buttons) */
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    gap: 8px;
+    position: relative;
+}
+
+[data-theme="dark"] .mini-input-bar {
+    background-color: var(--bg-surface);
+}
+
+/* Drag Region (Inside Input Bar) */
+.mini-drag-region {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    /* Full width (underneath controls) */
+    height: 100%;
+    -webkit-app-region: drag;
+    z-index: 1;
+}
+
+/* Output Area (Now on Bottom) */
+#mini-output {
+    flex: 1;
+    width: 100%;
+    background: transparent;
+    border: none;
+    resize: none;
+    outline: none;
+    padding: 4px 12px;
+    /* Reduce top/bottom padding slightly */
+    font-size: 1.25rem;
+    color: var(--text-main);
+    line-height: 1.3;
+    /* Slightly tighter to fit more lines if needed, or 1.5 for breathing room. User asked to "adjust". 1.4 was previous. Let's try 1.3 for compactness. */
+    overflow-y: auto;
+    /* Allow scrolling if needed */
+    scrollbar-width: none;
+    /* Firefox: Hide scrollbar */
+}
+
+/* Chrome/Safari/Edge: Hide scrollbar */
+#mini-output::-webkit-scrollbar {
+    display: none;
+}
+
+[data-theme="dark"] #mini-output {
+    background: transparent;
+    color: #f8fafc;
+}
+
+.mini-composition {
+    font-family: var(--font-mono);
+    font-size: 1.125rem;
+    color: var(--primary);
+    font-weight: 600;
+    min-width: 10px;
+    z-index: 2;
+    /* Above drag region */
+    position: relative;
+}
+
+.mini-candidates {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    font-size: 1rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    scrollbar-width: none;
+    z-index: 2;
+    /* Above drag region */
+    position: relative;
+}
+
+.mini-candidates::-webkit-scrollbar {
+    display: none;
+}
+
+.mini-candidate-item {
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    -webkit-app-region: no-drag;
+    /* Allow clicking */
+}
+
+.mini-candidate-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-main);
+}
+
+.mini-candidate-key {
+    font-size: 0.75em;
+    color: var(--primary);
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+/* Extreme Minimalist Cursor */
+.mini-cursor {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--primary);
+    animation: blink 1.2s infinite;
+    opacity: 0.8;
+    display: inline-block;
+    margin-left: 4px;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* 4. PWA Standalone Overrides (Force Mini Mode) */
+@media all and (display-mode: standalone),
+all and (display-mode: window-controls-overlay) {
+
+    /* Hide Main App Elements */
+    .app-header,
+    .app-container,
+    .fab,
+    .status-bar,
+    .menu-panel {
+        display: none !important;
+    }
+
+    /* Show Mini UI - Override .hidden class */
+    .mini-ui,
+    .mini-ui.hidden {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Force Transparent/Mini Backgrounds */
+    html,
+    body {
+        background-color: transparent !important;
+    }
+
+    /* Ensure html takes full height for transparency */
+    html {
+        height: 100%;
+    }
+}
+
+/* Flash effect for auto-copy */
+@keyframes flash-green {
+    0% {
+        background-color: #e8f5e9;
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+.flash-success {
+    animation: flash-green 0.2s ease-out;
+}
+</style>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,7 +1005,871 @@
     </div>
 
     <!-- App Logic -->
-    <script src="app.js?v=29"></script>
+    <script>
+/**
+ * WebDayi Lite - App Logic
+ */
+
+// State
+const state = {
+    db: {},
+    prefixes: new Set(), // Valid code prefixes
+    buffer: '', // Current input code (e.g., 'x', 'xo')
+    candidates: [], // Current candidates
+    output: '', // Committed text
+    page: 0,
+    pageSize: 10,
+    isEnglishMode: false, // English input mode
+    isMiniMode: false, // Mini mode state
+    lastAltPressTime: 0, // Track Alt key for double-tap
+    lastCtrlPressTime: 0 // Track Ctrl key for double-tap
+};
+
+// DOM Elements
+const els = {
+    status: document.getElementById('status-indicator'),
+    composition: document.getElementById('composition-buffer'),
+    candidates: document.getElementById('candidate-bar'),
+    output: document.getElementById('output-buffer'),
+    keyboard: document.getElementById('virtual-keyboard'),
+    copyBtn: document.getElementById('copy-btn'),
+    clearBtn: document.getElementById('clear-btn'),
+    miniModeBtn: document.getElementById('btn-mini-mode')
+};
+
+// Keyboard Layout (Dayi 4)
+const KEYBOARD_LAYOUT = [
+    [
+        { code: '1', label: '1', sub: '言' }, { code: '2', label: '2', sub: '牛' }, { code: '3', label: '3', sub: '目' },
+        { code: '4', label: '4', sub: '四' }, { code: '5', label: '5', sub: '王' }, { code: '6', label: '6', sub: '車' },
+        { code: '7', label: '7', sub: '田' }, { code: '8', label: '8', sub: '八' }, { code: '9', label: '9', sub: '足' },
+        { code: '0', label: '0', sub: '金' }
+    ],
+    [
+        { code: 'q', label: 'Q', sub: '石' }, { code: 'w', label: 'W', sub: '山' }, { code: 'e', label: 'E', sub: '一' },
+        { code: 'r', label: 'R', sub: '工' }, { code: 't', label: 'T', sub: '糸' }, { code: 'y', label: 'Y', sub: '火' },
+        { code: 'u', label: 'U', sub: '艸' }, { code: 'i', label: 'I', sub: '木' }, { code: 'o', label: 'O', sub: '口' },
+        { code: 'p', label: 'P', sub: '耳' }
+    ],
+    [
+        { code: 'a', label: 'A', sub: '人' }, { code: 's', label: 'S', sub: '革' }, { code: 'd', label: 'D', sub: '日' },
+        { code: 'f', label: 'F', sub: '土' }, { code: 'g', label: 'G', sub: '手' }, { code: 'h', label: 'H', sub: '鳥' },
+        { code: 'j', label: 'J', sub: '月' }, { code: 'k', label: 'K', sub: '立' }, { code: 'l', label: 'L', sub: '女' },
+        { code: ';', label: ';', sub: '虫' }
+    ],
+    [
+        { code: 'Shift', label: '⇧', type: 'special', action: 'toggleEnglish' },
+        { code: 'z', label: 'Z', sub: '心' }, { code: 'x', label: 'X', sub: '水' }, { code: 'c', label: 'C', sub: '鹿' },
+        { code: 'v', label: 'V', sub: '禾' }, { code: 'b', label: 'B', sub: '馬' }, { code: 'n', label: 'N', sub: '魚' },
+        { code: 'm', label: 'M', sub: '雨' },
+        { code: 'Backspace', label: '⌫', type: 'special', action: 'backspace' }
+    ],
+    [
+        { code: 'Space', label: 'Space', type: 'special', action: 'space', width: 'wide' },
+        { code: ',', label: ',', sub: '力' },
+        { code: '.', label: '.', sub: '舟' },
+        { code: '/', label: '/', sub: '竹' }
+    ]
+];
+
+// Initialization
+async function init() {
+    initTheme(); // Load settings first
+    setupEventListeners();
+    renderKeyboard();
+    setupMenuListeners();
+    await loadDatabase();
+}
+
+// Theme & Settings Logic
+function initTheme() {
+    // Default keyboard state: Hidden on larger screens (laptops/desktops), Visible on mobile
+    const isLargeScreen = window.innerWidth >= 768;
+
+    const defaults = {
+        focusMode: false,
+        autoCopy: false,
+        theme: 'dark',
+        fontScale: 1.0,
+        showKeyboard: !isLargeScreen
+    };
+
+    // Load settings
+    const savedSettings = localStorage.getItem('webdayi-lite-settings');
+    if (savedSettings) {
+        // Merge defaults with saved settings to ensure new keys exist
+        state.settings = { ...defaults, ...JSON.parse(savedSettings) };
+    } else {
+        state.settings = defaults;
+    }
+
+    applySettings();
+}
+
+function applySettings() {
+    // Theme
+    document.documentElement.setAttribute('data-theme', state.settings.theme);
+    updateToggleStatus('toggle-theme', state.settings.theme === 'dark' ? 'ON' : 'OFF');
+
+    // Focus Mode
+    if (state.settings.focusMode) {
+        document.body.classList.add('focus-mode');
+        updateToggleStatus('toggle-focus', 'ON');
+    } else {
+        document.body.classList.remove('focus-mode');
+        updateToggleStatus('toggle-focus', 'OFF');
+    }
+
+    // Auto Copy
+    updateToggleStatus('toggle-autocopy', state.settings.autoCopy ? 'ON' : 'OFF');
+
+    // Virtual Keyboard
+    if (state.settings.showKeyboard) {
+        document.body.classList.remove('hide-keyboard');
+        updateToggleStatus('toggle-keyboard', 'ON');
+    } else {
+        document.body.classList.add('hide-keyboard');
+        updateToggleStatus('toggle-keyboard', 'OFF');
+    }
+
+    // Font Scale
+    document.documentElement.style.setProperty('--font-scale', state.settings.fontScale);
+    const fontDisplay = document.getElementById('font-size-display');
+    if (fontDisplay) {
+        fontDisplay.textContent = `${Math.round(state.settings.fontScale * 100)}%`;
+    }
+
+    saveSettings();
+}
+
+function updateToggleStatus(id, status) {
+    const el = document.getElementById(id);
+    if (el) {
+        const statusEl = el.querySelector('.toggle-status');
+        if (statusEl) statusEl.textContent = status;
+        if (status === 'ON') el.classList.add('active');
+        else el.classList.remove('active');
+    }
+}
+
+function saveSettings() {
+    localStorage.setItem('webdayi-lite-settings', JSON.stringify(state.settings));
+}
+
+function setupMenuListeners() {
+    const fab = document.getElementById('menu-fab');
+    const panel = document.getElementById('menu-panel');
+
+    if (fab && panel) {
+        fab.addEventListener('click', () => {
+            panel.classList.toggle('hidden');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!panel.contains(e.target) && !fab.contains(e.target)) {
+                panel.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('toggle-focus').addEventListener('click', () => {
+            state.settings.focusMode = !state.settings.focusMode;
+            applySettings();
+        });
+
+        document.getElementById('toggle-autocopy').addEventListener('click', () => {
+            state.settings.autoCopy = !state.settings.autoCopy;
+            applySettings();
+        });
+
+        document.getElementById('toggle-theme').addEventListener('click', () => {
+            state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark';
+            applySettings();
+        });
+
+        document.getElementById('toggle-keyboard').addEventListener('click', () => {
+            state.settings.showKeyboard = !state.settings.showKeyboard;
+            applySettings();
+        });
+
+        // Font Size
+        document.getElementById('font-decrease').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent menu close
+            if (state.settings.fontScale > 0.5) {
+                state.settings.fontScale -= 0.1;
+                applySettings();
+            }
+        });
+
+        document.getElementById('font-increase').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent menu close
+            if (state.settings.fontScale < 2.0) {
+                state.settings.fontScale += 0.1;
+                applySettings();
+            }
+        });
+    }
+}
+
+// Load Data
+async function loadDatabase() {
+    try {
+        els.status.textContent = 'Loading Data...';
+        const response = await fetch('dayi_db.json');
+        if (!response.ok) throw new Error('Failed to load database');
+        state.db = await response.json();
+
+        // Build prefix set
+        els.status.textContent = 'Building Index...';
+        const keys = Object.keys(state.db);
+        keys.forEach(key => {
+            for (let i = 1; i <= key.length; i++) {
+                state.prefixes.add(key.substring(0, i));
+            }
+        });
+
+        els.status.textContent = 'Ready';
+        els.status.style.color = 'var(--primary)';
+    } catch (error) {
+        console.error(error);
+        els.status.textContent = 'Error Loading Data';
+        els.status.style.color = 'var(--danger)';
+    }
+}
+
+// Virtual Keyboard Rendering
+function renderKeyboard() {
+    const container = els.keyboard;
+    container.innerHTML = '';
+
+    KEYBOARD_LAYOUT.forEach((row, rowIndex) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'keyboard-row';
+
+        // Trapezoid effect for Row 3 (z-row)
+        if (rowIndex === 3) {
+            rowDiv.classList.add('row-trapezoid');
+        }
+
+        row.forEach(key => {
+            let btn;
+            if (key.type === 'special') {
+                btn = document.createElement('button');
+                btn.className = `key key-special ${key.width === 'wide' ? 'key-space' : ''}`;
+                if (key.code === 'Shift') btn.id = 'key-shift';
+                btn.textContent = key.label;
+
+                if (key.action === 'toggleEnglish') {
+                    btn.addEventListener('click', toggleEnglishMode);
+                } else if (key.action === 'backspace') {
+                    btn.addEventListener('click', handleBackspace);
+                } else if (key.action === 'space') {
+                    btn.addEventListener('click', handleSpace);
+                }
+            } else {
+                btn = document.createElement('button');
+                btn.className = 'key';
+                btn.dataset.code = key.code;
+                btn.innerHTML = `
+                    <span>${key.label}</span>
+                    <span class="key-sub">${key.sub}</span>
+                `;
+                btn.addEventListener('click', () => handleInput(key.code));
+            }
+            rowDiv.appendChild(btn);
+        });
+        container.appendChild(rowDiv);
+    });
+}
+
+function createSpecialKey(label, code, action, isSpace = false) {
+    const btn = document.createElement('button');
+    btn.className = `key key-special ${isSpace ? 'key-space' : ''}`;
+    btn.textContent = label;
+    btn.addEventListener('click', action);
+    return btn;
+}
+
+// Event Listeners
+function setupEventListeners() {
+    // Physical Keyboard
+    document.addEventListener('keydown', (e) => {
+        if (e.repeat) return; // Prevent rapid firing when holding key
+
+        // Alt-Hack: Auto Commit & Copy on Alt press (GLOBAL)
+        // Double-Alt to Clear
+        if (e.key === 'Alt') {
+            const now = Date.now();
+            if (now - state.lastAltPressTime < 300) {
+                // Double Tap Detected -> CLEAR
+                clearAll();
+                state.lastAltPressTime = 0; // Reset
+                // Visual feedback for clear
+                if (!state.isMiniMode) showToast('已清除');
+                else {
+                    // Mini mode clear feedback (flash red?)
+                    if (els.miniUi) {
+                        const card = els.miniUi.querySelector('.mini-card');
+                        if (card) {
+                            card.style.borderColor = 'var(--danger)';
+                            setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
+                        }
+                    }
+                }
+                return;
+            }
+            state.lastAltPressTime = now;
+
+            // Single Tap -> COPY logic
+            // 1. Commit candidate if composing
+            if (state.candidates.length > 0) {
+                selectCandidate(state.page * state.pageSize + 0); // Select first candidate
+            }
+
+            // 2. Copy to clipboard
+            if (state.output) {
+                navigator.clipboard.writeText(state.output).then(() => {
+                    // 3. Flash feedback
+                    const target = state.isMiniMode ? els.miniOutput : els.output;
+                    if (target) {
+                        target.style.animation = 'none';
+                        target.offsetHeight; /* trigger reflow */
+                        target.style.animation = 'flash-green 0.3s';
+                    }
+
+                    // Flash mini card
+                    if (state.isMiniMode && els.miniUi) {
+                        const card = els.miniUi.querySelector('.mini-card');
+                        if (card) {
+                            card.style.borderColor = 'var(--primary)';
+                            setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
+                        }
+                    }
+
+                    // Show toast if not in mini mode
+                    if (!state.isMiniMode) {
+                        showToast('已複製');
+                    }
+                }).catch(err => console.error('Auto-copy failed', err));
+            }
+            // Do NOT prevent default to allow Alt+Tab
+            return;
+        }
+
+        if (e.ctrlKey || e.altKey || e.metaKey) {
+            // Allow Ctrl+C/V etc to work normally, BUT intercept Ctrl key itself
+            if (e.key === 'Control') {
+                // Double-Ctrl -> Toggle Mini Mode (PWA only)
+                const now = Date.now();
+                if (now - state.lastCtrlPressTime < 300) {
+                    const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+                    // Allow toggle if PWA detected
+                    if (isPWA) {
+                        toggleMiniMode();
+                        state.lastCtrlPressTime = 0;
+                        return;
+                    }
+                }
+                state.lastCtrlPressTime = now;
+
+                // Ctrl key pressed alone (or as modifier start)
+                if (state.output) {
+                    // Try modern API first
+                    navigator.clipboard.writeText(state.output).then(() => {
+                        showToast();
+                    }).catch(err => {
+                        console.warn('Clipboard API failed, trying fallback', err);
+                        // Fallback: Select text and execCommand
+                        els.output.select();
+                        try {
+                            const successful = document.execCommand('copy');
+                            if (successful) showToast();
+                            else console.error('Fallback copy failed');
+                        } catch (err) {
+                            console.error('Fallback copy error', err);
+                        }
+                        // Deselect
+                        window.getSelection().removeAllRanges();
+                    });
+                }
+            }
+            return;
+        }
+
+        // If candidates are present, intercept selection keys
+        if (state.candidates.length > 0) {
+            const selectionKeys = [' ', "'", '[', ']', '-', '\\', '='];
+            if (selectionKeys.includes(e.key)) {
+                handleInput(e.key);
+                e.preventDefault();
+                return;
+            }
+        }
+
+        if (e.key === 'Backspace') {
+            handleBackspace();
+            e.preventDefault();
+        } else if (e.key === 'Enter') {
+            handleEnter();
+            e.preventDefault();
+        } else if (e.key === ' ') {
+            handleSpace();
+            e.preventDefault();
+        } else if (e.key === 'Escape') {
+            // ESC: Clear composition first, then output
+            if (state.buffer.length > 0) {
+                state.buffer = '';
+                state.candidates = [];
+                state.page = 0;
+                updateComposition();
+                renderCandidates();
+            } else if (state.output.length > 0) {
+                state.output = '';
+                updateOutput();
+                triggerHaptic();
+            }
+            e.preventDefault();
+        } else if (e.key === 'Delete') {
+            // Delete: Clear output immediately
+            if (state.output.length > 0) {
+                state.output = '';
+                updateOutput();
+                triggerHaptic();
+            }
+            e.preventDefault();
+        } else if (e.key === 'Shift') {
+            toggleEnglishMode();
+            // Don't prevent default for Shift
+        } else if (e.key.length === 1) {
+            const key = e.key.toLowerCase();
+            // Allow all keys to pass to handleInput, it will filter valid ones
+            handleInput(key);
+            e.preventDefault();
+        }
+    });
+
+    // Remove keyup listener (was used for Shift toggle)
+    // document.addEventListener('keyup', ...);
+
+    // Copy Button
+    els.copyBtn.addEventListener('click', () => {
+        if (state.output) {
+            navigator.clipboard.writeText(state.output).then(() => {
+                const originalText = els.copyBtn.innerHTML;
+                els.copyBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Copied';
+                setTimeout(() => {
+                    els.copyBtn.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+    });
+
+    // Clear Button
+    els.clearBtn.addEventListener('click', clearAll);
+
+    // Auto-Clear on Blur REMOVED (User requested Double-Alt instead)
+    /*
+    const handleBlur = () => { ... }
+    window.addEventListener('blur', handleBlur);
+    ...
+    */
+
+    // Restore focus on return (Mini Mode only)
+    window.addEventListener('focus', () => {
+        if (state.isMiniMode && els.miniOutput) {
+            // Small delay to ensure window is ready
+            setTimeout(() => els.miniOutput.focus(), 50);
+        }
+    });
+
+    // Mini UI Elements
+    els.miniUi = document.getElementById('mini-ui');
+    els.miniOutput = document.getElementById('mini-output');
+    els.miniComposition = document.getElementById('mini-composition');
+    els.miniCandidates = document.getElementById('mini-candidates');
+
+    // Auto-Start Mini Mode if PWA
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log("PWA Mode Detected - Initializing Mini Mode");
+        // Use toggleMiniMode to ensure full initialization (events, focus, etc.)
+        // We wrap in setTimeout to ensure DOM is fully painted and styles applied
+        setTimeout(() => {
+            if (!state.isMiniMode) {
+                toggleMiniMode();
+            }
+        }, 100);
+    }
+}
+
+function clearAll() {
+    state.output = '';
+    state.buffer = '';
+    state.candidates = [];
+    state.page = 0;
+    updateOutput();
+    updateComposition();
+    renderCandidates();
+
+    // Only focus if the window is active (to avoid errors or stealing focus)
+    if (document.hasFocus()) {
+        if (state.isMiniMode && els.miniOutput) {
+            els.miniOutput.focus();
+        } else if (!state.isMiniMode && els.output.offsetParent !== null) {
+            // Check if output is visible
+            els.output.focus();
+        }
+    }
+}
+
+function toggleMiniMode() {
+    console.log('Toggling Mini Mode. Current:', state.isMiniMode);
+    state.isMiniMode = !state.isMiniMode;
+    const isMini = state.isMiniMode;
+
+    // Toggle Classes
+    document.body.classList.toggle('mini-mode', isMini);
+    document.documentElement.classList.toggle('mini-mode', isMini);
+
+    // Toggle UI Visibility
+    if (els.miniUi) {
+        els.miniUi.classList.toggle('hidden', !isMini);
+
+        // Sync State
+        if (isMini) {
+            els.miniOutput.value = state.output;
+            updateComposition(); // Re-render composition/candidates in mini ui
+            setTimeout(() => els.miniOutput.focus(), 50);
+        } else {
+            // Sync back if needed (though state.output is shared)
+            els.output.value = state.output;
+        }
+    }
+
+    console.log('New State:', isMini);
+}
+
+// English Mode Toggle
+function toggleEnglishMode() {
+    triggerHaptic();
+    state.isEnglishMode = !state.isEnglishMode;
+    const shiftBtn = document.getElementById('key-shift');
+    if (shiftBtn) {
+        if (state.isEnglishMode) {
+            shiftBtn.classList.add('active');
+        } else {
+            shiftBtn.classList.remove('active');
+        }
+    }
+
+    // Clear buffer when switching modes
+    state.buffer = '';
+    updateComposition();
+    state.candidates = [];
+    renderCandidates();
+}
+
+// Input Handling
+function handleInput(key) {
+    triggerHaptic();
+    // English Mode Logic
+    if (state.isEnglishMode) {
+        state.output += key;
+        updateOutput();
+        return;
+    }
+
+    // Normal Dayi Logic
+    // Convert to lowercase for Dayi processing
+    const lowerKey = key.toLowerCase();
+
+    // Check if key is valid Dayi character (a-z, 0-9, etc.) OR a selection key
+    // We allow all keys defined in the layout plus standard keyboard inputs
+    // Added: ' [ ] - \ (selection keys) and Space
+    const validKeys = /^[a-z0-9,./;'\[\]\-\\ ]$/;
+    if (!validKeys.test(lowerKey)) return;
+
+    // If we have candidates, number keys select candidates
+    if (state.candidates.length > 0) {
+        // ... (existing candidate selection logic)
+        // But wait, number keys are also Dayi roots.
+        // Standard Dayi: If candidates are open, numbers select.
+        // If buffer is empty, numbers are roots.
+        // Logic below handles this via state.candidates check
+    }
+
+    // ... rest of handleInput
+
+    // 1. Candidate Selection (if candidates exist)
+    if (state.candidates.length > 0) {
+        // Check if it extends the current code (Priority: Input > Selection)
+        const nextBuffer = state.buffer + lowerKey;
+        // Only treat as input if it forms a valid prefix AND we haven't reached limit
+        // Exception: Space is always selection/commit, never input (unless defined in DB?)
+        // In Dayi, Space is not a root.
+        const isInput = state.buffer.length < 4 && state.prefixes.has(nextBuffer);
+
+        if (isInput) {
+            // Valid continuation, let it fall through to append to buffer
+        } else {
+            // Map selection keys
+            const selectionMap = {
+                ' ': 0, "'": 1, '[': 2, ']': 3, '-': 4, '\\': 5,
+                '1': 0, '2': 1, '3': 2, '4': 3, '5': 4,
+                '6': 5, '7': 6, '8': 7, '9': 8, '0': 9
+            };
+
+            if (lowerKey in selectionMap) {
+                selectCandidate(selectionMap[lowerKey]);
+                return;
+            }
+
+            // Not a valid continuation AND not a selection key
+            // Commit first candidate, then process key
+            selectCandidate(0);
+            // Fall through to process key as new input
+        }
+    }
+
+    // 2. Buffer Limit (Dayi max 4 codes)
+    if (state.buffer.length >= 4) {
+        return; // Ignore input if buffer full
+    }
+
+    // 3. Append to buffer
+    state.buffer += lowerKey;
+    updateComposition();
+
+    // 4. Check for candidates
+    // lookupCandidates() is handled by updateComposition()
+}
+
+
+function nextPage() {
+    const totalPages = Math.ceil(state.candidates.length / state.pageSize);
+    if (totalPages > 1) {
+        state.page = (state.page + 1) % totalPages;
+        renderCandidates();
+    }
+}
+
+function handleBackspace() {
+    triggerHaptic();
+    if (state.buffer.length > 0) {
+        state.buffer = state.buffer.slice(0, -1);
+        state.page = 0; // Reset page on edit
+        updateComposition();
+    } else if (state.output.length > 0) {
+        state.output = state.output.slice(0, -1);
+        updateOutput();
+    }
+}
+
+function handleSpace() {
+    triggerHaptic();
+    if (state.candidates.length > 0) {
+        selectCandidate(state.page * state.pageSize + 0); // Select first candidate
+    } else {
+        // If buffer empty, add space? Or ignore?
+        // Standard: if buffer empty, add space
+        if (state.buffer.length === 0) {
+            state.output += ' ';
+            updateOutput();
+        }
+    }
+}
+
+function handleEnter() {
+    triggerHaptic();
+    if (state.buffer.length > 0) {
+        // Commit buffer as is (if needed, or just clear)
+        // Standard behavior: clear buffer
+        state.buffer = '';
+        state.candidates = [];
+        state.page = 0;
+        updateComposition();
+        renderCandidates();
+    } else {
+        state.output += '\n';
+        updateOutput();
+    }
+}
+
+// Logic
+function updateComposition() {
+    els.composition.textContent = state.buffer;
+    // Update Mini UI
+    if (els.miniComposition) els.miniComposition.textContent = state.buffer;
+
+    state.page = 0; // Reset page on new input
+
+    if (state.buffer.length === 0) {
+        state.candidates = [];
+        renderCandidates();
+        return;
+    }
+
+    // Query DB
+    const candidates = state.db[state.buffer] || [];
+    state.candidates = candidates;
+    renderCandidates();
+}
+
+function renderCandidates() {
+    els.candidates.innerHTML = '';
+    if (els.miniCandidates) els.miniCandidates.innerHTML = ''; // Clear Mini UI
+
+    if (state.candidates.length === 0) {
+        if (state.buffer.length > 0) {
+            els.candidates.innerHTML = '<div class="placeholder">無候選字</div>';
+            if (els.miniCandidates) els.miniCandidates.innerHTML = '<span class="placeholder">無候選字</span>';
+        } else {
+            els.candidates.innerHTML = '<div class="placeholder">請輸入大易碼...</div>';
+            // Minimalist placeholder: Blinking Cursor
+            if (els.miniCandidates) els.miniCandidates.innerHTML = '<span class="mini-cursor">_</span>';
+        }
+        return;
+    }
+
+    const start = state.page * state.pageSize;
+    const end = start + state.pageSize;
+    const pageCandidates = state.candidates.slice(start, end);
+
+    pageCandidates.forEach((cand, index) => {
+        // Selection keys mapping for display
+        const selectionKeys = ['Space', "'", '[', ']', '-', '\\', '7', '8', '9', '0'];
+        const key = selectionKeys[index];
+
+        // Main UI Item
+        const item = document.createElement('div');
+        item.className = 'candidate-item';
+        item.innerHTML = `
+            <span class="candidate-index">${key.toUpperCase()}</span>
+            <span class="candidate-char">${cand.char}</span>
+        `;
+        item.onclick = () => selectCandidate(start + index);
+        els.candidates.appendChild(item);
+
+        // Mini UI Item
+        if (els.miniCandidates) {
+            const miniItem = document.createElement('span');
+            miniItem.className = 'mini-candidate-item';
+            miniItem.innerHTML = `<span class="mini-candidate-key">${key.toUpperCase()}</span>${cand.char}`;
+            miniItem.onclick = () => selectCandidate(start + index);
+            els.miniCandidates.appendChild(miniItem);
+        }
+    });
+
+    // Pagination (Main UI only for now, Mini UI scrolls)
+    if (state.candidates.length > state.pageSize) {
+        pageInfo.style.textAlign = 'center';
+        pageInfo.style.fontSize = '0.8rem';
+        pageInfo.style.color = 'var(--text-muted)';
+        pageInfo.style.marginTop = '4px';
+        pageInfo.textContent = `${state.page + 1}/${Math.ceil(state.candidates.length / state.pageSize)} (Press = for next)`;
+        els.candidates.appendChild(pageInfo);
+    }
+}
+
+function selectCandidate(index) {
+    // Adjust index for pagination if selecting by number key (0-9)
+    // But wait, selectCandidate is called with absolute index from click
+    // OR relative index from number keys?
+    // Let's standardize: selectCandidate takes ABSOLUTE index in state.candidates
+
+    // If coming from number key (0-9), it refers to the CURRENT PAGE
+    // We need to handle that in handleInput or here.
+    // Let's handle it in handleInput/callers to pass absolute index?
+    // No, easier to handle "selection by visible slot" logic.
+
+    // Actually, the previous logic passed 0-9.
+    // If we are on page 1, index 0 is actually start + 0.
+
+    // Let's refactor selectCandidate to take "visible index" and convert?
+    // Or just pass absolute index.
+
+    // In handleInput:
+    // const index = key === '0' ? 9 : parseInt(key) - 1;
+    // This is 0-9 relative to page.
+    // So: selectCandidate(state.page * state.pageSize + index)
+
+    // But wait, the selection keys (Space, ', etc) map to 0, 1, 2... relative to page.
+
+    // So let's update selectCandidate to accept absolute index,
+    // and update call sites to calculate it.
+
+    if (index >= 0 && index < state.candidates.length) {
+        triggerHaptic();
+        const char = state.candidates[index].char;
+        state.output += char;
+        state.buffer = '';
+        state.page = 0;
+        updateComposition();
+        updateOutput();
+
+        // Copy to clipboard if enabled
+        if (state.settings.autoCopy) {
+            navigator.clipboard.writeText(state.output).then(() => {
+                // Visual feedback
+                const target = state.isMiniMode ? els.miniOutput : els.output;
+
+                if (target) {
+                    target.style.animation = 'none';
+                    target.offsetHeight; /* trigger reflow */
+                    target.style.animation = 'flash-green 0.3s';
+                }
+
+                // Also flash the mini card border for extra visibility
+                if (state.isMiniMode && els.miniUi) {
+                    const card = els.miniUi.querySelector('.mini-card');
+                    if (card) {
+                        card.style.borderColor = 'var(--primary)';
+                        setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
+                    }
+                }
+
+                // Show toast if not in mini mode
+                if (!state.isMiniMode) {
+                    showToast('已複製');
+                }
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                if (!state.isMiniMode) showToast('複製失敗', true);
+            });
+        }
+    }
+}
+
+function showToast(message = '已複製', isError = false) {
+    const toast = document.getElementById('toast');
+    if (toast) {
+        toast.textContent = message;
+        toast.classList.toggle('error', isError);
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 1500);
+    }
+}
+
+function updateOutput() {
+    els.output.value = state.output;
+    if (els.miniOutput) els.miniOutput.value = state.output;
+    els.output.scrollTop = els.output.scrollHeight;
+    if (els.miniOutput) els.miniOutput.scrollTop = els.miniOutput.scrollHeight;
+}
+
+// Haptic Feedback
+function triggerHaptic() {
+    // Only on mobile/touch devices usually, but navigator.vibrate works if hardware supports it
+    if (navigator.vibrate) {
+        navigator.vibrate(10); // Light vibration
+    }
+}
+
+// Start
+init();
+
+</script>
 </body>
 
 </html>
