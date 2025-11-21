@@ -970,6 +970,11 @@ all and (display-mode: window-controls-overlay) {
                 <span>Keyboard</span>
                 <span class="toggle-status">ON</span>
             </div>
+            <div class="menu-item" id="toggle-mini">
+                <span class="material-symbols-outlined">aspect_ratio</span>
+                <span>Mini Mode</span>
+                <span class="toggle-status">OFF</span>
+            </div>
             <div class="menu-divider"></div>
             <div class="menu-controls">
                 <button id="font-decrease" class="control-btn" aria-label="Decrease Font Size">
@@ -1192,6 +1197,10 @@ function setupMenuListeners() {
             applySettings();
         });
 
+        document.getElementById('toggle-mini').addEventListener('click', () => {
+            toggleMiniMode();
+        });
+
         // Font Size
         document.getElementById('font-decrease').addEventListener('click', (e) => {
             e.stopPropagation(); // Prevent menu close
@@ -1359,16 +1368,12 @@ function setupEventListeners() {
         if (e.ctrlKey || e.altKey || e.metaKey) {
             // Allow Ctrl+C/V etc to work normally, BUT intercept Ctrl key itself
             if (e.key === 'Control') {
-                // Double-Ctrl -> Toggle Mini Mode (PWA only)
+                // Double-Ctrl -> Toggle Mini Mode
                 const now = Date.now();
-                if (now - state.lastCtrlPressTime < 300) {
-                    const isPWA = window.matchMedia('(display-mode: standalone)').matches;
-                    // Allow toggle if PWA detected
-                    if (isPWA) {
-                        toggleMiniMode();
-                        state.lastCtrlPressTime = 0;
-                        return;
-                    }
+                if (now - state.lastCtrlPressTime < 500) {
+                    toggleMiniMode();
+                    state.lastCtrlPressTime = 0;
+                    return;
                 }
                 state.lastCtrlPressTime = now;
 
@@ -1524,6 +1529,7 @@ function clearAll() {
 function toggleMiniMode() {
     console.log('Toggling Mini Mode. Current:', state.isMiniMode);
     state.isMiniMode = !state.isMiniMode;
+    updateToggleStatus('toggle-mini', state.isMiniMode ? 'ON' : 'OFF');
     const isMini = state.isMiniMode;
 
     // Toggle Classes
