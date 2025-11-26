@@ -1670,7 +1670,7 @@
 
             // Check if key is valid character (a-z, 0-9, etc.) OR a selection key
             // We allow all keys defined in the layout plus standard keyboard inputs
-            const validKeys = /^[a-z0-9,./;'\[\]\-\\ ]$/;
+            const validKeys = /^[a-z0-9,./;'\[\]\-\\ =]$/;
             if (!validKeys.test(lowerKey)) return;
 
             // If we have candidates, number keys select candidates
