@@ -1294,6 +1294,15 @@
             }
         }
 
+        // Zhuyin Mapping (Standard Daqian)
+        const ZHUYIN_MAPPING = {
+            '1': 'ㄅ', '2': 'ㄉ', '3': 'ˇ', '4': 'ˋ', '5': 'ㄓ', '6': 'ˊ', '7': '˙', '8': 'ㄚ', '9': 'ㄞ', '0': 'ㄢ',
+            'q': 'ㄆ', 'w': 'ㄊ', 'e': 'ㄍ', 'r': 'ㄐ', 't': 'ㄔ', 'y': 'ㄗ', 'u': 'ㄧ', 'i': 'ㄛ', 'o': 'ㄟ', 'p': 'ㄣ',
+            'a': 'ㄇ', 's': 'ㄋ', 'd': 'ㄎ', 'f': 'ㄑ', 'g': 'ㄕ', 'h': 'ㄘ', 'j': 'ㄨ', 'k': 'ㄜ', 'l': 'ㄠ', ';': 'ㄤ',
+            'z': 'ㄈ', 'x': 'ㄌ', 'c': 'ㄏ', 'v': 'ㄒ', 'b': 'ㄖ', 'n': 'ㄙ', 'm': 'ㄩ',
+            ',': 'ㄝ', '.': 'ㄡ', '/': 'ㄥ', '-': 'ㄦ'
+        };
+
         // Virtual Keyboard Rendering
         function renderKeyboard() {
             const container = els.keyboard;
@@ -1309,11 +1318,31 @@
                 }
 
                 row.forEach(key => {
+                    // Inject Globe button before Space in the last row
+                    if (rowIndex === 4 && key.code === 'Space') {
+                        const globeBtn = document.createElement('button');
+                        globeBtn.className = 'key key-special';
+                        globeBtn.innerHTML = '<span class="material-symbols-outlined">language</span>';
+                        globeBtn.addEventListener('click', () => {
+                            // Cycle: Dayi -> Zhuyin -> English -> Dayi
+                            if (state.currentIM === 'dayi') {
+                                switchToIM('zhuyin');
+                            } else if (state.currentIM === 'zhuyin') {
+                                switchToIM('english');
+                            } else {
+                                switchToIM('dayi');
+                            }
+                        });
+                        rowDiv.appendChild(globeBtn);
+                    }
+
                     let btn;
                     if (key.type === 'special') {
                         btn = document.createElement('button');
                         btn.className = `key key-special ${key.width === 'wide' ? 'key-space' : ''}`;
                         if (key.code === 'Shift') btn.id = 'key-shift';
+
+                        // Update Shift label based on state if needed, but icon is fine
                         btn.textContent = key.label;
 
                         if (key.action === 'toggleInputMethod') {
@@ -1327,9 +1356,25 @@
                         btn = document.createElement('button');
                         btn.className = 'key';
                         btn.dataset.code = key.code;
+
+                        // Dynamic Label Logic
+                        let mainLabel = key.label;
+                        let subLabel = '';
+
+                        if (state.currentIM === 'english') {
+                            // English: Only main label
+                            subLabel = '';
+                        } else if (state.currentIM === 'zhuyin') {
+                            // Zhuyin: Show Zhuyin symbol
+                            subLabel = ZHUYIN_MAPPING[key.code] || '';
+                        } else {
+                            // Dayi: Show Dayi root (default)
+                            subLabel = key.sub || '';
+                        }
+
                         btn.innerHTML = `
-                    <span>${key.label}</span>
-                    <span class="key-sub">${key.sub}</span>
+                    <span>${mainLabel}</span>
+                    <span class="key-sub">${subLabel}</span>
                 `;
                         btn.addEventListener('click', () => handleInput(key.code));
                     }
@@ -1673,6 +1718,7 @@
             // Update UI
             updateStatus();
             updateMenuToggle();
+            renderKeyboard(); // Re-render keyboard with new labels
 
             // Clear buffer
             state.buffer = '';
