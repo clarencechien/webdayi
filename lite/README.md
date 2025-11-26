@@ -57,4 +57,30 @@ When installed as a PWA on desktop, WebDayi Lite automatically launches in **Min
 - `index.html`: Main entry point.
 - `app.js`: Application logic.
 - `style.css`: Styling.
-- `data/dayi4.cin`: Source dictionary (converted to JSON at runtime or pre-converted).
+- `data/dayi4.cin`: Source dictionary (CIN format, 18,635 entries).
+- `dayi_db.json`: Compiled database (generated from dayi4.cin, 16,918 codes).
+
+### Regenerating the Database
+
+If you modify `data/dayi4.cin`, regenerate the database:
+
+```bash
+cd /path/to/webdayi
+node converter/convert_cin.js
+```
+
+This will read `lite/data/dayi4.cin` and output to `lite/dayi_db.json`.
+
+**Cache Buster**: After regenerating, update the version in `index.html`:
+```javascript
+const response = await fetch('dayi_db.json?v=XX');  // Increment XX
+```
+
+### Recent Updates (2025-11-26)
+
+- ✅ Fixed converter output path (was `lite/data/dayi_db.json`, now `lite/dayi_db.json`)
+- ✅ Merged character priority updates from feat/adjust-char-weights:
+  - `71` → 界 (prioritized)
+  - `2n` → 制 (prioritized)
+  - `2mn` → 觕 (moved from 2n)
+- ✅ Cache buster updated to v=32
