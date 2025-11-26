@@ -1846,6 +1846,7 @@
 
             // Pagination (Main UI only for now, Mini UI scrolls)
             if (state.candidates.length > state.pageSize) {
+                const pageInfo = document.createElement('div');
                 pageInfo.style.textAlign = 'center';
                 pageInfo.style.fontSize = '0.8rem';
                 pageInfo.style.color = 'var(--text-muted)';
