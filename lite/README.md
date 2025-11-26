@@ -86,6 +86,8 @@ const response = await fetch('dayi_db.json?v=XX');  // Increment XX
   - **Split Shift Key**: Left Shift (Eng/Chi), Right Shift (Dayi/Zhuyin).
   - **PWA Fix**: Single-instance behavior (focus existing window).
   - **UI Polish**: Added IM indicator to Mini Mode.
+  - **Mobile Keyboard**: Added Globe button (IM Switcher) and dynamic layouts.
+  - **UX**: Added visual feedback (blue border) for key taps.
 - ✅ Fixed converter output path (was `lite/data/dayi_db.json`, now `lite/dayi_db.json`)
 - ✅ Merged character priority updates from feat/adjust-char-weights:
   - `71` → 界 (prioritized)

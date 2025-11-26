@@ -31,6 +31,10 @@ This session focused on upgrading WebDayi Lite to **Phase 0.6.0**, adding **Zhuy
    - Added Input Method indicator ('易'/'注'/'Eng') to Mini Mode.
    - Optimized Mini Mode padding for maximum candidate space.
    - Fixed pagination (`=` key) and candidate display issues.
+5. ✅ **Mobile Keyboard Enhancements**:
+   - Added **Globe Button** (left of Space) to cycle IMs.
+   - Implemented **Dynamic Layouts** (Zhuyin symbols, English letters).
+   - Added **Visual Feedback** (blue border) on key tap/click.
 
 ### Implementation Details
 
@@ -40,6 +44,11 @@ This session focused on upgrading WebDayi Lite to **Phase 0.6.0**, adding **Zhuy
   - Added `toggleEnglishChinese()` and `toggleDayiZhuyin()` logic.
   - Updated `handleInput` to normalize Zhuyin candidates (strings -> objects).
   - Added `mini-im-status` indicator.
+  - **Mobile Keyboard**:
+    - Updated `renderKeyboard` to support dynamic labels (Zhuyin/English).
+    - Added Globe button injection logic.
+    - Added CSS for `.key:active` and `.active-state` visual feedback.
+    - Added touch event listeners for responsive feedback.
 - `lite/manifest.json`: Added `launch_handler`.
 - `lite/zhuyin_db.json`: New data file.
 

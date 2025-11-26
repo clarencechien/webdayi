@@ -14,6 +14,7 @@
     - **Split Shift**: Left Shift (Eng/Chi), Right Shift (Dayi/Zhuyin).
     - **PWA Fix**: Added single-instance support (`launch_handler`).
     - **UI Polish**: Added IM indicator to Mini Mode, optimized padding.
+    - **Mobile Keyboard**: Added Globe button, dynamic layouts (Zhuyin/Eng), and visual feedback.
 - **2025-11-26**: Merged feat/adjust-char-weights branch and fixed critical bugs.
     - Merged lite dictionary character priority updates (71→界, 2n→制, 2mn→觕).
     - Fixed broken mode-toggle button styling (Tailwind classes restored).
@@ -141,7 +142,9 @@
 │   ├─ Zhuyin Support           [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Split Shift Key          [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ PWA Single Instance      [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
-│   └─ UI Polish (IM Indicator) [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ UI Polish (IM Indicator) [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Mobile Keyboard (Globe)  [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ Visual Feedback (UX)     [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │ Phase 1.13: MVP 1.0 v12        [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.11: MVP 2a v2.0 Ext    [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% 📋    │
