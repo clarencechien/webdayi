@@ -1794,7 +1794,13 @@
             }
 
             // Query DB
-            const candidates = state.db[state.buffer] || [];
+            let candidates = state.db[state.buffer] || [];
+
+            // Normalize candidates (Zhuyin is array of strings, Dayi is array of objects)
+            if (candidates.length > 0 && typeof candidates[0] === 'string') {
+                candidates = candidates.map(c => ({ char: c }));
+            }
+
             state.candidates = candidates;
             renderCandidates();
         }
