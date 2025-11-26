@@ -1691,7 +1691,7 @@
                 // Only treat as input if it forms a valid prefix AND we haven't reached limit
                 // Exception: Space is always selection/commit, never input (unless defined in DB?)
                 // In Dayi, Space is not a root.
-                const isInput = state.buffer.length < 4 && state.prefixes.has(nextBuffer);
+                const isInput = state.buffer.length < 4 && state.validPrefixes.has(nextBuffer);
 
                 if (isInput) {
                     // Valid continuation, let it fall through to append to buffer
