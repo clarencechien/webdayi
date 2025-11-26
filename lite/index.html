@@ -1031,7 +1031,7 @@
             candidates: [], // Current candidates
             output: '', // Committed text
             page: 0,
-            pageSize: 10,
+            pageSize: 9,
             isMiniMode: false, // Mini mode state
             lastAltPressTime: 0, // Track Alt key for double-tap
             lastCtrlPressTime: 0, // Track Ctrl key for double-tap
@@ -1702,6 +1702,11 @@
                         '1': 0, '2': 1, '3': 2, '4': 3, '5': 4,
                         '6': 5, '7': 6, '8': 7, '9': 8, '0': 9
                     };
+
+                    if (lowerKey === '=') {
+                        nextPage();
+                        return;
+                    }
 
                     if (lowerKey in selectionMap) {
                         selectCandidate(selectionMap[lowerKey]);
