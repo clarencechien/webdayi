@@ -1,9 +1,19 @@
 # Progress Tracker: WebDaYi
 
-**Last Updated**: 2025-11-21 (🎉 Phase 1.11 - Ctrl Double-Click for Mini Mode!)
-**Current Version**: 11.3.8 (MVP 1.0) / 0.5.0 (PWA Build 014)
-**Build**: 20251121-015 (Phase 1.11 - Ctrl Shortcut)
-**Git Commits**: pending
+**Last Updated**: 2025-11-26 (🎉 Phase 1.12 - Branch Merge & Critical Fixes!)
+**Current Version**: 11.3.5 (MVP 1.0) / 0.5.0 (Lite)
+**Build**: 20251126-001 (Phase 1.12 - Merge + Fixes)
+**Git Commits**:
+- `7169beb` - Merge feat/adjust-char-weights into main
+- `6f8eabc` - Fix: Restore Tailwind CSS classes for mode-toggle button
+- `d7187f8` - Fix: Regenerate corrupted dayi_db.json and fix converter path
+
+**Recent Changes**:
+- **2025-11-26**: Merged feat/adjust-char-weights branch and fixed critical bugs.
+    - Merged lite dictionary character priority updates (71→界, 2n→制, 2mn→觕).
+    - Fixed broken mode-toggle button styling (Tailwind classes restored).
+    - Fixed corrupted lite/dayi_db.json (converter path issue, regenerated clean DB).
+    - Updated converter/convert_cin.js output path to correct location.
 - **2025-11-21**: Added Ctrl double-click shortcut to toggle Mini Mode in PWA.
     - Implemented PWA detection using `window.matchMedia('(display-mode: standalone)')`.
     - Added double-tap logic (300ms window) for Ctrl key.

@@ -412,17 +412,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) \=\> {
 
 ### **Prerequisites**
 
-* Node.js (\>= 18\)  
-* npm or pnpm  
+* Node.js (\>= 18\)
+* npm or pnpm
 * A Chromium-based browser (Chrome, Edge)
 
 ### **1\. Run Data Pipeline**
 
-\# Generate the database first  
-cd converter  
-node convert.js  
-\# This creates /mvp1/dayi\_db.json  
-\# Manually copy this file to /mvp2a-plugin/
+\# Generate the MVP1 database
+cd converter
+node convert.js
+\# This creates /mvp1/dayi\_db.json
+
+\# Generate the Lite database
+node convert_cin.js
+\# This creates /lite/dayi\_db.json (from /lite/data/dayi4.cin)
+
+\# Manually copy mvp1 database to mvp2a-plugin if needed
+cp mvp1/dayi\_db.json mvp2a-plugin/
 
 ### **2\. Run MVP 1 (Core Engine)**
 
@@ -455,9 +461,27 @@ file:///.../WebDaYi/mvp1/index.html
 
 ## **Known Limitations (to track)**
 
-* **No N-gram:** As designed. Static frequency (freq) is the only sorting method.  
-* **Static DB:** The database (dayi\_db.json) is read-only at runtime (MVP 2a+ will fix this).  
+* **No N-gram:** ~~As designed. Static frequency (freq) is the only sorting method.~~ **RESOLVED** - MVP 1.0 v11.3 now includes full N-gram + Viterbi support!
+* **Static DB:** The database (dayi\_db.json) is read-only at runtime (MVP 2a+ will fix this).
 * **Content Script Conflicts:** The content.js might conflict with complex web apps (like Google Docs or Notion) that do their own custom keyboard handling. This is the main challenge of this route.
+
+## **Converter Scripts**
+
+### **convert.js** (MVP1 Database)
+- **Input**: `converter/raw_data/dayi.dict.yaml` (Rime format)
+- **Output**: `mvp1/dayi_db.json` (1,584 codes)
+- **Usage**: `node converter/convert.js`
+
+### **convert_cin.js** (Lite Database)
+- **Input**: `lite/data/dayi4.cin` (CIN format)
+- **Output**: `lite/dayi_db.json` (16,918 codes)
+- **Usage**: `node converter/convert_cin.js`
+- **Important**: Output path fixed in commit `d7187f8` (was incorrectly outputting to `lite/data/dayi_db.json`)
+
+### **Known Issues Fixed (2025-11-26)**
+1. ✅ **Corrupted Lite Database**: Converter was outputting to wrong path, causing console output to be embedded in JSON file
+2. ✅ **Mode Toggle Button**: Merge accidentally removed Tailwind CSS classes, breaking button styling
+3. ✅ **Character Mappings**: Successfully merged feat/adjust-char-weights branch with updated priorities for 71, 2n, 2mn codes
 
 ---
 

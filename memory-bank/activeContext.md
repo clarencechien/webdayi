@@ -1,19 +1,73 @@
 # Active Context: WebDaYi
 
-**Last Updated**: 2025-11-21
-**Current Version**: MVP 1.0 v11.3.8 (Phase 1.11 WebDayi Lite)
+**Last Updated**: 2025-11-26
+**Current Version**: MVP 1.0 v11.3.5 + Lite v0.5.0
 **Branch**: `main`
 
 ---
 
 ## 📊 Current Status
 
-### Phase 1.10: Character-Level Editing ✅ FEATURE COMPLETE + E2E TESTED
-**Status**: Production ready with critical bug fixes and E2E verification
-**Completion Date**: 2025-11-19
-**Total Implementation**: 6 phases, 110 TDD tests + 6 E2E tests, 4,000+ lines of code
+### Phase 1.12: Branch Merge & Critical Fixes ✅ COMPLETE
+**Status**: feat/adjust-char-weights merged, critical bugs fixed
+**Completion Date**: 2025-11-26
+**Key Achievements**: Merged lite dictionary updates, fixed corrupted database, restored UI styling
 
-**All Features Implemented**:
+---
+
+## 🔧 Latest Session: Branch Merge & Critical Fixes (2025-11-26)
+
+### Session Summary
+
+This session focused on **merging the `feat/adjust-char-weights` branch** into `main` and resolving **critical bugs** that emerged during the merge process.
+
+**Merge Completed**:
+1. ✅ **Branch Merged**: Successfully merged `feat/adjust-char-weights` into `main`
+   - Updated character priorities for codes `2n`, `2mn`, and `71`
+   - Regenerated `lite/dayi_db.json` from merged source file
+   - Updated cache buster to `v=32`
+
+**Critical Bugs Fixed**:
+1. ✅ **Mode Toggle Button Broken** (mvp1/index.html)
+   - **Root Cause**: Merge replaced detailed Tailwind CSS classes with generic `class="mode-toggle"`
+   - **Impact**: Button became unstyled/invisible, breaking UI
+   - **Fix**: Restored original Tailwind CSS classes
+   - **Commit**: `6f8eabc`
+
+2. ✅ **Corrupted JSON Database** (lite/dayi_db.json) **[CRITICAL]**
+   - **Root Cause**: Converter script outputting to wrong path (`lite/data/dayi_db.json` instead of `lite/dayi_db.json`)
+   - **Impact**: Converter console output embedded in JSON, causing syntax errors at runtime
+   - **Symptoms**: `SyntaxError: Expected ',' or '}' after property value in JSON at position 244`
+   - **Fix**:
+     - Updated converter path: `converter/convert_cin.js` line 16
+     - Regenerated clean database (16,918 codes)
+     - Verified all merged mappings
+   - **Commit**: `d7187f8`
+
+**Character Mapping Changes** (from feat/adjust-char-weights):
+| Code | Before | After | Purpose |
+|------|--------|-------|---------|
+| `71` | 圁 | **界** | Prioritize 界 (from both branches) |
+| `2n` | 觕 | **制** | Prioritize 制 over 觕 |
+| `2mn` | 制 | **觕** | Move 觕 to 2mn code |
+
+**Files Modified**:
+- `lite/data/dayi4.cin` - Source dictionary with new mappings
+- `lite/dayi_db.json` - Regenerated from merged source (1.2MB, 16,918 codes)
+- `lite/index.html` - Cache buster updated to `v=32`
+- `mvp1/index.html` - Button styling restored
+- `converter/convert_cin.js` - Output path fixed
+
+**Commits**:
+1. `7169beb` - Merge feat/adjust-char-weights into main
+2. `6f8eabc` - Fix: Restore Tailwind CSS classes for mode-toggle button
+3. `d7187f8` - Fix: Regenerate corrupted dayi_db.json and fix converter path
+
+---
+
+### Previous Sessions
+
+**All Features Implemented (Phase 1.10)**:
 1. **Phase 1.10.1**: Character span architecture (24 tests) ✅
 2. **Phase 1.10.2**: Candidate selection modal (22 tests) ✅
 3. **Phase 1.10.3**: Auto-advance + arrow navigation (20 tests) ✅
