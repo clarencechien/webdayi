@@ -1039,6 +1039,7 @@
         // State
         const state = {
             currentIM: 'dayi', // 'dayi', 'zhuyin', 'english'
+            lastChineseIM: 'dayi', // Track last used Chinese IM
             dbs: { dayi: {}, zhuyin: {} },
             prefixes: { dayi: new Set(), zhuyin: new Set() },
             db: {}, // Pointer to current DB
@@ -1509,7 +1510,13 @@
                 if (e.key === 'Shift') {
                     // If Shift was pressed and released without other keys -> Toggle
                     if (!state.shiftKeyUsed) {
-                        toggleInputMethod();
+                        if (e.code === 'ShiftLeft') {
+                            // Left Shift: Toggle English <-> Chinese
+                            toggleEnglishChinese();
+                        } else if (e.code === 'ShiftRight') {
+                            // Right Shift: Toggle Dayi <-> Zhuyin
+                            toggleDayiZhuyin();
+                        }
                     }
                 }
             });
@@ -1612,24 +1619,55 @@
             console.log('New State:', isMini);
         }
 
-        // Input Method Toggle
-        function toggleInputMethod() {
+        // Input Method Toggle Logic
+
+        // Left Shift: Toggle English <-> Last Chinese IM
+        function toggleEnglishChinese() {
             triggerHaptic();
 
-            // Cycle: Dayi -> Zhuyin -> English -> Dayi
-            if (state.currentIM === 'dayi') {
-                state.currentIM = 'zhuyin';
-                state.db = state.dbs.zhuyin;
-                state.validPrefixes = state.prefixes.zhuyin;
-                showToast('Switched to Zhuyin');
-            } else if (state.currentIM === 'zhuyin') {
-                state.currentIM = 'english';
-                showToast('Switched to English');
+            if (state.currentIM === 'english') {
+                // Switch back to last Chinese IM
+                switchToIM(state.lastChineseIM);
             } else {
-                state.currentIM = 'dayi';
+                // Switch to English
+                switchToIM('english');
+            }
+        }
+
+        // Right Shift: Toggle Dayi <-> Zhuyin
+        function toggleDayiZhuyin() {
+            triggerHaptic();
+
+            let targetIM;
+            if (state.currentIM === 'dayi') {
+                targetIM = 'zhuyin';
+            } else if (state.currentIM === 'zhuyin') {
+                targetIM = 'dayi';
+            } else {
+                // In English mode: Switch to the OTHER Chinese IM (relative to last used)
+                // If last was Dayi, switch to Zhuyin. If last was Zhuyin, switch to Dayi.
+                targetIM = (state.lastChineseIM === 'dayi') ? 'zhuyin' : 'dayi';
+            }
+
+            // Update lastChineseIM
+            state.lastChineseIM = targetIM;
+            switchToIM(targetIM);
+        }
+
+        // Helper to switch IM and update UI
+        function switchToIM(im) {
+            state.currentIM = im;
+
+            if (im === 'dayi') {
                 state.db = state.dbs.dayi;
                 state.validPrefixes = state.prefixes.dayi;
                 showToast('Switched to Dayi');
+            } else if (im === 'zhuyin') {
+                state.db = state.dbs.zhuyin;
+                state.validPrefixes = state.prefixes.zhuyin;
+                showToast('Switched to Zhuyin');
+            } else {
+                showToast('Switched to English');
             }
 
             // Update UI
@@ -1651,6 +1689,11 @@
                     shiftBtn.classList.remove('active');
                 }
             }
+        }
+
+        // Legacy function for menu button (defaults to Left Shift behavior)
+        function toggleInputMethod() {
+            toggleEnglishChinese();
         }
 
         function updateStatus() {
