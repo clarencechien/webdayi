@@ -1,14 +1,19 @@
 # Progress Tracker: WebDaYi
 
-**Last Updated**: 2025-11-26 (🎉 Phase 1.12 - Branch Merge & Critical Fixes!)
-**Current Version**: 11.3.5 (MVP 1.0) / 0.5.0 (Lite)
-**Build**: 20251126-001 (Phase 1.12 - Merge + Fixes)
+**Last Updated**: 2025-11-26 (🎉 Phase 0.6.0 - Zhuyin Support & PWA Fixes!)
+**Current Version**: 11.3.5 (MVP 1.0) / 0.6.0 (Lite)
+**Build**: 20251126-002 (Phase 0.6.0 - Zhuyin + PWA Fixes)
 **Git Commits**:
 - `7169beb` - Merge feat/adjust-char-weights into main
 - `6f8eabc` - Fix: Restore Tailwind CSS classes for mode-toggle button
 - `d7187f8` - Fix: Regenerate corrupted dayi_db.json and fix converter path
 
 **Recent Changes**:
+- **2025-11-26**: Completed WebDayi Lite Phase 0.6.0.
+    - **Zhuyin Support**: Added full Zhuyin input method with `zhuyin_db.json`.
+    - **Split Shift**: Left Shift (Eng/Chi), Right Shift (Dayi/Zhuyin).
+    - **PWA Fix**: Added single-instance support (`launch_handler`).
+    - **UI Polish**: Added IM indicator to Mini Mode, optimized padding.
 - **2025-11-26**: Merged feat/adjust-char-weights branch and fixed critical bugs.
     - Merged lite dictionary character priority updates (71→界, 2n→制, 2mn→觕).
     - Fixed broken mode-toggle button styling (Tailwind classes restored).
@@ -26,7 +31,7 @@
         - **Double-Alt Clear**: Double-tapping `Alt` clears text.
         - **Shift**: Simple toggle for English/Chinese mode.
     - Fixed PWA layout issues and removed legacy toggle buttons.
-**Overall Status**: 🎉 WebDayi Lite Implemented! (Phase 1.10.6 E2E Complete)
+**Overall Status**: 🎉 WebDayi Lite Phase 0.6.0 Complete!
 **Main Branch**: ~98% (Phase 0-1.10.6 ✅, MVP 2a next)
 **Feature Branch**: Merged into main
 **Integration**: Phase 1.10.6 complete - E2E Framework established!
@@ -132,7 +137,12 @@
 │   ├─ Ctrl-to-Copy             [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   ├─ Mini Mode                [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
 │   └─ Ctrl Double-Click Toggle [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ⌨️✅  │
-│ Phase 1.12: MVP 1.0 v12        [░░░░░░░░░░░░░░░░]   0% ⏳    │
+│ Phase 1.12: WebDayi Lite 0.6.0 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% 🎉✅ │
+│   ├─ Zhuyin Support           [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ Split Shift Key          [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   ├─ PWA Single Instance      [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│   └─ UI Polish (IM Indicator) [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% ✅    │
+│ Phase 1.13: MVP 1.0 v12        [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 1.11: MVP 2a v2.0 Ext    [░░░░░░░░░░░░░░░░]   0% ⏳    │
 │ Phase 2: MVP 2a               [░░░░░░░░░░░░░░░░]   0% 📋    │
 │ Phase 3: MVP 2a+ (Future)     [░░░░░░░░░░░░░░░░]   0% 📋    │

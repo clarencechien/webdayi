@@ -1,7 +1,7 @@
 # Active Context: WebDaYi
 
 **Last Updated**: 2025-11-26
-**Current Version**: MVP 1.0 v11.3.5 + Lite v0.5.0
+**Current Version**: MVP 1.0 v11.3.5 + Lite v0.6.0
 **Branch**: `main`
 
 ---
@@ -15,7 +15,37 @@
 
 ---
 
-## 🔧 Latest Session: Branch Merge & Critical Fixes (2025-11-26)
+## 🔧 Latest Session: WebDayi Lite Phase 0.6.0 Upgrade (2025-11-26)
+
+### Session Summary
+
+This session focused on upgrading WebDayi Lite to **Phase 0.6.0**, adding **Zhuyin (Bopomofo) support**, **PWA single-instance behavior**, and refined **input method switching**.
+
+**Key Achievements**:
+1. ✅ **Zhuyin Support**: Integrated `zhuyin_db.json` (converted from `bopomofo.cin`) and added multi-IM support to core logic.
+2. ✅ **Split Shift Key**: Implemented distinct Shift key behaviors:
+   - **Left Shift**: Toggles English <-> Last Chinese IM (Dayi/Zhuyin).
+   - **Right Shift**: Toggles Dayi <-> Zhuyin.
+3. ✅ **PWA Single Instance**: Added `launch_handler: "focus-existing"` to `manifest.json` to prevent multiple windows.
+4. ✅ **UI Polish**:
+   - Added Input Method indicator ('易'/'注'/'Eng') to Mini Mode.
+   - Optimized Mini Mode padding for maximum candidate space.
+   - Fixed pagination (`=` key) and candidate display issues.
+
+### Implementation Details
+
+**Changes Made**:
+- `lite/index.html`:
+  - Refactored `state` to support multiple DBs (`dbs`, `prefixes`).
+  - Added `toggleEnglishChinese()` and `toggleDayiZhuyin()` logic.
+  - Updated `handleInput` to normalize Zhuyin candidates (strings -> objects).
+  - Added `mini-im-status` indicator.
+- `lite/manifest.json`: Added `launch_handler`.
+- `lite/zhuyin_db.json`: New data file.
+
+---
+
+## 🔧 Previous Session: Branch Merge & Critical Fixes (2025-11-26)
 
 ### Session Summary
 

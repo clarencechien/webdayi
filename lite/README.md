@@ -7,12 +7,14 @@ A lightweight, dependency-free Progressive Web App (PWA) for the Dayi input meth
 - **Lightweight**: Pure HTML/CSS/JS, no build steps required.
 - **Offline Capable**: Fully funct- **Virtual Keyboard**:
   - Optimized 5-row layout.
-  - **English Mode**: Toggle via Shift key (Virtual & Physical).
+  - **Multi-IM Support**: Dayi (Default) and Zhuyin (Bopomofo).
+  - **English Mode**: Toggle via Shift key.
   - **Haptic Feedback**: Vibration on key press.
   - **Smart Input**: Prioritizes valid code extension over candidate selection.
   - **Responsive**: Full-width layout on mobile devices.
   - **Shortcuts**:
-    - **Shift**: Toggle English Mode.
+    - **Left Shift**: Toggle English <-> Last Chinese Mode.
+    - **Right Shift**: Toggle Dayi <-> Zhuyin.
     - **Control**: Copy output to clipboard.
     - **Alt**: (In Mini Mode) Commit & Copy.
 - **Mini Mode**: Distraction-free suspended window for "Alt+Tab" workflow.
@@ -42,7 +44,8 @@ When installed as a PWA on desktop, WebDayi Lite automatically launches in **Min
     - **`Ctrl` (Double-Tap)**: Toggle between Mini Mode and Normal Mode (PWA only).
     - **`Alt` (Tap)**: Auto-commits first candidate and copies text to clipboard.
     - **`Alt` (Double-Tap)**: Instantly clears all text.
-    - **`Shift`**: Toggles between Chinese and English input modes.
+    - **`Left Shift`**: Toggles between English and Chinese.
+    - **`Right Shift`**: Toggles between Dayi and Zhuyin.
     - **`Esc` / `Delete`**: Alternative keys to clear text.
 - **Window Controls**: Supports `window-controls-overlay` for a native, integrated feel.
 
@@ -78,6 +81,11 @@ const response = await fetch('dayi_db.json?v=XX');  // Increment XX
 
 ### Recent Updates (2025-11-26)
 
+- ✅ **Phase 0.6.0 Upgrade**:
+  - **Zhuyin Support**: Added full Zhuyin input method.
+  - **Split Shift Key**: Left Shift (Eng/Chi), Right Shift (Dayi/Zhuyin).
+  - **PWA Fix**: Single-instance behavior (focus existing window).
+  - **UI Polish**: Added IM indicator to Mini Mode.
 - ✅ Fixed converter output path (was `lite/data/dayi_db.json`, now `lite/dayi_db.json`)
 - ✅ Merged character priority updates from feat/adjust-char-weights:
   - `71` → 界 (prioritized)
