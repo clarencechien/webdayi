@@ -13,7 +13,7 @@ const path = require('path');
 
 // File paths
 const INPUT_FILE = path.join(__dirname, '..', 'lite', 'data', 'dayi4.cin');
-const OUTPUT_FILE = path.join(__dirname, '..', 'lite', 'data', 'dayi_db.json');
+const OUTPUT_FILE = path.join(__dirname, '..', 'lite', 'dayi_db.json');
 
 console.log('[Converter] Starting CIN to JSON conversion...');
 console.log(`[Converter] Input: ${INPUT_FILE}`);
