@@ -456,8 +456,20 @@
             padding: 0;
         }
 
-        .key:active {
-            background-color: rgba(0, 0, 0, 0.1);
+        .key:active,
+        .key.active-state {
+            background-color: var(--bg-surface);
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .key-special:active,
+        .key-special.active-state {
+            background-color: var(--bg-surface-2);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         .key-sub {
@@ -1333,6 +1345,14 @@
                                 switchToIM('dayi');
                             }
                         });
+
+                        // Add visual feedback
+                        globeBtn.addEventListener('touchstart', () => globeBtn.classList.add('active-state'), { passive: true });
+                        globeBtn.addEventListener('touchend', () => setTimeout(() => globeBtn.classList.remove('active-state'), 100));
+                        globeBtn.addEventListener('mousedown', () => globeBtn.classList.add('active-state'));
+                        globeBtn.addEventListener('mouseup', () => setTimeout(() => globeBtn.classList.remove('active-state'), 100));
+                        globeBtn.addEventListener('mouseleave', () => globeBtn.classList.remove('active-state'));
+
                         rowDiv.appendChild(globeBtn);
                     }
 
@@ -1378,6 +1398,14 @@
                 `;
                         btn.addEventListener('click', () => handleInput(key.code));
                     }
+
+                    // Add visual feedback handler
+                    btn.addEventListener('touchstart', () => btn.classList.add('active-state'), { passive: true });
+                    btn.addEventListener('touchend', () => setTimeout(() => btn.classList.remove('active-state'), 100));
+                    btn.addEventListener('mousedown', () => btn.classList.add('active-state'));
+                    btn.addEventListener('mouseup', () => setTimeout(() => btn.classList.remove('active-state'), 100));
+                    btn.addEventListener('mouseleave', () => btn.classList.remove('active-state'));
+
                     rowDiv.appendChild(btn);
                 });
                 container.appendChild(rowDiv);
