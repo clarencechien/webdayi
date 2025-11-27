@@ -16,6 +16,8 @@
 - **Predictive Engine**: Implemented `PredictionEngine` with Frequency and Bigram models.
 - **Smart Spacebar**: Confirms "Phantom Text" suggestions instantly.
 - **UI Restoration**: Restored the clean "WebDayi Lite" card design.
+- **Mini Mode Alignment**: Aligned Mini Mode UX with Lite version (correct keys and styling).
+- **Phantom UX Refinement**: Integrated Phantom Text into the main candidate list (Index 0) to resolve key conflicts.
 - **Verification**: Confirmed "司機" (bo + i + Space) workflow.
 
 ---
@@ -29,7 +31,9 @@ This session established the **Predictive Engine** architecture (MVP 2.0). We mo
 1.  **Engine Logic**: Created `js/prediction_engine.js` to handle `predictPhantom` (frequency) and `getBigramSuggestion` (context).
 2.  **Smart Spacebar**: Modified `app.js` to prioritize confirming Phantom Text over candidate selection when available.
 3.  **UI Restoration**: Reverted `index.html` to the stable "Lite" design while keeping the new engine logic.
-4.  **Cleanup**: Archived legacy `mvp1` code and updated documentation to reflect the new direction.
+4.  **Mini Mode Fix**: Updated `app.js` to use correct selection keys and styling in Mini Mode, matching `lite`.
+5.  **Phantom Integration**: Moved Phantom Text into the candidate list as the first item (Index 0), ensuring consistent UX and key mapping.
+6.  **Cleanup**: Archived legacy `mvp1` code and updated documentation to reflect the new direction.
 
 ### Current Focus
 - **Refining Prediction**: Expand `bigram_lite.json` with more data.

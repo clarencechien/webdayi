@@ -789,6 +789,16 @@ function updateComposition() {
     }
 
     state.candidates = candidates;
+
+    if (state.phantomText) {
+        // Remove phantom from candidates if it exists (to avoid duplicates)
+        state.candidates = state.candidates.filter(c => c.char !== state.phantomText);
+        // Insert at the beginning
+        state.candidates.unshift({ char: state.phantomText, isPhantom: true });
+        // Clear phantomText so it's not rendered separately
+        state.phantomText = null;
+    }
+
     renderCandidates();
 }
 
@@ -796,19 +806,7 @@ function renderCandidates() {
     els.candidates.innerHTML = '';
     if (els.miniCandidates) els.miniCandidates.innerHTML = '';
 
-    if (state.phantomText) {
-        const phantomHtml = `
-            <div class="candidate-item phantom-candidate" style="border: 1px dashed var(--text-muted); opacity: 0.8;">
-                <span class="candidate-index" style="font-size: 0.7em;">SPACE</span>
-                <span class="candidate-char" style="color: var(--text-muted);">${state.phantomText}</span>
-            </div>
-        `;
-        els.candidates.insertAdjacentHTML('beforeend', phantomHtml);
 
-        if (els.miniCandidates) {
-            els.miniCandidates.insertAdjacentHTML('beforeend', `<span class="candidate-item" style="color:gray">${state.phantomText}</span>`);
-        }
-    }
 
     if (state.candidates.length === 0) {
         if (state.buffer.length > 0 && !state.phantomText) {
@@ -831,8 +829,14 @@ function renderCandidates() {
 
         const item = document.createElement('div');
         item.className = 'candidate-item';
+        if (cand.isPhantom) {
+            item.classList.add('phantom-candidate');
+            item.style.borderColor = 'var(--primary)';
+            item.style.backgroundColor = 'rgba(15, 184, 240, 0.05)';
+        }
+
         item.innerHTML = `
-            <span class="candidate-index">${key}</span>
+            <span class="candidate-index" ${cand.isPhantom ? 'style="color:var(--primary)"' : ''}>${key}</span>
             <span class="candidate-char">${cand.char}</span>
         `;
         item.addEventListener('click', () => selectCandidate(index));
@@ -840,8 +844,13 @@ function renderCandidates() {
 
         if (els.miniCandidates) {
             const miniItem = document.createElement('span');
-            miniItem.className = 'candidate-item';
-            miniItem.innerHTML = `<span class="index">${index + 1}</span>${cand.char}`;
+            miniItem.className = 'mini-candidate-item';
+            if (cand.isPhantom) {
+                miniItem.style.color = 'var(--primary)';
+                miniItem.style.fontWeight = 'bold';
+            }
+            miniItem.innerHTML = `<span class="mini-candidate-key">${key}</span>${cand.char}`;
+            miniItem.addEventListener('click', () => selectCandidate(index));
             els.miniCandidates.appendChild(miniItem);
         }
     });

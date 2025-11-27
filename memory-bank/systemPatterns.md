@@ -1,81 +1,90 @@
-# System Patterns: WebDayi
+# System Patterns: WebDaYi
 
-## Architecture Overview
+**Last Updated**: 2025-11-27
+**Current Version**: MVP 2.0 (Predictive Type-ahead)
 
-WebDayi MVP 2.0 follows a **Client-Side Predictive Architecture**. It is designed to be a lightweight, zero-dependency web application that runs entirely in the browser.
+---
 
-### High-Level Architecture
+## 🏗️ Architecture: Client-Side Predictive Engine
+
+WebDaYi MVP 2.0 shifts from a complex Viterbi algorithm to a lightweight, high-speed **Predictive Type-ahead** architecture.
+
+### Core Flow
 
 ```mermaid
 graph TD
-    User[User Input] --> |Key Events| App[app.js (Controller)]
-    App --> |Update State| State[Global State]
-    App --> |Render| UI[DOM Elements]
+    User[User Input] -->|Keystroke| App[app.js]
+    App -->|Buffer| Engine[PredictionEngine]
     
-    subgraph Prediction Engine
-        App --> |Query| Engine[prediction_engine.js]
-        Engine --> |Lookup| FreqMap[Frequency Map (dayi_db)]
-        Engine --> |Predict| BigramModel[Bigram Model (bigram_lite)]
+    subgraph Prediction Logic
+        Engine -->|Lookup| FreqMap[Frequency Map (dayi_db.json)]
+        Engine -->|Context| Bigram[Bigram Model (bigram_lite.json)]
+        FreqMap -->|Candidate| Engine
+        Bigram -->|Suggestion| Engine
     end
     
-    Engine --> |Phantom Suggestion| App
-    App --> |Display| PhantomUI[Phantom Text (Grey)]
-    
-    User --> |Spacebar| App
-    App --> |Confirm| PhantomUI
+    Engine -->|Phantom Text| App
+    App -->|Render| UI[UI Layer]
+    UI -->|Feedback| User
 ```
 
-## Core Components
+### Key Components
 
-### 1. UI Layer (`index.html`, CSS)
-- **Card-Based Layout**: A clean, centered card design (restored from WebDayi Lite) for focus and readability.
-- **Virtual Keyboard**: Visual feedback for key presses and layout reference.
-- **Phantom Text**: A visual indicator (grey text) appended to the cursor for predictive suggestions.
+1.  **UI Layer (`index.html` + `app.js`)**
+    *   **Responsibility**: Rendering, Input Handling, State Management.
+    *   **Pattern**: Zero-Build (Vanilla JS + CSS Variables).
+    *   **Mini Mode**: Floating overlay for unobtrusive input.
 
-### 2. Application Logic (`js/app.js`)
-- **Controller**: Manages the application lifecycle, event listeners, and UI updates.
-- **State Management**: Holds the current buffer, output, candidates, and phantom text state.
-- **Smart Spacebar Logic**:
-    - Intercepts the Space key.
-    - If `state.phantomText` exists, confirms it.
-    - Else, triggers standard candidate selection.
+2.  **Application Logic (`app.js`)**
+    *   **State**: `buffer`, `output`, `candidates`, `phantomText`.
+    *   **Event Loop**: `keydown` -> `handleInput` -> `updateComposition` -> `renderCandidates`.
 
-### 3. Prediction Engine (`js/prediction_engine.js`)
-- **Responsibility**: Pure logic class for generating suggestions.
-- **`predictPhantom(buffer)`**:
-    - Uses `dayi_db.json`.
-    - Returns the most frequent character for the current input buffer.
-- **`getBigramSuggestion(lastChar, nextCode)`**:
-    - Uses `bigram_lite.json`.
-    - Returns the most likely next character based on the previously confirmed character and the current input.
+3.  **Prediction Engine (`js/prediction_engine.js`)**
+    *   **Responsibility**: Pure logic for generating suggestions.
+    *   **Methods**:
+        *   `predictPhantom(buffer)`: Returns highest frequency char for current buffer.
+        *   `getBigramSuggestion(lastChar, nextCode)`: Returns context-aware suggestion.
 
-### 4. Data Layer (`data/*.json`)
-- **`dayi_db.json`**: The core Dayi character mapping (Code -> Char).
-- **`bigram_lite.json`**: A lightweight bigram model (Char -> Next Char) for context-aware predictions.
-- **`zhuyin_db.json`**: Support for Zhuyin input method.
+4.  **Data Layer (`data/*.json`)**
+    *   **`dayi_db.json`**: Core mapping (Code -> Candidates).
+    *   **`bigram_lite.json`**: Lightweight bigram model (Char + Code -> Next Char).
 
-## Design Patterns
+---
 
-### 1. Predictive Type-ahead ("Phantom Text")
-- **Problem**: Reducing keystrokes for common patterns.
-- **Solution**: Display a "ghost" suggestion that can be confirmed with a single key (Space).
-- **Interaction**:
-    - User types `b` `o` -> Selects `司`.
-    - User types `i` -> Engine predicts `機` (based on `司` + `i`).
-    - User presses Space -> `機` is confirmed.
+## 🧩 Design Patterns
+
+### 1. Predictive Type-ahead ("Smart 2-Code")
+*   **Concept**: Predict the full character before the user finishes typing the code.
+*   **Mechanism**:
+    *   **Phantom Text**: A "ghost" suggestion displayed immediately.
+    *   **Smart Spacebar**: Pressing `Space` confirms the Phantom Text if available.
+    *   **Integrated Candidate**: Phantom Text is inserted as the **first candidate (Index 0)**. This resolves key conflicts (Space naturally selects it) and ensures consistent UX across Web and Mini modes.
 
 ### 2. Client-Side Data Loading
-- **Pattern**: Fetch-and-Cache.
-- **Implementation**: JSON files are fetched on `init()` and stored in memory.
-- **Optimization**: Cache busting (`?v=timestamp`) is used during development to ensure fresh data.
+*   **Pattern**: Fetch-and-Cache.
+*   **Implementation**: `fetch('data/dayi_db.json')` on init.
+*   **Optimization**: Browser cache handles subsequent loads. No IndexedDB complexity needed for read-only data.
 
 ### 3. Zero-Build Architecture
-- **Philosophy**: No bundlers (Webpack/Vite) required for the core runtime.
-- **Benefit**: Extremely simple deployment and debugging.
-- **Structure**: ES Modules are used where appropriate, but the core app runs as a simple script inclusion.
+*   **Philosophy**: "View Source" is the source code.
+*   **Benefit**: Maximum transparency, easy to debug, no build step friction.
+*   **Structure**: ES Modules (optional) or simple script tags.
 
-## Directory Structure Mapping
+---
 
-- **`mvp2-predictive/`**: The current stable codebase.
-- **`lite/`**: The previous stable PWA version.
-- **`archive/`**: Legacy prototypes.
+## 📂 Directory Structure Mapping
+
+```
+webdayi/
+├── mvp2-predictive/        # MVP 2.0 (Current Focus)
+│   ├── js/                 # Logic (app.js, prediction_engine.js)
+│   ├── data/               # JSON Data (dayi_db, bigram_lite)
+│   └── index.html          # UI Entry Point
+│
+├── lite/                   # WebDayi Lite (Stable PWA)
+│   └── (Similar structure, no prediction engine)
+│
+└── archive/                # Legacy Code
+    ├── mvp1/               # Vue.js Prototype
+    └── mvp1-pwa/           # Early PWA
+```

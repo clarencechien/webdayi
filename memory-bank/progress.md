@@ -17,6 +17,9 @@
   - [x] TDD: Unit tests for prediction logic
   - [x] Integration: `app.js` + `PredictionEngine`
   - [x] Smart Spacebar Interaction (Phantom Text confirmation)
+- [x] **UX Refinement**
+  - [x] **Mini Mode Alignment**: Align `mvp2` Mini Mode with `lite` (styling, keys).
+  - [x] **Phantom UX**: Integrate Phantom suggestion as 1st candidate (Index 0).
 - [ ] **Data Expansion**
   - [ ] Generate full `bigram.json` from corpus
   - [ ] Implement "Smart 3-Code" logic
@@ -52,6 +55,7 @@
 
 ## 📅 Milestones
 
+- **2025-11-27**: MVP 2.0 UX Refinement (Mini Mode & Phantom Integration).
 - **2025-11-27**: MVP 2.0 Initialization & Core Logic Complete.
 - **2025-11-26**: WebDayi Lite 0.6.0 Released.
 - **2025-11-06**: Project Kickoff.
