@@ -2,9 +2,10 @@
 const state = {
     buffer: '',
     output: '',
-    candidates: [],
+    // Pagination
     page: 0,
-    pageSize: 10,
+    pageSize: 8, // Limit to 8 items as requested
+    candidates: [],
     dbs: { dayi: {}, zhuyin: {} },
     prefixes: { dayi: new Set(), zhuyin: new Set() },
     db: {}, // Current DB
@@ -41,37 +42,41 @@ const els = {
 
 // Keyboard Layout (Dayi 4)
 const KEYBOARD_LAYOUT = [
+    // Row 0: Numbers
     [
-        { code: '1', label: '1', sub: '言' }, { code: '2', label: '2', sub: '牛' }, { code: '3', label: '3', sub: '目' },
-        { code: '4', label: '4', sub: '四' }, { code: '5', label: '5', sub: '王' }, { code: '6', label: '6', sub: '車' },
-        { code: '7', label: '7', sub: '田' }, { code: '8', label: '8', sub: '八' }, { code: '9', label: '9', sub: '足' },
-        { code: '0', label: '0', sub: '金' }
+        { label: '1', sub: '言', code: '1' }, { label: '2', sub: '牛', code: '2' }, { label: '3', sub: '目', code: '3' },
+        { label: '4', sub: '四', code: '4' }, { label: '5', sub: '王', code: '5' }, { label: '6', sub: '車', code: '6' },
+        { label: '7', sub: '田', code: '7' }, { label: '8', sub: '八', code: '8' }, { label: '9', sub: '足', code: '9' },
+        { label: '0', sub: '金', code: '0' }
     ],
+    // Row 1: Q-P
     [
-        { code: 'Tab', label: 'Tab', type: 'special', action: 'tab' },
-        { code: 'q', label: 'Q', sub: '石' }, { code: 'w', label: 'W', sub: '山' }, { code: 'e', label: 'E', sub: '一' },
-        { code: 'r', label: 'R', sub: '工' }, { code: 't', label: 'T', sub: '糸' }, { code: 'y', label: 'Y', sub: '火' },
-        { code: 'u', label: 'U', sub: '艸' }, { code: 'i', label: 'I', sub: '木' }, { code: 'o', label: 'O', sub: '口' },
-        { code: 'p', label: 'P', sub: '耳' }
+        { label: 'Q', sub: '石', code: 'q' }, { label: 'W', sub: '山', code: 'w' }, { label: 'E', sub: '一', code: 'e' },
+        { label: 'R', sub: '工', code: 'r' }, { label: 'T', sub: '糸', code: 't' }, { label: 'Y', sub: '火', code: 'y' },
+        { label: 'U', sub: '艸', code: 'u' }, { label: 'I', sub: '木', code: 'i' }, { label: 'O', sub: '口', code: 'o' },
+        { label: 'P', sub: '耳', code: 'p' }
     ],
+    // Row 2: A-L
     [
-        { code: 'a', label: 'A', sub: '人' }, { code: 's', label: 'S', sub: '革' }, { code: 'd', label: 'D', sub: '日' },
-        { code: 'f', label: 'F', sub: '土' }, { code: 'g', label: 'G', sub: '手' }, { code: 'h', label: 'H', sub: '鳥' },
-        { code: 'j', label: 'J', sub: '月' }, { code: 'k', label: 'K', sub: '立' }, { code: 'l', label: 'L', sub: '女' },
-        { code: ';', label: ';', sub: '虫' }
+        { label: 'A', sub: '人', code: 'a' }, { label: 'S', sub: '革', code: 's' }, { label: 'D', sub: '日', code: 'd' },
+        { label: 'F', sub: '土', code: 'f' }, { label: 'G', sub: '手', code: 'g' }, { label: 'H', sub: '鳥', code: 'h' },
+        { label: 'J', sub: '月', code: 'j' }, { label: 'K', sub: '立', code: 'k' }, { label: 'L', sub: '女', code: 'l' },
+        { label: ';', sub: '虫', code: ';' }
     ],
+    // Row 3: Bottom (Z-M, Comma, Dot, Slash)
     [
-        { code: 'Shift', label: '⇧', type: 'special', action: 'toggleInputMethod' },
-        { code: 'z', label: 'Z', sub: '心' }, { code: 'x', label: 'X', sub: '水' }, { code: 'c', label: 'C', sub: '鹿' },
-        { code: 'v', label: 'V', sub: '禾' }, { code: 'b', label: 'B', sub: '馬' }, { code: 'n', label: 'N', sub: '魚' },
-        { code: 'm', label: 'M', sub: '雨' },
-        { code: 'Backspace', label: '⌫', type: 'special', action: 'backspace' }
+        { label: '', icon: 'arrow_upward', code: 'ShiftLeft' }, // Icon only
+        { label: 'Z', sub: '心', code: 'z' }, { label: 'X', sub: '水', code: 'x' }, { label: 'C', sub: '鹿', code: 'c' },
+        { label: 'V', sub: '禾', code: 'v' }, { label: 'B', sub: '馬', code: 'b' }, { label: 'N', sub: '魚', code: 'n' },
+        { label: 'M', sub: '雨', code: 'm' },
+        { label: '', icon: 'backspace', code: 'Backspace' } // Icon only
     ],
+    // Row 4: Space Row (Globe, Tab, Space, Punctuation)
     [
-        { code: 'Space', label: 'Space', type: 'special', action: 'space', width: 'wide' },
-        { code: ',', label: ',', sub: '力' },
-        { code: '.', label: '.', sub: '舟' },
-        { code: '/', label: '/', sub: '竹' }
+        { label: '', icon: 'language', code: 'SwitchIM' }, // Icon only
+        { label: 'Tab', code: 'Tab' },
+        { label: 'Space', code: 'Space' },
+        { label: ',', sub: '力', code: ',' }, { label: '.', sub: '舟', code: '.' }, { label: '/', sub: '竹', code: '/' }
     ]
 ];
 
@@ -91,6 +96,21 @@ async function init() {
     renderKeyboard();
     setupMenuListeners();
     await loadDatabase();
+
+    // Mobile: Auto-open keyboard AND Default to Focus Mode
+    if (window.innerWidth <= 768) {
+        // Default to Focus Mode
+        state.settings.focusMode = true;
+        applySettings();
+
+        const keyboard = document.getElementById('virtual-keyboard');
+        if (keyboard) {
+            keyboard.classList.remove('hidden');
+            // Adjust main container margin if needed
+            const mainContainer = document.querySelector('.app-container');
+            if (mainContainer) mainContainer.style.marginBottom = 'var(--keyboard-height)';
+        }
+    }
 }
 
 // Theme & Settings Logic
@@ -140,7 +160,7 @@ function applySettings() {
     document.documentElement.style.setProperty('--font-scale', state.settings.fontScale);
     const fontDisplay = document.getElementById('font-size-display');
     if (fontDisplay) {
-        fontDisplay.textContent = `${Math.round(state.settings.fontScale * 100)}%`;
+        fontDisplay.textContent = `${Math.round(state.settings.fontScale * 100)}% `;
     }
 
     updateToggleStatus('toggle-code-len', state.settings.maxCodeLength === 4 ? '4碼' : '3碼');
@@ -166,13 +186,47 @@ function setupMenuListeners() {
     const fab = document.getElementById('menu-fab');
     const panel = document.getElementById('menu-panel');
 
+    els.menuPanel = panel;
+    els.menuOverlay = document.getElementById('menu-overlay');
+    els.headerMenuBtn = document.getElementById('header-menu-trigger'); // New Header Menu
+    const headerThemeBtn = document.getElementById('toggle-theme-header');
+    const focusMenuBtn = document.getElementById('focus-menu-trigger'); // New Focus Menu
+
     if (fab && panel) {
         fab.addEventListener('click', () => {
             panel.classList.toggle('hidden');
         });
 
+        // Header Menu Trigger
+        if (els.headerMenuBtn) {
+            els.headerMenuBtn.addEventListener('click', () => {
+                panel.classList.toggle('hidden');
+            });
+        }
+
+        // Focus Menu Trigger
+        if (focusMenuBtn) {
+            focusMenuBtn.addEventListener('click', () => {
+                panel.classList.toggle('hidden');
+            });
+        }
+
+        // Header Theme Toggle
+        if (headerThemeBtn) {
+            headerThemeBtn.addEventListener('click', () => {
+                state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark';
+                applySettings();
+            });
+        }
+
         document.addEventListener('click', (e) => {
-            if (!panel.contains(e.target) && !fab.contains(e.target)) {
+            // Check if click is outside panel AND outside triggers (FAB + Header Btn + Focus Btn)
+            const isOutside = !panel.contains(e.target) &&
+                !fab.contains(e.target) &&
+                (!els.headerMenuBtn || !els.headerMenuBtn.contains(e.target)) &&
+                (!focusMenuBtn || !focusMenuBtn.contains(e.target));
+
+            if (isOutside) {
                 panel.classList.add('hidden');
             }
         });
@@ -208,7 +262,7 @@ function setupMenuListeners() {
         document.getElementById('toggle-code-len').addEventListener('click', () => {
             state.settings.maxCodeLength = state.settings.maxCodeLength === 4 ? 3 : 4;
             applySettings();
-            showToast(`Switched to ${state.settings.maxCodeLength}-Code Mode`);
+            showToast(`Switched to ${state.settings.maxCodeLength} -Code Mode`);
         });
 
         document.getElementById('font-decrease').addEventListener('click', (e) => {
@@ -293,69 +347,90 @@ function renderKeyboard() {
         }
 
         row.forEach(key => {
-            if (rowIndex === 4 && key.code === 'Space') {
-                const globeBtn = document.createElement('button');
-                globeBtn.className = 'key key-special';
-                globeBtn.innerHTML = '<span class="material-symbols-outlined">language</span>';
-                globeBtn.addEventListener('click', () => {
-                    if (state.currentIM === 'dayi') {
-                        switchToIM('zhuyin');
-                    } else if (state.currentIM === 'zhuyin') {
-                        switchToIM('english');
-                    } else {
-                        switchToIM('dayi');
-                    }
-                });
+            // Create Button
+            const btn = document.createElement('button');
 
-                globeBtn.addEventListener('touchstart', () => globeBtn.classList.add('active-state'), { passive: true });
-                globeBtn.addEventListener('touchend', () => setTimeout(() => globeBtn.classList.remove('active-state'), 100));
-                globeBtn.addEventListener('mousedown', () => globeBtn.classList.add('active-state'));
-                globeBtn.addEventListener('mouseup', () => setTimeout(() => globeBtn.classList.remove('active-state'), 100));
-                globeBtn.addEventListener('mouseleave', () => globeBtn.classList.remove('active-state'));
-
-                rowDiv.appendChild(globeBtn);
-            }
-
-            let btn;
-            if (key.type === 'special') {
-                btn = document.createElement('button');
-                btn.className = `key key-special ${key.width === 'wide' ? 'key-space' : ''}`;
-                if (key.code === 'Shift') btn.id = 'key-shift';
-
-                btn.textContent = key.label;
-
-                if (key.action === 'toggleInputMethod') {
-                    btn.addEventListener('click', toggleInputMethod);
-                } else if (key.action === 'backspace') {
-                    btn.addEventListener('click', handleBackspace);
-                } else if (key.action === 'space') {
-                    btn.addEventListener('click', handleSpace);
-                } else if (key.action === 'tab') {
-                    btn.addEventListener('click', handleTab);
-                }
+            // Determine Class
+            if (key.code === 'Space') {
+                btn.className = 'key key-special key-space';
+                btn.style.flex = '2'; // Space takes 2 units
+            } else if (key.code === 'Tab') {
+                btn.className = 'key key-special key-tab-bottom';
+                btn.style.flex = '1'; // Tab takes 1 unit
+            } else if (key.code === 'SwitchIM') {
+                btn.className = 'key key-special';
+                btn.style.flex = '0 0 48px'; // Fixed width for Globe
+            } else if (key.code === 'ShiftLeft' || key.code === 'Backspace') {
+                btn.className = 'key key-special';
+                btn.style.flex = '0 0 56px'; // Fixed width for modifiers
+                if (key.code === 'ShiftLeft') btn.id = 'key-shift';
             } else {
-                btn = document.createElement('button');
                 btn.className = 'key';
+                btn.style.flex = '1'; // Standard keys grow evenly
                 btn.dataset.code = key.code;
-
-                let mainLabel = key.label;
-                let subLabel = '';
-
-                if (state.currentIM === 'english') {
-                    subLabel = '';
-                } else if (state.currentIM === 'zhuyin') {
-                    subLabel = ZHUYIN_MAPPING[key.code] || '';
-                } else {
-                    subLabel = key.sub || '';
-                }
-
-                btn.innerHTML = `
-                    <span>${mainLabel}</span>
-                    <span class="key-sub">${subLabel}</span>
-                `;
-                btn.addEventListener('click', () => handleInput(key.code));
             }
 
+            // Set Content (Icon or Label)
+            if (key.icon) {
+                btn.innerHTML = `<span class="material-symbols-outlined">${key.icon}</span>`;
+            } else {
+                // For standard keys, we might have sub-labels
+                if (!key.icon && (key.code.length === 1 || key.code === 'Space' || key.code === 'Tab')) {
+                    let mainLabel = key.label;
+                    let subLabel = '';
+
+                    if (state.currentIM === 'english') {
+                        subLabel = '';
+                    } else if (state.currentIM === 'zhuyin') {
+                        subLabel = ZHUYIN_MAPPING[key.code] || '';
+                    } else {
+                        subLabel = key.sub || '';
+                    }
+
+                    if (key.code === 'Space' || key.code === 'Tab') {
+                        btn.textContent = mainLabel;
+                    } else {
+                        btn.innerHTML = `
+                            <div class="key-main">${mainLabel}</div>
+                            <div class="key-sub">${subLabel}</div>
+                        `;
+                    }
+                } else {
+                    btn.textContent = key.label;
+                }
+            }
+
+            // Add Event Listeners
+            if (key.code === 'SwitchIM') {
+                btn.addEventListener('click', () => {
+                    if (state.currentIM === 'dayi') switchToIM('zhuyin');
+                    else if (state.currentIM === 'zhuyin') switchToIM('english');
+                    else switchToIM('dayi');
+                });
+            } else if (key.code === 'ShiftLeft') {
+                btn.addEventListener('click', toggleInputMethod); // Shift toggles IM in this logic? Or shift state? 
+                // Wait, Shift usually toggles English/Chinese in PC, but here it might be Shift modifier?
+                // The original code had action: 'toggleInputMethod' for Shift.
+                btn.addEventListener('click', toggleInputMethod);
+            } else if (key.code === 'Backspace') {
+                btn.addEventListener('click', handleBackspace);
+            } else if (key.code === 'Space') {
+                btn.addEventListener('click', handleSpace);
+            } else if (key.code === 'Tab') {
+                btn.addEventListener('click', handleTab);
+            } else {
+                // Standard Key
+                btn.addEventListener('click', (e) => {
+                    handleInput(key.code); // Changed from handleKeyInput to handleInput to match existing functions
+                    // Visual feedback
+                    const ripple = document.createElement('div');
+                    ripple.className = 'ripple';
+                    btn.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            }
+
+            // Touch States
             btn.addEventListener('touchstart', () => btn.classList.add('active-state'), { passive: true });
             btn.addEventListener('touchend', () => setTimeout(() => btn.classList.remove('active-state'), 100));
             btn.addEventListener('mousedown', () => btn.classList.add('active-state'));
@@ -364,6 +439,7 @@ function renderKeyboard() {
 
             rowDiv.appendChild(btn);
         });
+
         container.appendChild(rowDiv);
     });
 }
@@ -558,7 +634,7 @@ function setupMiniMenuListeners() {
             state.settings.maxCodeLength = state.settings.maxCodeLength === 4 ? 3 : 4;
             applySettings();
             updateMiniMenuUI();
-            showToast(`Switched to ${state.settings.maxCodeLength}-Code Mode`);
+            showToast(`Switched to ${state.settings.maxCodeLength} -Code Mode`);
         });
 
         // Font Size
@@ -589,7 +665,7 @@ function updateMiniMenuUI() {
     }
 
     if (codeBtn) {
-        codeBtn.textContent = `${state.settings.maxCodeLength}碼`;
+        codeBtn.textContent = `${state.settings.maxCodeLength} 碼`;
         if (state.settings.maxCodeLength === 4) {
             codeBtn.style.borderColor = 'var(--primary)';
             codeBtn.style.color = 'var(--primary)';
@@ -612,7 +688,7 @@ function triggerVisualFeedback(type) {
         els.miniUi.offsetParent !== null
     );
 
-    console.log(`Visual Feedback: type=${type}, isMini=${isMiniVisible} (state=${state.isMiniMode})`); // DEBUG
+    console.log(`Visual Feedback: type = ${type}, isMini = ${isMiniVisible} (state = ${state.isMiniMode})`); // DEBUG
 
     const isCopy = type === 'copy';
 
@@ -631,7 +707,7 @@ function triggerVisualFeedback(type) {
 
             // 2. Apply styles (Fine 1px border + Very soft minimal glow)
             // Inset border 1px + 4px blur for just a hint of glow
-            overlay.style.setProperty('box-shadow', `inset 0 0 0 1px ${colorVar}, inset 0 0 4px ${colorVar}`, 'important');
+            overlay.style.setProperty('box-shadow', `inset 0 0 0 1px ${colorVar}, inset 0 0 4px ${colorVar} `, 'important');
             overlay.style.setProperty('background-color', isCopy ? 'rgba(0, 255, 0, 0.04)' : 'rgba(255, 0, 0, 0.04)', 'important');
 
             // 3. Force reflow to ensure transition applies
@@ -976,7 +1052,7 @@ function updateComposition() {
     // 4. Render Composition (Buffer + Phantom)
     let html = state.buffer;
     if (state.phantomText) {
-        html += `<span class="phantom-text-display">${state.phantomText} <span style="font-size:0.8em; opacity:0.7;">[Tab]</span></span>`;
+        html += `<span class="phantom-text-display">${state.phantomText}<span style="font-size:0.8em; opacity:0.7;">[Tab]</span></span>`;
     }
 
     els.composition.innerHTML = html;

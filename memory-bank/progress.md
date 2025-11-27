@@ -26,6 +26,10 @@
 - [x] **Data Expansion**
   - [x] Generate `freq_map.json` from corpus
   - [x] Regenerate `dayi_db.json` for full coverage
+- [x] **Mobile Web UI Consistency**
+  - [x] **Unified Header**: Consistent Copy/Clear/Menu buttons in Output Header.
+  - [x] **Mobile Optimization**: Icon-only buttons and FAB removal on mobile.
+  - [x] **Focus Mode Fix**: Resolved keyboard cutoff issue.
 ### Phase 6: Refactoring - Dual-Track Input (Completed)
 - [x] **Core Logic Refactoring**
   - [x] `getCandidates`: Prioritize Exact Matches (Blind Typing).

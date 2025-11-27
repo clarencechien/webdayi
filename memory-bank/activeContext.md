@@ -18,6 +18,8 @@
 - **UI Restoration**: Restored the clean "WebDayi Lite" card design.
 - **Mini Mode Alignment**: Aligned Mini Mode UX with Lite version (correct keys and styling).
 - **Phantom UX Refinement**: Integrated Phantom Text into the main candidate list (Index 0) to resolve key conflicts.
+- **Mobile Web UI Consistency**: Unified Output Header buttons (Copy/Clear/Menu) and optimized layout for mobile (Icon-only, No FAB).
+- **Focus Mode Fix**: Resolved keyboard cutoff issues by enforcing container width constraints.
 - **Verification**: Confirmed "司機" (bo + i + Space) workflow.
 
 ---

@@ -88,8 +88,10 @@ webdayi/
 - 🚧 **MVP 2.0**: Predictive Type-ahead (In Progress)
     - ✅ Smart Spacebar
     - ✅ Basic Prediction Engine
-    - 🚧 Expanded Bigram Data
-    - 📋 Smart 3-Code Logic
+    - ✅ Smart 3/4 Code Toggle & Auto-Commit
+    - ✅ Mini Mode Settings Menu
+    - ✅ Mobile Web UI Consistency (Unified Header, No FAB)
+    - ✅ Focus Mode Layout Fix
 
 ---
 

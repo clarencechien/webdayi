@@ -241,7 +241,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: var(--spacing-sm);
+            margin-bottom: 12px;
         }
 
         h2 {
@@ -249,23 +249,29 @@
             font-weight: 600;
         }
 
-        .actions {
+        .output-actions {
             display: flex;
-            gap: var(--spacing-sm);
+            gap: 8px;
+            align-items: center;
+            /* Ensure vertical alignment */
         }
 
-        .action-btn {
+        .output-actions .icon-btn {
             background: none;
             border: none;
-            font-size: 0.875rem;
-            font-weight: 500;
+            color: var(--text-secondary);
             cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
-        .action-btn:hover {
+        .output-actions .icon-btn:hover {
             background-color: rgba(0, 0, 0, 0.05);
         }
 
@@ -666,8 +672,12 @@
         }
 
         body.focus-mode .app-container {
-            padding: var(--spacing-sm);
-            /* Minimal padding */
+            padding: var(--spacing-md);
+            /* Increased from sm to md to fix keyboard cutoff */
+            width: 100%;
+            max-width: 100vw;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
 
         /* Hide Keyboard Mode */
@@ -953,6 +963,13 @@
             align-items: center;
         }
 
+        .mini-composition .phantom-text-display {
+            margin-left: 4px;
+            /* Tighter spacing for Mini Mode */
+            font-size: 1em;
+            /* Match surrounding text */
+        }
+
         .mini-candidates {
             flex: 0 1 auto;
             /* Don't grow, just shrink if needed */
@@ -961,7 +978,8 @@
             /* Force items to start */
             text-align: left;
             /* Force text to left */
-            gap: 4px;
+            gap: 2px;
+            /* Further reduced gap */
             overflow-x: auto;
             font-size: 1rem;
             color: var(--text-muted);
@@ -970,14 +988,16 @@
             z-index: 2;
             /* Above drag region */
             position: relative;
-            margin-left: 12px;
-            /* Add specific spacing from cursor */
+            margin-left: 8px;
+            /* Reduced from 12px */
             min-width: 0;
             /* Allow shrinking for scroll */
             line-height: 1.5;
             /* Consistent line height */
             align-items: center;
             /* Ensure items are centered */
+            min-height: 28px;
+            /* Reserve space to prevent jumping */
         }
 
         .mini-candidates::-webkit-scrollbar {
@@ -985,14 +1005,19 @@
         }
 
         .mini-candidate-item {
-            padding: 2px 6px;
+            padding: 1px 4px;
+            /* Further reduced padding */
             border-radius: var(--radius-sm);
             cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-main);
             display: flex;
             align-items: center;
             gap: 2px;
+            /* Further reduced gap */
+            transition: background-color 0.2s;
+            border: 1px solid transparent;
             -webkit-app-region: no-drag;
-            /* Allow clicking */
         }
 
         .mini-candidate-item:hover {
@@ -1005,6 +1030,21 @@
             color: var(--primary);
             font-weight: 700;
             font-family: var(--font-mono);
+        }
+
+        /* Ensure placeholders match candidate height exactly */
+        .mini-cursor,
+        .mini-candidates .placeholder {
+            padding: 1px 4px;
+            border: 1px solid transparent;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+        }
+
+        .mini-cursor {
+            animation: blink 1s step-end infinite;
         }
 
         .mini-im-status {
@@ -1090,6 +1130,29 @@
             }
         }
 
+        /* Phantom Text Spacing */
+        .phantom-text-display {
+            color: var(--text-secondary);
+            opacity: 0.8;
+            /* Slightly more visible */
+            margin-left: 12px;
+            /* More separation */
+            font-size: 1.2rem;
+            /* Match candidate size */
+            font-weight: 500;
+        }
+
+        /* Feedback Animation */
+        @keyframes flash-red {
+            0% {
+                background-color: rgba(255, 0, 0, 0.1);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
         /* Flash effect for auto-copy */
         @keyframes flash-green {
             0% {
@@ -1119,6 +1182,97 @@
             /* border-radius: var(--radius-lg); Remove radius to fill window */
             transition: all 0.1s ease-out;
         }
+
+        /* Mobile Optimizations */
+        .header-menu-btn {
+            display: none;
+            /* Hidden by default */
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        @media (max-width: 768px) {
+
+            /* Hide FAB on mobile by default */
+            .fab {
+                display: none !important;
+            }
+
+            /* Focus Mode: Hide FAB, Show Header Menu Button instead */
+            body.focus-mode .fab {
+                display: none !important;
+            }
+
+            /* Show Header Menu - HIDDEN as per user request (use Output Menu instead) */
+            .header-menu-btn {
+                display: none !important;
+            }
+
+            /* Show Output Menu Button on Mobile (even in Non-Focus Mode) */
+            .focus-menu-btn {
+                display: flex !important;
+                align-items: center;
+                gap: 4px;
+            }
+
+            /* Icon-only buttons on mobile for cleaner UI */
+            .output-actions .btn-label {
+                display: none;
+            }
+
+            .output-actions .icon-btn {
+                padding: 8px;
+                /* Ensure square-ish touch target */
+            }
+
+            /* Fix Keyboard Overflow */
+            .virtual-keyboard {
+                width: 100%;
+                max-width: 100vw;
+                overflow-x: hidden;
+                /* Prevent horizontal scroll */
+                box-sizing: border-box;
+                padding: 4px;
+                /* Increased padding to prevent cutoff */
+            }
+
+            .keyboard-row {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                margin-bottom: 2px;
+                /* Tighter rows */
+            }
+
+            .key-btn {
+                min-width: 0;
+                /* Allow shrinking */
+                flex: 1;
+                /* Distribute space evenly */
+                margin: 1px;
+                /* Minimal margin */
+                padding: 8px 0;
+                /* Adjust padding */
+            }
+        }
+
+        /* Focus Mode Menu Button (Output Header) */
+        .focus-menu-btn {
+            display: none;
+            /* Hidden by default */
+        }
+
+        body.focus-mode .focus-menu-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            /* Match other buttons */
+            /* Show only in Focus Mode */
+            /* Highlight it */
+        }
     </style>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1140,7 +1294,12 @@
                 <h1>WebDayi Lite</h1>
             </div>
             <div class="header-actions">
-                <!-- Mini Mode button removed -->
+                <button class="icon-btn header-menu-btn" id="header-menu-trigger" aria-label="Menu">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <button class="icon-btn" id="toggle-theme-header" aria-label="Toggle Theme">
+                    <span class="material-symbols-outlined">dark_mode</span>
+                </button>
             </div>
         </header>
 
@@ -1150,14 +1309,19 @@
             <section class="output-section card">
                 <div class="section-header">
                     <h2>輸出 (Output)</h2>
-                    <div class="actions">
-                        <button id="copy-btn" class="action-btn primary-text">
+                    <div class="output-actions">
+                        <button class="icon-btn" id="copy-btn">
                             <span class="material-symbols-outlined">content_copy</span>
-                            Copy
+                            <span class="btn-label">Copy</span>
                         </button>
-                        <button id="clear-btn" class="action-btn danger-text">
+                        <button class="icon-btn danger" id="clear-btn">
                             <span class="material-symbols-outlined">delete</span>
-                            Clear
+                            <span class="btn-label">Clear</span>
+                        </button>
+                        <!-- Focus Mode Menu Button -->
+                        <button class="icon-btn focus-menu-btn" id="focus-menu-trigger" aria-label="Menu">
+                            <span class="material-symbols-outlined">menu</span>
+                            <span class="btn-label">Menu</span>
                         </button>
                     </div>
                 </div>

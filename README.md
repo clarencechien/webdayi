@@ -92,6 +92,8 @@ webdayi/
     - ✅ 擴充預測 (Prefix Search)
     - ✅ Smart 3/4 碼切換與自動上字
     - ✅ Mini Mode 設定選單
+    - ✅ Mobile Web UI 一致性優化 (Unified Header, No FAB)
+    - ✅ Focus Mode 鍵盤佈局修正
 
 ---
 
