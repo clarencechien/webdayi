@@ -48,6 +48,7 @@ const KEYBOARD_LAYOUT = [
         { code: '0', label: '0', sub: '金' }
     ],
     [
+        { code: 'Tab', label: 'Tab', type: 'special', action: 'tab' },
         { code: 'q', label: 'Q', sub: '石' }, { code: 'w', label: 'W', sub: '山' }, { code: 'e', label: 'E', sub: '一' },
         { code: 'r', label: 'R', sub: '工' }, { code: 't', label: 'T', sub: '糸' }, { code: 'y', label: 'Y', sub: '火' },
         { code: 'u', label: 'U', sub: '艸' }, { code: 'i', label: 'I', sub: '木' }, { code: 'o', label: 'O', sub: '口' },
@@ -329,6 +330,8 @@ function renderKeyboard() {
                     btn.addEventListener('click', handleBackspace);
                 } else if (key.action === 'space') {
                     btn.addEventListener('click', handleSpace);
+                } else if (key.action === 'tab') {
+                    btn.addEventListener('click', handleTab);
                 }
             } else {
                 btn = document.createElement('button');
@@ -369,21 +372,34 @@ function setupEventListeners() {
     document.addEventListener('keydown', (e) => {
         if (e.repeat) return;
 
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            if (state.phantomText) {
+                // Confirm Phantom Text (Smart Adopt)
+                state.output += state.phantomText;
+
+                // Record user habit for the phantom text
+                if (state.userHistory) {
+                    state.userHistory.recordCommit(state.phantomText);
+                }
+
+                state.buffer = '';
+                state.candidates = [];
+                state.phantomText = null;
+                updateComposition();
+                renderCandidates();
+                updateOutput();
+                triggerHaptic();
+            }
+            return;
+        }
+
         if (e.key === 'Alt') {
             const now = Date.now();
             if (now - state.lastAltPressTime < 300) {
                 clearAll();
+                triggerVisualFeedback('clear');
                 state.lastAltPressTime = 0;
-                if (!state.isMiniMode) showToast('已清除');
-                else {
-                    if (els.miniUi) {
-                        const card = els.miniUi.querySelector('.mini-card');
-                        if (card) {
-                            card.style.borderColor = 'var(--danger)';
-                            setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
-                        }
-                    }
-                }
                 return;
             }
             state.lastAltPressTime = now;
@@ -391,24 +407,7 @@ function setupEventListeners() {
             // Single Alt: Copy Output
             if (state.output) {
                 navigator.clipboard.writeText(state.output).then(() => {
-                    const target = state.isMiniMode ? els.miniOutput : els.output;
-                    if (target) {
-                        target.style.animation = 'none';
-                        target.offsetHeight;
-                        target.style.animation = 'flash-green 0.3s';
-                    }
-
-                    if (state.isMiniMode && els.miniUi) {
-                        const card = els.miniUi.querySelector('.mini-card');
-                        if (card) {
-                            card.style.borderColor = 'var(--primary)';
-                            setTimeout(() => card.style.borderColor = 'var(--border-color)', 300);
-                        }
-                    }
-
-                    if (!state.isMiniMode) {
-                        showToast('已複製');
-                    }
+                    triggerVisualFeedback('copy');
                 }).catch(err => console.error('Auto-copy failed', err));
             }
             return;
@@ -442,24 +441,19 @@ function setupEventListeners() {
         } else if (e.key === ' ') {
             handleSpace();
             e.preventDefault();
-        } else if (e.key === 'Escape') {
-            if (state.buffer.length > 0) {
+        } else if (e.key === 'Escape' || e.key === 'Delete') {
+            if (state.output.length > 0 && state.buffer.length === 0) {
+                state.output = '';
+                updateOutput();
+                triggerVisualFeedback('clear');
+                triggerHaptic();
+            } else if (state.buffer.length > 0) {
+                // Escape clears buffer
                 state.buffer = '';
                 state.candidates = [];
                 state.page = 0;
                 updateComposition();
                 renderCandidates();
-            } else if (state.output.length > 0) {
-                state.output = '';
-                updateOutput();
-                triggerHaptic();
-            }
-            e.preventDefault();
-        } else if (e.key === 'Delete') {
-            if (state.output.length > 0) {
-                state.output = '';
-                updateOutput();
-                triggerHaptic();
             }
             e.preventDefault();
         } else if (e.key === 'Shift') {
@@ -525,34 +519,50 @@ function setupEventListeners() {
 
 function setupMiniMenuListeners() {
     const miniStatus = document.getElementById('mini-im-status');
-    const miniMenu = document.getElementById('mini-menu');
+    const toolbar = document.getElementById('mini-settings-toolbar');
+    const candidates = document.getElementById('mini-candidates');
+    const closeBtn = document.getElementById('mini-tool-close');
 
-    if (miniStatus && miniMenu) {
+    if (miniStatus && toolbar && candidates) {
+        // Toggle Toolbar
         miniStatus.addEventListener('click', (e) => {
             e.stopPropagation();
-            miniMenu.classList.toggle('hidden');
-            updateMiniMenuUI();
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!miniMenu.contains(e.target) && e.target !== miniStatus) {
-                miniMenu.classList.add('hidden');
+            const isHidden = toolbar.classList.contains('hidden');
+            if (isHidden) {
+                toolbar.classList.remove('hidden');
+                candidates.classList.add('hidden');
+                updateMiniMenuUI();
+            } else {
+                toolbar.classList.add('hidden');
+                candidates.classList.remove('hidden');
             }
         });
 
-        document.getElementById('mini-toggle-im').addEventListener('click', () => {
+        // Close Toolbar
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toolbar.classList.add('hidden');
+                candidates.classList.remove('hidden');
+            });
+        }
+
+        // IM Switch
+        document.getElementById('mini-tool-im')?.addEventListener('click', () => {
             toggleInputMethod();
             updateMiniMenuUI();
         });
 
-        document.getElementById('mini-toggle-code').addEventListener('click', () => {
+        // Code Length Switch
+        document.getElementById('mini-tool-code')?.addEventListener('click', () => {
             state.settings.maxCodeLength = state.settings.maxCodeLength === 4 ? 3 : 4;
             applySettings();
             updateMiniMenuUI();
             showToast(`Switched to ${state.settings.maxCodeLength}-Code Mode`);
         });
 
-        document.getElementById('mini-font-dec').addEventListener('click', (e) => {
+        // Font Size
+        document.getElementById('mini-tool-font-dec')?.addEventListener('click', (e) => {
             e.stopPropagation();
             if (state.settings.fontScale > 0.5) {
                 state.settings.fontScale -= 0.1;
@@ -560,7 +570,7 @@ function setupMiniMenuListeners() {
             }
         });
 
-        document.getElementById('mini-font-inc').addEventListener('click', (e) => {
+        document.getElementById('mini-tool-font-inc')?.addEventListener('click', (e) => {
             e.stopPropagation();
             if (state.settings.fontScale < 2.0) {
                 state.settings.fontScale += 0.1;
@@ -571,8 +581,8 @@ function setupMiniMenuListeners() {
 }
 
 function updateMiniMenuUI() {
-    const imBtn = document.getElementById('mini-toggle-im');
-    const codeBtn = document.getElementById('mini-toggle-code');
+    const imBtn = document.getElementById('mini-tool-im');
+    const codeBtn = document.getElementById('mini-tool-code');
 
     if (imBtn) {
         imBtn.textContent = state.currentIM === 'dayi' ? 'Dayi' : (state.currentIM === 'zhuyin' ? 'Zhuyin' : 'Eng');
@@ -580,20 +590,83 @@ function updateMiniMenuUI() {
 
     if (codeBtn) {
         codeBtn.textContent = `${state.settings.maxCodeLength}碼`;
-        if (state.settings.maxCodeLength === 4) codeBtn.classList.add('active');
-        else codeBtn.classList.remove('active');
+        if (state.settings.maxCodeLength === 4) {
+            codeBtn.style.borderColor = 'var(--primary)';
+            codeBtn.style.color = 'var(--primary)';
+        } else {
+            codeBtn.style.borderColor = 'var(--border-color)';
+            codeBtn.style.color = 'var(--text-main)';
+        }
+    }
+}
+
+/**
+ * Trigger visual feedback for actions (Copy/Clear)
+ * @param {string} type - 'copy' (success/blue) or 'clear' (danger/red)
+ */
+function triggerVisualFeedback(type) {
+    // Check if Mini UI is visible (fallback if state.isMiniMode is out of sync in PWA)
+    const isMiniVisible = els.miniUi && (
+        state.isMiniMode ||
+        getComputedStyle(els.miniUi).display !== 'none' ||
+        els.miniUi.offsetParent !== null
+    );
+
+    console.log(`Visual Feedback: type=${type}, isMini=${isMiniVisible} (state=${state.isMiniMode})`); // DEBUG
+
+    const isCopy = type === 'copy';
+
+    // CSS Variables
+    const colorVar = isCopy ? 'var(--primary)' : 'var(--danger)';
+    const message = isCopy ? '已複製' : '已清除';
+
+    if (isMiniVisible && els.miniUi) {
+        // Mini Mode: Feedback Overlay
+        const overlay = document.getElementById('mini-feedback-overlay');
+
+        if (overlay) {
+            // Premium UX: Ultra-subtle feedback
+            // 1. Reset transition for instant "on"
+            overlay.style.transition = 'none';
+
+            // 2. Apply styles (Fine 1px border + Very soft minimal glow)
+            // Inset border 1px + 4px blur for just a hint of glow
+            overlay.style.setProperty('box-shadow', `inset 0 0 0 1px ${colorVar}, inset 0 0 4px ${colorVar}`, 'important');
+            overlay.style.setProperty('background-color', isCopy ? 'rgba(0, 255, 0, 0.04)' : 'rgba(255, 0, 0, 0.04)', 'important');
+
+            // 3. Force reflow to ensure transition applies
+            overlay.offsetHeight;
+
+            // 4. Fade out smoothly
+            setTimeout(() => {
+                overlay.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                overlay.style.removeProperty('box-shadow');
+                overlay.style.removeProperty('background-color');
+            }, 50);
+        } else {
+            console.warn('Feedback overlay not found!');
+        }
+    } else {
+        // Web Mode: Toast + Input Flash
+        showToast(message);
+        if (els.output) {
+            els.output.style.transition = 'background-color 0.15s';
+            els.output.style.backgroundColor = isCopy ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)';
+            setTimeout(() => els.output.style.backgroundColor = '', 200);
+        }
     }
 }
 
 function clearAll() {
-    state.output = '';
     state.buffer = '';
     state.candidates = [];
+    state.output = '';
     state.page = 0;
-    updateOutput();
+    state.phantomText = null;
     updateComposition();
     renderCandidates();
-
+    updateOutput();
+    triggerHaptic();
     if (document.hasFocus()) {
         if (state.isMiniMode && els.miniOutput) {
             els.miniOutput.focus();
@@ -795,6 +868,26 @@ function handleBackspace() {
     }
 }
 
+function handleTab() {
+    if (state.phantomText) {
+        // Confirm Phantom Text (Smart Adopt)
+        state.output += state.phantomText;
+
+        // Record user habit
+        if (state.userHistory) {
+            state.userHistory.recordCommit(state.phantomText);
+        }
+
+        state.buffer = '';
+        state.candidates = [];
+        state.phantomText = null;
+        updateComposition();
+        renderCandidates();
+        updateOutput();
+        triggerHaptic();
+    }
+}
+
 function handleSpace() {
     triggerHaptic();
 
@@ -839,13 +932,12 @@ function handleEnter() {
 }
 
 function updateComposition() {
-    els.composition.textContent = state.buffer;
-    if (els.miniComposition) els.miniComposition.textContent = state.buffer;
-
     state.page = 0;
     state.phantomText = null; // Reset phantom text state
 
     if (state.buffer.length === 0) {
+        els.composition.textContent = '';
+        if (els.miniComposition) els.miniComposition.textContent = '';
         state.candidates = [];
         renderCandidates();
         return;
@@ -853,13 +945,24 @@ function updateComposition() {
 
     if (state.currentIM === 'dayi' && state.predictionEngine) {
         const lastChar = state.output.slice(-1);
-        // Use PredictionEngine to get sorted candidates
+
+        // 1. Get Candidates (Prioritize Exact Matches)
+        // The engine now sorts Exact Matches to the top
         const candidates = state.predictionEngine.getCandidates(state.buffer, lastChar);
         state.candidates = candidates;
 
-        // Mark the first candidate as phantom if it exists (top prediction)
-        if (state.candidates.length > 0) {
-            state.candidates[0].isPhantom = true;
+        // 2. Get Best Prediction (Phantom Text)
+        // This is for the Tab key "Smart Adopt"
+        const bestPrediction = state.predictionEngine.getBestPrediction(state.buffer, lastChar);
+
+        // 3. Set Phantom Text
+        // Condition: Has prediction AND prediction is NOT the top candidate (avoid redundancy)
+        if (bestPrediction &&
+            state.candidates.length > 0 &&
+            bestPrediction.char !== state.candidates[0].char) {
+            state.phantomText = bestPrediction.char;
+        } else {
+            state.phantomText = null;
         }
     } else {
         // Fallback for Zhuyin or other IMs
@@ -869,6 +972,15 @@ function updateComposition() {
         }
         state.candidates = candidates;
     }
+
+    // 4. Render Composition (Buffer + Phantom)
+    let html = state.buffer;
+    if (state.phantomText) {
+        html += `<span class="phantom-text-display">${state.phantomText} <span style="font-size:0.8em; opacity:0.7;">[Tab]</span></span>`;
+    }
+
+    els.composition.innerHTML = html;
+    if (els.miniComposition) els.miniComposition.innerHTML = html;
 
     renderCandidates();
 }

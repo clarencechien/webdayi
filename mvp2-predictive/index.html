@@ -57,11 +57,15 @@
             --primary-hover: #0da2d4;
             --bg-main: #f5f8f8;
             --bg-surface: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --border-light: #f1f5f9;
-            --danger: #ef4444;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --danger: #ff4d4f;
+            /* Clear / Error */
+            --ghost-color: #888;
+            /* Phantom Text */
+            --key-bg: #f5f5f5;
             --success: #22c55e;
 
             /* Spacing */
@@ -154,6 +158,13 @@
 
         .control-btn:hover {
             background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .phantom-text-display {
+            color: var(--ghost-color);
+            font-style: italic;
+            pointer-events: none;
+            opacity: 0.8;
         }
 
         #font-size-display {
@@ -252,9 +263,6 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            padding: 4px 8px;
-            border-radius: var(--radius-sm);
-            transition: background-color 0.2s;
         }
 
         .action-btn:hover {
@@ -574,7 +582,7 @@
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             padding: var(--spacing-sm);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 44px 12px rgba(0, 0, 0, 0.15);
             z-index: 99;
             min-width: 200px;
             display: flex;
@@ -708,11 +716,15 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            align-items: stretch;
+            /* Ensure full width */
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
             border-radius: 0;
             overflow: hidden;
+            /* overflow: hidden; Removed to prevent clipping of shadows if we use outer ones, but we will use inset. */
             position: relative;
+            transition: border-color 0.1s ease-out, box-shadow 0.1s ease-out;
         }
 
         /* Mini Menu */
@@ -786,6 +798,71 @@
             }
         }
 
+        /* Settings Toolbar Styles */
+        .mini-settings-toolbar {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            z-index: 10;
+            /* Ensure above drag region */
+            -webkit-app-region: no-drag;
+            /* Allow clicking */
+            position: relative;
+            justify-content: flex-end;
+            /* Align to right */
+        }
+
+        .mini-settings-toolbar.hidden {
+            display: none;
+        }
+
+        .mini-tool-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .mini-tool-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--primary);
+        }
+
+        .mini-tool-group {
+            display: flex;
+            gap: 2px;
+        }
+
+        .mini-tool-icon {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+        }
+
+        .mini-tool-icon:hover {
+            color: var(--primary);
+        }
+
+        .mini-tool-icon.danger:hover {
+            color: var(--danger);
+        }
+
+        .mini-tool-icon span {
+            font-size: 1.2rem;
+        }
+
         /* Input Bar (Now on Top) */
         .mini-input-bar {
             flex: 0 0 auto;
@@ -799,9 +876,13 @@
             /* Space for Window Controls (Traffic Lights/Caption Buttons) */
             display: flex;
             align-items: center;
-            min-height: 40px;
+            /* height: 40px;  Removed fixed height to allow natural spacing */
+            min-height: 44px;
+            /* Ensure minimum touch target size */
             gap: 8px;
             position: relative;
+            padding-bottom: 12px;
+            /* Move separator further down */
         }
 
         [data-theme="dark"] .mini-input-bar {
@@ -822,8 +903,11 @@
 
         /* Output Area (Now on Bottom) */
         #mini-output {
-            flex: 1;
+            flex: 0 0 auto;
+            /* Shrink to fit content, don't take extra space */
             width: 100%;
+            max-width: 520px;
+            /* Limit text width for readability */
             background: transparent;
             border: none;
             resize: none;
@@ -838,6 +922,10 @@
             /* Allow scrolling if needed */
             scrollbar-width: none;
             /* Firefox: Hide scrollbar */
+            max-height: 60px;
+            /* Compact height */
+            margin-top: 4px;
+            /* Small space from separator */
         }
 
         /* Chrome/Safari/Edge: Hide scrollbar */
@@ -859,11 +947,20 @@
             z-index: 2;
             /* Above drag region */
             position: relative;
+            line-height: 1.5;
+            /* Consistent line height */
+            display: flex;
+            align-items: center;
         }
 
         .mini-candidates {
-            flex: 1;
+            flex: 0 1 auto;
+            /* Don't grow, just shrink if needed */
             display: flex;
+            justify-content: flex-start;
+            /* Force items to start */
+            text-align: left;
+            /* Force text to left */
             gap: 4px;
             overflow-x: auto;
             font-size: 1rem;
@@ -873,6 +970,14 @@
             z-index: 2;
             /* Above drag region */
             position: relative;
+            margin-left: 12px;
+            /* Add specific spacing from cursor */
+            min-width: 0;
+            /* Allow shrinking for scroll */
+            line-height: 1.5;
+            /* Consistent line height */
+            align-items: center;
+            /* Ensure items are centered */
         }
 
         .mini-candidates::-webkit-scrollbar {
@@ -906,14 +1011,26 @@
             font-size: 0.8rem;
             font-weight: 700;
             color: var(--primary);
-            margin-left: auto;
-            margin-right: 8px;
             z-index: 10;
             padding: 2px 6px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             background: var(--bg-surface);
             flex-shrink: 0;
+            -webkit-app-region: no-drag;
+            margin-left: auto;
+            /* Push to far right */
+            margin-right: 8px;
+            /* Space from window controls */
+            cursor: pointer;
+            /* Make it clickable */
+        }
+
+        .window-controls {
+            /* margin-left: auto;  Removed, as status icon now pushes right */
+            display: flex;
+            gap: 8px;
+            z-index: 10;
             -webkit-app-region: no-drag;
         }
 
@@ -986,6 +1103,21 @@
 
         .flash-success {
             animation: flash-green 0.2s ease-out;
+        }
+
+        /* Feedback Overlay */
+        #mini-feedback-overlay {
+            position: fixed;
+            /* Fixed to viewport to ensure it covers everything */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
+            /* Maximum z-index */
+            /* border-radius: var(--radius-lg); Remove radius to fill window */
+            transition: all 0.1s ease-out;
         }
     </style>
     <!-- Google Fonts -->
@@ -1111,13 +1243,17 @@
                     <span class="material-symbols-outlined">text_increase</span>
                 </button>
             </div>
+
+
+            <!-- Toast Notification -->
+            <div id="toast" class="toast hidden">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Copied!</span>
+            </div>
         </div>
 
-        <!-- Toast Notification -->
-        <div id="toast" class="toast hidden">
-            <span class="material-symbols-outlined">check_circle</span>
-            <span>Copied!</span>
-        </div>
+
+    </div>
     </div>
     <!-- Mini Mode UI (Overlay) -->
     <div id="mini-ui" class="mini-ui hidden">
@@ -1128,31 +1264,31 @@
                 <div id="mini-composition" class="mini-composition"></div>
                 <span class="cursor">|</span>
                 <div id="mini-candidates" class="mini-candidates"></div>
-                <div id="mini-im-status" class="mini-im-status">易</div>
-            </div>
-
-            <!-- Mini Menu (Popover) -->
-            <div id="mini-menu" class="mini-menu hidden">
-                <div class="mini-menu-row">
-                    <span>輸入法</span>
-                    <button id="mini-toggle-im" class="mini-btn">Dayi</button>
-                </div>
-                <div class="mini-menu-row">
-                    <span>碼數</span>
-                    <button id="mini-toggle-code" class="mini-btn">4碼</button>
-                </div>
-                <div class="mini-menu-row">
-                    <span>字體</span>
-                    <div class="mini-btn-group">
-                        <button id="mini-font-dec" class="mini-btn">A-</button>
-                        <button id="mini-font-inc" class="mini-btn">A+</button>
+                <!-- Mini Settings Toolbar (Inline) -->
+                <div class="mini-settings-toolbar hidden" id="mini-settings-toolbar">
+                    <button class="mini-tool-btn" id="mini-tool-im">Dayi</button>
+                    <button class="mini-tool-btn" id="mini-tool-code">4碼</button>
+                    <div class="mini-tool-group">
+                        <button class="mini-tool-icon" id="mini-tool-font-dec"><span
+                                class="material-symbols-outlined">text_decrease</span></button>
+                        <button class="mini-tool-icon" id="mini-tool-font-inc"><span
+                                class="material-symbols-outlined">text_increase</span></button>
                     </div>
+                    <button class="mini-tool-icon danger" id="mini-tool-close"><span
+                            class="material-symbols-outlined">close</span></button>
                 </div>
+
+                <div class="mini-im-status" id="mini-im-status">易</div>
+                <div class="window-controls"></div>
+
             </div>
 
             <!-- Bottom: Output Area -->
             <textarea id="mini-output" readonly></textarea>
         </div>
+
+        <!-- Feedback Overlay (Outside Card) -->
+        <div id="mini-feedback-overlay"></div>
     </div>
 
     <!-- App Logic -->

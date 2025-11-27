@@ -23,20 +23,39 @@
 ---
 
 ## Current Focus
-The current focus is on **verifying and refining the MVP2 Adaptive Predictive Engine**. The core implementation is complete, including the weighted scoring model, extended prediction, and UI integration. We are now ensuring the documentation is up-to-date.
+The current focus is on **Verifying the Dual-Track Input System**. The refactoring is complete, and we are ensuring the new Space/Tab logic works seamlessly.
 
 ## Recent Changes
+*   **Dual-Track Input Refactoring**:
+    *   **Space Key**: Now strictly confirms **Exact Matches** (Blind Typing).
+    *   **Tab Key**: Now confirms **Best Prediction** (Phantom Text).
+    *   **UI Fix**: Added **Tab Key** to virtual keyboard and **[Tab] Hint** to phantom text display.
+    *   **Visual Feedback**: Implemented Unified Feedback (Blue for Copy, Red for Clear).
+    *   **Core Logic**: Refactored `PredictionEngine` to separate Exact Matches from Predictions.
 *   **MVP2 Implementation**:
+    *   Implemented **Adaptive Predictive Engine** with 3-layer weighted scoring.
+    *   Added **Extended Prediction** (prefix matching).
+    *   Implemented **Smart Auto-Commit** with collision safety.
+    *   Added **3/4 Code Toggle** and **Mini Mode Settings Menu**.
     *   Implemented **Adaptive Predictive Engine** with 3-layer weighted scoring (Static + Bigram + User Habit).
     *   Added **Extended Prediction** (prefix matching) to support predicting full words from partial codes.
     *   Implemented **Smart Auto-Commit** with collision safety (waits if multiple candidates exist).
     *   Added **3/4 Code Toggle** and **Mini Mode Settings Menu**.
     *   Reconfigured **Hotkeys** (Tap Ctrl for Mini Mode, Tap Alt for Copy).
+    *   **Mini Mode Fixes**:
+        *   Corrected layout (Output below Input).
+        *   Fixed Menu Interaction (z-index/drag issues).
+        *   **Robust Visual Feedback**: Implemented overlay-based feedback visible in PWA/Dark Mode.
     *   Regenerated `dayi_db.json` to ensure full coverage.
 
 ---
 
-## 🔧 Latest Session: MVP 2.0 Implementation (2025-11-27)
+## 🔧 Latest Session: Mini Mode & Visual Feedback Refinement (2025-11-27)
+
+We focused on fixing the Mini Mode UI and ensuring visual feedback works reliably in PWA mode.
+- **Layout**: Fixed the nesting error that broke the Mini Mode layout.
+- **Menu**: Fixed the inline settings toolbar interaction (z-index).
+- **Visual Feedback**: Implemented a **root-level overlay** to guarantee visibility in PWA/Dark Mode, and refined the aesthetics to be ultra-subtle (premium feel).
 
 ### Session Summary
 This session established the **Predictive Engine** architecture (MVP 2.0). We moved away from the complex Viterbi approach to a lightweight, high-speed type-ahead system.

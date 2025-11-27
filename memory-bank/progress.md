@@ -26,9 +26,16 @@
 - [x] **Data Expansion**
   - [x] Generate `freq_map.json` from corpus
   - [x] Regenerate `dayi_db.json` for full coverage
-- [ ] **Refinement**
-  - [ ] Performance optimization
-  - [ ] Mobile UI tweaks
+### Phase 6: Refactoring - Dual-Track Input (Completed)
+- [x] **Core Logic Refactoring**
+  - [x] `getCandidates`: Prioritize Exact Matches (Blind Typing).
+  - [x] `getBestPrediction`: Find best non-exact match (Phantom).
+  - [x] TDD Verification: `js/prediction_refactor.test.js`.
+- [x] **Interaction & UI**
+  - [x] **Visual Feedback**: Blue (Copy) / Red (Clear) flash.
+  - [x] **Tab Key**: Confirm Phantom Text.
+  - [x] **Space Key**: Confirm Exact Match.
+  - [x] **Alt Key**: Single (Copy) / Double (Clear).
 
 ### WebDayi Lite (Stable)
 - [x] **Core Features**
@@ -36,10 +43,11 @@
   - [x] Character-by-character Input
   - [x] Virtual Keyboard (Responsive)
   - [x] Mini Mode (Floating Widget)
-- [x] **Enhancements**
-  - [x] Zhuyin Support
-  - [x] Split Shift Key
-  - [x] Ctrl Double-Click Toggle
+  - [x] **Enhancements**
+    - [x] Zhuyin Support
+    - [x] Split Shift Key
+    - [x] Ctrl Double-Click Toggle
+    - [x] **Visual Feedback Refinement**: Ultra-subtle overlay for premium UX.
 
 ---
 

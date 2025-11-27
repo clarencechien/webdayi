@@ -83,8 +83,6 @@ class PredictionEngine {
         }
 
         // 2. Extended Matches (Predictive)
-        // Find keys starting with buffer
-        // Limit to top N extensions to avoid performance hit
         const extensions = this.getExtendedCandidates(buffer);
         candidates = [...candidates, ...extensions];
 
@@ -97,10 +95,17 @@ class PredictionEngine {
             };
         });
 
-        // 4. Sort by score descending
-        scoredCandidates.sort((a, b) => b.score - a.score);
+        // 4. Sort: Exact Matches First, then by Score
+        scoredCandidates.sort((a, b) => {
+            // Priority A: Exact Match always comes first
+            if (a.isExact && !b.isExact) return -1;
+            if (!a.isExact && b.isExact) return 1;
 
-        // Deduplicate (keep highest score)
+            // Priority B: Score descending
+            return b.score - a.score;
+        });
+
+        // Deduplicate (keep highest priority/score version)
         const seen = new Set();
         const uniqueCandidates = [];
         for (const c of scoredCandidates) {
@@ -156,20 +161,38 @@ class PredictionEngine {
     }
 
     /**
-     * Predict phantom text based on current buffer and context.
-     * Returns the top candidate if confidence is high enough (or just the top one).
+     * Get the best prediction (Phantom Text) for the current buffer.
+     * This is strictly for "Smart Adopt" (Tab key), so it excludes exact matches
+     * unless there are no other options.
      * 
      * @param {string} buffer 
      * @param {string} lastChar 
-     * @returns {string|null} - Phantom text suggestion
+     * @returns {object|null} - The best candidate object or null
+     */
+    getBestPrediction(buffer, lastChar) {
+        // Only look for extensions (non-exact matches)
+        const extensions = this.getExtendedCandidates(buffer);
+        if (extensions.length === 0) return null;
+
+        // Score them
+        const scored = extensions.map(c => ({
+            ...c,
+            score: this.calculateScore(c.char, lastChar, buffer)
+        }));
+
+        // Sort by score descending
+        scored.sort((a, b) => b.score - a.score);
+
+        return scored.length > 0 ? scored[0] : null;
+    }
+
+    /**
+     * Predict phantom text based on current buffer and context.
+     * DEPRECATED: Use getBestPrediction instead.
      */
     predictPhantom(buffer, lastChar) {
-        const candidates = this.getCandidates(buffer, lastChar);
-        if (candidates.length > 0) {
-            // We return the top candidate as per "Active Suggestion" strategy
-            return candidates[0].char;
-        }
-        return null;
+        const best = this.getBestPrediction(buffer, lastChar);
+        return best ? best.char : null;
     }
 }
 

@@ -38,8 +38,8 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 | Key | Action |
 | :--- | :--- |
 | **Ctrl (Tap)** | Toggle **Mini Mode** (Press & Release) |
-| **Alt (Tap)** | **Copy** Output to Clipboard |
-| **Alt (Double)** | **Clear All** (Output + Buffer) |
+| **Alt (Tap)** | **Copy** Output (Subtle Blue Flash) |
+| **Alt (Double)** | **Clear All** (Subtle Red Flash) |
 | **Left Shift** | Toggle English / Chinese |
 | **Right Shift** | Toggle Dayi / Zhuyin |
 | **Space** | Select 1st Candidate / Input Space |
