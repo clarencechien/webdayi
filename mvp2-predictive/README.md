@@ -8,25 +8,44 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 
 ## 🌟 Key Features
 
-### 1. Smart Spacebar (Phantom Text)
-*   **What it is**: As you type, the engine predicts the most likely character (based on frequency or context) and displays it as a "Phantom" suggestion.
-*   **How to use**:
-    *   The Phantom suggestion appears as the **first candidate** (Index 0).
-    *   Press **Space** to confirm it immediately.
-    *   If you want a different character, continue typing or select another candidate.
+### 1. Adaptive Prediction Engine
+*   **3-Layer Weighted Scoring**: Combines Static Frequency, Bigram Context, and **User Habit** to predict the most likely character.
+*   **Extended Prediction**: Predicts full words (e.g., 4-code "何") even when you've only typed the first code (e.g., "i"), based on prefix matching.
+*   **Smart Spacebar**: The top prediction is always the first candidate. Press **Space** to commit it immediately.
 
-### 2. Integrated Candidate UX
-*   **Unified Experience**: The Phantom suggestion is integrated directly into the candidate list.
-*   **Key Conflict Resolved**: Since it occupies the first slot, it naturally uses the **Space** key for selection, avoiding conflicts with other selection keys.
+### 2. Smart Input Logic
+*   **3/4 Code Toggle**: Switch between 3-code (Express) and 4-code (Standard) modes via the Menu.
+*   **Smart Auto-Commit**:
+    *   **Unique Match**: Auto-commits immediately when the buffer reaches max length (3 or 4).
+    *   **Collision Safety**: If there are multiple candidates at max length, it **waits** for you to select, preventing accidental commits.
+*   **Error Feedback**: Invalid keys trigger a "shake" animation instead of auto-committing, preventing typos from ruining your flow.
 
-### 3. Mini Mode
-*   **Toggle**: Press `Ctrl` twice (Double-Click) or use the menu.
-*   **Design**: A floating, unobtrusive widget perfect for overlaying on other content.
-*   **UX**: Fully aligned with the main view, supporting Smart Spacebar and all selection keys.
+### 3. Mini Mode & Settings
+*   **Toggle**: Tap `Ctrl` (Single Press) to toggle Mini Mode.
+*   **Mini Menu**: Click the status icon (e.g., "易") in Mini Mode to access:
+    *   **Input Method**: Dayi / Zhuyin / Eng.
+    *   **Max Codes**: 3-code / 4-code toggle.
+    *   **Font Size**: A- / A+.
 
 ### 4. Bigram Context Awareness
 *   **Smart Prediction**: The engine looks at the *last committed character* to predict the next one.
 *   **Example**: Typing `bo` (司) -> `i` (機) is predicted because "司機" is a common bigram.
+
+---
+
+## ⌨️ Hotkeys
+
+| Key | Action |
+| :--- | :--- |
+| **Ctrl (Tap)** | Toggle **Mini Mode** (Press & Release) |
+| **Alt (Tap)** | **Copy** Output to Clipboard |
+| **Alt (Double)** | **Clear All** (Output + Buffer) |
+| **Left Shift** | Toggle English / Chinese |
+| **Right Shift** | Toggle Dayi / Zhuyin |
+| **Space** | Select 1st Candidate / Input Space |
+| **Enter** | Commit Buffer / Input Enter |
+| **Esc** | Clear Buffer / Clear Output |
+
 
 ---
 

@@ -1,12 +1,21 @@
 /**
  * Prediction Engine for WebDayi MVP2
- * Handles Phantom Text and Bigram Predictions
+ * Handles Phantom Text, Bigram Predictions, and Dynamic Re-ranking
  */
 
 class PredictionEngine {
-    constructor(bigramData = {}) {
-        this.bigramData = bigramData;
+    constructor(config = {}) {
+        this.bigramData = config.bigramData || {};
+        this.freqMap = config.freqMap || {};
+        this.userHistory = config.userHistory || { getScore: () => 0 };
         this.dayiMap = {}; // Map<code, candidates[]>
+
+        // Weighted Scoring Model
+        this.weights = {
+            static: 1.0,   // Baseline (Unigram)
+            bigram: 2.5,   // Context (Bigram)
+            user: 10.0     // Personalization (User History)
+        };
     }
 
     setDayiMap(map) {
@@ -14,48 +23,155 @@ class PredictionEngine {
     }
 
     /**
-     * Predict phantom text based on current buffer.
-     * Strategy:
-     * 1. If buffer is empty, return null.
-     * 2. Look up buffer in dayiMap.
-     * 3. If match found, return the first candidate (highest frequency).
-     * 4. (Future) If no exact match, look for extensions? For now, exact prefix match.
+     * Calculate the prediction score for a candidate character.
+     * Formula: Score = (w1 * StaticFreq) + (w2 * BigramProb) + (w3 * UserHabit)
      * 
-     * @param {string} buffer - Current input buffer (e.g., "i")
-     * @returns {string|null} - Phantom text suggestion or null
+     * @param {string} char - The candidate character
+     * @param {string} lastChar - The last committed character (for context)
+     * @param {string} currentBuffer - The current input buffer (code)
+     * @returns {number} - The calculated score
      */
-    predictPhantom(buffer) {
-        // Simple frequency-based prediction (mock)
-        // In real app, check if buffer matches a high-freq char
-        const candidate = this.dayiMap[buffer];
-        if (candidate) {
-            // If candidate is object (from DB), return char property
-            return typeof candidate === 'object' ? candidate.char : candidate;
-        }
-        return null;
-    }
+    calculateScore(char, lastChar, currentBuffer) {
+        // 1. Static Frequency (from freq_map.json)
+        const staticFreq = this.freqMap[char] || 0;
 
-    getBigramSuggestion(lastChar, nextCode) {
-        if (!lastChar || !nextCode) return null;
-
-        const predictions = this.bigramData[lastChar];
-        if (!predictions) {
-            return null;
-        }
-
-        if (predictions[nextCode]) {
-            return predictions[nextCode];
-        }
-
-        for (const code in predictions) {
-            if (code.startsWith(nextCode)) {
-                return predictions[code];
+        // 2. Bigram Probability (from bigram_lite.json)
+        // Check if bigramData[lastChar][currentBuffer] suggests this char
+        let bigramProb = 0;
+        if (lastChar && this.bigramData[lastChar]) {
+            const suggestion = this.bigramData[lastChar][currentBuffer];
+            // If the bigram model explicitly suggests this char for this code, give it high probability
+            if (suggestion === char) {
+                bigramProb = 1.0;
             }
         }
 
+        // 3. User Habit (from UserHistory)
+        // We use the raw count from history. 
+        // Since w3 is 10.0, even a single usage (1 * 10) will likely outweigh static freq (usually < 0.1).
+        const userHabit = this.userHistory.getScore(char);
+
+        // Weighted Sum
+        const score = (this.weights.static * staticFreq) +
+            (this.weights.bigram * bigramProb) +
+            (this.weights.user * userHabit);
+
+        return score;
+    }
+
+    /**
+     * Get sorted candidates for a given code buffer.
+     * Applies Dynamic Re-ranking based on scores.
+     * Includes "Extended Candidates" (words starting with the buffer code).
+     * 
+     * @param {string} buffer - Current input buffer
+     * @param {string} lastChar - Last committed character
+     * @returns {Array} - Sorted list of candidates [{char, score}, ...]
+     */
+    getCandidates(buffer, lastChar) {
+        // 1. Exact Matches
+        const rawCandidates = this.dayiMap[buffer];
+        let candidates = [];
+
+        if (rawCandidates) {
+            const list = Array.isArray(rawCandidates) ? rawCandidates : [rawCandidates];
+            candidates = list.map(c => ({
+                char: typeof c === 'object' ? c.char : c,
+                originalData: c,
+                isExact: true // Mark as exact match
+            }));
+        }
+
+        // 2. Extended Matches (Predictive)
+        // Find keys starting with buffer
+        // Limit to top N extensions to avoid performance hit
+        const extensions = this.getExtendedCandidates(buffer);
+        candidates = [...candidates, ...extensions];
+
+        // 3. Score Everything
+        const scoredCandidates = candidates.map(c => {
+            const score = this.calculateScore(c.char, lastChar, buffer);
+            return {
+                ...c,
+                score: score
+            };
+        });
+
+        // 4. Sort by score descending
+        scoredCandidates.sort((a, b) => b.score - a.score);
+
+        // Deduplicate (keep highest score)
+        const seen = new Set();
+        const uniqueCandidates = [];
+        for (const c of scoredCandidates) {
+            if (!seen.has(c.char)) {
+                seen.add(c.char);
+                uniqueCandidates.push(c);
+            }
+        }
+
+        return uniqueCandidates;
+    }
+
+    /**
+     * Find candidates from keys that start with the buffer.
+     * @param {string} buffer 
+     * @returns {Array}
+     */
+    getExtendedCandidates(buffer) {
+        if (!buffer || buffer.length === 0) return [];
+
+        const extensions = [];
+        const MAX_EXTENSIONS = 20; // Limit to avoid flooding
+        let count = 0;
+
+        // Optimization: In a real app with 30k keys, we might want a Trie.
+        // For now, simple iteration. 
+        // We can optimize by caching keys or using a pre-computed index.
+
+        for (const key in this.dayiMap) {
+            if (key.length > buffer.length && key.startsWith(buffer)) {
+                const raw = this.dayiMap[key];
+                const list = Array.isArray(raw) ? raw : [raw];
+
+                for (const item of list) {
+                    const char = typeof item === 'object' ? item.char : item;
+                    // Only add if it has a high enough static freq or user history
+                    // to be worth showing as a prediction.
+                    // For simplicity, we add all, but the scoring/sorting will filter them down.
+                    extensions.push({
+                        char: char,
+                        originalData: item,
+                        isExact: false,
+                        code: key // Track the full code
+                    });
+                }
+
+                // Safety break if too many keys scanned? No, we need to scan all to find high scores.
+                // But we can limit the *result* size if needed.
+            }
+        }
+
+        return extensions;
+    }
+
+    /**
+     * Predict phantom text based on current buffer and context.
+     * Returns the top candidate if confidence is high enough (or just the top one).
+     * 
+     * @param {string} buffer 
+     * @param {string} lastChar 
+     * @returns {string|null} - Phantom text suggestion
+     */
+    predictPhantom(buffer, lastChar) {
+        const candidates = this.getCandidates(buffer, lastChar);
+        if (candidates.length > 0) {
+            // We return the top candidate as per "Active Suggestion" strategy
+            return candidates[0].char;
+        }
         return null;
     }
 }
 
-// Export for testing
+// Export
 window.PredictionEngine = PredictionEngine;

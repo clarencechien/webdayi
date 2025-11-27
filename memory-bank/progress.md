@@ -8,21 +8,24 @@
 
 ## 🚀 Active Phases
 
-### MVP 2.0: Predictive Type-ahead (Current Focus)
+### MVP 2.0: Predictive Type-ahead (Completed)
 - [x] **Setup**
   - [x] Create `mvp2-predictive` folder
   - [x] Define `DEV_INSTRUCTIONS.md`
 - [x] **Core Logic Implementation**
-  - [x] `PredictionEngine` class (Frequency + Bigram)
-  - [x] TDD: Unit tests for prediction logic
+  - [x] `PredictionEngine` class (Weighted Scoring: Static + Bigram + User Habit)
+  - [x] Extended Prediction (Prefix Search for 4-code words)
   - [x] Integration: `app.js` + `PredictionEngine`
   - [x] Smart Spacebar Interaction (Phantom Text confirmation)
 - [x] **UX Refinement**
   - [x] **Mini Mode Alignment**: Align `mvp2` Mini Mode with `lite` (styling, keys).
   - [x] **Phantom UX**: Integrate Phantom suggestion as 1st candidate (Index 0).
-- [ ] **Data Expansion**
-  - [ ] Generate full `bigram.json` from corpus
-  - [ ] Implement "Smart 3-Code" logic
+  - [x] **Smart Auto-Commit**: Collision-safe auto-commit logic.
+  - [x] **Mini Mode Settings**: Menu for IM, Max Codes, Font Size.
+  - [x] **Hotkeys**: Reconfigured for better usability.
+- [x] **Data Expansion**
+  - [x] Generate `freq_map.json` from corpus
+  - [x] Regenerate `dayi_db.json` for full coverage
 - [ ] **Refinement**
   - [ ] Performance optimization
   - [ ] Mobile UI tweaks

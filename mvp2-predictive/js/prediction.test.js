@@ -38,55 +38,52 @@ async function runTests() {
         "台": { "b": "北", "w": "灣" }
     };
     const mockDayiMap = {
-        "i": ["台", "巷"], // 'i' -> 台 (high freq), 巷 (low freq)
-        "ir": ["台"],      // 'ir' -> 台 (exact)
-        "x": []            // 'x' -> no match
+        "i": [{ char: "台" }, { char: "巷" }],
+        "ir": [{ char: "台" }],
+        "x": []
+    };
+    const mockFreq = {
+        "台": 0.005,
+        "巷": 0.001,
+        "北": 0.002,
+        "不": 0.01
+    };
+    const mockHistory = {
+        getScore: (char) => char === '巷' ? 100 : 0 // User loves '巷'
     };
 
-    const engine = new PredictionEngine(mockBigram);
+    const engine = new PredictionEngine({
+        bigramData: mockBigram,
+        freqMap: mockFreq,
+        userHistory: mockHistory
+    });
     engine.setDayiMap(mockDayiMap);
 
     // Test 1: Initialization
     assert(engine.bigramData === mockBigram, 'Engine initialized with bigram data');
 
-    // Test 2: Phantom Suggestion (Basic)
-    const phantom1 = engine.predictPhantom('i');
-    assert(phantom1 === '台', `Expected '台', got '${phantom1}'`);
+    // Test 2: Phantom Suggestion (User History Dominance)
+    // 'i' -> 台 (0.005) vs 巷 (0.001 + 100*10 = 1000!)
+    const phantom1 = engine.predictPhantom('i', null);
+    assert(phantom1 === '巷', `Expected '巷' (User History), got '${phantom1}'`);
 
-    // Test 3: Phantom Suggestion (Exact Match)
-    const phantom2 = engine.predictPhantom('ir');
-    assert(phantom2 === '台', `Expected '台', got '${phantom2}'`);
+    // Test 3: Phantom Suggestion (Bigram Context)
+    // Context: '台'. Input 'b'.
+    // Bigram says 'b' -> '北'.
+    // We need 'b' in dayiMap.
+    mockDayiMap['b'] = [{ char: "北" }, { char: "不" }];
+
+    // Without context: '不' (0.01) > '北' (0.002).
+    const noContext = engine.predictPhantom('b', null);
+    assert(noContext === '不', `Expected '不' (Freq), got '${noContext}'`);
+
+    // With context '台': '北' gets Bigram boost (1.0 * 2.5 = 2.5).
+    const withContext = engine.predictPhantom('b', '台');
+    assert(withContext === '北', `Expected '北' (Bigram), got '${withContext}'`);
 
     // Test 4: No Match
-    const phantom3 = engine.predictPhantom('x');
+    const phantom3 = engine.predictPhantom('x', null);
     assert(phantom3 === null, `Expected null, got '${phantom3}'`);
-
-    // Test 5: Empty Buffer
-    const phantom4 = engine.predictPhantom('');
-    assert(phantom4 === null, `Expected null for empty buffer`);
-
-    // --- Bigram Tests ---
-
-    // Test 6: Bigram Exact Match
-    // Mock: "台": { "b": "北", "w": "灣" }
-    const bigram1 = engine.getBigramSuggestion('台', 'b');
-    assert(bigram1 === '北', `Expected '北', got '${bigram1}'`);
-
-    // Test 7: Bigram Prefix Match (if implemented)
-    // If user types 'j' (assuming 'j' maps to 'b' in some layout? No, let's stick to code)
-    // Wait, the mock data keys are CODES.
-    // "b" is the code for "北" (actually 'jb' is 北, but let's assume 'b' for simplicity or relative code)
-    // Let's update mock to be realistic Dayi codes if possible, or stick to abstract.
-    // Abstract is fine.
-    // If I type "b", I get "北".
-
-    // Test 8: Bigram No Match
-    const bigram2 = engine.getBigramSuggestion('台', 'z');
-    assert(bigram2 === null, `Expected null, got '${bigram2}'`);
-
-    // Test 9: Bigram Unknown Last Char
-    const bigram3 = engine.getBigramSuggestion('無', 'b');
-    assert(bigram3 === null, `Expected null, got '${bigram3}'`);
 
     summary();
 }

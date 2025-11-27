@@ -17,6 +17,7 @@ const state = {
     isMiniMode: false,
     settings: {},
     predictionEngine: null,
+    userHistory: null,
     phantomText: null,
     lastConfirmedChar: null
 };
@@ -99,7 +100,8 @@ function initTheme() {
         autoCopy: false,
         theme: 'dark',
         fontScale: 1.0,
-        showKeyboard: !isLargeScreen
+        showKeyboard: !isLargeScreen,
+        maxCodeLength: 4 // Default to 4-code mode
     };
 
     const savedSettings = localStorage.getItem('webdayi-lite-settings');
@@ -139,6 +141,8 @@ function applySettings() {
     if (fontDisplay) {
         fontDisplay.textContent = `${Math.round(state.settings.fontScale * 100)}%`;
     }
+
+    updateToggleStatus('toggle-code-len', state.settings.maxCodeLength === 4 ? '4碼' : '3碼');
 
     saveSettings();
 }
@@ -200,6 +204,12 @@ function setupMenuListeners() {
             toggleMiniMode();
         });
 
+        document.getElementById('toggle-code-len').addEventListener('click', () => {
+            state.settings.maxCodeLength = state.settings.maxCodeLength === 4 ? 3 : 4;
+            applySettings();
+            showToast(`Switched to ${state.settings.maxCodeLength}-Code Mode`);
+        });
+
         document.getElementById('font-decrease').addEventListener('click', (e) => {
             e.stopPropagation();
             if (state.settings.fontScale > 0.5) {
@@ -244,7 +254,16 @@ async function loadDatabase() {
         const bigramResp = await fetch(`data/bigram_lite.json?v=${ts}`);
         const bigramData = await bigramResp.json();
 
-        state.predictionEngine = new PredictionEngine(bigramData);
+        const freqResp = await fetch(`data/freq_map.json?v=${ts}`);
+        const freqMap = await freqResp.json();
+
+        state.userHistory = new UserHistory();
+
+        state.predictionEngine = new PredictionEngine({
+            bigramData: bigramData,
+            freqMap: freqMap,
+            userHistory: state.userHistory
+        });
         state.predictionEngine.setDayiMap(state.dbs.dayi);
 
         state.db = state.dbs.dayi;
@@ -369,10 +388,7 @@ function setupEventListeners() {
             }
             state.lastAltPressTime = now;
 
-            if (state.candidates.length > 0) {
-                selectCandidate(state.page * state.pageSize + 0);
-            }
-
+            // Single Alt: Copy Output
             if (state.output) {
                 navigator.clipboard.writeText(state.output).then(() => {
                     const target = state.isMiniMode ? els.miniOutput : els.output;
@@ -399,32 +415,8 @@ function setupEventListeners() {
         }
 
         if (e.ctrlKey || e.altKey || e.metaKey) {
-            if (e.key === 'Control') {
-                const now = Date.now();
-                if (now - state.lastCtrlPressTime < 500) {
-                    toggleMiniMode();
-                    state.lastCtrlPressTime = 0;
-                    return;
-                }
-                state.lastCtrlPressTime = now;
-
-                if (state.output) {
-                    navigator.clipboard.writeText(state.output).then(() => {
-                        showToast();
-                    }).catch(err => {
-                        console.warn('Clipboard API failed, trying fallback', err);
-                        els.output.select();
-                        try {
-                            const successful = document.execCommand('copy');
-                            if (successful) showToast();
-                            else console.error('Fallback copy failed');
-                        } catch (err) {
-                            console.error('Fallback copy error', err);
-                        }
-                        window.getSelection().removeAllRanges();
-                    });
-                }
-            }
+            // Track modifier usage to prevent "Tap" action if used as a modifier
+            if (e.ctrlKey) state.ctrlKeyUsed = true;
             return;
         }
 
@@ -472,8 +464,11 @@ function setupEventListeners() {
             e.preventDefault();
         } else if (e.key === 'Shift') {
             state.shiftKeyUsed = false;
+        } else if (e.key === 'Control') {
+            state.ctrlKeyUsed = false;
         } else if (e.key.length === 1) {
             if (e.shiftKey) state.shiftKeyUsed = true;
+            if (e.ctrlKey) state.ctrlKeyUsed = true;
             const key = e.key.toLowerCase();
             handleInput(key);
             e.preventDefault();
@@ -488,6 +483,10 @@ function setupEventListeners() {
                 } else if (e.code === 'ShiftRight') {
                     toggleDayiZhuyin();
                 }
+            }
+        } else if (e.key === 'Control') {
+            if (!state.ctrlKeyUsed) {
+                toggleMiniMode();
             }
         }
     });
@@ -519,6 +518,70 @@ function setupEventListeners() {
                 toggleMiniMode();
             }
         }, 100);
+    }
+
+    setupMiniMenuListeners();
+}
+
+function setupMiniMenuListeners() {
+    const miniStatus = document.getElementById('mini-im-status');
+    const miniMenu = document.getElementById('mini-menu');
+
+    if (miniStatus && miniMenu) {
+        miniStatus.addEventListener('click', (e) => {
+            e.stopPropagation();
+            miniMenu.classList.toggle('hidden');
+            updateMiniMenuUI();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!miniMenu.contains(e.target) && e.target !== miniStatus) {
+                miniMenu.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('mini-toggle-im').addEventListener('click', () => {
+            toggleInputMethod();
+            updateMiniMenuUI();
+        });
+
+        document.getElementById('mini-toggle-code').addEventListener('click', () => {
+            state.settings.maxCodeLength = state.settings.maxCodeLength === 4 ? 3 : 4;
+            applySettings();
+            updateMiniMenuUI();
+            showToast(`Switched to ${state.settings.maxCodeLength}-Code Mode`);
+        });
+
+        document.getElementById('mini-font-dec').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (state.settings.fontScale > 0.5) {
+                state.settings.fontScale -= 0.1;
+                applySettings();
+            }
+        });
+
+        document.getElementById('mini-font-inc').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (state.settings.fontScale < 2.0) {
+                state.settings.fontScale += 0.1;
+                applySettings();
+            }
+        });
+    }
+}
+
+function updateMiniMenuUI() {
+    const imBtn = document.getElementById('mini-toggle-im');
+    const codeBtn = document.getElementById('mini-toggle-code');
+
+    if (imBtn) {
+        imBtn.textContent = state.currentIM === 'dayi' ? 'Dayi' : (state.currentIM === 'zhuyin' ? 'Zhuyin' : 'Eng');
+    }
+
+    if (codeBtn) {
+        codeBtn.textContent = `${state.settings.maxCodeLength}碼`;
+        if (state.settings.maxCodeLength === 4) codeBtn.classList.add('active');
+        else codeBtn.classList.remove('active');
     }
 }
 
@@ -639,8 +702,14 @@ function updateStatus() {
         miniText = 'Eng';
     }
 
+    if (state.currentIM === 'dayi') {
+        text += ` [${state.settings.maxCodeLength}碼]`;
+    }
+
     els.status.textContent = text;
     if (els.miniImStatus) els.miniImStatus.textContent = miniText;
+
+    updateMiniMenuUI();
 }
 
 function updateMenuToggle() {
@@ -664,7 +733,7 @@ function handleInput(key) {
 
     if (state.candidates.length > 0) {
         const nextBuffer = state.buffer + lowerKey;
-        const isInput = state.buffer.length < 4 && state.validPrefixes.has(nextBuffer);
+        const isInput = state.buffer.length < state.settings.maxCodeLength && state.validPrefixes.has(nextBuffer);
 
         if (isInput) {
             // Valid continuation
@@ -685,16 +754,33 @@ function handleInput(key) {
                 return;
             }
 
-            selectCandidate(0);
+            // Invalid key and not a selection key -> Do nothing (or error feedback)
+            // Do NOT auto-commit the first candidate, as it confuses the user (e.g., typing 'j' for 'aej' commits 'ae').
+            const composition = els.composition;
+            if (composition) {
+                composition.style.animation = 'none';
+                composition.offsetHeight; // Trigger reflow
+                composition.style.animation = 'shake 0.3s';
+            }
+            return;
         }
     }
 
-    if (state.buffer.length >= 4) {
+    if (state.buffer.length >= state.settings.maxCodeLength) {
         return;
     }
 
     state.buffer += lowerKey;
     updateComposition();
+
+    // Auto-commit if we reached max length
+    if (state.buffer.length === state.settings.maxCodeLength) {
+        if (state.candidates.length === 1) {
+            // Only auto-commit if there is no ambiguity (single candidate)
+            selectCandidate(0);
+        }
+        // If multiple candidates, stay and let user select (Space or Keys)
+    }
 }
 
 function handleBackspace() {
@@ -712,12 +798,8 @@ function handleBackspace() {
 function handleSpace() {
     triggerHaptic();
 
-    if (state.phantomText) {
-        confirmPhantom();
-        return;
-    }
-
     if (state.candidates.length > 0) {
+        // Select the first candidate (which might be the phantom/predicted one)
         selectCandidate(state.page * state.pageSize + 0);
     } else {
         if (state.buffer.length === 0) {
@@ -761,20 +843,7 @@ function updateComposition() {
     if (els.miniComposition) els.miniComposition.textContent = state.buffer;
 
     state.page = 0;
-
-    state.phantomText = null;
-    if (state.currentIM === 'dayi' && state.predictionEngine) {
-        if (state.buffer.length > 0) {
-            const lastChar = state.output.slice(-1);
-            if (lastChar) {
-                state.phantomText = state.predictionEngine.getBigramSuggestion(lastChar, state.buffer);
-            }
-
-            if (!state.phantomText) {
-                state.phantomText = state.predictionEngine.predictPhantom(state.buffer);
-            }
-        }
-    }
+    state.phantomText = null; // Reset phantom text state
 
     if (state.buffer.length === 0) {
         state.candidates = [];
@@ -782,21 +851,23 @@ function updateComposition() {
         return;
     }
 
-    let candidates = state.db[state.buffer] || [];
+    if (state.currentIM === 'dayi' && state.predictionEngine) {
+        const lastChar = state.output.slice(-1);
+        // Use PredictionEngine to get sorted candidates
+        const candidates = state.predictionEngine.getCandidates(state.buffer, lastChar);
+        state.candidates = candidates;
 
-    if (candidates.length > 0 && typeof candidates[0] === 'string') {
-        candidates = candidates.map(c => ({ char: c }));
-    }
-
-    state.candidates = candidates;
-
-    if (state.phantomText) {
-        // Remove phantom from candidates if it exists (to avoid duplicates)
-        state.candidates = state.candidates.filter(c => c.char !== state.phantomText);
-        // Insert at the beginning
-        state.candidates.unshift({ char: state.phantomText, isPhantom: true });
-        // Clear phantomText so it's not rendered separately
-        state.phantomText = null;
+        // Mark the first candidate as phantom if it exists (top prediction)
+        if (state.candidates.length > 0) {
+            state.candidates[0].isPhantom = true;
+        }
+    } else {
+        // Fallback for Zhuyin or other IMs
+        let candidates = state.db[state.buffer] || [];
+        if (candidates.length > 0 && typeof candidates[0] === 'string') {
+            candidates = candidates.map(c => ({ char: c }));
+        }
+        state.candidates = candidates;
     }
 
     renderCandidates();
@@ -869,6 +940,12 @@ function selectCandidate(index) {
     if (realIndex >= state.candidates.length) return;
 
     const char = state.candidates[realIndex].char;
+
+    // Record user habit
+    if (state.userHistory) {
+        state.userHistory.recordCommit(char);
+    }
+
     state.output += char;
     state.buffer = '';
     state.candidates = [];

@@ -22,6 +22,20 @@
 
 ---
 
+## Current Focus
+The current focus is on **verifying and refining the MVP2 Adaptive Predictive Engine**. The core implementation is complete, including the weighted scoring model, extended prediction, and UI integration. We are now ensuring the documentation is up-to-date.
+
+## Recent Changes
+*   **MVP2 Implementation**:
+    *   Implemented **Adaptive Predictive Engine** with 3-layer weighted scoring (Static + Bigram + User Habit).
+    *   Added **Extended Prediction** (prefix matching) to support predicting full words from partial codes.
+    *   Implemented **Smart Auto-Commit** with collision safety (waits if multiple candidates exist).
+    *   Added **3/4 Code Toggle** and **Mini Mode Settings Menu**.
+    *   Reconfigured **Hotkeys** (Tap Ctrl for Mini Mode, Tap Alt for Copy).
+    *   Regenerated `dayi_db.json` to ensure full coverage.
+
+---
+
 ## 🔧 Latest Session: MVP 2.0 Implementation (2025-11-27)
 
 ### Session Summary

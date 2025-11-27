@@ -339,6 +339,24 @@
             }
         }
 
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-4px);
+                color: var(--danger);
+            }
+
+            75% {
+                transform: translateX(4px);
+                color: var(--danger);
+            }
+        }
+
         /* Candidate Bar */
         .candidate-bar {
             display: flex;
@@ -697,6 +715,77 @@
             position: relative;
         }
 
+        /* Mini Menu */
+        .mini-menu {
+            position: absolute;
+            top: 48px;
+            /* Below input bar */
+            right: 8px;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10000;
+            min-width: 140px;
+            animation: fadeIn 0.1s ease-out;
+        }
+
+        .mini-menu.hidden {
+            display: none;
+        }
+
+        .mini-menu-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .mini-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: all 0.1s;
+        }
+
+        .mini-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            border-color: var(--primary);
+        }
+
+        .mini-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .mini-btn-group {
+            display: flex;
+            gap: 4px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Input Bar (Now on Top) */
         .mini-input-bar {
             flex: 0 0 auto;
@@ -1002,6 +1091,11 @@
                 <span>Keyboard</span>
                 <span class="toggle-status">ON</span>
             </div>
+            <div class="menu-item" id="toggle-code-len">
+                <span class="material-symbols-outlined">numbers</span>
+                <span>Max Codes</span>
+                <span class="toggle-status">4碼</span>
+            </div>
             <div class="menu-item" id="toggle-mini">
                 <span class="material-symbols-outlined">aspect_ratio</span>
                 <span>Mini Mode</span>
@@ -1037,13 +1131,34 @@
                 <div id="mini-im-status" class="mini-im-status">易</div>
             </div>
 
+            <!-- Mini Menu (Popover) -->
+            <div id="mini-menu" class="mini-menu hidden">
+                <div class="mini-menu-row">
+                    <span>輸入法</span>
+                    <button id="mini-toggle-im" class="mini-btn">Dayi</button>
+                </div>
+                <div class="mini-menu-row">
+                    <span>碼數</span>
+                    <button id="mini-toggle-code" class="mini-btn">4碼</button>
+                </div>
+                <div class="mini-menu-row">
+                    <span>字體</span>
+                    <div class="mini-btn-group">
+                        <button id="mini-font-dec" class="mini-btn">A-</button>
+                        <button id="mini-font-inc" class="mini-btn">A+</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Bottom: Output Area -->
             <textarea id="mini-output" readonly></textarea>
         </div>
     </div>
 
     <!-- App Logic -->
+    <script src="js/user_history.js"></script>
     <script src="js/prediction_engine.js"></script>
-    <script src="js/app.js?v=5"></script>
+    <script src="js/app.js?v=6"></script>
 </body>
+
 </html>

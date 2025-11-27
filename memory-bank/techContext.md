@@ -93,6 +93,27 @@ webdayi/
 
 ## API Reference
 
+### Prediction Engine (MVP 2.0)
+
+#### Weighted Scoring Model
+The engine uses a 3-layer weighted formula to rank candidates:
+`Score = (w1 * StaticFreq) + (w2 * BigramProb) + (w3 * UserHabit)`
+
+| Component | Weight | Source | Description |
+|-----------|--------|--------|-------------|
+| **Static Frequency** | 1.0 | `freq_map.json` | Baseline probability of the character in general usage. |
+| **Bigram Probability** | 2.5 | `bigram_lite.json` | Context-aware boost based on the previous character. |
+| **User Habit** | 10.0 | `localStorage` | Personalized boost for characters frequently selected by the user. |
+
+#### Data Structures
+*   **`freq_map.json`**: Key-Value map of `char -> frequency` (normalized).
+*   **`bigram_lite.json`**: Map of `lastChar -> { nextChar: probability }`.
+*   **`dayi_db.json`**: Full mapping including 4-code words (regenerated from CIN).
+
+#### Extended Prediction (Prefix Search)
+To support predicting full words (e.g., 4-code "何") from partial input (e.g., "i"), the engine performs a prefix search on the `dayi_db` keys.
+*   **Optimization**: Limits results to top N matches to maintain performance.
+
 ### Chrome Extension APIs Used
 
 #### chrome.runtime (Message Passing)
