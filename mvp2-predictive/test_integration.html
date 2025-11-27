@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Integration Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #222;
+            color: #eee;
+            padding: 20px;
+        }
+
+        .pass {
+            color: #4caf50;
+        }
+
+        .fail {
+            color: #f44336;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Integration Test Runner</h1>
+    <div id="log"></div>
+
+    <!-- Hidden App Container -->
+    <div id="app-container" style="display:none">
+        <textarea id="output-buffer"></textarea>
+        <div id="composition-buffer"></div>
+        <div id="candidate-bar"></div>
+        <div id="status-bar"></div>
+        <div id="virtual-keyboard"></div>
+        <button id="copy-btn"></button>
+        <button id="clear-btn"></button>
+        <button id="btn-mini-mode"></button>
+        <span id="mini-im-status"></span>
+        <div id="mini-ui">
+            <textarea id="mini-output"></textarea>
+            <div id="mini-composition"></div>
+            <div id="mini-candidates"></div>
+        </div>
+        <div id="toggle-im"><span class="toggle-status"></span></div>
+        <div id="toggle-focus"><span class="toggle-status"></span></div>
+        <div id="toggle-autocopy"><span class="toggle-status"></span></div>
+        <div id="toggle-theme"><span class="toggle-status"></span></div>
+        <div id="toggle-keyboard"><span class="toggle-status"></span></div>
+        <div id="toggle-mini"><span class="toggle-status"></span></div>
+        <div id="font-size-display"></div>
+        <button id="font-decrease"></button>
+        <button id="font-increase"></button>
+        <div id="menu-fab"></div>
+        <div id="menu-panel"></div>
+        <button id="key-shift"></button>
+    </div>
+
+    <!-- Load App Scripts -->
+    <script src="js/prediction_engine.js"></script>
+    <script src="js/app.js?v=2"></script>
+
+    <script>
+        const logEl = document.getElementById('log');
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.textContent = msg;
+            if (type === 'pass') div.className = 'pass';
+            if (type === 'fail') div.className = 'fail';
+            logEl.appendChild(div);
+            console.log(msg);
+        }
+
+        async function runTests() {
+            log('Starting Tests...');
+
+            // Wait for init
+            await new Promise(r => setTimeout(r, 1000));
+
+            // Test 1: Basic Input & Selection (司 - bo)
+            log('Test 1: Input "bo" -> "司"');
+            handleInput('b');
+            handleInput('o');
+
+            // Wait for candidates
+            await new Promise(r => setTimeout(r, 50));
+
+            if (state.candidates.length === 0 || state.candidates[0].char !== '司') {
+                log('FAIL: Expected candidate "司", got ' + (state.candidates[0] ? state.candidates[0].char : 'none'), 'fail');
+            } else {
+                log('PASS: Candidate "司" found', 'pass');
+            }
+
+            handleSpace(); // Confirm "司"
+
+            if (state.output.trim() !== '司') {
+                log('FAIL: Expected output "司", got "' + state.output + '"', 'fail');
+            } else {
+                log('PASS: "司" confirmed', 'pass');
+            }
+
+            // Test 2: Bigram Prediction (司 + i -> 機)
+            log('Test 2: Bigram Prediction (司 + i -> 機)');
+            handleInput('i'); // i is start of 機 code (木)
+
+            await new Promise(r => setTimeout(r, 50));
+
+            if (state.phantomText !== '機') {
+                log('FAIL: Expected phantom "機", got "' + state.phantomText + '"', 'fail');
+            } else {
+                log('PASS: Phantom text "機" appeared', 'pass');
+            }
+
+            // Test 3: Smart Spacebar
+            log('Test 3: Smart Spacebar Confirmation');
+
+            // Dispatch Space Event to test the listener
+            const spaceEvent = new KeyboardEvent('keydown', { key: ' ' });
+            document.dispatchEvent(spaceEvent);
+
+            await new Promise(r => setTimeout(r, 50));
+
+            if (state.output.trim() !== '司機') {
+                log('FAIL: Expected output "司機", got "' + state.output + '"', 'fail');
+            } else {
+                log('PASS: Smart Spacebar confirmed "機"', 'pass');
+            }
+
+            log('Tests Completed.');
+        }
+
+        // Override loadDatabase to use real files but we are in same dir structure so it should work.
+        // Start tests after a delay
+        setTimeout(runTests, 2000);
+    </script>
+</body>
+
+</html>

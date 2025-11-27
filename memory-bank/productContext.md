@@ -3,17 +3,13 @@
 ## Why This Project Exists
 
 ### The Pain Point
-Modern knowledge workers increasingly live in the browser. Tools like Gmail, Google Docs, Notion, and countless web applications have become the primary workspace. Yet for Dàyì (大易) Chinese input method users, the typing experience remains fragmented:
+Modern knowledge workers increasingly live in the browser. Tools like Gmail, Google Docs, Notion, and countless web applications have become the primary workspace. Yet for Dàyì (大易) Chinese input method users, the typing experience remains fragmented.
 
-1. **System IMEs are opaque**: Traditional OS-level IMEs are black boxes you can't customize or understand
-2. **Rime is powerful but heavy**: Configuring Rime feels like learning a new programming language
-3. **No browser-native solution**: Existing IMEs operate at OS level, missing browser-specific optimization opportunities
-4. **No cloud sync**: Personal dictionaries and preferences don't follow you across devices
-
-### The Vision
-What if your input method was as transparent as your favorite developer tool? What if it lived where you actually type—in the browser? What if it learned from your context and synced seamlessly?
-
-WebDaYi answers these questions.
+### The Vision: Smart 2-Code Predictive Engine
+The goal is to evolve from a simple character-by-character input (Lite) into a high-speed, **Predictive Type-ahead** engine. We call this **Smart 2-Code**.
+- **Determinism**: Respect the core Dayi 4-code rules.
+- **Speed**: Predict the intended character after just 2 codes (or even 1) using "Phantom Text".
+- **Flow**: Confirm predictions with Space, or continue typing to refine.
 
 ## Problems It Solves
 
@@ -158,91 +154,33 @@ User continues typing naturally
 - ❌ An AI-powered smart typing assistant (frequency-based is sufficient for MVP)
 - ❌ A desktop application (web-first philosophy)
 
-## Future Product Evolution
+## Roadmap 2.0: From Lite to Predictive Engine
 
-### MVP 3.0 v2: Smart Upgrade (2025-11-12 Planning)
+### Stage 1: Foundation (Lite PWA) - **Current Stable**
+The current single-file, lightweight PWA.
+- Pure Dayi 4-code logic.
+- Zero dependencies.
+- Fast, deterministic, manual selection.
+- Multi-IM support (Zhuyin/Dayi) & Window management.
 
-**Vision**: Transform from static prediction to **intelligent, adaptive prediction** that learns from users and adapts to context.
+### Stage 2: MVP2 - Predictive Engine (Smart 2-Code) - **Next Target**
+An evolution of Lite that introduces "Phantom Text" suggestions.
+- **Concept**: Predictive Type-ahead.
+- **Workflow**:
+  1. Input 1st code -> Suggest most likely char (Phantom).
+  2. Input 2nd code -> Confirm 1st char + Suggest next char (Phantom).
+- **Interaction**: "Space" to confirm phantom text, "Numbers" to select manually.
+- **Goal**: High-speed entry for 2-code patterns without "guessing" whole sentences (unlike the legacy Viterbi approach).
+- **Tech Stack**: Base Lite codebase, Lightweight Bigram model (`bigram_lite.json`).
 
-#### F-4.0: Personalized N-gram Learning (User LoRA)
+### Stage 3: MVP3 - Smart Context Engine - **Future**
+Advanced context awareness on top of MVP2.
+- Viterbi re-integration for long-sentence disambiguation (optional).
+- Dynamic user dictionary learning.
+- Cloud sync.
 
-**Problem it solves**: Tie-breaking and personalization
-- When "天氣" and "天真" have similar scores, system cannot learn user preference
-- Each user gets same predictions, no personalization
-
-**Solution**: User-side LoRA (Low-Rank Adaptation)
-- Base Model: ngram_db.json (static, shared by all users)
-- Adapter: chrome.storage.sync (dynamic, personal to each user)
-- Formula: `Final Score = Base Score + User LoRA Score`
-
-**User Experience**:
-```
-First time: User types "天" + "c8"
-  → Sees [1. 真, 2. 氣]
-  → Selects 2 (氣)
-  → System learns: "天氣 > 天真" for this user
-
-Second time: Same input
-  → Sees [1. 氣, 2. 真]  ✓ Learned!
-  → First choice is now what user wants
-```
-
-**Synergy**: Learning works across both modes
-- Learn in character mode → affects sentence mode
-- Learn in sentence mode → affects character mode
-- Same UserDB shared by both!
-
-#### F-5.0: Context-Adaptive Weights
-
-**Problem it solves**: Context blindness
-- Same predictions on GitHub (formal) and PTT (casual)
-- Cannot adapt to different writing styles
-
-**Solution**: Dynamic scoring weight adjustment
-- GitHub: {bigram: 0.8, unigram: 0.2} - trust structure
-- PTT: {bigram: 0.6, unigram: 0.4} - trust popularity
-- Default: {bigram: 0.7, unigram: 0.3} - balanced
-
-**User Experience**:
-```
-On github.com: User types "實作演算法"
-  → System uses formal weights
-  → Predicts "實作" (formal) over "實做" (casual)
-  → Result matches context ✓
-
-On ptt.cc: Same input
-  → System uses casual weights
-  → Balances structure vs popularity differently
-  → Result adapts to context ✓
-```
-
-**No manual switching**: System automatically detects website and adjusts
-
-#### Success Vision (MVP 3.0 v2)
-
-**Accuracy**: 94.4% → 97% (after 10 learning iterations)
-**Personalization**: 1-2 corrections to learn a preference
-**Context-awareness**: +3-5% accuracy on domain-specific text
-**User Experience**: "It just knows what I want"
-
-**8-Week Roadmap**:
-- Week 1: Planning & design (current)
-- Week 2-3: F-4.0 UserDB.js implementation
-- Week 4: F-5.0 ContextEngine.js implementation
-- Week 5: MVP 1.0 v12 integration
-- Week 6-8: MVP 2a v2.0 Chrome Extension
-
-### MVP 2a+ Features (Future)
-1. **Cloud Sync**: Personal dictionary via `chrome.storage.sync` (part of F-4.0)
-2. **Advanced Learning**: LoRA-style adaptive learning rates, confidence scoring
-3. **Multi-Corpus Context**: Domain-specific N-gram models per website
-4. **Visual Dashboard**: See what engine has learned, manual editing
-5. **Collaborative Learning**: Share anonymized patterns (privacy-preserving)
-
-### Potential Beyond Browser
-- Firefox extension (similar architecture)
-- Mobile PWA (for web-based typing on phones)
-- API mode (let other apps use WebDaYi as service)
+## Legacy Archives
+The previous MVP1 (Viterbi sentence-based) and MVP1-PWA have been moved to `archive/` to focus on the cleaner, faster "Smart 2-Code" approach.
 
 ## Competitive Landscape
 

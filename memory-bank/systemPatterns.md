@@ -281,30 +281,32 @@ User clicks in Gmail textarea
 - Better performance for frequent lookups
 - Cleaner API
 
-### Decision 2: Why Manifest V3 over V2?
+### 1. Core Architecture (MVP2 Predictive Engine)
 
-**Rationale**:
-- V2 is deprecated (sunset 2024)
-- V3 required for Chrome Web Store
-- Service Workers more resource-efficient than background pages
-- Future-proof architecture
+The system has evolved from a Viterbi-based sentence predictor to a **Predictive Type-ahead** engine.
 
-### Decision 3: Why Not Use Trie/Prefix Tree?
+```mermaid
+graph TD
+    User[User Input] --> InputHandler
+    InputHandler --> |Code 1| PhantomEngine[Phantom Engine]
+    PhantomEngine --> |Lookup| FreqMap[Frequency Map]
+    PhantomEngine --> |Suggest| UI[Phantom Text UI]
+    
+    InputHandler --> |Code 2| PhantomEngine
+    PhantomEngine --> |Confirm Char 1| OutputBuffer
+    PhantomEngine --> |Predict Char 2| BigramModel[Bigram Lite Model]
+    BigramModel --> |Suggest| UI
+    
+    UI --> |Space| Confirm[Confirm Prediction]
+    UI --> |Number| Select[Manual Selection]
+```
 
-**Rationale**:
-- Dàyì codes are short (1-4 characters)
-- Full dictionary is small enough for RAM
-- Map lookup is already optimal
-- Simpler implementation = fewer bugs
-- **Trade-off**: No autocomplete (acceptable for MVP)
+### 2. Key Components
 
-### Decision 4: Why Frequency-Based Sorting Only?
-
-**Rationale**:
-- Validates core algorithm first
-- N-gram adds complexity (defer to 2a+)
-- Rime's frequencies are high quality
-- **Future**: Easy to add contextual weights later
+- **Phantom Engine**: The new core logic that handles type-ahead suggestions.
+- **Frequency Map**: `dayi_db.json` (sorted by frequency) for single-character lookups.
+- **Bigram Lite Model**: `bigram_lite.json` for predicting the next character based on the previous one.
+- **Mini Mode**: The floating, transparent window for PWA usage (inherited from Lite).
 
 ### Decision 5: Why Chrome-Only Initially?
 

@@ -1,18 +1,4 @@
 # Technical Context: WebDaYi
-
-## Technology Stack
-
-### Core Technologies
-
-| Component | Technology | Version | Rationale |
-|-----------|-----------|---------|-----------|
-| **Language** | JavaScript | ES6+ | Native browser support, no transpilation |
-| **Runtime** | Browser | Chrome 88+ | Modern APIs, Manifest V3 support |
-| **Extension API** | Chrome Extensions | Manifest V3 | Future-proof, required for Web Store |
-| **Data Format** | JSON | - | Universal, built-in parsing |
-| **Markup** | HTML5 | - | Standard web platform |
-| **Styling** | CSS3 | - | Native browser support |
-
 ### Development Tools
 
 | Tool | Purpose | Required |

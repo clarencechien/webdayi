@@ -171,8 +171,18 @@ webdayi/
 │   ├── dayi_db.json            # 大易碼表 (O(1) 查詢)
 │   └── ngram_db.json           # N-gram 資料庫 (279K bigrams)
 │
-├── lite/                       #- **WebDayi Lite**: A pure PWA version optimized for mobile devices.
-  - **Features**: Virtual Keyboard (Trapezoid layout, English Mode, Haptics), Offline Support, Focus Mode.
+├── lite/                     ## Quick Start
+
+### MVP 2.0: Predictive Type-ahead (Current)
+The latest version features a Smart Spacebar and predictive engine.
+1.  Navigate to `mvp2-predictive/`.
+2.  Open `index.html` in your browser.
+3.  See `mvp2-predictive/README.md` for details.
+
+### WebDayi Lite (Stable)
+The lightweight, PWA-ready version.
+1.  Navigate to `lite/`.
+2.  Open `index.html`.pport, Focus Mode.
   - **Path**: `lite/`          # 主頁面
 │   ├── app.js                  # 核心邏輯
 │   ├── style.css               # 樣式

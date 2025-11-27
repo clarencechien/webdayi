@@ -1,21 +1,63 @@
 # Active Context: WebDaYi
 
 **Last Updated**: 2025-11-26
-**Current Version**: MVP 1.0 v11.3.5 + Lite v0.6.0
+**Current Version**: MVP2 Predictive Engine (In Progress)
 **Branch**: `main`
 
 ---
 
 ## 📊 Current Status
 
-### Phase 1.12: Branch Merge & Critical Fixes ✅ COMPLETE
-**Status**: feat/adjust-char-weights merged, critical bugs fixed
+### Phase: Restructuring & MVP2 Initialization ✅ COMPLETE
+**Status**: Legacy MVPs archived, MVP2 structure initialized.
 **Completion Date**: 2025-11-26
-**Key Achievements**: Merged lite dictionary updates, fixed corrupted database, restored UI styling
+**Key Achievements**:
+- Moved `mvp1` and `mvp1-pwa` to `archive/`.
+- Created `mvp2-predictive` based on `lite`.
+- Created mock `bigram_lite.json` and `DEV_INSTRUCTIONS.md`.
 
 ---
 
-## 🔧 Latest Session: WebDayi Lite Phase 0.6.0 Upgrade (2025-11-26)
+## 🔧 Latest Session: Restructuring for Predictive Engine (2025-11-26)
+
+### Session Summary
+
+This session marked a major pivot in the project roadmap. We are moving away from the heavy Viterbi sentence-based prediction (MVP1) towards a lightweight, high-speed **Predictive Type-ahead** engine (MVP2).
+
+**Key Achievements**:
+1. ✅ **Archive Legacy**: Moved `mvp1` and `mvp1-pwa` to `archive/` to clear the workspace.
+2. ✅ **Initialize MVP2**: Created `mvp2-predictive` by copying the stable `lite` version.
+3. ✅ **Data Prep**: Created a lightweight `bigram_lite.json` mock for the new predictive engine.
+4. ✅ **Documentation**: Updated `README.md` and created `DEV_INSTRUCTIONS.md` for the next development phase.
+
+## Current Focus
+The current focus is on **MVP 2.0: Predictive Type-ahead**.
+We have successfully implemented the core "Smart 2-Code" prediction engine, integrated it into the WebDayi Lite UI, and verified the "Smart Spacebar" interaction.
+The next step is to expand the bigram database and refine the prediction logic (Smart 3-Code).
+
+## Recent Changes
+- **MVP2 Predictive Engine**:
+    - Created `mvp2-predictive` directory.
+    - Implemented `PredictionEngine` class with `predictPhantom` (frequency) and `getBigramSuggestion` (context).
+    - Integrated engine into `app.js` and `index.html`.
+    - **Smart Spacebar**: Implemented logic to confirm "Phantom Text" with Spacebar.
+    - **UI Restoration**: Restored the "WebDayi Lite" card design from the `lite/` branch.
+    - **Verification**: Verified "司機" (bo + i + Space) test case.
+- **Archived**: Moved legacy MVP1 and PWA prototypes to `archive/`.
+
+### Implementation Details
+
+**New Structure**:
+- `mvp2-predictive/`: The new main development folder.
+- `archive/`: Contains legacy code.
+
+**Next Steps**:
+- Implement the "Phantom Text" logic in `mvp2-predictive/index.html`.
+- Connect `bigram_lite.json` to the input logic.
+
+---
+
+## 🔧 Previous Session: WebDayi Lite Phase 0.6.0 Upgrade (2025-11-26)
 
 ### Session Summary
 

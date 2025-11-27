@@ -1,43 +1,54 @@
 # Progress Tracker: WebDaYi
 
-**Last Updated**: 2025-11-26 (🎉 Phase 0.6.0 - Zhuyin Support & PWA Fixes!)
-**Current Version**: 11.3.5 (MVP 1.0) / 0.6.0 (Lite)
-**Build**: 20251126-002 (Phase 0.6.0 - Zhuyin + PWA Fixes)
-**Git Commits**:
-- `7169beb` - Merge feat/adjust-char-weights into main
-- `6f8eabc` - Fix: Restore Tailwind CSS classes for mode-toggle button
-- `d7187f8` - Fix: Regenerate corrupted dayi_db.json and fix converter path
+**Last Updated**: 2025-11-26 (Restructuring for MVP2)
+**Current Version**: MVP2 Predictive Engine (In Progress)
+**Build**: 20251126-003 (MVP2 Init)
 
 **Recent Changes**:
+- **2025-11-26**: **Restructuring & Roadmap 2.0**
+    - **Archived Legacy**: Moved `mvp1` and `mvp1-pwa` to `archive/`.
+    - **Initialized MVP2**: Created `mvp2-predictive` from `lite`.
+    - **Data Prep**: Created `bigram_lite.json` mock.
+    - **Documentation**: Updated roadmap to focus on "Predictive Type-ahead".
 - **2025-11-26**: Completed WebDayi Lite Phase 0.6.0.
     - **Zhuyin Support**: Added full Zhuyin input method with `zhuyin_db.json`.
     - **Split Shift**: Left Shift (Eng/Chi), Right Shift (Dayi/Zhuyin).
     - **PWA Fix**: Added single-instance support (`launch_handler`).
-    - **UI Polish**: Added IM indicator to Mini Mode, optimized padding.
-    - **Mobile Keyboard**: Added Globe button, dynamic layouts (Zhuyin/Eng), and visual feedback.
-- **2025-11-26**: Merged feat/adjust-char-weights branch and fixed critical bugs.
-    - Merged lite dictionary character priority updates (71→界, 2n→制, 2mn→觕).
-    - Fixed broken mode-toggle button styling (Tailwind classes restored).
-    - Fixed corrupted lite/dayi_db.json (converter path issue, regenerated clean DB).
-    - Updated converter/convert_cin.js output path to correct location.
-- **2025-11-21**: Added Ctrl double-click shortcut to toggle Mini Mode in PWA.
-    - Implemented PWA detection using `window.matchMedia('(display-mode: standalone)')`.
-    - Added double-tap logic (300ms window) for Ctrl key.
-    - Preserves existing Ctrl copy functionality.
-- **2025-11-20**: Completed "Mini Mode" for WebDayi Lite.
-    - Implemented `window-controls-overlay` for frameless PWA experience.
-    - Designed "Extreme Minimalist" UI with blinking cursor and transparent background.
-    - Refined Input Logic:
-        - **Global Alt-Copy**: `Alt` key copies text in all modes.
-        - **Double-Alt Clear**: Double-tapping `Alt` clears text.
-        - **Shift**: Simple toggle for English/Chinese mode.
-    - Fixed PWA layout issues and removed legacy toggle buttons.
-**Overall Status**: 🎉 WebDayi Lite Phase 0.6.0 Complete!
-**Main Branch**: ~98% (Phase 0-1.10.6 ✅, MVP 2a next)
-**Feature Branch**: Merged into main
-**Integration**: Phase 1.10.6 complete - E2E Framework established!
 
-## Project Phases Overview
+**Overall Status**: 🔄 Transitioning to MVP2 Predictive Engine
+**Main Branch**: MVP2 Initialization Complete
+
+## Project Phases Overview (Roadmap 2.0)
+
+### Stage 1: Foundation (Lite PWA)
+- [x] **Lite PWA Core** (Phase 0.6.0) ✅
+- [x] **Multi-IM Support** (Zhuyin/Dayi) ✅
+
+### Stage 2: MVP2 - Predictive Engine (Smart 2-Code)
+   ### MVP 2.0: Predictive Type-ahead (Current)
+- [x] **Setup**
+  - [x] Create `mvp2-predictive` folder
+  - [x] Define `DEV_INSTRUCTIONS.md`
+- [x] **Core Logic Implementation**
+  - [x] `PredictionEngine` class (Frequency + Bigram)
+  - [x] TDD: Unit tests for prediction logic
+  - [x] Integration: `app.js` + `PredictionEngine`
+  - [x] Smart Spacebar Interaction (Phantom Text confirmation)
+- [ ] **Data Expansion**
+  - [ ] Generate full `bigram.json` from corpus
+  - [ ] Implement "Smart 3-Code" logic
+- [ ] **Refinement**
+  - [ ] Performance optimization
+  - [ ] Mobile UI tweaks
+
+### Stage 3: MVP3 - Smart Context Engine (Future)
+- [ ] Viterbi Re-integration
+- [ ] Dynamic User Dictionary
+- [ ] Cloud Sync
+
+---
+
+### Legacy Phases (Archived)
 
 ### Main Branch (Production Track)
 
