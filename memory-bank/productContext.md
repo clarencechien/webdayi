@@ -13,6 +13,16 @@ The goal is to evolve from a simple character-by-character input (Lite) into a h
 
 ## Problems It Solves
 
+## Project Status
+- **Current Version**: MVP 2.0 (Predictive Type-ahead)
+- **Status**: Stable / In Development
+- **Focus**: Expanding prediction data and refining "Smart 3-Code" logic.
+
+## Goals
+1.  **Speed**: Reduce keystrokes for common characters using "Smart Spacebar" and Phantom Text.
+2.  **Simplicity**: Maintain the lightweight, client-side architecture of WebDayi Lite.
+3.  **Accuracy**: Provide context-aware suggestions (Bigram) to minimize candidate selection.
+
 ### For Power Users
 - **Transparency**: Every line of code is readable and modifiable
 - **Control**: No hidden configurations or mysterious behaviors

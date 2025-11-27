@@ -148,15 +148,13 @@ chrome.scripting.executeScript({
 
 ### Web APIs Used
 
-#### Fetch API
-
-```javascript
-// Load database
-const response = await fetch('dayi_db.json');
-const data = await response.json();
-```
-
-**Browser Support**: Chrome 42+ (universal)
+#### Tech Stack (MVP 2.0)
+- **Frontend**: Vanilla HTML5, CSS3 (Variables), JavaScript (ES6+).
+- **Data**: JSON files (`dayi_db.json`, `bigram_lite.json`).
+- **Testing**:
+    - **Unit**: `js/prediction.test.js` (Custom lightweight runner).
+    - **Integration**: `test_integration.html` (DOM-based tests).
+- **Build Tools**: None required (Zero-build). Optional `scripts/build_bigram.js` (Node.js) for data generation.
 
 #### Clipboard API
 
