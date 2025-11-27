@@ -1,102 +1,102 @@
 # WebDayi (網頁大易輸入法)
 
-> **Language / 語言**: [English](README.en.md) | [正體中文](README.md)
+> **語言 / Language**: [正體中文](README.md) | [English](README.en.md)
 
-> Lightweight, Transparent, Web-First Dayi Input Method Engine.
+> 輕量、透明、網頁優先的大易輸入法引擎。
 
 [![Status](https://img.shields.io/badge/status-MVP%202.0%20Beta-blue)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ---
 
-## 📖 Overview
+## 📖 概述
 
-**WebDayi** is a modern implementation of the Dayi input method for the web.
+**WebDayi** 是一個現代化的網頁版大易輸入法實作。
 
-**Current Focus: MVP 2.0 (Predictive Type-ahead)**
-We are currently developing a predictive engine ("Smart 2-Code") to significantly reduce keystrokes.
-- **Smart Spacebar**: Confirm "Phantom" suggestions with Space.
-- **Predictive Engine**: Frequency and Context (Bigram) based suggestions.
-- **Lightweight**: Pure client-side, no server dependencies.
-
----
-
-## 🚀 Quick Start
-
-### MVP 2.0: Predictive Type-ahead (Current)
-The latest version with Smart Spacebar and predictive features.
-1.  Navigate to `mvp2-predictive/`.
-2.  Open `index.html` in your browser.
-3.  See `mvp2-predictive/README.md` for details.
-
-### WebDayi Lite (Stable)
-The lightweight, PWA-ready version for mobile and desktop.
-1.  Navigate to `lite/`.
-2.  Open `index.html`.
-
-### Legacy Versions
-Older prototypes (MVP1, Vue.js) are moved to `archive/`.
+**當前重點：MVP 2.0 (預測型輸入)**
+我們正在開發一個能夠顯著減少按鍵次數的預測引擎（"Smart 2-Code"）。
+- **智慧空白鍵 (Smart Spacebar)**：使用空白鍵確認「幽靈文字 (Phantom)」建議。
+- **預測引擎**：基於頻率和上下文 (Bigram) 的智慧建議。
+- **輕量化**：純客戶端執行，無伺服器依賴。
 
 ---
 
-## 🏗️ Directory Structure
+## 🚀 快速開始
+
+### MVP 2.0: 預測型輸入 (當前版本)
+具備智慧空白鍵和預測功能的最新版本。
+1.  前往 `mvp2-predictive/` 目錄。
+2.  在瀏覽器中打開 `index.html`。
+3.  詳情請參閱 `mvp2-predictive/README.md`。
+
+### WebDayi Lite (穩定版)
+適用於手機和桌面的輕量級 PWA 版本。
+1.  前往 `lite/` 目錄。
+2.  打開 `index.html`。
+
+### 舊版本
+早期的原型 (MVP1, Vue.js) 已移動至 `archive/`。
+
+---
+
+## 🏗️ 目錄結構
 
 ```
 webdayi/
-├── mvp2-predictive/        # MVP 2.0 (Current Focus)
-│   ├── index.html          # Main Application
-│   ├── js/                 # Application Logic
+├── mvp2-predictive/        # MVP 2.0 (當前開發重點)
+│   ├── index.html          # 主應用程式
+│   ├── js/                 # 應用程式邏輯
 │   │   ├── app.js
 │   │   ├── prediction_engine.js
 │   │   └── prediction.test.js
-│   ├── data/               # Data Files
+│   ├── data/               # 資料檔案
 │   │   ├── bigram_lite.json
 │   │   ├── dayi_db.json
 │   │   └── zhuyin_db.json
-│   └── README.md           # MVP2 Documentation
+│   └── README.md           # MVP2 文件
 │
-├── lite/                   # WebDayi Lite (Stable PWA)
+├── lite/                   # WebDayi Lite (穩定版 PWA)
 │   ├── index.html
 │   └── app.js
 │
-├── archive/                # Legacy Versions
-│   ├── mvp1/               # Original Vue.js Prototype
-│   └── mvp1-pwa/           # Early PWA Experiments
+├── archive/                # 舊版本存檔
+│   ├── mvp1/               # 原始 Vue.js 原型
+│   └── mvp1-pwa/           # 早期 PWA 實驗
 │
-└── memory-bank/            # Project Documentation
-    ├── activeContext.md    # Current Status
-    ├── productContext.md   # Goals & Vision
-    ├── systemPatterns.md   # Architecture
-    └── techContext.md      # Tech Stack
+└── memory-bank/            # 專案文件
+    ├── activeContext.md    # 當前狀態
+    ├── productContext.md   # 目標與願景
+    ├── systemPatterns.md   # 系統架構
+    └── techContext.md      # 技術堆疊
 ```
 
 ---
 
-## � Documentation
+## 📚 文件
 
-- **[activeContext.md](memory-bank/activeContext.md)**: Current development status.
-- **[productContext.md](memory-bank/productContext.md)**: Project goals and vision.
-- **[systemPatterns.md](memory-bank/systemPatterns.md)**: Architecture and design patterns.
-- **[techContext.md](memory-bank/techContext.md)**: Technology stack.
-
----
-
-## 🎯 Roadmap
-
-- ✅ **MVP 1.0**: Vue.js Prototype (Archived)
-- ✅ **WebDayi Lite**: Lightweight PWA (Stable)
-- 🚧 **MVP 2.0**: Predictive Type-ahead (In Progress)
-    - ✅ Smart Spacebar
-    - ✅ Basic Prediction Engine
-    - � Expanded Bigram Data
-    - 📋 Smart 3-Code Logic
+- **[activeContext.md](memory-bank/activeContext.md)**：當前開發狀態。
+- **[productContext.md](memory-bank/productContext.md)**：專案目標與願景。
+- **[systemPatterns.md](memory-bank/systemPatterns.md)**：架構與設計模式。
+- **[techContext.md](memory-bank/techContext.md)**：技術堆疊。
 
 ---
 
-## 📄 License
+## 🎯 路線圖
 
-Open Source. Contributions welcome!
+- ✅ **MVP 1.0**：Vue.js 原型 (已存檔)
+- ✅ **WebDayi Lite**：輕量級 PWA (穩定版)
+- 🚧 **MVP 2.0**：預測型輸入 (進行中)
+    - ✅ 智慧空白鍵
+    - ✅ 基礎預測引擎
+    - 🚧 擴充 Bigram 資料
+    - 📋 Smart 3-Code 邏輯
 
-### Acknowledgements
-- **Rime Input Method**: Data source ([rime/rime-dayi](https://github.com/rime/rime-dayi))
-- **Dayi Input Method**: Created by Mr. Wang Zan-jie.
+---
+
+## 📄 授權
+
+開源專案。歡迎貢獻！
+
+### 致謝
+- **Rime 輸入法**：資料來源 ([rime/rime-dayi](https://github.com/rime/rime-dayi))
+- **大易輸入法**：由王贊傑先生發明。
