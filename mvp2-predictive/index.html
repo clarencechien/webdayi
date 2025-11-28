@@ -1266,6 +1266,88 @@
             /* Show only in Focus Mode */
             /* Highlight it */
         }
+
+        /* Small Screen Optimization (iPhone SE) */
+        @media (max-height: 700px) {
+            .app-container {
+                padding: 8px;
+                /* Reduce container padding */
+            }
+
+            .app-header {
+                padding-bottom: 4px;
+                /* Reduce header spacing */
+            }
+
+            h1 {
+                font-size: 1.2rem;
+                /* Smaller title */
+            }
+
+            .main-content {
+                gap: 8px;
+                /* Reduce gap between cards */
+                padding-bottom: 4px;
+            }
+
+            .card {
+                padding: 8px 12px;
+                /* Reduce card padding */
+            }
+
+            .section-header {
+                margin-bottom: 4px;
+                /* Reduce section header spacing */
+            }
+
+            h2 {
+                font-size: 1rem;
+            }
+
+            #output-buffer {
+                height: 50px;
+                /* Reduce output height */
+                font-size: 1rem;
+            }
+
+            .input-group {
+                margin-bottom: 4px;
+            }
+
+            .input-wrapper {
+                height: 36px;
+                /* Reduce input height */
+            }
+
+            .candidate-bar {
+                min-height: 48px;
+                /* Reduce candidate bar height */
+                padding: 4px;
+                gap: 4px;
+            }
+
+            .candidate-item {
+                height: 44px;
+                /* Reduce candidate item height */
+                min-width: 40px;
+                padding: 2px 4px;
+            }
+
+            .candidate-char {
+                font-size: 1.1rem;
+            }
+
+            .keyboard-container {
+                padding-top: 4px;
+                gap: 2px;
+            }
+
+            .key {
+                height: 40px;
+                /* Reduce key height */
+                font-size: 1rem;
+            }
+        }
     </style>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
