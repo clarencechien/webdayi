@@ -1102,32 +1102,9 @@
             }
         }
 
-        /* 4. PWA Standalone Overrides (Force Mini Mode) */
+        /* 4. PWA Standalone Overrides */
         @media all and (display-mode: standalone),
         all and (display-mode: window-controls-overlay) {
-
-            /* Hide Main App Elements */
-            .app-header,
-            .app-container,
-            .fab,
-            .status-bar,
-            .menu-panel {
-                display: none !important;
-            }
-
-            /* Show Mini UI - Override .hidden class */
-            .mini-ui,
-            .mini-ui.hidden {
-                display: flex !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            }
-
-            /* Force Transparent/Mini Backgrounds */
-            html,
-            body {
-                background-color: transparent !important;
-            }
 
             /* Ensure html takes full height for transparency */
             html {
