@@ -187,8 +187,8 @@ chrome.scripting.executeScript({
 - **Frontend**: Vanilla HTML5, CSS3 (Variables), JavaScript (ES6+).
 - **Data**: JSON files (`dayi_db.json`, `bigram_lite.json`).
 - **Testing**:
-    - **Unit**: `js/prediction.test.js` (Custom lightweight runner).
-    - **Data Quality**: `js/data_quality.test.js` (Real-world verification).
+    - **Unit**: `tests/prediction.test.js` (Custom lightweight runner).
+    - **Data Quality**: `tests/data_quality.test.js` (Real-world verification).
     - **Integration**: `test_integration.html` (DOM-based tests).
 - **Build Tools**: None required (Zero-build). Optional `scripts/build_bigram.js` (Node.js) for data generation.
 

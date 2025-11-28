@@ -7,7 +7,30 @@
 **Feature Branch**: claude/update-prd-v3-roadmap-011CV3aecnMvzQ7oqkMwjcUi
 **Next Milestone**: Phase 2 - Production Optimization & Polish
 
-**Latest Achievements** (Mobile NaN Fix + Phase 1.10 Design):
+## 📦 Archived: Phase 1.10 (Mobile NaN Fix + Design)
+**Archived Date**: 2025-11-28
+
+**Achievements**:
+- ✅ **CRITICAL MOBILE FIX**: Fixed NaN bug in Android character mode learning (triple-layer validation)!
+- ✅ **CONTENTEDITABLE QUICK FIX**: Added Enter/= key handlers directly to contenteditable (temporary)
+- ✅ **PHASE 1.10 DESIGN**: Comprehensive character span architecture design document (430 lines)
+- ✅ **TDD**: 25 comprehensive mobile NaN prevention tests (all passing)
+- ✅ **SESSION 10.11 PART 5 COMPLETE**: Top-N prediction cycling with = key + Enter confirmation!
+- ✅ **MOBILE EXPORT FIX**: Web Share API for mobile devices (native share sheet on iOS/Android)
+- ✅ **CONSOLE CLEANUP**: Fixed dayiMap loading race condition logging (error → info)
+- ✅ **PWA WARNINGS FIXED**: Manifest shortcuts, deprecated meta tags, icon directory created
+- ✅ **ICONS PLACEHOLDER**: Created icons directory with SVG template and generation guide
+- ✅ **CHARACTER MODE LEARNING**: Character mode now records to Phase 1 UserDB (both modes unified!)
+- ✅ **PWA INSTALLATION**: Fixed all paths for GitHub Pages deployment (manifest, SW, icons)
+- ✅ **CRITICAL FIX**: Phase 1 F-4.0 learning integration fully functional (exported functions to window scope)
+- ✅ **UI FIX**: Desktop controls no longer overlap input area (moved UserDB controls to Learning Stats section)
+- ✅ **FEATURE ADD**: Mobile controls now have Export/Import/Clear buttons
+- ✅ **TDD**: 15 comprehensive UI layout tests (test-ui-layout-fixes.html)
+- ✅ Phase 0 (Foundation): 100% Complete - Planning & Documentation
+- ✅ Phase 0.5 (PWA POC): **100% COMPLETE** - Full implementation with TDD 🎉
+
+---
+
 - ✅ **CRITICAL MOBILE FIX**: Fixed NaN bug in Android character mode learning (triple-layer validation)!
 - ✅ **CONTENTEDITABLE QUICK FIX**: Added Enter/= key handlers directly to contenteditable (temporary)
 - ✅ **PHASE 1.10 DESIGN**: Comprehensive character span architecture design document (430 lines)

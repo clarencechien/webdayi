@@ -68,8 +68,8 @@ graph TD
 ### 3. Data Quality Loop
 *   **Pattern**: Test-Patch-Verify.
 *   **Mechanism**:
-    *   **Automated Verification**: `data_quality.test.js` runs against a "Golden Set" of real-world phrases.
-    *   **Iterative Patching**: `fix_bigrams.js` applies targeted fixes (Additions/Removals) to `bigram_lite.json`.
+    *   **Automated Verification**: `tests/data_quality.test.js` runs against a "Golden Set" of real-world phrases.
+    *   **Iterative Patching**: `scripts/fix_bigrams.js` applies targeted fixes (Additions/Removals) to `bigram_lite.json`.
     *   **Goal**: Continuous improvement of prediction accuracy (currently 100% pass rate).
 
 ### 4. Zero-Build Architecture

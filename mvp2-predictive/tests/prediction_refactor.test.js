@@ -67,16 +67,7 @@ async function runTests() {
 
 // Load Engine and Run
 if (typeof window === 'undefined') {
-    // Node.js environment: Load the file manually
-    const fs = require('fs');
-    const vm = require('vm');
-    const path = require('path');
-
-    const engineCode = fs.readFileSync(path.join(__dirname, 'prediction_engine.js'), 'utf8');
-    const context = { window: {}, console, PredictionEngine: null };
-    vm.createContext(context);
-    vm.runInContext(engineCode, context);
-    global.PredictionEngine = context.window.PredictionEngine;
-
+    // Node.js environment
+    global.PredictionEngine = require('../js/prediction_engine.js');
     runTests();
 }

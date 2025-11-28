@@ -37,7 +37,7 @@ Currently working on **Fine-tuning remaining data failures** (e.g., "謝謝", "�
     *   **Core Logic**: Refactored `PredictionEngine` to separate Exact Matches from Predictions.
 *   **Data Quality Verification**:
     *   Created **Test Plan** (Logic vs. Data Quality) and **Test Data Set** (20+ cases).
-    *   Implemented automated data quality testing (`js/data_quality.test.js`).
+    *   Implemented automated data quality testing (`tests/data_quality.test.js`).
     *   Implemented data patching script (`scripts/fix_bigrams.js`) to fix missing bigrams and remove noise.
     *   Achieved **100% Pass Rate** (15/15) after fine-tuning logic and data.
 *   **Smart Compose**:
@@ -47,10 +47,6 @@ Currently working on **Fine-tuning remaining data failures** (e.g., "謝謝", "�
     *   Added Ghost Text Timeout (3s auto-hide) with fade-out animation.
     *   Added UI toggles for Ghost Text behavior in both Web and Mini modes.
 *   **MVP2 Implementation**:
-    *   Implemented **Adaptive Predictive Engine** with 3-layer weighted scoring.
-    *   Added **Extended Prediction** (prefix matching).
-    *   Implemented **Smart Auto-Commit** with collision safety.
-    *   Added **3/4 Code Toggle** and **Mini Mode Settings Menu**.
     *   Implemented **Adaptive Predictive Engine** with 3-layer weighted scoring (Static + Bigram + User Habit).
     *   Added **Extended Prediction** (prefix matching) to support predicting full words from partial codes.
     *   Implemented **Smart Auto-Commit** with collision safety (waits if multiple candidates exist).
@@ -67,33 +63,19 @@ Currently working on **Fine-tuning remaining data failures** (e.g., "謝謝", "�
 
 ---
 
-## 🔧 Latest Session: Dayi 4-Code Auto-Commit Refinement (2025-11-28)
+## 🔧 Latest Session: Project Structure & Documentation Cleanup (2025-11-28)
 
-We refined the auto-commit behavior based on user feedback to distinguish between 3-code and 4-code modes.
-- **4-Code Mode**: Disabled auto-commit. Users must now press **Space** to confirm the character, even if it's a unique match. This prevents accidental commits when the user intends to type more codes or just wants to confirm visually.
-- **3-Code Mode**: Retained auto-commit for unique matches to maintain speed.
+We reorganized the project structure and updated documentation to reflect the mature state of MVP 2.0.
+- **Tests**: Moved all test scripts to `mvp2-predictive/tests/`.
+- **Scripts**: Moved one-off debug scripts to `archive/scripts/`.
+- **Documentation**: Updated all READMEs and Memory Bank files to reflect the new structure and Data Quality results.
+- **Cleanup**: Removed unnecessary logs and archived outdated context.
 
-## 🔧 Previous Session: Mini Mode & Visual Feedback Refinement (2025-11-27)
+## 🔧 Previous Session: Data Quality Verification (2025-11-28)
 
-We focused on fixing the Mini Mode UI and ensuring visual feedback works reliably in PWA mode.
-- **Layout**: Fixed the nesting error that broke the Mini Mode layout.
-- **Menu**: Fixed the inline settings toolbar interaction (z-index).
-- **Visual Feedback**: Implemented a **root-level overlay** to guarantee visibility in PWA/Dark Mode, and refined the aesthetics to be ultra-subtle (premium feel).
-
-### Session Summary
-This session established the **Predictive Engine** architecture (MVP 2.0). We moved away from the complex Viterbi approach to a lightweight, high-speed type-ahead system.
-
-**Key Changes**:
-1.  **Engine Logic**: Created `js/prediction_engine.js` to handle `predictPhantom` (frequency) and `getBigramSuggestion` (context).
-2.  **Smart Spacebar**: Modified `app.js` to prioritize confirming Phantom Text over candidate selection when available.
-3.  **UI Restoration**: Reverted `index.html` to the stable "Lite" design while keeping the new engine logic.
-4.  **Mini Mode Fix**: Updated `app.js` to use correct selection keys and styling in Mini Mode, matching `lite`.
-5.  **Phantom Integration**: Moved Phantom Text into the candidate list as the first item (Index 0), ensuring consistent UX and key mapping.
-6.  **Cleanup**: Archived legacy `mvp1` code and updated documentation to reflect the new direction.
-
-### Current Focus
-- **Refining Prediction**: Expand `bigram_lite.json` with more data.
-- **Smart 3-Code**: Implement logic for 3-code predictions.
+We established a rigorous testing framework to ensure prediction accuracy.
+- **Automated Testing**: Achieved 100% pass rate on `data_quality.test.js`.
+- **Data Patching**: Fixed critical data issues (e.g., "台北", "謝謝") using `fix_bigrams.js`.
 
 ---
 

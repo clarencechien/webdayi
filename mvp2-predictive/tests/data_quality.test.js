@@ -6,12 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 // 1. Load Prediction Engine
-const enginePath = path.join(__dirname, 'prediction_engine.js');
-const engineCode = fs.readFileSync(enginePath, 'utf8');
-// Mock window/document if needed by engine (though engine seems pure JS)
-global.window = {};
-eval(engineCode);
-const PredictionEngine = window.PredictionEngine;
+const PredictionEngine = require('../js/prediction_engine.js');
 
 // 2. Load Data
 const dataDir = path.join(__dirname, '../data');

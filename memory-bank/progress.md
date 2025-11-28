@@ -36,12 +36,17 @@
   - [x] **Test Plan**: Logic vs. Data Quality strategy.
   - [x] **Automated Testing**: `data_quality.test.js` (Real-world cases).
   - [x] **Data Patching**: `fix_bigrams.js` for iterative improvement.
-  - [x] **Validation**: Achieved 80% pass rate on initial test set.
+  - [x] **Validation**: Achieved 100% pass rate (15/15) on core test set.
+- [x] **Project Structure Cleanup**
+  - [x] **Tests**: Moved to `tests/` directory.
+  - [x] **Scripts**: Organized into `scripts/` and `archive/scripts/`.
+  - [x] **Documentation**: Updated all READMEs and Memory Bank.
+
 ### Phase 6: Refactoring - Dual-Track Input (Completed)
 - [x] **Core Logic Refactoring**
   - [x] `getCandidates`: Prioritize Exact Matches (Blind Typing).
   - [x] `getBestPrediction`: Find best non-exact match (Phantom).
-  - [x] TDD Verification: `js/prediction_refactor.test.js`.
+  - [x] TDD Verification: `tests/prediction_refactor.test.js`.
 - [x] **Interaction & UI**
   - [x] **Visual Feedback**: Blue (Copy) / Red (Clear) flash.
   - [x] **Tab Key**: Confirm Phantom Text.
@@ -77,7 +82,8 @@
 
 ## 📅 Milestones
 
-- **2025-11-28**: Data Quality Verification (80% Pass Rate).
+- **2025-11-28**: Project Structure & Documentation Cleanup.
+- **2025-11-28**: Data Quality Verification (100% Pass Rate).
 - **2025-11-28**: Refined Dayi 4-Code Auto-Commit Behavior.
 - **2025-11-27**: MVP 2.0 UX Refinement (Mini Mode & Phantom Integration).
 - **2025-11-27**: MVP 2.0 Initialization & Core Logic Complete.

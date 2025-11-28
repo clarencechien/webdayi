@@ -54,7 +54,9 @@ webdayi/
 │   ├── index.html          # 主應用程式
 │   ├── js/                 # 應用程式邏輯
 │   │   ├── app.js
-│   │   ├── prediction_engine.js
+│   │   └── prediction_engine.js
+│   ├── tests/              # 測試腳本
+│   │   ├── data_quality.test.js
 │   │   └── prediction.test.js
 │   ├── data/               # 資料檔案
 │   │   ├── bigram_lite.json

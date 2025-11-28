@@ -177,7 +177,6 @@ class PredictionEngine {
             if (predFreq > 0) {
                 const ratio = maxExactFreq / predFreq;
                 if (ratio > this.DOMINANCE_RATIO) {
-                    // console.log(`Prediction suppressed: Exact '${exactList[0].char}'(${maxExactFreq}) dominates '${bestExt.char}'(${predFreq}) ratio=${ratio.toFixed(1)}`);
                     return null;
                 }
             } else if (maxExactFreq > 0.01) {
@@ -266,4 +265,10 @@ class PredictionEngine {
     }
 }
 
-window.PredictionEngine = PredictionEngine;
+if (typeof window !== 'undefined') {
+    window.PredictionEngine = PredictionEngine;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = PredictionEngine;
+}

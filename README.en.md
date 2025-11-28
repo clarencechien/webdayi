@@ -50,7 +50,9 @@ webdayi/
 │   ├── index.html          # Main Application
 │   ├── js/                 # Application Logic
 │   │   ├── app.js
-│   │   ├── prediction_engine.js
+│   │   └── prediction_engine.js
+│   ├── tests/              # Test Scripts
+│   │   ├── data_quality.test.js
 │   │   └── prediction.test.js
 │   ├── data/               # Data Files
 │   │   ├── bigram_lite.json

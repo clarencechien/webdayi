@@ -26,10 +26,7 @@ if (typeof document === 'undefined') {
 
 const fs = require('fs');
 const path = require('path');
-const enginePath = path.join(__dirname, 'prediction_engine.js');
-const engineCode = fs.readFileSync(enginePath, 'utf8');
-eval(engineCode); // This puts PredictionEngine on window/global
-const PredictionEngine = window.PredictionEngine;
+const PredictionEngine = require('../js/prediction_engine.js');
 
 const resultsDiv = { appendChild: () => { } }; // Mock resultsDiv
 let passed = 0;

@@ -74,12 +74,12 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 
 We maintain a rigorous testing framework to ensure prediction accuracy.
 
-*   **Automated Testing**: `js/data_quality.test.js` runs a suite of real-world test cases (e.g., "台北", "謝謝", "因為").
+*   **Automated Testing**: `tests/data_quality.test.js` runs a suite of real-world test cases (e.g., "台北", "謝謝", "因為").
 *   **Data Patching**: `scripts/fix_bigrams.js` allows for iterative refinement of Bigram data.
 *   **Current Status**: **100% Pass Rate** (15/15) on the core test set.
 *   **Verification**:
     ```bash
-    node js/data_quality.test.js
+    node tests/data_quality.test.js
     ```
 
 ---
