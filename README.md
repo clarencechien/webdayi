@@ -47,7 +47,7 @@
 ---
 
 ## 🏗️ 目錄結構
-
+```
 webdayi/
 ├── mvp2-predictive/        # MVP 2.0 (當前開發重點)
 │   ├── index.html          # 主應用程式
@@ -107,10 +107,10 @@ webdayi/
     - ✅ Smart Compose (連續預測 + Tab 確認 + 自動淡出)
     - ✅ 預測優化 (頻率壓制 + 上下文絕對優先)
     - ✅ Mini Mode 設定選單
-    - [x] **PWA Mode Control**：Mobile 預設 Focus Mode，Laptop 預設 Mini Mode
-    - [x] **Mini Mode Toggle**：Mini Mode 選單新增手動切換模式按鈕
-    - [x] **Laptop Focus Mode**：桌面版 Focus Mode 介面優化（置中、限制寬度）
-- [x] **Small Screen Optimization**：針對 iPhone SE 等小螢幕裝置優化版面配置
+    - ✅ **PWA Mode Control**：Mobile 預設 Focus Mode，Laptop 預設 Mini Mode
+    - ✅ **Mini Mode Toggle**：Mini Mode 選單新增手動切換模式按鈕
+    - ✅ **Laptop Focus Mode**：桌面版 Focus Mode 介面優化（置中、限制寬度）
+- ✅ **Small Screen Optimization**：針對 iPhone SE 等小螢幕裝置優化版面配置
     - ✅ Mobile Web UI 一致性優化 (Unified Header, No FAB)
     - ✅ Focus Mode 鍵盤佈局修正
     - ✅ **資料品質驗證 (Data Quality Verification)**：建立自動化測試框架，達成 100% 通過率。
