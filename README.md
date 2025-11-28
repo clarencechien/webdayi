@@ -16,7 +16,6 @@
 **當前重點：MVP 2.0 (預測型輸入)**
 我們已完成開發能夠顯著減少按鍵次數的預測引擎（"Adaptive Predictive Engine"）。
 - **智慧空白鍵 (Smart Spacebar)**：使用空白鍵確認「幽靈文字 (Phantom)」建議。
-- **智慧空白鍵 (Smart Spacebar)**：使用空白鍵確認「幽靈文字 (Phantom)」建議。
 - **Smart Compose**：連續預測下一個字，支援 Tab 鍵確認，具備智慧防呆與自動淡出功能。
 - **預測優化**：包含「頻率壓制 (Frequency Dominance)」與「上下文絕對優先 (Context Absolute Priority)」，確保預測精準度。
 - **預測引擎**：基於頻率、上下文 (Bigram) 和 **使用者習慣** 的智慧建議。
