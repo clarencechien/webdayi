@@ -90,7 +90,7 @@ webdayi/
     - ✅ 智慧空白鍵
     - ✅ 3層權重預測引擎 (頻率 + Bigram + 使用者習慣)
     - ✅ 擴充預測 (Prefix Search)
-    - ✅ Smart 3/4 碼切換與自動上字
+    - ✅ Smart 3/4 碼切換與自動上字 (3碼自動，4碼手動)
     - ✅ Mini Mode 設定選單
     - ✅ Mobile Web UI 一致性優化 (Unified Header, No FAB)
     - ✅ Focus Mode 鍵盤佈局修正
