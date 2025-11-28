@@ -31,11 +31,15 @@
 1.  前往 `mvp2-predictive/` 目錄。
 2.  在瀏覽器中打開 `index.html`。
 3.  詳情請參閱 `mvp2-predictive/README.md`。
+   
+[https://clarencechien.github.io/webdayi/lite/index.html](https://clarencechien.github.io/webdayi/mvp2-predictive/index.html)
 
 ### WebDayi Lite (穩定版)
 適用於手機和桌面的輕量級 PWA 版本。
 1.  前往 `lite/` 目錄。
 2.  打開 `index.html`。
+   
+[https://clarencechien.github.io/webdayi/lite/index.html](https://clarencechien.github.io/webdayi/lite/index.html)
 
 ### 舊版本
 早期的原型 (MVP1, Vue.js) 已移動至 `archive/`。
