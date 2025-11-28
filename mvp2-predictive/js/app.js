@@ -20,8 +20,45 @@ const state = {
     predictionEngine: null,
     userHistory: null,
     phantomText: null,
-    lastConfirmedChar: null
+    lastConfirmedChar: null,
+    ghostTimer: null, // Instance of GhostTimer
+    ghostDismissed: false // Flag to prevent re-prediction after timeout
 };
+
+// --- Ghost Timer Logic ---
+class GhostTimer {
+    constructor(callback, duration = 3000) {
+        this.callback = callback;
+        this.duration = duration;
+        this.timerId = null;
+        this.isAlwaysShow = false;
+    }
+
+    setAlwaysShow(isAlwaysShow) {
+        this.isAlwaysShow = isAlwaysShow;
+        if (isAlwaysShow) {
+            this.clear();
+        } else {
+            // If switching to timeout mode, we don't necessarily start immediately unless text is there.
+            // The caller (updateComposition) will handle start().
+        }
+    }
+
+    start() {
+        if (this.isAlwaysShow) return;
+        this.clear();
+        this.timerId = setTimeout(() => {
+            this.callback();
+        }, this.duration);
+    }
+
+    clear() {
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = null;
+        }
+    }
+}
 
 // DOM Elements
 const els = {
@@ -122,7 +159,10 @@ function initTheme() {
         theme: 'dark',
         fontScale: 1.0,
         showKeyboard: !isLargeScreen,
-        maxCodeLength: 4 // Default to 4-code mode
+        fontScale: 1.0,
+        showKeyboard: !isLargeScreen,
+        maxCodeLength: 4, // Default to 4-code mode
+        alwaysShowGhost: false // Default: Off (3s Timeout)
     };
 
     const savedSettings = localStorage.getItem('webdayi-lite-settings');
@@ -164,6 +204,12 @@ function applySettings() {
     }
 
     updateToggleStatus('toggle-code-len', state.settings.maxCodeLength === 4 ? '4碼' : '3碼');
+    updateToggleStatus('toggle-ghost', state.settings.alwaysShowGhost ? 'Always' : '3s');
+
+    // Update Ghost Timer State
+    if (state.ghostTimer) {
+        state.ghostTimer.setAlwaysShow(state.settings.alwaysShowGhost);
+    }
 
     saveSettings();
 }
@@ -265,6 +311,12 @@ function setupMenuListeners() {
             showToast(`Switched to ${state.settings.maxCodeLength} -Code Mode`);
         });
 
+        document.getElementById('toggle-ghost').addEventListener('click', () => {
+            state.settings.alwaysShowGhost = !state.settings.alwaysShowGhost;
+            applySettings();
+            updateMiniMenuUI();
+        });
+
         document.getElementById('font-decrease').addEventListener('click', (e) => {
             e.stopPropagation();
             if (state.settings.fontScale > 0.5) {
@@ -320,6 +372,29 @@ async function loadDatabase() {
             userHistory: state.userHistory
         });
         state.predictionEngine.setDayiMap(state.dbs.dayi);
+
+        // Init Ghost Timer
+        state.ghostTimer = new GhostTimer(() => {
+            // Timeout Callback: Fade out then Clear
+            if (state.phantomText) {
+                // 1. Trigger Animation
+                const displays = document.querySelectorAll('.phantom-text-display');
+                displays.forEach(el => el.classList.add('phantom-fade-out'));
+
+                // 2. Wait for animation (500ms) then clear
+                setTimeout(() => {
+                    // Check if phantom text is still there (user might have typed)
+                    // Actually, if user typed, updateComposition would have cleared the timer/text anyway.
+                    // But we should be safe.
+                    if (state.phantomText) {
+                        state.phantomText = null;
+                        state.ghostDismissed = true; // Prevent immediate re-prediction
+                        updateComposition();
+                    }
+                }, 500);
+            }
+        }, 3000);
+        state.ghostTimer.setAlwaysShow(state.settings.alwaysShowGhost);
 
         state.db = state.dbs.dayi;
         state.validPrefixes = state.prefixes.dayi;
@@ -653,6 +728,13 @@ function setupMiniMenuListeners() {
                 applySettings();
             }
         });
+
+        // Ghost Toggle
+        document.getElementById('mini-tool-ghost')?.addEventListener('click', () => {
+            state.settings.alwaysShowGhost = !state.settings.alwaysShowGhost;
+            applySettings();
+            updateMiniMenuUI();
+        });
     }
 }
 
@@ -672,6 +754,18 @@ function updateMiniMenuUI() {
         } else {
             codeBtn.style.borderColor = 'var(--border-color)';
             codeBtn.style.color = 'var(--text-main)';
+        }
+    }
+
+    const ghostBtn = document.getElementById('mini-tool-ghost');
+    if (ghostBtn) {
+        const icon = ghostBtn.querySelector('.material-symbols-outlined');
+        if (state.settings.alwaysShowGhost) {
+            ghostBtn.style.color = 'var(--primary)';
+            if (icon) icon.textContent = 'visibility';
+        } else {
+            ghostBtn.style.color = 'var(--text-muted)';
+            if (icon) icon.textContent = 'visibility_off';
         }
     }
 }
@@ -869,6 +963,7 @@ function updateMenuToggle() {
 }
 
 function handleInput(key) {
+    state.ghostDismissed = false; // Reset dismissal on user input
     triggerHaptic();
     if (state.currentIM === 'english') {
         state.output += key;
@@ -934,6 +1029,7 @@ function handleInput(key) {
 }
 
 function handleBackspace() {
+    state.ghostDismissed = false; // Reset dismissal on user input
     triggerHaptic();
     if (state.buffer.length > 0) {
         state.buffer = state.buffer.slice(0, -1);
@@ -946,6 +1042,7 @@ function handleBackspace() {
 }
 
 function handleTab() {
+    state.ghostDismissed = false; // Reset dismissal on user input
     if (state.phantomText) {
         // Confirm Phantom Text (Smart Adopt)
         state.output += state.phantomText;
@@ -966,6 +1063,7 @@ function handleTab() {
 }
 
 function handleSpace() {
+    state.ghostDismissed = false; // Reset dismissal on user input
     triggerHaptic();
 
     if (state.candidates.length > 0) {
@@ -1013,6 +1111,31 @@ function updateComposition() {
     state.phantomText = null; // Reset phantom text state
 
     if (state.buffer.length === 0) {
+        // [Smart Compose] Continuous Prediction (Next Word)
+        if (state.currentIM === 'dayi' && state.predictionEngine && !state.ghostDismissed) {
+            const lastChar = state.output.slice(-1);
+            const nextPred = state.predictionEngine.predictNextChar(lastChar);
+
+            if (nextPred) {
+                state.phantomText = nextPred.char;
+                // Render Ghost Text Only (Low Opacity)
+                let html = `<span class="phantom-text-display" style="opacity: 0.5">${state.phantomText}<span style="font-size:0.8em; opacity:0.7;">[Tab]</span></span>`;
+                els.composition.innerHTML = html;
+                if (els.miniComposition) els.miniComposition.innerHTML = html;
+
+                // Clear candidates (Visual hierarchy: Ghost only)
+                state.candidates = [];
+                renderCandidates();
+
+                // Start Timer
+                if (state.ghostTimer) state.ghostTimer.start();
+                return;
+            }
+        }
+
+        // Clear Timer if no prediction
+        if (state.ghostTimer) state.ghostTimer.clear();
+
         els.composition.textContent = '';
         if (els.miniComposition) els.miniComposition.textContent = '';
         state.candidates = [];
@@ -1030,7 +1153,10 @@ function updateComposition() {
 
         // 2. Get Best Prediction (Phantom Text)
         // This is for the Tab key "Smart Adopt"
-        const bestPrediction = state.predictionEngine.getBestPrediction(state.buffer, lastChar);
+        let bestPrediction = null;
+        if (!state.ghostDismissed) {
+            bestPrediction = state.predictionEngine.getBestPrediction(state.buffer, lastChar);
+        }
 
         // 3. Set Phantom Text
         // Condition: Has prediction AND prediction is NOT the top candidate (avoid redundancy)
@@ -1053,7 +1179,14 @@ function updateComposition() {
     // 4. Render Composition (Buffer + Phantom)
     let html = state.buffer;
     if (state.phantomText) {
-        html += `<span class="phantom-text-display">${state.phantomText}<span style="font-size:0.8em; opacity:0.7;">[Tab]</span></span>`;
+        // Visual Noise Reduction: Opacity 0.5
+        html += `<span class="phantom-text-display" style="opacity: 0.5">${state.phantomText}<span style="font-size:0.8em; opacity:0.7;">[Tab]</span></span>`;
+
+        // Start Timer (Refresh on any render with phantom text)
+        if (state.ghostTimer) state.ghostTimer.start();
+    } else {
+        // Clear Timer if no phantom text
+        if (state.ghostTimer) state.ghostTimer.clear();
     }
 
     els.composition.innerHTML = html;
@@ -1125,6 +1258,7 @@ function renderCandidates() {
 }
 
 function selectCandidate(index) {
+    state.ghostDismissed = false; // Reset dismissal on user input
     const realIndex = state.page * state.pageSize + index;
     if (realIndex >= state.candidates.length) return;
 

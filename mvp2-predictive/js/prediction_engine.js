@@ -1,7 +1,19 @@
 /**
  * Prediction Engine for WebDayi MVP2
- * Handles Phantom Text, Bigram Predictions, and Dynamic Re-ranking
+ * 支援：
+ * 1. 補全 (Completion): 有輸入碼時，預測長詞 (如 i -> 想)
+ * 2. 聯想 (Next Word): 無輸入碼時，預測下個字 (如 相 -> 信)
+ * * Update: 加入「上下文安全機制」，避免在句首或標點後亂猜干擾視線。
  */
+
+// 定義「停止預測」的字元集合（標點符號、空白、換行）
+const STOP_CHARS = new Set([
+    '，', '。', '？', '！', '：', '；', '、', '「', '」', '『', '』', '（', '）',
+    ',', '.', '?', '!', ':', ';', ' ', '\n', '\t'
+]);
+
+// 頻率門檻：低於此值的字視為冷僻字
+const FREQ_THRESHOLD = 0.00005;
 
 class PredictionEngine {
     constructor(config = {}) {
@@ -10,11 +22,11 @@ class PredictionEngine {
         this.userHistory = config.userHistory || { getScore: () => 0 };
         this.dayiMap = {}; // Map<code, candidates[]>
 
-        // Weighted Scoring Model
+        // 權重設定
         this.weights = {
-            static: 1.0,   // Baseline (Unigram)
-            bigram: 2.5,   // Context (Bigram)
-            user: 10.0     // Personalization (User History)
+            static: 2.0,   // 靜態頻率 (Boosted from 1.0 to 2.0)
+            bigram: 2.5,   // 前字上下文
+            user: 10.0     // 用戶習慣
         };
     }
 
@@ -23,53 +35,30 @@ class PredictionEngine {
     }
 
     /**
-     * Calculate the prediction score for a candidate character.
-     * Formula: Score = (w1 * StaticFreq) + (w2 * BigramProb) + (w3 * UserHabit)
-     * 
-     * @param {string} char - The candidate character
-     * @param {string} lastChar - The last committed character (for context)
-     * @param {string} currentBuffer - The current input buffer (code)
-     * @returns {number} - The calculated score
+     * 計算分數
      */
     calculateScore(char, lastChar, currentBuffer) {
-        // 1. Static Frequency (from freq_map.json)
         const staticFreq = this.freqMap[char] || 0;
 
-        // 2. Bigram Probability (from bigram_lite.json)
-        // Check if bigramData[lastChar][currentBuffer] suggests this char
         let bigramProb = 0;
         if (lastChar && this.bigramData[lastChar]) {
             const suggestion = this.bigramData[lastChar][currentBuffer];
-            // If the bigram model explicitly suggests this char for this code, give it high probability
-            if (suggestion === char) {
-                bigramProb = 1.0;
-            }
+            if (suggestion === char) bigramProb = 1.0;
         }
 
-        // 3. User Habit (from UserHistory)
-        // We use the raw count from history. 
-        // Since w3 is 10.0, even a single usage (1 * 10) will likely outweigh static freq (usually < 0.1).
         const userHabit = this.userHistory.getScore(char);
 
-        // Weighted Sum
-        const score = (this.weights.static * staticFreq) +
+        return (this.weights.static * staticFreq) +
             (this.weights.bigram * bigramProb) +
             (this.weights.user * userHabit);
-
-        return score;
     }
 
     /**
-     * Get sorted candidates for a given code buffer.
-     * Applies Dynamic Re-ranking based on scores.
-     * Includes "Extended Candidates" (words starting with the buffer code).
-     * 
-     * @param {string} buffer - Current input buffer
-     * @param {string} lastChar - Last committed character
-     * @returns {Array} - Sorted list of candidates [{char, score}, ...]
+     * [Space 鍵用] 取得標準候選字列表
+     * 邏輯：盲打優先 (Exact Match First)
      */
     getCandidates(buffer, lastChar) {
-        // 1. Exact Matches
+        // 1. 精確匹配 (本字)
         const rawCandidates = this.dayiMap[buffer];
         let candidates = [];
 
@@ -78,34 +67,28 @@ class PredictionEngine {
             candidates = list.map(c => ({
                 char: typeof c === 'object' ? c.char : c,
                 originalData: c,
-                isExact: true // Mark as exact match
+                isExact: true
             }));
         }
 
-        // 2. Extended Matches (Predictive)
+        // 2. 延伸預測
         const extensions = this.getExtendedCandidates(buffer);
         candidates = [...candidates, ...extensions];
 
-        // 3. Score Everything
-        const scoredCandidates = candidates.map(c => {
-            const score = this.calculateScore(c.char, lastChar, buffer);
-            return {
-                ...c,
-                score: score
-            };
-        });
+        // 3. 計算分數
+        const scoredCandidates = candidates.map(c => ({
+            ...c,
+            score: this.calculateScore(c.char, lastChar, buffer)
+        }));
 
-        // 4. Sort: Exact Matches First, then by Score
+        // 4. 排序：本字 > 分數
         scoredCandidates.sort((a, b) => {
-            // Priority A: Exact Match always comes first
             if (a.isExact && !b.isExact) return -1;
             if (!a.isExact && b.isExact) return 1;
-
-            // Priority B: Score descending
             return b.score - a.score;
         });
 
-        // Deduplicate (keep highest priority/score version)
+        // 去重
         const seen = new Set();
         const uniqueCandidates = [];
         for (const c of scoredCandidates) {
@@ -119,82 +102,102 @@ class PredictionEngine {
     }
 
     /**
-     * Find candidates from keys that start with the buffer.
-     * @param {string} buffer 
-     * @returns {Array}
+     * [Tab 鍵情境 1]：有輸入碼時的「補全」
+     * 回傳最佳的延伸字 (排除本字)
+     * Alias: getBestPrediction (for compatibility)
      */
-    getExtendedCandidates(buffer) {
-        if (!buffer || buffer.length === 0) return [];
-
-        const extensions = [];
-        const MAX_EXTENSIONS = 20; // Limit to avoid flooding
-        let count = 0;
-
-        // Optimization: In a real app with 30k keys, we might want a Trie.
-        // For now, simple iteration. 
-        // We can optimize by caching keys or using a pre-computed index.
-
-        for (const key in this.dayiMap) {
-            if (key.length > buffer.length && key.startsWith(buffer)) {
-                const raw = this.dayiMap[key];
-                const list = Array.isArray(raw) ? raw : [raw];
-
-                for (const item of list) {
-                    const char = typeof item === 'object' ? item.char : item;
-                    // Only add if it has a high enough static freq or user history
-                    // to be worth showing as a prediction.
-                    // For simplicity, we add all, but the scoring/sorting will filter them down.
-                    extensions.push({
-                        char: char,
-                        originalData: item,
-                        isExact: false,
-                        code: key // Track the full code
-                    });
-                }
-
-                // Safety break if too many keys scanned? No, we need to scan all to find high scores.
-                // But we can limit the *result* size if needed.
-            }
-        }
-
-        return extensions;
-    }
-
-    /**
-     * Get the best prediction (Phantom Text) for the current buffer.
-     * This is strictly for "Smart Adopt" (Tab key), so it excludes exact matches
-     * unless there are no other options.
-     * 
-     * @param {string} buffer 
-     * @param {string} lastChar 
-     * @returns {object|null} - The best candidate object or null
-     */
-    getBestPrediction(buffer, lastChar) {
-        // Only look for extensions (non-exact matches)
+    getBestCompletion(buffer, lastChar) {
         const extensions = this.getExtendedCandidates(buffer);
         if (extensions.length === 0) return null;
 
-        // Score them
         const scored = extensions.map(c => ({
             ...c,
             score: this.calculateScore(c.char, lastChar, buffer)
         }));
 
-        // Sort by score descending
         scored.sort((a, b) => b.score - a.score);
+
+        // [新增] 簡單門檻：如果分數太低，代表只是隨便湊的字，不要干擾使用者
+        if (scored.length > 0 && scored[0].score < 0.0001) return null;
 
         return scored.length > 0 ? scored[0] : null;
     }
 
+    // Alias for backward compatibility if needed
+    getBestPrediction(buffer, lastChar) {
+        return this.getBestCompletion(buffer, lastChar);
+    }
+
     /**
-     * Predict phantom text based on current buffer and context.
-     * DEPRECATED: Use getBestPrediction instead.
+     * [Tab 鍵情境 2]：無輸入碼時的「聯想」
+     * 根據上一個字預測下一個字
+     * [Critical Update] 加入標點符號阻擋機制
      */
-    predictPhantom(buffer, lastChar) {
-        const best = this.getBestPrediction(buffer, lastChar);
-        return best ? best.char : null;
+    predictNextChar(lastChar) {
+        // 1. 安全檢查：如果沒有上個字，或是上個字是標點/換行，絕對不猜
+        if (!lastChar || STOP_CHARS.has(lastChar)) {
+            return null;
+        }
+
+        // 2. 資料檢查
+        if (!this.bigramData[lastChar]) return null;
+
+        const possibleNext = this.bigramData[lastChar]; // { "code": "char", ... }
+        const nextCandidates = [];
+
+        for (const code in possibleNext) {
+            const char = possibleNext[code];
+            const userScore = this.userHistory.getScore(char);
+            const freqScore = this.freqMap[char] || 0;
+
+            // Bigram 預測的基礎分數應該較高
+            const totalScore = freqScore + (userScore * 10);
+
+            nextCandidates.push({ char, code, score: totalScore });
+        }
+
+        if (nextCandidates.length === 0) return null;
+
+        // 依分數排序
+        nextCandidates.sort((a, b) => b.score - a.score);
+
+        return nextCandidates[0]; // 回傳最高分的下個字
+    }
+
+    /**
+     * 輔助：找出以 buffer 開頭的所有字
+     * [Update] 加入頻率過濾 (Frequency Filtering)
+     */
+    getExtendedCandidates(buffer) {
+        if (!buffer || buffer.length === 0) return [];
+        const extensions = [];
+
+        for (const key in this.dayiMap) {
+            if (key.length > buffer.length && key.startsWith(buffer)) {
+                const raw = this.dayiMap[key];
+                const list = Array.isArray(raw) ? raw : [raw];
+                for (const item of list) {
+                    const char = typeof item === 'object' ? item.char : item;
+
+                    // [新增] 頻率過濾
+                    const staticFreq = this.freqMap[char] || 0;
+                    const userScore = this.userHistory.getScore(char);
+
+                    // 如果是冷僻字 (頻率低) 且 用戶沒用過 (userScore == 0)，則跳過
+                    if (staticFreq < FREQ_THRESHOLD && userScore === 0) {
+                        continue;
+                    }
+
+                    extensions.push({
+                        char: char,
+                        isExact: false,
+                        code: key
+                    });
+                }
+            }
+        }
+        return extensions;
     }
 }
 
-// Export
 window.PredictionEngine = PredictionEngine;

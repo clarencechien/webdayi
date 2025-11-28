@@ -114,6 +114,13 @@ The engine uses a 3-layer weighted formula to rank candidates:
 To support predicting full words (e.g., 4-code "何") from partial input (e.g., "i"), the engine performs a prefix search on the `dayi_db` keys.
 *   **Optimization**: Limits results to top N matches to maintain performance.
 
+#### Smart Compose (Continuous Prediction)
+*   **Next Word Prediction**: Predicts the next character based on the last committed character using Bigram data, even when the input buffer is empty.
+*   **Context Safety**: Prevents predictions after punctuation or at the start of a sentence to avoid visual distraction.
+*   **Frequency Filtering**: Filters out rare words from predictions unless they are in the user's history.
+*   **Ghost Text Timeout**: Automatically hides the ghost text after 3 seconds (configurable) to minimize visual distraction.
+*   **Fade-out Animation**: Ghost text fades out smoothly (0.5s opacity transition) before being removed.
+
 ### Chrome Extension APIs Used
 
 #### chrome.runtime (Message Passing)

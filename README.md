@@ -16,6 +16,8 @@
 **當前重點：MVP 2.0 (預測型輸入)**
 我們已完成開發能夠顯著減少按鍵次數的預測引擎（"Adaptive Predictive Engine"）。
 - **智慧空白鍵 (Smart Spacebar)**：使用空白鍵確認「幽靈文字 (Phantom)」建議。
+- **智慧空白鍵 (Smart Spacebar)**：使用空白鍵確認「幽靈文字 (Phantom)」建議。
+- **Smart Compose**：連續預測下一個字，支援 Tab 鍵確認，具備智慧防呆與自動淡出功能。
 - **預測引擎**：基於頻率、上下文 (Bigram) 和 **使用者習慣** 的智慧建議。
 - **智慧輸入**：支援 3/4 碼切換、智慧自動上字 (Smart Auto-Commit) 和錯誤防呆 (Shake)。
 - **輕量化**：純客戶端執行，無伺服器依賴。
@@ -91,6 +93,7 @@ webdayi/
     - ✅ 3層權重預測引擎 (頻率 + Bigram + 使用者習慣)
     - ✅ 擴充預測 (Prefix Search)
     - ✅ Smart 3/4 碼切換與自動上字 (3碼自動，4碼手動)
+    - ✅ Smart Compose (連續預測 + Tab 確認 + 自動淡出)
     - ✅ Mini Mode 設定選單
     - ✅ Mobile Web UI 一致性優化 (Unified Header, No FAB)
     - ✅ Focus Mode 鍵盤佈局修正

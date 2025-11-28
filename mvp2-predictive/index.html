@@ -167,6 +167,11 @@
             opacity: 0.8;
         }
 
+        .phantom-fade-out {
+            transition: opacity 0.5s ease-out;
+            opacity: 0 !important;
+        }
+
         #font-size-display {
             font-size: 0.85rem;
             font-weight: 600;
@@ -1397,6 +1402,11 @@
                 <span>Mini Mode</span>
                 <span class="toggle-status">OFF</span>
             </div>
+            <div class="menu-item" id="toggle-ghost">
+                <span class="material-symbols-outlined">visibility_off</span>
+                <span>Ghost Text</span>
+                <span class="toggle-status">3s</span>
+            </div>
             <div class="menu-divider"></div>
             <div class="menu-controls">
                 <button id="font-decrease" class="control-btn" aria-label="Decrease Font Size">
@@ -1438,6 +1448,8 @@
                         <button class="mini-tool-icon" id="mini-tool-font-inc"><span
                                 class="material-symbols-outlined">text_increase</span></button>
                     </div>
+                    <button class="mini-tool-icon" id="mini-tool-ghost"><span
+                            class="material-symbols-outlined">visibility_off</span></button>
                     <button class="mini-tool-icon danger" id="mini-tool-close"><span
                             class="material-symbols-outlined">close</span></button>
                 </div>

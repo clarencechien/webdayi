@@ -25,6 +25,8 @@ The goal is to evolve from a simple character-by-character input (Lite) into a h
 
 ### For Power Users
 - **Transparency**: Every line of code is readable and modifiable
+-   **Smart Compose**: Intelligent next-word prediction that suggests completions using ghost text. Includes context safety, frequency filtering, and auto-hide/fade-out to minimize visual noise.
+-   **Mini Mode**: A compact, floating window for PWA/Desktop usage.
 - **Control**: No hidden configurations or mysterious behaviors
 - **Customization**: Built to be extended and personalized
 - **Understanding**: Know exactly how your input method makes decisions

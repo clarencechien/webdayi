@@ -10,7 +10,7 @@
 
 ### Phase: MVP 2.0 Development ✅ IN PROGRESS
 **Status**: Core Engine Implemented, UI Restored, Verification Complete.
-**Focus**: Expanding prediction data and refining "Smart 3-Code" logic.
+**Focus**: Implementing "Smart Compose" (Continuous Prediction) and refining "Smart 3-Code" logic.
 
 **Key Achievements**:
 - **Predictive Engine**: Implemented `PredictionEngine` with Frequency and Bigram models.
@@ -25,7 +25,7 @@
 ---
 
 ## Current Focus
-The current focus is on **Verifying the Dual-Track Input System**. The refactoring is complete, and we are ensuring the new Space/Tab logic works seamlessly.
+The current focus is on **Refining Smart Compose**. The core features (continuous prediction, context safety, ghost text timeout/fade-out) are implemented. Next steps may involve further tuning based on user feedback.
 
 ## Recent Changes
 *   **Dual-Track Input Refactoring**:
@@ -34,6 +34,12 @@ The current focus is on **Verifying the Dual-Track Input System**. The refactori
     *   **UI Fix**: Added **Tab Key** to virtual keyboard and **[Tab] Hint** to phantom text display.
     *   **Visual Feedback**: Implemented Unified Feedback (Blue for Copy, Red for Clear).
     *   **Core Logic**: Refactored `PredictionEngine` to separate Exact Matches from Predictions.
+*   **Smart Compose**:
+    *   Implemented continuous next-word prediction (even with empty buffer).
+    *   Added context safety (no prediction after punctuation).
+    *   Implemented frequency filtering for cleaner suggestions.
+    *   Added Ghost Text Timeout (3s auto-hide) with fade-out animation.
+    *   Added UI toggles for Ghost Text behavior in both Web and Mini modes.
 *   **MVP2 Implementation**:
     *   Implemented **Adaptive Predictive Engine** with 3-layer weighted scoring.
     *   Added **Extended Prediction** (prefix matching).

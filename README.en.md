@@ -16,7 +16,9 @@
 **Current Focus: MVP 2.0 (Predictive Type-ahead)**
 We are currently developing a predictive engine ("Smart 2-Code") to significantly reduce keystrokes.
 - **Smart Spacebar**: Confirm "Phantom" suggestions with Space.
-- **Predictive Engine**: Frequency and Context (Bigram) based suggestions.
+- **Smart Compose**: Continuous next-word prediction with Tab confirmation, smart safety checks, and auto-fade.
+- **Predictive Engine**: Intelligent suggestions based on Frequency, Context (Bigram), and **User Habit**.
+- **Smart Input**: Supports 3/4 code toggling, Smart Auto-Commit, and Error Shake.
 - **Lightweight**: Pure client-side, no server dependencies.
 
 ---
@@ -85,10 +87,12 @@ webdayi/
 
 - ✅ **MVP 1.0**: Vue.js Prototype (Archived)
 - ✅ **WebDayi Lite**: Lightweight PWA (Stable)
-- 🚧 **MVP 2.0**: Predictive Type-ahead (In Progress)
+- 🚧 **MVP 2.0**: Predictive Type-ahead (Completed)
     - ✅ Smart Spacebar
-    - ✅ Basic Prediction Engine
+    - ✅ 3-Layer Weighted Prediction Engine (Frequency + Bigram + User Habit)
+    - ✅ Extended Prediction (Prefix Search)
     - ✅ Smart 3/4 Code Toggle & Auto-Commit (Auto for 3-code, Manual for 4-code)
+    - ✅ Smart Compose (Continuous Prediction + Tab Confirm + Auto-Fade)
     - ✅ Mini Mode Settings Menu
     - ✅ Mobile Web UI Consistency (Unified Header, No FAB)
     - ✅ Focus Mode Layout Fix

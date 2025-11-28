@@ -12,6 +12,9 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 *   **3-Layer Weighted Scoring**: Combines Static Frequency, Bigram Context, and **User Habit** to predict the most likely character.
 *   **Extended Prediction**: Predicts full words (e.g., 4-code "何") even when you've only typed the first code (e.g., "i"), based on prefix matching.
 *   **Smart Spacebar**: The top prediction is always the first candidate. Press **Space** to commit it immediately.
+*   **Smart Compose**: Predicts the next word continuously (even with empty buffer). Press **Tab** to accept.
+    *   **Context Safety**: No predictions after punctuation.
+    *   **Ghost Text**: Auto-fades out after 3 seconds (configurable) to reduce visual noise.
 
 ### 2. Smart Input Logic
 *   **3/4 Code Toggle**: Switch between 3-code (Express) and 4-code (Standard) modes via the Menu.
@@ -50,6 +53,7 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 | **Left Shift** | Toggle English / Chinese |
 | **Right Shift** | Toggle Dayi / Zhuyin |
 | **Space** | Select 1st Candidate / Input Space |
+| **Tab** | Accept **Smart Compose** Prediction |
 | **Enter** | Commit Buffer / Input Enter |
 | **Esc** | Clear Buffer / Clear Output |
 
