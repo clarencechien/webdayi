@@ -41,6 +41,7 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 *   **Consistent UI**: Unified "Copy", "Clear", and "Menu" buttons in the Output Header for both Focus and Non-Focus modes.
 *   **Clean Layout**: Icon-only buttons on mobile to save space.
 *   **Focus Mode**: Optimized layout to prevent keyboard cutoff and ensure a distraction-free typing experience.
+*   **PWA Mode Control**: Automatically defaults to **Focus Mode** on Mobile and **Mini Mode** on Laptop/Desktop.
 *   **No FAB**: Removed floating action button on mobile for a cleaner interface.
 
 ---

@@ -102,6 +102,7 @@ webdayi/
     - ✅ Smart Compose (連續預測 + Tab 確認 + 自動淡出)
     - ✅ 預測優化 (頻率壓制 + 上下文絕對優先)
     - ✅ Mini Mode 設定選單
+    - ✅ **PWA Mode Control**：Mobile 預設 Focus Mode，Laptop 預設 Mini Mode
     - ✅ Mobile Web UI 一致性優化 (Unified Header, No FAB)
     - ✅ Focus Mode 鍵盤佈局修正
     - ✅ **資料品質驗證 (Data Quality Verification)**：建立自動化測試框架，達成 100% 通過率。

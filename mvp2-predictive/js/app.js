@@ -657,12 +657,17 @@ function setupEventListeners() {
     });
 
     if (window.matchMedia('(display-mode: standalone)').matches) {
-        console.log("PWA Mode Detected - Initializing Mini Mode");
-        setTimeout(() => {
-            if (!state.isMiniMode) {
-                toggleMiniMode();
-            }
-        }, 100);
+        // Only enable Mini Mode if NOT on mobile (Width > 768px)
+        if (window.innerWidth > 768) {
+            console.log("Desktop PWA Mode Detected - Initializing Mini Mode");
+            setTimeout(() => {
+                if (!state.isMiniMode) {
+                    toggleMiniMode();
+                }
+            }, 100);
+        } else {
+            console.log("Mobile PWA Mode Detected - Keeping Focus Mode");
+        }
     }
 
     setupMiniMenuListeners();

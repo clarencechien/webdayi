@@ -29,6 +29,12 @@ The current focus is on **Data Quality Verification**. We have established a rig
 Currently working on **Fine-tuning remaining data failures** (e.g., "謝謝", "台北") by adjusting `bigram_lite.json` via `fix_bigrams.js`.
 
 ## Recent Changes
+- **PWA Mode Control**: Implemented device-specific PWA behavior.
+    - **Mobile**: Defaults to **Focus Mode** (Full screen, no floating UI).
+    - **Laptop/Desktop**: Defaults to **Mini Mode** (Compact floating UI).
+- **Data Quality Verification**: Established automated testing framework with 100% pass rate.
+- **Context Absolute Priority**: Refined prediction logic to prioritize contextually correct words (Bigram) over high-frequency single characters.
+- **Mobile Web UI Polish**: Unified header design and removed FAB for a cleaner mobile experience.
 *   **Dual-Track Input Refactoring**:
     *   **Space Key**: Now strictly confirms **Exact Matches** (Blind Typing).
     *   **Tab Key**: Now confirms **Best Prediction** (Phantom Text).
