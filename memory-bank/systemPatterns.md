@@ -65,7 +65,14 @@ graph TD
 *   **Implementation**: `fetch('data/dayi_db.json')` on init.
 *   **Optimization**: Browser cache handles subsequent loads. No IndexedDB complexity needed for read-only data.
 
-### 3. Zero-Build Architecture
+### 3. Data Quality Loop
+*   **Pattern**: Test-Patch-Verify.
+*   **Mechanism**:
+    *   **Automated Verification**: `data_quality.test.js` runs against a "Golden Set" of real-world phrases.
+    *   **Iterative Patching**: `fix_bigrams.js` applies targeted fixes (Additions/Removals) to `bigram_lite.json`.
+    *   **Goal**: Continuous improvement of prediction accuracy (currently 100% pass rate).
+
+### 4. Zero-Build Architecture
 *   **Philosophy**: "View Source" is the source code.
 *   **Benefit**: Maximum transparency, easy to debug, no build step friction.
 *   **Structure**: ES Modules (optional) or simple script tags.

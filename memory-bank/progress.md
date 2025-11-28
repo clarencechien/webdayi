@@ -30,7 +30,13 @@
 - [x] **Mobile Web UI Consistency**
   - [x] **Unified Header**: Consistent Copy/Clear/Menu buttons in Output Header.
   - [x] **Mobile Optimization**: Icon-only buttons and FAB removal on mobile.
+  - [x] **Mobile Optimization**: Icon-only buttons and FAB removal on mobile.
   - [x] **Focus Mode Fix**: Resolved keyboard cutoff issue.
+- [x] **Data Quality Verification**
+  - [x] **Test Plan**: Logic vs. Data Quality strategy.
+  - [x] **Automated Testing**: `data_quality.test.js` (Real-world cases).
+  - [x] **Data Patching**: `fix_bigrams.js` for iterative improvement.
+  - [x] **Validation**: Achieved 80% pass rate on initial test set.
 ### Phase 6: Refactoring - Dual-Track Input (Completed)
 - [x] **Core Logic Refactoring**
   - [x] `getCandidates`: Prioritize Exact Matches (Blind Typing).
@@ -71,6 +77,7 @@
 
 ## 📅 Milestones
 
+- **2025-11-28**: Data Quality Verification (80% Pass Rate).
 - **2025-11-28**: Refined Dayi 4-Code Auto-Commit Behavior.
 - **2025-11-27**: MVP 2.0 UX Refinement (Mini Mode & Phantom Integration).
 - **2025-11-27**: MVP 2.0 Initialization & Core Logic Complete.

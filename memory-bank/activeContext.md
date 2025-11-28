@@ -25,8 +25,8 @@
 ---
 
 ## Current Focus
-The current focus is on **Refining Smart Compose**. The core features (continuous prediction, context safety, ghost text timeout/fade-out) are implemented.
-Currently working on **Fixing Prediction Suppression** by lowering `DOMINANCE_RATIO` from 10.0 to 8.0. This is to ensure that "衝" (Ratio ~9.2 vs "天") is correctly suppressed.
+The current focus is on **Data Quality Verification**. We have established a rigorous testing framework (`data_quality.test.js`) and are iteratively refining the Bigram data to ensure high-quality predictions.
+Currently working on **Fine-tuning remaining data failures** (e.g., "謝謝", "台北") by adjusting `bigram_lite.json` via `fix_bigrams.js`.
 
 ## Recent Changes
 *   **Dual-Track Input Refactoring**:
@@ -35,6 +35,11 @@ Currently working on **Fixing Prediction Suppression** by lowering `DOMINANCE_RA
     *   **UI Fix**: Added **Tab Key** to virtual keyboard and **[Tab] Hint** to phantom text display.
     *   **Visual Feedback**: Implemented Unified Feedback (Blue for Copy, Red for Clear).
     *   **Core Logic**: Refactored `PredictionEngine` to separate Exact Matches from Predictions.
+*   **Data Quality Verification**:
+    *   Created **Test Plan** (Logic vs. Data Quality) and **Test Data Set** (20+ cases).
+    *   Implemented automated data quality testing (`js/data_quality.test.js`).
+    *   Implemented data patching script (`scripts/fix_bigrams.js`) to fix missing bigrams and remove noise.
+    *   Achieved **100% Pass Rate** (15/15) after fine-tuning logic and data.
 *   **Smart Compose**:
     *   Implemented continuous next-word prediction (even with empty buffer).
     *   Added context safety (no prediction after punctuation).

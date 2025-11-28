@@ -139,6 +139,9 @@ class PredictionEngine {
         if (!bestExt) return null;
 
         // --- [新增] 頻率壓制檢查 (Dominance Check) ---
+        // Exception: If bestExt is VIP (Score >= 1000000), bypass suppression
+        if (bestExt.score >= 1000000.0) return bestExt;
+
         // 檢查當前的 buffer 是否已經對應到一個「強勢本字」
         const rawExact = this.dayiMap[buffer];
         if (rawExact) {
