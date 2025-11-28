@@ -16,8 +16,9 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 ### 2. Smart Input Logic
 *   **3/4 Code Toggle**: Switch between 3-code (Express) and 4-code (Standard) modes via the Menu.
 *   **Smart Auto-Commit**:
-    *   **Unique Match**: Auto-commits immediately when the buffer reaches max length (3 or 4).
-    *   **Collision Safety**: If there are multiple candidates at max length, it **waits** for you to select, preventing accidental commits.
+    *   **3-Code Mode**: Auto-commits immediately on unique match for speed.
+    *   **4-Code Mode**: Requires manual **Space** to commit (no auto-commit), preventing accidental commits.
+    *   **Collision Safety**: If there are multiple candidates, it always waits for selection.
 *   **Error Feedback**: Invalid keys trigger a "shake" animation instead of auto-committing, preventing typos from ruining your flow.
 
 ### 3. Mini Mode & Settings

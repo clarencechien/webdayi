@@ -924,11 +924,12 @@ function handleInput(key) {
 
     // Auto-commit if we reached max length
     if (state.buffer.length === state.settings.maxCodeLength) {
-        if (state.candidates.length === 1) {
+        // Only auto-commit if NOT in 4-code mode (User Request: Max 4 requires manual Space)
+        if (state.settings.maxCodeLength !== 4 && state.candidates.length === 1) {
             // Only auto-commit if there is no ambiguity (single candidate)
             selectCandidate(0);
         }
-        // If multiple candidates, stay and let user select (Space or Keys)
+        // If multiple candidates OR Max 4 mode, stay and let user select (Space or Keys)
     }
 }
 

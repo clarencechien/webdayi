@@ -42,6 +42,9 @@ The current focus is on **Verifying the Dual-Track Input System**. The refactori
     *   Implemented **Adaptive Predictive Engine** with 3-layer weighted scoring (Static + Bigram + User Habit).
     *   Added **Extended Prediction** (prefix matching) to support predicting full words from partial codes.
     *   Implemented **Smart Auto-Commit** with collision safety (waits if multiple candidates exist).
+    *   **Refined Auto-Commit Logic**:
+        *   **3-Code Mode**: Auto-commits on unique match.
+        *   **4-Code Mode**: Requires manual **Space** to commit (no auto-commit), preventing accidental commits during full-code typing.
     *   Added **3/4 Code Toggle** and **Mini Mode Settings Menu**.
     *   Reconfigured **Hotkeys** (Tap Ctrl for Mini Mode, Tap Alt for Copy).
     *   **Mini Mode Fixes**:
@@ -52,7 +55,13 @@ The current focus is on **Verifying the Dual-Track Input System**. The refactori
 
 ---
 
-## 🔧 Latest Session: Mini Mode & Visual Feedback Refinement (2025-11-27)
+## 🔧 Latest Session: Dayi 4-Code Auto-Commit Refinement (2025-11-28)
+
+We refined the auto-commit behavior based on user feedback to distinguish between 3-code and 4-code modes.
+- **4-Code Mode**: Disabled auto-commit. Users must now press **Space** to confirm the character, even if it's a unique match. This prevents accidental commits when the user intends to type more codes or just wants to confirm visually.
+- **3-Code Mode**: Retained auto-commit for unique matches to maintain speed.
+
+## 🔧 Previous Session: Mini Mode & Visual Feedback Refinement (2025-11-27)
 
 We focused on fixing the Mini Mode UI and ensuring visual feedback works reliably in PWA mode.
 - **Layout**: Fixed the nesting error that broke the Mini Mode layout.

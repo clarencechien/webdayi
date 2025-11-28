@@ -21,6 +21,7 @@
   - [x] **Mini Mode Alignment**: Align `mvp2` Mini Mode with `lite` (styling, keys).
   - [x] **Phantom UX**: Integrate Phantom suggestion as 1st candidate (Index 0).
   - [x] **Smart Auto-Commit**: Collision-safe auto-commit logic.
+  - [x] **Auto-Commit Refinement**: Disabled auto-commit for 4-code mode (manual Space required).
   - [x] **Mini Mode Settings**: Menu for IM, Max Codes, Font Size.
   - [x] **Hotkeys**: Reconfigured for better usability.
 - [x] **Data Expansion**
@@ -70,7 +71,9 @@
 
 ## 📅 Milestones
 
+- **2025-11-28**: Refined Dayi 4-Code Auto-Commit Behavior.
 - **2025-11-27**: MVP 2.0 UX Refinement (Mini Mode & Phantom Integration).
 - **2025-11-27**: MVP 2.0 Initialization & Core Logic Complete.
 - **2025-11-26**: WebDayi Lite 0.6.0 Released.
 - **2025-11-06**: Project Kickoff.
+r
