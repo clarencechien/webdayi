@@ -42,6 +42,8 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 *   **Clean Layout**: Icon-only buttons on mobile to save space.
 *   **Focus Mode**: Optimized layout to prevent keyboard cutoff and ensure a distraction-free typing experience.
 *   **PWA Mode Control**: Automatically defaults to **Focus Mode** on Mobile and **Mini Mode** on Laptop/Desktop.
+*   **Mini Mode Toggle**: Manual "Switch Mode" button available in the Mini Mode toolbar.
+*   **Laptop Focus Mode**: Polished UI for desktop users with centered layout and optimal reading width.
 *   **No FAB**: Removed floating action button on mobile for a cleaner interface.
 
 ---

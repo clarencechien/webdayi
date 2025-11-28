@@ -564,6 +564,11 @@ function setupEventListeners() {
             return;
         }
 
+        if (e.key === 'Control') {
+            state.ctrlKeyUsed = false;
+            return;
+        }
+
         if (e.ctrlKey || e.altKey || e.metaKey) {
             // Track modifier usage to prevent "Tap" action if used as a modifier
             if (e.ctrlKey) state.ctrlKeyUsed = true;
@@ -609,8 +614,6 @@ function setupEventListeners() {
             e.preventDefault();
         } else if (e.key === 'Shift') {
             state.shiftKeyUsed = false;
-        } else if (e.key === 'Control') {
-            state.ctrlKeyUsed = false;
         } else if (e.key.length === 1) {
             if (e.shiftKey) state.shiftKeyUsed = true;
             if (e.ctrlKey) state.ctrlKeyUsed = true;
@@ -874,6 +877,7 @@ function toggleMiniMode() {
             setTimeout(() => els.miniOutput.focus(), 50);
         } else {
             els.output.value = state.output;
+            setTimeout(() => els.output.focus(), 50);
         }
     }
     console.log('New State:', isMini);

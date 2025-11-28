@@ -30,8 +30,10 @@ Currently working on **Fine-tuning remaining data failures** (e.g., "謝謝", "�
 
 ## Recent Changes
 - **PWA Mode Control**: Implemented device-specific PWA behavior.
-    - **Mobile**: Defaults to **Focus Mode** (Full screen, no floating UI).
-    - **Laptop/Desktop**: Defaults to **Mini Mode** (Compact floating UI).
+    - **PWA Mode Control**: Automatically defaults to **Focus Mode** on Mobile and **Mini Mode** on Laptop/Desktop.
+- **Mini Mode Toggle**: Added manual "Switch Mode" button to Mini Mode toolbar.
+- **Laptop Focus Mode**: Polished UI with constrained width and centered layout for better readability on large screens.
+- **Ctrl Key Toggle**: Fixed and verified `Ctrl` key toggle between Mini Mode and Main UI.
 - **Data Quality Verification**: Established automated testing framework with 100% pass rate.
 - **Context Absolute Priority**: Refined prediction logic to prioritize contextually correct words (Bigram) over high-frequency single characters.
 - **Mobile Web UI Polish**: Unified header design and removed FAB for a cleaner mobile experience.

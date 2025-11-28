@@ -685,6 +685,17 @@
             overflow-x: hidden;
         }
 
+        /* Desktop Focus Mode Polish */
+        @media (min-width: 768px) {
+            body.focus-mode .app-container {
+                max-width: 640px;
+                /* Optimal reading width */
+                margin: 0 auto;
+                padding-top: 10vh;
+                /* Push down slightly */
+            }
+        }
+
         /* Hide Keyboard Mode */
         body.hide-keyboard .keyboard-container {
             display: none !important;
