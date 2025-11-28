@@ -15,6 +15,8 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 *   **Smart Compose**: Predicts the next word continuously (even with empty buffer). Press **Tab** to accept.
     *   **Context Safety**: No predictions after punctuation.
     *   **Ghost Text**: Auto-fades out after 3 seconds (configurable) to reduce visual noise.
+19: *   **Frequency Dominance**: Automatically suppresses low-quality predictions if the exact match you typed is significantly more frequent (e.g., typing "明" won't suggest "盟").
+20: *   **Context Absolute Priority**: Ensures that contextually correct words (e.g., "天" after "明") always appear first, even if other candidates have higher static frequency.
 
 ### 2. Smart Input Logic
 *   **3/4 Code Toggle**: Switch between 3-code (Express) and 4-code (Standard) modes via the Menu.

@@ -28,6 +28,12 @@ class PredictionEngine {
             bigram: 2.5,   // 前字上下文
             user: 10.0     // 用戶習慣
         };
+
+        // [新增] 頻率壓制門檻
+        // 如果 (本字頻率 / 預測字頻率) > DOMINANCE_RATIO，則隱藏預測
+        // 例如：明(0.18) / 盟(0.005) = 36 > 8 -> 隱藏 "盟"
+        // Update: Lowered to 8.0 to handle "天"(0.0024) vs "衝"(0.00026) ratio ~9.2
+        this.DOMINANCE_RATIO = 8.0;
     }
 
     setDayiMap(map) {
@@ -42,8 +48,17 @@ class PredictionEngine {
 
         let bigramProb = 0;
         if (lastChar && this.bigramData[lastChar]) {
-            const suggestion = this.bigramData[lastChar][currentBuffer];
-            if (suggestion === char) bigramProb = 1.0;
+            // [Fix] Bigram Lookup: Use first char of buffer to find suggestion
+            // e.g. buffer="ev", we check "e" -> "天"
+            const firstChar = currentBuffer ? currentBuffer[0] : '';
+            const suggestion = this.bigramData[lastChar][firstChar];
+
+            if (suggestion === char) {
+                // [Context Absolute Priority]
+                // 如果完全命中 Bigram 建議，給予 VIP 分數 (1000000.0)
+                // 確保它絕對排在第一位，壓過任何頻率或用戶習慣 (User Score * 10 could be high)
+                return 1000000.0;
+            }
         }
 
         const userHabit = this.userHistory.getScore(char);
@@ -120,7 +135,55 @@ class PredictionEngine {
         // [新增] 簡單門檻：如果分數太低，代表只是隨便湊的字，不要干擾使用者
         if (scored.length > 0 && scored[0].score < 0.0001) return null;
 
-        return scored.length > 0 ? scored[0] : null;
+        const bestExt = scored.length > 0 ? scored[0] : null;
+        if (!bestExt) return null;
+
+        // --- [新增] 頻率壓制檢查 (Dominance Check) ---
+        // 檢查當前的 buffer 是否已經對應到一個「強勢本字」
+        const rawExact = this.dayiMap[buffer];
+        if (rawExact) {
+            const exactList = Array.isArray(rawExact) ? rawExact : [rawExact];
+
+            // [Context Dominance]
+            // 如果本字是 VIP 字 (符合 Bigram 建議)，則壓制所有延伸預測
+            // 例如：明(last) + ev(buffer) -> 天(Exact, VIP) -> 壓制 衝(evdj)
+            if (lastChar && this.bigramData[lastChar]) {
+                const firstChar = buffer[0];
+                const suggestion = this.bigramData[lastChar][firstChar];
+                // 檢查 exactList 中是否有 VIP 字
+                for (const item of exactList) {
+                    const char = typeof item === 'object' ? item.char : item;
+                    if (char === suggestion) {
+                        // Exact Match IS the VIP word. Suppress extensions.
+                        return null;
+                    }
+                }
+            }
+
+            // 找出本字中頻率最高的
+            let maxExactFreq = 0;
+            for (const item of exactList) {
+                const char = typeof item === 'object' ? item.char : item;
+                const freq = this.freqMap[char] || 0;
+                if (freq > maxExactFreq) maxExactFreq = freq;
+            }
+
+            // 比較：如果 (本字頻率 / 預測頻率) 差距過大，則不顯示預測
+            // 避免干擾：打 "明" (dj) 時顯示 "盟" (djv)
+            const predFreq = this.freqMap[bestExt.char] || 0;
+            if (predFreq > 0) {
+                const ratio = maxExactFreq / predFreq;
+                if (ratio > this.DOMINANCE_RATIO) {
+                    // console.log(`Prediction suppressed: Exact '${exactList[0].char}'(${maxExactFreq}) dominates '${bestExt.char}'(${predFreq}) ratio=${ratio.toFixed(1)}`);
+                    return null;
+                }
+            } else if (maxExactFreq > 0.01) {
+                // 如果預測字頻率為 0 (極冷僻)，且本字稍微常用，直接壓制
+                return null;
+            }
+        }
+
+        return bestExt;
     }
 
     // Alias for backward compatibility if needed

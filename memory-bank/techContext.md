@@ -120,6 +120,13 @@ To support predicting full words (e.g., 4-code "何") from partial input (e.g., 
 *   **Frequency Filtering**: Filters out rare words from predictions unless they are in the user's history.
 *   **Ghost Text Timeout**: Automatically hides the ghost text after 3 seconds (configurable) to minimize visual distraction.
 *   **Fade-out Animation**: Ghost text fades out smoothly (0.5s opacity transition) before being removed.
+*   **Frequency Dominance**: Suppresses predictions if the "Exact Match" (what you typed) is significantly more frequent than the "Prediction" (what it suggests).
+    *   Formula: `if (ExactFreq / PredictionFreq > DOMINANCE_RATIO) Suppress()`
+    *   Threshold: **8.0** (Lowered from 10.0 to handle cases like "天" vs "衝" where ratio is ~9.2).
+    *   Goal: Prevent visual noise when typing high-frequency characters (e.g., "明" shouldn't suggest "盟").
+*   **Context Absolute Priority**: If a character matches the Bigram suggestion for the current context (checking the first char of buffer), it gets a massive score boost (VIP Score: 10000.0) to ensure it appears first.
+    *   **Context Dominance**: If the Exact Match for the current buffer is a VIP word, all extensions are suppressed.
+    *   Goal: Solve ordering issues where low-frequency correct predictions (e.g., "天" after "明") are ranked below high-frequency partial matches or extensions (e.g., "衝").
 
 ### Chrome Extension APIs Used
 

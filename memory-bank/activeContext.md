@@ -25,7 +25,8 @@
 ---
 
 ## Current Focus
-The current focus is on **Refining Smart Compose**. The core features (continuous prediction, context safety, ghost text timeout/fade-out) are implemented. Next steps may involve further tuning based on user feedback.
+The current focus is on **Refining Smart Compose**. The core features (continuous prediction, context safety, ghost text timeout/fade-out) are implemented.
+Currently working on **Fixing Prediction Suppression** by lowering `DOMINANCE_RATIO` from 10.0 to 8.0. This is to ensure that "衝" (Ratio ~9.2 vs "天") is correctly suppressed.
 
 ## Recent Changes
 *   **Dual-Track Input Refactoring**:

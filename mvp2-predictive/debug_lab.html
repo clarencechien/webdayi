@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Engine Debug Lab</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input {
+            width: 200px;
+            padding: 5px;
+        }
+
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .vip {
+            background-color: #e6fffa;
+            color: #00796b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Prediction Engine Debug Lab</h1>
+
+    <div class="section">
+        <h3>1. Load Data</h3>
+        <div id="status">Loading data...</div>
+    </div>
+
+    <div class="section">
+        <h3>2. Test Prediction</h3>
+        <div>
+            <label>Context (Last Char):</label>
+            <input type="text" id="ctxInput" value="明" placeholder="e.g. 明">
+        </div>
+        <div style="margin-top: 5px;">
+            <label>Buffer (Input):</label>
+            <input type="text" id="bufInput" value="e" placeholder="e.g. e">
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="runPrediction()">Run Prediction</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>3. Results</h3>
+        <div id="output"></div>
+    </div>
+
+    <script src="js/prediction_engine.js"></script>
+    <script>
+        let engine;
+        const statusDiv = document.getElementById('status');
+        const outputDiv = document.getElementById('output');
+
+        async function init() {
+            try {
+                const [dayiResp, bigramResp] = await Promise.all([
+                    fetch('data/dayi_db.json'),
+                    fetch('data/bigram_lite.json') // Using lite for demo
+                ]);
+
+                const dayiMap = await dayiResp.json();
+                const bigramData = await bigramResp.json();
+
+                // Mock Freq Map for demo (since we don't have a separate freq file easily accessible or it's huge)
+                // Or try to load it if it exists.
+                // Let's load the pruned ngram if available, or just mock common ones.
+                let freqMap = {};
+                try {
+                    const freqResp = await fetch('data/ngram_pruned.json'); // Assuming this exists or similar
+                    if (freqResp.ok) freqMap = await freqResp.json();
+                } catch (e) {
+                    console.log("Freq map not found, using mock");
+                    freqMap = { "明": 0.18, "天": 0.005, "衝": 0.0002, "一": 0.01 };
+                }
+
+                engine = new PredictionEngine({
+                    bigramData: bigramData,
+                    freqMap: freqMap,
+                    userHistory: { getScore: () => 0 }
+                });
+                engine.setDayiMap(dayiMap);
+
+                statusDiv.textContent = "Engine Ready!";
+                statusDiv.style.color = "green";
+            } catch (e) {
+                statusDiv.textContent = "Error loading data: " + e.message;
+                statusDiv.style.color = "red";
+                console.error(e);
+            }
+        }
+
+        function runPrediction() {
+            if (!engine) return;
+
+            const ctx = document.getElementById('ctxInput').value;
+            const buf = document.getElementById('bufInput').value;
+
+            outputDiv.innerHTML = "Calculating...";
+
+            // We want to see ALL candidates and their scores
+            // So we'll use a modified version of getBestCompletion logic here to visualize
+
+            const extensions = engine.getExtendedCandidates(buf);
+            const results = extensions.map(c => {
+                const score = engine.calculateScore(c.char, ctx, buf);
+
+                // Check VIP status manually for display
+                let isVip = false;
+                if (ctx && engine.bigramData[ctx]) {
+                    if (engine.bigramData[ctx][buf] === c.char) isVip = true;
+                }
+
+                return { ...c, score, isVip };
+            });
+
+            results.sort((a, b) => b.score - a.score);
+
+            let html = `
+                <table>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Char</th>
+                        <th>Code</th>
+                        <th>Score</th>
+                        <th>Type</th>
+                    </tr>
+            `;
+
+            results.forEach((r, i) => {
+                const rowClass = r.isVip ? 'vip' : '';
+                const typeLabel = r.isVip ? 'VIP (Bigram Match)' : 'Normal';
+                html += `
+                    <tr class="${rowClass}">
+                        <td>${i + 1}</td>
+                        <td>${r.char}</td>
+                        <td>${r.code}</td>
+                        <td>${r.score.toFixed(4)}</td>
+                        <td>${typeLabel}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</table>`;
+
+            if (results.length === 0) {
+                html += "<p>No candidates found.</p>";
+            }
+
+            outputDiv.innerHTML = html;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
