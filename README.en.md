@@ -44,16 +44,16 @@ Older prototypes (MVP1, Vue.js) are moved to `archive/`.
 
 ## 🏗️ Directory Structure
 
-```
 webdayi/
 ├── mvp2-predictive/        # MVP 2.0 (Current Focus)
 │   ├── index.html          # Main Application
 │   ├── js/                 # Application Logic
 │   │   ├── app.js
 │   │   └── prediction_engine.js
-│   ├── tests/              # Test Scripts
-│   │   ├── data_quality.test.js
-│   │   └── prediction.test.js
+│   ├── tests/              # Tests & Debug Tools
+│   │   ├── debug_lab.html
+│   │   ├── test.html
+│   │   └── test_integration.html
 │   ├── data/               # Data Files
 │   │   ├── bigram_lite.json
 │   │   ├── dayi_db.json
@@ -63,6 +63,11 @@ webdayi/
 ├── lite/                   # WebDayi Lite (Stable PWA)
 │   ├── index.html
 │   └── app.js
+│
+├── scripts/                # Utility Scripts
+│   ├── analyze_cin.py
+│   ├── find_lines.py
+│   └── test-github-pages.js
 │
 ├── archive/                # Legacy Versions
 │   ├── mvp1/               # Original Vue.js Prototype
@@ -102,6 +107,7 @@ webdayi/
     - [x] **PWA Mode Control**: Mobile defaults to Focus Mode, Laptop defaults to Mini Mode
     - [x] **Mini Mode Toggle**: Added manual switch button in Mini Mode menu
     - [x] **Laptop Focus Mode**: Optimized desktop Focus Mode UI (centered, width-constrained)
+- [x] **Small Screen Optimization**: Optimized layout for small screens (e.g., iPhone SE)
     - ✅ Mobile Web UI Consistency (Unified Header, No FAB)
     - ✅ Focus Mode Layout Fix
     - ✅ **Data Quality Verification**: Automated testing framework with 100% pass rate.

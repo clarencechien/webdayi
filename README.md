@@ -48,16 +48,16 @@
 
 ## 🏗️ 目錄結構
 
-```
 webdayi/
 ├── mvp2-predictive/        # MVP 2.0 (當前開發重點)
 │   ├── index.html          # 主應用程式
 │   ├── js/                 # 應用程式邏輯
 │   │   ├── app.js
 │   │   └── prediction_engine.js
-│   ├── tests/              # 測試腳本
-│   │   ├── data_quality.test.js
-│   │   └── prediction.test.js
+│   ├── tests/              # 測試與除錯工具
+│   │   ├── debug_lab.html
+│   │   ├── test.html
+│   │   └── test_integration.html
 │   ├── data/               # 資料檔案
 │   │   ├── bigram_lite.json
 │   │   ├── dayi_db.json
@@ -67,6 +67,11 @@ webdayi/
 ├── lite/                   # WebDayi Lite (穩定版 PWA)
 │   ├── index.html
 │   └── app.js
+│
+├── scripts/                # 工具腳本
+│   ├── analyze_cin.py
+│   ├── find_lines.py
+│   └── test-github-pages.js
 │
 ├── archive/                # 舊版本存檔
 │   ├── mvp1/               # 原始 Vue.js 原型
@@ -105,6 +110,7 @@ webdayi/
     - [x] **PWA Mode Control**：Mobile 預設 Focus Mode，Laptop 預設 Mini Mode
     - [x] **Mini Mode Toggle**：Mini Mode 選單新增手動切換模式按鈕
     - [x] **Laptop Focus Mode**：桌面版 Focus Mode 介面優化（置中、限制寬度）
+- [x] **Small Screen Optimization**：針對 iPhone SE 等小螢幕裝置優化版面配置
     - ✅ Mobile Web UI 一致性優化 (Unified Header, No FAB)
     - ✅ Focus Mode 鍵盤佈局修正
     - ✅ **資料品質驗證 (Data Quality Verification)**：建立自動化測試框架，達成 100% 通過率。

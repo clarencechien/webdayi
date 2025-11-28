@@ -85,7 +85,7 @@
         <div id="output"></div>
     </div>
 
-    <script src="js/prediction_engine.js"></script>
+    <script src="../js/prediction_engine.js"></script>
     <script>
         let engine;
         const statusDiv = document.getElementById('status');
@@ -94,8 +94,8 @@
         async function init() {
             try {
                 const [dayiResp, bigramResp] = await Promise.all([
-                    fetch('data/dayi_db.json'),
-                    fetch('data/bigram_lite.json') // Using lite for demo
+                    fetch('../data/dayi_db.json'),
+                    fetch('../data/bigram_lite.json') // Using lite for demo
                 ]);
 
                 const dayiMap = await dayiResp.json();
@@ -106,7 +106,7 @@
                 // Let's load the pruned ngram if available, or just mock common ones.
                 let freqMap = {};
                 try {
-                    const freqResp = await fetch('data/ngram_pruned.json'); // Assuming this exists or similar
+                    const freqResp = await fetch('../data/ngram_pruned.json'); // Assuming this exists or similar
                     if (freqResp.ok) freqMap = await freqResp.json();
                 } catch (e) {
                     console.log("Freq map not found, using mock");

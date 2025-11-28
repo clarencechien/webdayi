@@ -44,6 +44,7 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 *   **PWA Mode Control**: Automatically defaults to **Focus Mode** on Mobile and **Mini Mode** on Laptop/Desktop.
 *   **Mini Mode Toggle**: Manual "Switch Mode" button available in the Mini Mode toolbar.
 *   **Laptop Focus Mode**: Polished UI for desktop users with centered layout and optimal reading width.
+*   **Small Screen Optimization**: Optimized layout for devices with limited screen height (e.g., iPhone SE) to prevent vertical scrolling.
 *   **No FAB**: Removed floating action button on mobile for a cleaner interface.
 
 ---
@@ -77,13 +78,12 @@ MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by pred
 
 We maintain a rigorous testing framework to ensure prediction accuracy.
 
-*   **Automated Testing**: `tests/data_quality.test.js` runs a suite of real-world test cases (e.g., "台北", "謝謝", "因為").
-*   **Data Patching**: `scripts/fix_bigrams.js` allows for iterative refinement of Bigram data.
-*   **Current Status**: **100% Pass Rate** (15/15) on the core test set.
+*   **Automated Testing**: `tests/test.html` runs the prediction engine test suite.
+*   **Integration Testing**: `tests/test_integration.html` verifies UI interactions.
+*   **Debug Lab**: `tests/debug_lab.html` for manual testing and visualization.
+*   **Data Patching**: `../scripts/analyze_cin.py` helps analyze CIN files for data improvements.
 *   **Verification**:
-    ```bash
-    node tests/data_quality.test.js
-    ```
+    Open `tests/test.html` in your browser.
 
 ---
 
