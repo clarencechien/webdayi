@@ -740,6 +740,11 @@ function setupMiniMenuListeners() {
             applySettings();
             updateMiniMenuUI();
         });
+
+        // Mode Toggle (Manual Exit)
+        document.getElementById('mini-tool-mode')?.addEventListener('click', () => {
+            toggleMiniMode();
+        });
     }
 }
 
