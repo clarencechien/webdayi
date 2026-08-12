@@ -1,20 +1,24 @@
 /**
- * WebDayi Smart — 智慧 2 碼 UI(PoC)
+ * WebDayi Smart — 智慧 2 碼 UI(與 Lite 對齊的 UX)
  *
  * 輸入行為:
- *   - 連續打碼,每 2 鍵 = 一個字,取碼 = 首碼 + 末碼(大易簡碼慣例,不用空白切碼;
- *     完整 token 之後的空白是 no-op,不會造成錯位)
- *   - 單碼字(一、大、火、車…84 個):打該鍵 + 空白
- *   - ` (backtick):全碼逃生口——接下來這個字打全碼(1-4 鍵),數字/空白選字後鎖定
- *   - 緩衝區的字都是「暫定」(Viterbi 目前最佳路徑,會隨後續輸入跳動;虛線標示)
- *   - 點暫定字(或 ←/→ 移游標)列出該位置候選,按數字鍵替換 → 該字鎖定(綠線),
- *     其餘位置用新 context 重跑 Viterbi
- *   - Enter:送出緩衝區到輸出;Copy 交付(維持 Lite 的交付方式)
+ *   - 連續打碼,每 2 鍵 = 一個字,取碼 = 首碼 + 末碼(大易簡碼慣例,不用空白切碼)
+ *   - 單碼字(一、大、火、車…):該鍵 + 空白
+ *   - 緩衝區的字都是「暫定」(Viterbi 目前最佳路徑,虛線標示,會隨後續輸入回頭修正)
+ *   - 候選列預設對準「剛打的字」;要改別的位置就點該字(或 ←/→ 移游標)
+ *   - 選字鍵沿用大易/Lite 傳統配置:
+ *       Space=第1個、'=第2、[=第3、]=第4、-=第5、\=第6、= 換頁
+ *     (數字鍵是大易碼,不當選字鍵)
+ *   - `  進入全碼逃生口:打全碼 1-4 鍵,同一組選字鍵選字並鎖定
+ *   - Enter / 空白(無待配對碼時)= 送出;送出後可自動複製(選單可關)
  */
 (function () {
     'use strict';
 
     const DAYI_KEY = /^[a-z0-9,.;/]$/;
+    const SELECT_KEYS = [' ', "'", '[', ']', '-', '\\'];
+    const SELECT_LABELS = ['␣', "'", '[', ']', '-', '\\'];
+    const PAGE_SIZE = SELECT_KEYS.length;
 
     const KEYBOARD_LAYOUT = [
         [
@@ -36,51 +40,56 @@
             { code: ';', label: ';', sub: '虫' }
         ],
         [
-            { code: '`', label: '全', type: 'special', action: 'fullcode' },
+            { code: '`', label: '全碼', type: 'special', action: 'fullcode' },
             { code: 'z', label: 'Z', sub: '心' }, { code: 'x', label: 'X', sub: '水' }, { code: 'c', label: 'C', sub: '鹿' },
             { code: 'v', label: 'V', sub: '禾' }, { code: 'b', label: 'B', sub: '馬' }, { code: 'n', label: 'N', sub: '魚' },
             { code: 'm', label: 'M', sub: '雨' },
             { code: 'Backspace', label: '⌫', type: 'special', action: 'backspace' }
         ],
         [
-            { code: 'Enter', label: '送出', type: 'special', action: 'commit' },
-            { code: 'Space', label: '空白(單碼字)', type: 'special', action: 'space', width: 'wide' },
             { code: ',', label: ',', sub: '力' },
             { code: '.', label: '.', sub: '舟' },
-            { code: '/', label: '/', sub: '竹' }
+            { code: '/', label: '/', sub: '竹' },
+            { code: 'Space', label: '空白 / 選字', type: 'special', action: 'space', width: 'wide' },
+            { code: 'Enter', label: '送出 ⏎', type: 'special', action: 'commit' }
         ]
     ];
     const KEY_SUB = {};
     KEYBOARD_LAYOUT.flat().forEach(k => { if (k.sub) KEY_SUB[k.code] = k.sub; });
 
     const state = {
-        tokens: [],       // {keys} 待解碼 | {pinned, keys, fc?} 鎖定
-        pendingKey: null, // 2 碼的第 1 鍵
-        decoded: [],      // 目前最佳路徑的字
+        tokens: [],       // {keys} 待解碼 | {pinned, keys, fc?} 已鎖定
+        pendingKey: null, // 2 碼中的第 1 鍵
+        decoded: [],      // 目前最佳路徑
         lastWords: [],
-        cursor: null,     // 修正游標
-        fc: null,         // 全碼模式 {keys, cands}
+        cursor: null,     // 明確選取的修正位置(null = 隱含指向最後一字)
+        fc: null,         // 全碼模式 {keys}
+        page: 0,
+        isMini: false,
+        settings: { autoCopy: true, theme: null, keyboard: true, focusMode: false, fontScale: 1 },
     };
 
     let decoder = null;
     let dayiRaw = null;
     let history = null;
-
-    const $ = id => document.getElementById(id);
     const els = {};
 
     // ---------- 初始化 ----------
     async function init() {
-        ['output-buffer', 'compose-area', 'candidate-bar', 'commit-btn', 'buf-backspace-btn',
-         'copy-btn', 'clear-btn', 'status-indicator', 'latency', 'mode-chip', 'virtual-keyboard',
-         'vk-toggle', 'vk-card', 'toast', 'theme-toggle'].forEach(id => {
-            els[id.replace(/-(\w)/g, (_, c) => c.toUpperCase())] = $(id);
-        });
-        initTheme();
+        [
+            'output-buffer', 'compose-area', 'candidate-bar', 'copy-btn', 'clear-btn', 'status-indicator',
+            'latency', 'mode-chip', 'virtual-keyboard', 'menu-fab', 'menu-panel', 'toast',
+            'font-size-display', 'mini-ui', 'mini-compose', 'mini-cands', 'mini-output', 'mini-kb',
+            'mini-status', 'history-count'
+        ].forEach(id => { els[camel(id)] = document.getElementById(id); });
+
+        loadSettings();
         renderKeyboard();
         setupListeners();
+        applySettings();
+
         try {
-            setStatus('載入資料庫中…(首次約 5MB,之後有快取)');
+            setStatus('載入資料庫中…');
             const [dayi, wordDb, charBigram] = await Promise.all([
                 fetchJSON('data/dayi_db.json'),
                 fetchJSON('data/word_db.json'),
@@ -89,11 +98,15 @@
             dayiRaw = dayi;
             history = new UserHistory('webdayi_smart_history');
             decoder = new SmartDecoder(wordDb, charBigram, history);
-            setStatus(`就緒:詞庫 ${wordDb.meta.words.toLocaleString()} 詞(McBopomofo+essay)`);
+            updateHistoryCount();
+            setStatus(`就緒 · 詞庫 ${wordDb.meta.words.toLocaleString()} 詞`);
+            render();
         } catch (e) {
             setStatus('資料載入失敗:' + e.message);
         }
     }
+
+    const camel = id => id.replace(/-(\w)/g, (_, c) => c.toUpperCase());
 
     async function fetchJSON(url) {
         const r = await fetch(url);
@@ -107,22 +120,53 @@
         els.toast.textContent = msg;
         els.toast.classList.add('show');
         clearTimeout(toast._t);
-        toast._t = setTimeout(() => els.toast.classList.remove('show'), 1600);
+        toast._t = setTimeout(() => els.toast.classList.remove('show'), 1500);
     }
 
-    function initTheme() {
-        const saved = localStorage.getItem('webdayi_smart_theme');
-        if (saved) document.documentElement.dataset.theme = saved;
-        else if (matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
-        els.themeToggle.addEventListener('click', () => {
-            const cur = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-            document.documentElement.dataset.theme = cur;
-            localStorage.setItem('webdayi_smart_theme', cur);
-        });
+    function haptic() { if (navigator.vibrate) navigator.vibrate(8); }
+
+    // ---------- 設定 ----------
+    function loadSettings() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('webdayi_smart_settings') || '{}');
+            Object.assign(state.settings, saved);
+        } catch (e) { /* 用預設值 */ }
+        if (state.settings.theme === null || state.settings.theme === undefined) {
+            state.settings.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
     }
 
-    // ---------- 解碼與渲染 ----------
-    function decodeAndRender() {
+    function saveSettings() {
+        localStorage.setItem('webdayi_smart_settings', JSON.stringify(state.settings));
+    }
+
+    function applySettings() {
+        const s = state.settings;
+        document.documentElement.dataset.theme = s.theme;
+        document.documentElement.style.setProperty('--font-scale', s.fontScale);
+        els.fontSizeDisplay.textContent = Math.round(s.fontScale * 100) + '%';
+        document.body.classList.toggle('focus-mode', s.focusMode);
+        const kb = els.virtualKeyboard;
+        kb.classList.toggle('hidden', !s.keyboard);
+        setToggle('toggle-autocopy', s.autoCopy ? 'ON' : 'OFF');
+        setToggle('toggle-theme', s.theme === 'dark' ? 'ON' : 'OFF');
+        setToggle('toggle-keyboard', s.keyboard ? 'ON' : 'OFF');
+        setToggle('toggle-focus', s.focusMode ? 'ON' : 'OFF');
+        setToggle('toggle-mini', state.isMini ? 'ON' : 'OFF');
+        saveSettings();
+    }
+
+    function setToggle(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.querySelector('.toggle-status').textContent = text;
+    }
+
+    function updateHistoryCount() {
+        if (history) els.historyCount.textContent = Object.keys(history.history || {}).length;
+    }
+
+    // ---------- 解碼 ----------
+    function render() {
         if (!decoder) return;
         const t0 = performance.now();
         if (state.tokens.length === 0) {
@@ -135,7 +179,6 @@
                 state.decoded = r.chars;
                 state.lastWords = r.words;
             } else {
-                // 有 token 查無候選:退化為逐位置解碼,無候選處顯示 ∅
                 state.decoded = state.tokens.map((t, i) => {
                     if (t.pinned) return t.pinned;
                     const prev = i > 0 ? state.decoded[i - 1] : '';
@@ -145,240 +188,311 @@
                 state.lastWords = [];
             }
         }
-        els.latency.textContent = `解碼 ${(performance.now() - t0).toFixed(1)}ms`;
+        els.latency.textContent = state.tokens.length ? `解碼 ${(performance.now() - t0).toFixed(1)}ms` : '';
         renderCompose();
         renderCandidates();
-        els.commitBtn.disabled = state.tokens.length === 0 && !state.pendingKey && !state.fc;
     }
 
-    function keysLabel(keys) {
-        return [...keys].map(k => KEY_SUB[k] || k).join('');
+    const keysLabel = keys => [...keys].map(k => KEY_SUB[k] || k).join('');
+
+    /** 目前作用的位置:明確游標,否則隱含指向最後一個字 */
+    function activeIndex() {
+        if (state.cursor !== null) return state.cursor;
+        return state.tokens.length ? state.tokens.length - 1 : null;
     }
 
     function renderCompose() {
-        const area = els.composeArea;
-        area.innerHTML = '';
-        if (state.tokens.length === 0 && !state.pendingKey && !state.fc) {
-            area.innerHTML = '<span class="compose-hint">連續打碼:每字 2 鍵 = <b>首碼+末碼</b>(單碼字打 1 鍵 + 空白)。<code>`</code> = 全碼逃生口,Enter = 送出</span>';
-            return;
-        }
-        state.tokens.forEach((t, i) => {
-            const cell = document.createElement('div');
-            cell.className = 'cell' + (t.pinned ? ' pinned' : '') + (state.cursor === i ? ' selected' : '') + (t.fc ? ' fc-cell' : '');
-            cell.innerHTML = `<span class="ch">${state.decoded[i] || '·'}</span><span class="keys">${keysLabel(t.keys)}</span>`;
-            cell.addEventListener('click', () => selectCell(i));
-            area.appendChild(cell);
-        });
-        if (state.fc) {
-            const cell = document.createElement('div');
-            cell.className = 'cell pending fc-cell';
-            cell.innerHTML = `<span class="ch">${state.fc.cands.length ? state.fc.cands[0].char : '全'}</span><span class="keys">${keysLabel(state.fc.keys) || '打全碼…'}</span>`;
-            area.appendChild(cell);
-        } else if (state.pendingKey) {
-            const cell = document.createElement('div');
-            cell.className = 'cell pending';
-            cell.innerHTML = `<span class="ch">·</span><span class="keys">${keysLabel(state.pendingKey)}</span>`;
-            area.appendChild(cell);
-        }
+        const build = (mini) => {
+            const frag = document.createDocumentFragment();
+            const act = activeIndex();
+            state.tokens.forEach((t, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell'
+                    + (t.pinned ? ' pinned' : '')
+                    + (state.cursor === i ? ' selected' : '')
+                    + (t.fc ? ' fc-cell' : '');
+                cell.innerHTML = `<span class="ch">${state.decoded[i] || '·'}</span><span class="keys">${keysLabel(t.keys)}</span>`;
+                cell.addEventListener('click', () => selectCell(i));
+                frag.appendChild(cell);
+            });
+            if (state.fc) {
+                const cell = document.createElement('div');
+                cell.className = 'cell pending fc-cell';
+                const first = state.fc.keys ? (fcCandidates()[0] || {}).char : null;
+                cell.innerHTML = `<span class="ch">${first || '全'}</span><span class="keys">${keysLabel(state.fc.keys) || '全碼'}</span>`;
+                frag.appendChild(cell);
+            } else if (state.pendingKey) {
+                const cell = document.createElement('div');
+                cell.className = 'cell pending';
+                cell.innerHTML = `<span class="ch">·</span><span class="keys">${keysLabel(state.pendingKey)}</span>`;
+                frag.appendChild(cell);
+            }
+            if (!mini && !frag.childNodes.length) {
+                const hint = document.createElement('span');
+                hint.className = 'compose-hint';
+                hint.innerHTML = '連續打碼:每字 2 鍵 = <b>首碼+末碼</b>(單碼字打 1 鍵 + 空白)。'
+                    + '打錯按 <code>\'</code> <code>[</code> <code>]</code> 換字,<code>`</code> 打全碼,<code>⏎</code> 送出。';
+                frag.appendChild(hint);
+            }
+            return frag;
+        };
+        els.composeArea.replaceChildren(build(false));
+        if (state.isMini) els.miniCompose.replaceChildren(build(true));
+        // 讓最新的字保持在可視範圍
+        els.composeArea.scrollLeft = els.composeArea.scrollWidth;
+        if (state.isMini) els.miniCompose.scrollLeft = els.miniCompose.scrollWidth;
+    }
+
+    /** 目前候選列表(全碼模式 / 修正位置) */
+    function currentCandidates() {
+        if (state.fc) return fcCandidates();
+        const i = activeIndex();
+        if (i === null) return [];
+        const t = state.tokens[i];
+        if (t.fc) return (dayiRaw[t.keys] || []).map(c => ({ char: c.char }));
+        const prev = i > 0 ? state.decoded[i - 1] : '';
+        return decoder.candidatesAt(t.keys, prev, 60);
     }
 
     function renderCandidates() {
-        const bar = els.candidateBar;
-        bar.innerHTML = '';
-        let cands = [];
-        let hint = '';
-        if (state.fc) {
-            cands = fcCandidates();
-            hint = state.fc.keys ? `全碼「${state.fc.keys}」候選(空白選 1;' [ ] - \\ = 選 2-7;或點選)` : '全碼模式:輸入 1-4 碼';
-        } else if (state.cursor !== null) {
-            const t = state.tokens[state.cursor];
-            const prev = state.cursor > 0 ? state.decoded[state.cursor - 1] : '';
-            if (t.fc) {
-                cands = (dayiRaw[t.keys] || []).map(c => ({ char: c.char }));
-            } else {
-                cands = decoder.candidatesAt(t.keys, prev, 9);
+        const cands = currentCandidates();
+        const totalPages = Math.max(1, Math.ceil(cands.length / PAGE_SIZE));
+        if (state.page >= totalPages) state.page = 0;
+        const start = state.page * PAGE_SIZE;
+        const pageCands = cands.slice(start, start + PAGE_SIZE);
+
+        const build = (mini) => {
+            const frag = document.createDocumentFragment();
+            if (!cands.length) {
+                if (!mini) {
+                    const hint = document.createElement('span');
+                    hint.className = 'cand-hint';
+                    hint.textContent = state.fc ? '全碼模式:輸入 1-4 碼' : '打字後這裡會列出剛打那個字的候選';
+                    frag.appendChild(hint);
+                }
+                return frag;
             }
-            hint = `位置 ${state.cursor + 1} 候選(數字鍵替換並鎖定,Esc 取消)`;
-        } else {
-            bar.innerHTML = '<span class="cand-hint">點選緩衝區的字即可列出該位置候選(按數字鍵替換)</span>';
-            return;
-        }
-        const hintEl = document.createElement('span');
-        hintEl.className = 'cand-hint';
-        hintEl.textContent = hint;
-        bar.appendChild(hintEl);
-        const fcSelLabels = ['␣', "'", '[', ']', '-', '\\', '=', '', ''];
-        cands.slice(0, 9).forEach((c, i) => {
-            const el = document.createElement('span');
-            el.className = 'cand';
-            const num = state.fc ? (fcSelLabels[i] || '') : String(i + 1);
-            el.innerHTML = `<span class="num">${num}</span>${c.char}`;
-            el.addEventListener('click', () => selectCandidate(i));
-            bar.appendChild(el);
-        });
-        if (state.cursor !== null && state.tokens[state.cursor].pinned && !state.tokens[state.cursor].fc) {
-            const un = document.createElement('span');
-            un.className = 'cand';
-            un.innerHTML = '<span class="num">↺</span>解除鎖定';
-            un.addEventListener('click', unpinAtCursor);
-            bar.appendChild(un);
-        }
+            if (!mini) {
+                const hint = document.createElement('span');
+                hint.className = 'cand-hint';
+                const i = activeIndex();
+                hint.textContent = state.fc ? '全碼候選:' : `第 ${i + 1} 字:`;
+                frag.appendChild(hint);
+            }
+            pageCands.forEach((c, idx) => {
+                const el = document.createElement('span');
+                el.className = 'cand';
+                el.innerHTML = `<span class="num">${SELECT_LABELS[idx]}</span>${c.char}`;
+                el.addEventListener('click', () => selectCandidate(idx));
+                frag.appendChild(el);
+            });
+            if (totalPages > 1) {
+                const pg = document.createElement('span');
+                pg.className = 'cand-page';
+                pg.textContent = `${state.page + 1}/${totalPages} (=)`;
+                pg.addEventListener('click', nextPage);
+                frag.appendChild(pg);
+            }
+            return frag;
+        };
+        els.candidateBar.replaceChildren(build(false));
+        if (state.isMini) els.miniCands.replaceChildren(build(true));
     }
 
     function fcCandidates() {
-        if (!state.fc.keys) return [];
+        if (!state.fc || !state.fc.keys) return [];
         const exact = (dayiRaw[state.fc.keys] || []).map(c => ({ char: c.char, freq: c.freq || 0 }));
         exact.sort((a, b) => b.freq - a.freq);
         return exact;
     }
 
-    // ---------- 動作 ----------
-    function pushToken(keys) {
-        state.tokens.push({ keys });
-        state.cursor = null;
-        decodeAndRender();
+    function nextPage() {
+        const total = Math.ceil(currentCandidates().length / PAGE_SIZE);
+        if (total > 1) { state.page = (state.page + 1) % total; renderCandidates(); }
     }
 
+    // ---------- 輸入動作 ----------
     function handleDayiKey(k) {
+        haptic();
         if (state.fc) {
-            if (state.fc.keys.length >= 4) { toast('全碼最多 4 鍵'); return; }
+            if (state.fc.keys.length >= 4) return;
             state.fc.keys += k;
-            state.fc.cands = fcCandidates();
+            state.page = 0;
             renderCompose();
             renderCandidates();
             return;
         }
         state.cursor = null;
+        state.page = 0;
         if (state.pendingKey === null) {
             state.pendingKey = k;
             renderCompose();
-            renderCandidates();
         } else {
             const keys = state.pendingKey + k;
             state.pendingKey = null;
-            pushToken(keys);
+            state.tokens.push({ keys });
+            render();
         }
     }
 
+    /** 空白:待配對碼→單碼字;全碼模式→選第 1 個;其餘→送出 */
     function handleSpace() {
         if (state.fc) { selectCandidate(0); return; }
         if (state.pendingKey !== null) {
-            const keys = state.pendingKey;   // 單碼字:1 鍵 + 空白
+            haptic();
+            state.tokens.push({ keys: state.pendingKey });
             state.pendingKey = null;
-            pushToken(keys);
+            state.cursor = null;
+            state.page = 0;
+            render();
+            return;
         }
+        commit();
     }
 
     function handleBackspace() {
+        haptic();
         if (state.fc) {
-            if (state.fc.keys.length > 0) {
-                state.fc.keys = state.fc.keys.slice(0, -1);
-                state.fc.cands = fcCandidates();
-            } else {
-                state.fc = null;
-                updateModeChip();
-            }
+            if (state.fc.keys.length > 0) state.fc.keys = state.fc.keys.slice(0, -1);
+            else { state.fc = null; updateModeChip(); }
+            state.page = 0;
             renderCompose();
             renderCandidates();
             return;
         }
         if (state.pendingKey !== null) { state.pendingKey = null; renderCompose(); return; }
-        if (state.cursor !== null) { state.cursor = null; renderCompose(); renderCandidates(); return; }
+        if (state.cursor !== null) { state.cursor = null; state.page = 0; render(); return; }
         state.tokens.pop();
-        decodeAndRender();
+        state.page = 0;
+        render();
     }
 
     function toggleFullCode() {
+        haptic();
         if (state.fc) {
             state.fc = null;
         } else {
-            state.fc = { keys: state.pendingKey || '', cands: [] };
+            state.fc = { keys: state.pendingKey || '' };
             state.pendingKey = null;
             state.cursor = null;
-            if (state.fc.keys) state.fc.cands = fcCandidates();
         }
+        state.page = 0;
         updateModeChip();
         renderCompose();
         renderCandidates();
     }
 
     function updateModeChip() {
-        if (state.fc) {
-            els.modeChip.textContent = '全碼逃生口';
-            els.modeChip.classList.add('fc');
-        } else {
-            els.modeChip.textContent = '智慧 2 碼';
-            els.modeChip.classList.remove('fc');
-        }
+        const fc = !!state.fc;
+        els.modeChip.textContent = fc ? '全碼逃生口' : '智慧 2 碼';
+        els.modeChip.classList.toggle('fc', fc);
+        els.miniStatus.textContent = fc ? '全碼' : '易2';
     }
 
-    function selectCandidate(i) {
+    function selectCandidate(idxOnPage) {
+        const cands = currentCandidates();
+        const abs = state.page * PAGE_SIZE + idxOnPage;
+        if (!cands[abs]) return;
+        haptic();
+        const char = cands[abs].char;
+
         if (state.fc) {
-            const cands = fcCandidates();
-            if (!cands[i]) { if (state.fc.keys) toast('無此候選'); return; }
-            state.tokens.push({ pinned: cands[i].char, keys: state.fc.keys, fc: true });
+            state.tokens.push({ pinned: char, keys: state.fc.keys, fc: true });
             state.fc = null;
+            state.cursor = null;
+            state.page = 0;
             updateModeChip();
-            decodeAndRender();
+            history.recordCommit(char);
+            updateHistoryCount();
+            render();
             return;
         }
-        if (state.cursor === null) return;
-        const t = state.tokens[state.cursor];
-        const prev = state.cursor > 0 ? state.decoded[state.cursor - 1] : '';
-        const cands = t.fc ? (dayiRaw[t.keys] || []).map(c => ({ char: c.char })) : decoder.candidatesAt(t.keys, prev, 9);
-        if (!cands[i]) return;
-        state.tokens[state.cursor] = { pinned: cands[i].char, keys: t.keys, fc: t.fc };
-        history.recordCommit(cands[i].char);   // 修正選字是最強的個人訊號
+        const i = activeIndex();
+        if (i === null) return;
+        const t = state.tokens[i];
+        state.tokens[i] = { pinned: char, keys: t.keys, fc: t.fc };
+        history.recordCommit(char);          // 修正選字是最強的個人訊號
+        updateHistoryCount();
         state.cursor = null;
-        decodeAndRender();
-    }
-
-    function unpinAtCursor() {
-        const t = state.tokens[state.cursor];
-        state.tokens[state.cursor] = { keys: t.keys };
-        state.cursor = null;
-        decodeAndRender();
+        state.page = 0;
+        render();
     }
 
     function selectCell(i) {
         state.cursor = state.cursor === i ? null : i;
+        state.page = 0;
         renderCompose();
         renderCandidates();
     }
 
     function moveCursor(delta) {
-        if (state.tokens.length === 0) return;
-        if (state.cursor === null) state.cursor = delta > 0 ? 0 : state.tokens.length - 1;
-        else state.cursor = Math.max(0, Math.min(state.tokens.length - 1, state.cursor + delta));
+        if (!state.tokens.length) return;
+        const cur = activeIndex();
+        state.cursor = Math.max(0, Math.min(state.tokens.length - 1, cur + delta));
+        state.page = 0;
         renderCompose();
         renderCandidates();
     }
 
     function commit() {
-        if (state.decoded.length === 0) return;
+        if (!state.decoded.length) return;
+        haptic();
         const text = state.decoded.join('');
-        els.outputBuffer.value += text;
-        // 學習:整詞 + 單字都記(修正過的字已在 selectCandidate 記過)
+        setOutput(getOutput() + text);
         state.lastWords.forEach(w => history.recordCommit(w));
         state.decoded.forEach(c => history.recordCommit(c));
+        updateHistoryCount();
         state.tokens = [];
         state.decoded = [];
         state.lastWords = [];
         state.cursor = null;
-        decodeAndRender();
-        toast(`已送出「${text}」`);
+        state.page = 0;
+        render();
+        if (state.settings.autoCopy) copyOutput(true);
+        else toast(`已送出「${text}」`);
+    }
+
+    const getOutput = () => els.outputBuffer.value;
+
+    function setOutput(v) {
+        els.outputBuffer.value = v;
+        els.miniOutput.value = v;
+        const target = state.isMini ? els.miniOutput : els.outputBuffer;
+        target.scrollTop = target.scrollHeight;
+    }
+
+    async function copyOutput(silent) {
+        const text = getOutput();
+        if (!text) { if (!silent) toast('沒有可複製的內容'); return; }
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch (e) {
+            const target = state.isMini ? els.miniOutput : els.outputBuffer;
+            target.removeAttribute('readonly');
+            target.select();
+            document.execCommand('copy');
+            target.setAttribute('readonly', '');
+        }
+        const target = state.isMini ? els.miniOutput : els.outputBuffer;
+        target.style.animation = 'none';
+        void target.offsetHeight;
+        target.style.animation = 'flash-green .3s';
+        toast(silent ? '已送出並複製 ✓' : '已複製到剪貼簿 ✓');
     }
 
     // ---------- 鍵盤 ----------
     function renderKeyboard() {
         const vk = els.virtualKeyboard;
+        vk.replaceChildren();
         KEYBOARD_LAYOUT.forEach(row => {
             const rowEl = document.createElement('div');
             rowEl.className = 'vk-row';
             row.forEach(key => {
                 const btn = document.createElement('div');
                 btn.className = 'vk-key' + (key.type === 'special' ? ' special' : '') + (key.width === 'wide' ? ' wide' : '');
-                btn.innerHTML = key.sub ? `<span>${key.label}</span><span class="sub">${key.sub}</span>` : `<span>${key.label}</span>`;
+                btn.innerHTML = key.sub
+                    ? `<span>${key.label}</span><span class="sub">${key.sub}</span>`
+                    : `<span>${key.label}</span>`;
                 btn.addEventListener('click', () => {
                     if (key.action === 'backspace') handleBackspace();
                     else if (key.action === 'space') handleSpace();
@@ -386,65 +500,95 @@
                     else if (key.action === 'fullcode') toggleFullCode();
                     else handleDayiKey(key.code);
                 });
+                ['touchstart', 'mousedown'].forEach(ev =>
+                    btn.addEventListener(ev, () => btn.classList.add('active-state'), { passive: true }));
+                ['touchend', 'mouseup', 'mouseleave'].forEach(ev =>
+                    btn.addEventListener(ev, () => setTimeout(() => btn.classList.remove('active-state'), 90)));
                 rowEl.appendChild(btn);
             });
             vk.appendChild(rowEl);
         });
-        els.vkToggle.addEventListener('click', () => {
-            const kb = els.virtualKeyboard;
-            const hidden = kb.classList.toggle('hidden');
-            els.vkToggle.textContent = hidden ? '展開鍵盤 ▴' : '收合鍵盤 ▾';
-        });
-        // 桌面預設收合(有實體鍵盤),觸控裝置展開
-        if (!('ontouchstart' in window)) {
-            els.virtualKeyboard.classList.add('hidden');
-            els.vkToggle.textContent = '展開鍵盤 ▴';
-        }
     }
 
     function setupListeners() {
         document.addEventListener('keydown', (e) => {
-            if (e.metaKey || e.ctrlKey || e.altKey) return;
-            if (!decoder) return;
+            if (e.metaKey || e.ctrlKey || e.altKey || !decoder) return;
             const k = e.key;
-            // 修正游標下數字鍵 = 替換候選(此時不在打碼)
-            if (/^[1-9]$/.test(k) && state.cursor !== null) {
-                e.preventDefault();
-                selectCandidate(parseInt(k, 10) - 1);
-                return;
-            }
-            // 全碼模式:數字是大易碼(1=言 2=牛…),選字用 Lite 慣例的選字鍵
-            if (state.fc && state.fc.keys) {
-                const sel = ["'", '[', ']', '-', '\\', '='].indexOf(k);
-                if (sel !== -1) { e.preventDefault(); selectCandidate(sel + 1); return; }
-            }
+
+            // 選字鍵(大易/Lite 傳統配置);Space 另有語意,在 handleSpace 分流
+            const selIdx = SELECT_KEYS.indexOf(k);
+            if (selIdx > 0) { e.preventDefault(); selectCandidate(selIdx); return; }
+            if (k === '=') { e.preventDefault(); nextPage(); return; }
             if (k === ' ') { e.preventDefault(); handleSpace(); return; }
             if (k === 'Backspace') { e.preventDefault(); handleBackspace(); return; }
             if (k === 'Enter') { e.preventDefault(); commit(); return; }
             if (k === '`') { e.preventDefault(); toggleFullCode(); return; }
             if (k === 'ArrowLeft') { e.preventDefault(); moveCursor(-1); return; }
             if (k === 'ArrowRight') { e.preventDefault(); moveCursor(1); return; }
-            if (k === 'Escape') { state.cursor = null; renderCompose(); renderCandidates(); return; }
+            if (k === 'Escape') {
+                e.preventDefault();
+                if (state.isMini) { toggleMini(); return; }
+                state.cursor = null; state.page = 0; render();
+                return;
+            }
             const lower = k.toLowerCase();
             if (DAYI_KEY.test(lower)) { e.preventDefault(); handleDayiKey(lower); }
         });
 
-        els.commitBtn.addEventListener('click', commit);
-        els.bufBackspaceBtn.addEventListener('click', handleBackspace);
-        els.copyBtn.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(els.outputBuffer.value);
-                toast('已複製到剪貼簿');
-            } catch (e) {
-                els.outputBuffer.select();
-                document.execCommand('copy');
-                toast('已複製(fallback)');
+        els.copyBtn.addEventListener('click', () => copyOutput(false));
+        els.clearBtn.addEventListener('click', () => { setOutput(''); toast('已清空輸出'); });
+        els.miniStatus.addEventListener('click', toggleMini);
+
+        // FAB 選單
+        els.menuFab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            els.menuPanel.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+            if (!els.menuPanel.contains(e.target) && e.target !== els.menuFab) {
+                els.menuPanel.classList.add('hidden');
             }
         });
-        els.clearBtn.addEventListener('click', () => {
-            els.outputBuffer.value = '';
-            toast('已清空輸出');
+        const menu = {
+            'toggle-autocopy': () => { state.settings.autoCopy = !state.settings.autoCopy; },
+            'toggle-theme': () => { state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark'; },
+            'toggle-keyboard': () => { state.settings.keyboard = !state.settings.keyboard; },
+            'toggle-focus': () => { state.settings.focusMode = !state.settings.focusMode; },
+            'toggle-mini': () => { toggleMini(); },
+        };
+        Object.entries(menu).forEach(([id, fn]) => {
+            document.getElementById(id).addEventListener('click', () => { fn(); applySettings(); });
         });
+        document.getElementById('clear-history').addEventListener('click', () => {
+            if (!history) return;
+            history.clear();
+            updateHistoryCount();
+            toast('已清除選字習慣');
+            render();
+        });
+        document.getElementById('font-decrease').addEventListener('click', (e) => {
+            e.stopPropagation();
+            state.settings.fontScale = Math.max(0.8, +(state.settings.fontScale - 0.1).toFixed(1));
+            applySettings();
+        });
+        document.getElementById('font-increase').addEventListener('click', (e) => {
+            e.stopPropagation();
+            state.settings.fontScale = Math.min(1.6, +(state.settings.fontScale + 0.1).toFixed(1));
+            applySettings();
+        });
+    }
+
+    function toggleMini() {
+        state.isMini = !state.isMini;
+        document.body.classList.toggle('mini-mode', state.isMini);
+        els.miniUi.classList.toggle('hidden', !state.isMini);
+        // 虛擬鍵盤在兩種模式間搬移(同一個 DOM 節點)
+        (state.isMini ? els.miniKb : document.querySelector('.keyboard-container'))
+            .appendChild(els.virtualKeyboard);
+        els.menuPanel.classList.add('hidden');
+        setToggle('toggle-mini', state.isMini ? 'ON' : 'OFF');
+        setOutput(getOutput());
+        render();
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

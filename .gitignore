@@ -60,3 +60,6 @@ mvp1/test-*.html
 mvp1/test-*.js
 mvp1/diagnose-*.js
 mvp1/tests/browser/*.html
+
+screenshot-*.png
+node_modules/
