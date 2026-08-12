@@ -1,0 +1,1558 @@
+{
+ "opts": {
+  "gamma": 0.3,
+  "beta": 0.02,
+  "mu": 2,
+  "lenBonus": 3,
+  "maxWordLen": 4,
+  "topN": 9
+ },
+ "totals": {
+  "chars": 1240,
+  "top1AllOk": 1190,
+  "ctx": {
+   "total": 1081,
+   "top1": 1035,
+   "top3": 1032
+  },
+  "head": {
+   "total": 159,
+   "top1": 155
+  },
+  "sentences": 159,
+  "sentencesAllOk": 123,
+  "skipped": []
+ },
+ "fullCode": {
+  "total": 1240,
+  "top1": 1205
+ },
+ "latency": {
+  "decodes": 159,
+  "totalMs": 397,
+  "maxMs": 68
+ },
+ "errors": [
+  {
+   "sent": "會議改到下午三點",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "改",
+     "got": "已",
+     "token": "rc"
+    }
+   ],
+   "got": "會議已到下午三點"
+  },
+  {
+   "sent": "媽媽煮的菜最好吃",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "煮",
+     "got": "場",
+     "token": "fd"
+    },
+    {
+     "pos": 3,
+     "truth": "的",
+     "got": "白",
+     "token": "/d"
+    }
+   ],
+   "got": "媽媽場白菜最好吃"
+  },
+  {
+   "sent": "老闆算便宜一點啦",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "算",
+     "got": "自",
+     "token": "/3"
+    },
+    {
+     "pos": 3,
+     "truth": "便",
+     "got": "傳",
+     "token": "ae"
+    },
+    {
+     "pos": 4,
+     "truth": "宜",
+     "got": "體",
+     "token": "mj"
+    }
+   ],
+   "got": "老闆自傳體一點啦"
+  },
+  {
+   "sent": "我肚子好餓",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 4,
+     "truth": "餓",
+     "got": "似",
+     "token": "a;"
+    }
+   ],
+   "got": "我肚子好似"
+  },
+  {
+   "sent": "你家住在哪裡",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 1,
+     "truth": "家",
+     "got": "定",
+     "token": "me"
+    },
+    {
+     "pos": 2,
+     "truth": "住",
+     "got": "位",
+     "token": "ak"
+    }
+   ],
+   "got": "你定位在哪裡"
+  },
+  {
+   "sent": "放假想去墾丁玩",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 6,
+     "truth": "玩",
+     "got": "球",
+     "token": "5e"
+    }
+   ],
+   "got": "放假想去墾丁球"
+  },
+  {
+   "sent": "票已經買好了",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 0,
+     "truth": "票",
+     "got": "還",
+     "token": "4e"
+    }
+   ],
+   "got": "還已經買好了"
+  },
+  {
+   "sent": "位子在第七排",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 5,
+     "truth": "排",
+     "got": "看",
+     "token": "g3"
+    }
+   ],
+   "got": "位子在第七看"
+  },
+  {
+   "sent": "藥要按時吃",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 0,
+     "truth": "藥",
+     "got": "首",
+     "token": "u/"
+    }
+   ],
+   "got": "首要按時吃"
+  },
+  {
+   "sent": "口罩戴好再出門",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "戴",
+     "got": "毒",
+     "token": "f7"
+    }
+   ],
+   "got": "口罩毒好再出門"
+  },
+  {
+   "sent": "奶奶身體很健康",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 0,
+     "truth": "奶",
+     "got": "媽",
+     "token": "lb"
+    },
+    {
+     "pos": 1,
+     "truth": "奶",
+     "got": "媽",
+     "token": "lb"
+    },
+    {
+     "pos": 4,
+     "truth": "很",
+     "got": "式",
+     "token": "er"
+    }
+   ],
+   "got": "媽媽身體式健康"
+  },
+  {
+   "sent": "連假高速公路會塞車",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 1,
+     "truth": "假",
+     "got": "偏",
+     "token": "ah"
+    },
+    {
+     "pos": 7,
+     "truth": "塞",
+     "got": "賽",
+     "token": "ms"
+    }
+   ],
+   "got": "連偏高速公路會賽車"
+  },
+  {
+   "sent": "還好證件都在",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "證",
+     "got": "這",
+     "token": "10"
+    }
+   ],
+   "got": "還好這件都在"
+  },
+  {
+   "sent": "檔案記得先存檔",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 5,
+     "truth": "存",
+     "got": "帶",
+     "token": "s1"
+    },
+    {
+     "pos": 6,
+     "truth": "檔",
+     "got": "機",
+     "token": "it"
+    }
+   ],
+   "got": "檔案記得先帶機"
+  },
+  {
+   "sent": "密碼不要設太簡單",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 4,
+     "truth": "設",
+     "got": "說",
+     "token": "1q"
+    }
+   ],
+   "got": "密碼不要說太簡單"
+  },
+  {
+   "sent": "不要隨便點連結",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 6,
+     "truth": "結",
+     "got": "續",
+     "token": "tf"
+    }
+   ],
+   "got": "不要隨便點連續"
+  },
+  {
+   "sent": "衣服還沒有晾",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 5,
+     "truth": "晾",
+     "got": "影",
+     "token": "dk"
+    }
+   ],
+   "got": "衣服還沒有影"
+  },
+  {
+   "sent": "衛生局提醒民眾注意流感",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 6,
+     "truth": "眾",
+     "got": "黔",
+     "token": "4a"
+    }
+   ],
+   "got": "衛生局提醒民黔注意流感"
+  },
+  {
+   "sent": "半導體產業表現亮眼",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 7,
+     "truth": "亮",
+     "got": "就",
+     "token": "ko"
+    }
+   ],
+   "got": "半導體產業表現就眼"
+  },
+  {
+   "sent": "失業率創下新低",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 6,
+     "truth": "低",
+     "got": "創",
+     "token": "ar"
+    }
+   ],
+   "got": "失業率創下新創"
+  },
+  {
+   "sent": "勞動部修正勞基法規定",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "部",
+     "got": "就",
+     "token": "ko"
+    }
+   ],
+   "got": "勞動就修正勞基法規定"
+  },
+  {
+   "sent": "疫苗接種率持續提升",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 4,
+     "truth": "率",
+     "got": "畜",
+     "token": "kt"
+    }
+   ],
+   "got": "疫苗接種畜持續提升"
+  },
+  {
+   "sent": "演唱會門票秒殺",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 3,
+     "truth": "門",
+     "got": "車",
+     "token": "6"
+    }
+   ],
+   "got": "演唱會車票秒殺"
+  },
+  {
+   "sent": "警方呼籲民眾提高警覺",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 5,
+     "truth": "眾",
+     "got": "黔",
+     "token": "4a"
+    }
+   ],
+   "got": "警方呼籲民黔提高警覺"
+  },
+  {
+   "sent": "台鐵新自強號上路",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "新",
+     "got": "親",
+     "token": "ki"
+    }
+   ],
+   "got": "台鐵親自強號上路"
+  },
+  {
+   "sent": "夜市攤商生意變好",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "攤",
+     "got": "技",
+     "token": "gs"
+    },
+    {
+     "pos": 3,
+     "truth": "商",
+     "got": "交",
+     "token": "k8"
+    }
+   ],
+   "got": "夜市技交生意變好"
+  },
+  {
+   "sent": "漁業署公布休漁期程",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 6,
+     "truth": "漁",
+     "got": "沒",
+     "token": "xn"
+    },
+    {
+     "pos": 7,
+     "truth": "期",
+     "got": "其",
+     "token": "p8"
+    },
+    {
+     "pos": 8,
+     "truth": "程",
+     "got": "和",
+     "token": "vo"
+    }
+   ],
+   "got": "漁業署公布休沒其和"
+  },
+  {
+   "sent": "電價審議委員會開會",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 0,
+     "truth": "電",
+     "got": "宴",
+     "token": "md"
+    },
+    {
+     "pos": 1,
+     "truth": "價",
+     "got": "會",
+     "token": "a4"
+    }
+   ],
+   "got": "宴會審議委員會開會"
+  },
+  {
+   "sent": "太陽能板裝設量增加",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 6,
+     "truth": "量",
+     "got": "是",
+     "token": "de"
+    }
+   ],
+   "got": "太陽能板裝設是增加"
+  },
+  {
+   "sent": "水庫蓄水率回升",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "蓄",
+     "got": "薪",
+     "token": "uk"
+    }
+   ],
+   "got": "水庫薪水率回升"
+  },
+  {
+   "sent": "民眾節約用水意識提高",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 1,
+     "truth": "眾",
+     "got": "黔",
+     "token": "4a"
+    }
+   ],
+   "got": "民黔節約用水意識提高"
+  },
+  {
+   "sent": "青年購屋貸款放寬",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "購",
+     "got": "貼",
+     "token": "38"
+    },
+    {
+     "pos": 3,
+     "truth": "屋",
+     "got": "近",
+     "token": "he"
+    }
+   ],
+   "got": "青年貼近貸款放寬"
+  },
+  {
+   "sent": "都市更新計畫啟動",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 6,
+     "truth": "啟",
+     "got": "感",
+     "token": "ho"
+    }
+   ],
+   "got": "都市更新計畫感動"
+  },
+  {
+   "sent": "公車路網重新規劃",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 3,
+     "truth": "網",
+     "got": "常",
+     "token": "tm"
+    }
+   ],
+   "got": "公車路常重新規劃"
+  },
+  {
+   "sent": "共享單車使用率提升",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 2,
+     "truth": "單",
+     "got": "戰",
+     "token": "oo"
+    },
+    {
+     "pos": 3,
+     "truth": "車",
+     "got": "鬥",
+     "token": "6"
+    }
+   ],
+   "got": "共享戰鬥使用率提升"
+  },
+  {
+   "sent": "人工智慧應用越來越廣",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 9,
+     "truth": "廣",
+     "got": "度",
+     "token": "cs"
+    }
+   ],
+   "got": "人工智慧應用越來越度"
+  }
+ ],
+ "sentences": [
+  {
+   "sent": "今天天氣很好",
+   "got": "今天天氣很好",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "你吃飯了嗎",
+   "got": "你吃飯了嗎",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "我們明天見面",
+   "got": "我們明天見面",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "謝謝大家的幫忙",
+   "got": "謝謝大家的幫忙",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "請問現在幾點",
+   "got": "請問現在幾點",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "我要去台北車站",
+   "got": "我要去台北車站",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "晚上要不要一起吃飯",
+   "got": "晚上要不要一起吃飯",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "這個週末有空嗎",
+   "got": "這個週末有空嗎",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "會議改到下午三點",
+   "got": "會議已到下午三點",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "請幫我確認一下",
+   "got": "請幫我確認一下",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "火車快要出發了",
+   "got": "火車快要出發了",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "外面正在下雨",
+   "got": "外面正在下雨",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "記得帶雨傘出門",
+   "got": "記得帶雨傘出門",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "功課寫完了沒有",
+   "got": "功課寫完了沒有",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "媽媽煮的菜最好吃",
+   "got": "媽媽場白菜最好吃",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "早安今天也要加油",
+   "got": "早安今天也要加油",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "不好意思讓你久等了",
+   "got": "不好意思讓你久等了",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "生日快樂",
+   "got": "生日快樂",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "恭喜你考上大學",
+   "got": "恭喜你考上大學",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "我等一下再打給你",
+   "got": "我等一下再打給你",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "手機快沒電了",
+   "got": "手機快沒電了",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "捷運站在前面右轉",
+   "got": "捷運站在前面右轉",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "幫我買一杯咖啡",
+   "got": "幫我買一杯咖啡",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "這件衣服多少錢",
+   "got": "這件衣服多少錢",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "老闆算便宜一點啦",
+   "got": "老闆自傳體一點啦",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "我肚子好餓",
+   "got": "我肚子好似",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "今天上班好累",
+   "got": "今天上班好累",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "週五晚上有聚餐",
+   "got": "週五晚上有聚餐",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "你家住在哪裡",
+   "got": "你定位在哪裡",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "我住在新北市",
+   "got": "我住在新北市",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "放假想去墾丁玩",
+   "got": "放假想去墾丁球",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "夜市的小吃很有名",
+   "got": "夜市的小吃很有名",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "珍珠奶茶是台灣發明的",
+   "got": "珍珠奶茶是台灣發明的",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "我想吃滷肉飯",
+   "got": "我想吃滷肉飯",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "牛肉麵也不錯",
+   "got": "牛肉麵也不錯",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "這家餐廳要排隊",
+   "got": "這家餐廳要排隊",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "先訂位比較保險",
+   "got": "先訂位比較保險",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "電影幾點開演",
+   "got": "電影幾點開演",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "票已經買好了",
+   "got": "還已經買好了",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "位子在第七排",
+   "got": "位子在第七看",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "下班一起去運動",
+   "got": "下班一起去運動",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "最近開始學游泳",
+   "got": "最近開始學游泳",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "醫生說要多喝水",
+   "got": "醫生說要多喝水",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "感冒記得多休息",
+   "got": "感冒記得多休息",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "藥要按時吃",
+   "got": "首要按時吃",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "口罩戴好再出門",
+   "got": "口罩毒好再出門",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "今天空氣品質不好",
+   "got": "今天空氣品質不好",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "騎機車要戴安全帽",
+   "got": "騎機車要戴安全帽",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "路上小心慢慢開",
+   "got": "路上小心慢慢開",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "到家記得傳訊息",
+   "got": "到家記得傳訊息",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "爸爸在客廳看電視",
+   "got": "爸爸在客廳看電視",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "妹妹在房間寫作業",
+   "got": "妹妹在房間寫作業",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "哥哥去補習班上課",
+   "got": "哥哥去補習班上課",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "奶奶身體很健康",
+   "got": "媽媽身體式健康",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "全家一起吃年夜飯",
+   "got": "全家一起吃年夜飯",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "過年要發紅包",
+   "got": "過年要發紅包",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "端午節吃粽子",
+   "got": "端午節吃粽子",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "中秋節一起烤肉",
+   "got": "中秋節一起烤肉",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "連假高速公路會塞車",
+   "got": "連偏高速公路會賽車",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "提早出門比較好",
+   "got": "提早出門比較好",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "我的錢包不見了",
+   "got": "我的錢包不見了",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "趕快去警察局報案",
+   "got": "趕快去警察局報案",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "信用卡先掛失",
+   "got": "信用卡先掛失",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "還好證件都在",
+   "got": "還好這件都在",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "電腦當機了",
+   "got": "電腦當機了",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "先重新開機試試看",
+   "got": "先重新開機試試看",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "檔案記得先存檔",
+   "got": "檔案記得先帶機",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "密碼不要設太簡單",
+   "got": "密碼不要說太簡單",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "這封信是詐騙",
+   "got": "這封信是詐騙",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "不要隨便點連結",
+   "got": "不要隨便點連續",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "冷氣溫度調高一點",
+   "got": "冷氣溫度調高一點",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "電費最近漲價了",
+   "got": "電費最近漲價了",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "垃圾車快來了",
+   "got": "垃圾車快來了",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "資源回收要分類",
+   "got": "資源回收要分類",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "洗衣機在陽台",
+   "got": "洗衣機在陽台",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "衣服還沒有晾",
+   "got": "衣服還沒有影",
+   "ok": false,
+   "group": "conversation"
+  },
+  {
+   "sent": "房間要整理乾淨",
+   "got": "房間要整理乾淨",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "書桌上都是灰塵",
+   "got": "書桌上都是灰塵",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "貓咪在沙發上睡覺",
+   "got": "貓咪在沙發上睡覺",
+   "ok": true,
+   "group": "conversation"
+  },
+  {
+   "sent": "行政院今天召開記者會",
+   "got": "行政院今天召開記者會",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "立法院三讀通過修正案",
+   "got": "立法院三讀通過修正案",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "總統宣布新的政策方向",
+   "got": "總統宣布新的政策方向",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "市政府推動交通改善計畫",
+   "got": "市政府推動交通改善計畫",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "教育部公布考試新制",
+   "got": "教育部公布考試新制",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "衛生局提醒民眾注意流感",
+   "got": "衛生局提醒民黔注意流感",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "氣象署發布豪雨特報",
+   "got": "氣象署發布豪雨特報",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "颱風可能在週末登陸",
+   "got": "颱風可能在週末登陸",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "中央氣象署持續觀察路徑",
+   "got": "中央氣象署持續觀察路徑",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "股市今天收盤上漲",
+   "got": "股市今天收盤上漲",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "台幣匯率小幅升值",
+   "got": "台幣匯率小幅升值",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "油價下週可能調漲",
+   "got": "油價下週可能調漲",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "物價指數持續攀升",
+   "got": "物價指數持續攀升",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "央行決定維持利率不變",
+   "got": "央行決定維持利率不變",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "科技公司公布財報",
+   "got": "科技公司公布財報",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "半導體產業表現亮眼",
+   "got": "半導體產業表現就眼",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "台積電擴大投資計畫",
+   "got": "台積電擴大投資計畫",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "新竹科學園區徵才",
+   "got": "新竹科學園區徵才",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "失業率創下新低",
+   "got": "失業率創下新創",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "勞動部修正勞基法規定",
+   "got": "勞動就修正勞基法規定",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "健保費率明年調整",
+   "got": "健保費率明年調整",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "醫院急診人數增加",
+   "got": "醫院急診人數增加",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "疫苗接種率持續提升",
+   "got": "疫苗接種畜持續提升",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "研究團隊發表最新成果",
+   "got": "研究團隊發表最新成果",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "大學申請入學放榜",
+   "got": "大學申請入學放榜",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "學測成績今天公布",
+   "got": "學測成績今天公布",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "運動選手奪得金牌",
+   "got": "運動選手奪得金牌",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "職棒開幕戰湧入人潮",
+   "got": "職棒開幕戰湧入人潮",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "球迷擠滿整個球場",
+   "got": "球迷擠滿整個球場",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "演唱會門票秒殺",
+   "got": "演唱會車票秒殺",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "博物館推出特展",
+   "got": "博物館推出特展",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "故宮展出國寶文物",
+   "got": "故宮展出國寶文物",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "觀光局推廣國內旅遊",
+   "got": "觀光局推廣國內旅遊",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "日月潭風景區遊客增加",
+   "got": "日月潭風景區遊客增加",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "阿里山櫻花季開始",
+   "got": "阿里山櫻花季開始",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "花蓮地震規模五點二",
+   "got": "花蓮地震規模五點二",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "餘震持續發生中",
+   "got": "餘震持續發生中",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "消防隊前往現場救援",
+   "got": "消防隊前往現場救援",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "警方呼籲民眾提高警覺",
+   "got": "警方呼籲民黔提高警覺",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "詐騙集團手法不斷翻新",
+   "got": "詐騙集團手法不斷翻新",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "環保署加強稽查排放",
+   "got": "環保署加強稽查排放",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "電動車銷售量成長",
+   "got": "電動車銷售量成長",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "充電站數量持續增加",
+   "got": "充電站數量持續增加",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "高鐵加開班次因應連假",
+   "got": "高鐵加開班次因應連假",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "台鐵新自強號上路",
+   "got": "台鐵親自強號上路",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "機場出入境人數回升",
+   "got": "機場出入境人數回升",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "航空公司增加航班",
+   "got": "航空公司增加航班",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "旅行社推出優惠行程",
+   "got": "旅行社推出優惠行程",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "飯店住房率明顯提升",
+   "got": "飯店住房率明顯提升",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "餐飲業營收創新高",
+   "got": "餐飲業營收創新高",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "夜市攤商生意變好",
+   "got": "夜市技交生意變好",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "農民市集週末登場",
+   "got": "農民市集週末登場",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "有機蔬菜受到歡迎",
+   "got": "有機蔬菜受到歡迎",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "水果價格波動較大",
+   "got": "水果價格波動較大",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "漁業署公布休漁期程",
+   "got": "漁業署公布休沒其和",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "電價審議委員會開會",
+   "got": "宴會審議委員會開會",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "再生能源發電量成長",
+   "got": "再生能源發電量成長",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "太陽能板裝設量增加",
+   "got": "太陽能板裝設是增加",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "離岸風電進度超前",
+   "got": "離岸風電進度超前",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "水庫蓄水率回升",
+   "got": "水庫薪水率回升",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "南部地區解除限水",
+   "got": "南部地區解除限水",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "民眾節約用水意識提高",
+   "got": "民黔節約用水意識提高",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "房價指數持續上揚",
+   "got": "房價指數持續上揚",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "青年購屋貸款放寬",
+   "got": "青年貼近貸款放寬",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "都市更新計畫啟動",
+   "got": "都市更新計畫感動",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "社會住宅完工入住",
+   "got": "社會住宅完工入住",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "捷運新路線通車",
+   "got": "捷運新路線通車",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "公車路網重新規劃",
+   "got": "公車路常重新規劃",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "共享單車使用率提升",
+   "got": "共享戰鬥使用率提升",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "人行道改善工程完工",
+   "got": "人行道改善工程完工",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "國道服務區改建完成",
+   "got": "國道服務區改建完成",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "郵局推出新服務",
+   "got": "郵局推出新服務",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "銀行數位帳戶成長",
+   "got": "銀行數位帳戶成長",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "行動支付普及率提高",
+   "got": "行動支付普及率提高",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "資安事件引發關注",
+   "got": "資安事件引發關注",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "個資保護法修正上路",
+   "got": "個資保護法修正上路",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "人工智慧應用越來越廣",
+   "got": "人工智慧應用越來越度",
+   "ok": false,
+   "group": "news"
+  },
+  {
+   "sent": "科技部推動研發計畫",
+   "got": "科技部推動研發計畫",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "新創公司獲得投資",
+   "got": "新創公司獲得投資",
+   "ok": true,
+   "group": "news"
+  },
+  {
+   "sent": "文化部補助藝文活動",
+   "got": "文化部補助藝文活動",
+   "ok": true,
+   "group": "news"
+  }
+ ],
+ "summary": {
+  "top1 全部": 96,
+  "top1 有左context (門檻85%)": 95.7,
+  "top3 有左context (門檻95%)": 95.5,
+  "top1 句首無context (僅報告)": 97.5,
+  "整句全對率": 77.4,
+  "4碼回歸 top1 (門檻~100%)": 97.2,
+  "平均整句解碼 ms": 2.5,
+  "最大整句解碼 ms": 68,
+  "句數": 159,
+  "字數": 1240,
+  "skipped": 0
+ }
+}
