@@ -40,6 +40,7 @@
             { code: 'j', label: 'J', sub: '月' }, { code: 'k', label: 'K', sub: '立' }, { code: 'l', label: 'L', sub: '女' },
             { code: ';', label: ';', sub: '虫' }
         ],
+        // 第 4、5 列沿用 Lite 的幾何:⇧ 的位置放「全碼逃生口」,🌐 的位置放「送出」
         [
             { code: '`', label: '全碼', type: 'special', action: 'fullcode' },
             { code: 'z', label: 'Z', sub: '心' }, { code: 'x', label: 'X', sub: '水' }, { code: 'c', label: 'C', sub: '鹿' },
@@ -48,11 +49,11 @@
             { code: 'Backspace', label: '⌫', type: 'special', action: 'backspace' }
         ],
         [
+            { code: 'Enter', label: '⏎', type: 'special', action: 'commit' },
+            { code: 'Space', label: 'Space', type: 'special', action: 'space', width: 'wide' },
             { code: ',', label: ',', sub: '力' },
             { code: '.', label: '.', sub: '舟' },
-            { code: '/', label: '/', sub: '竹' },
-            { code: 'Space', label: '空白 / 選字', type: 'special', action: 'space', width: 'wide' },
-            { code: 'Enter', label: '送出 ⏎', type: 'special', action: 'commit' }
+            { code: '/', label: '/', sub: '竹' }
         ]
     ];
     const KEY_SUB = {};
