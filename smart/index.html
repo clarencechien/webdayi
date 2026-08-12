@@ -177,6 +177,7 @@
         }
         .mode-chip { padding: 1px 9px; border-radius: 999px; border: 1px solid var(--border-color); }
         .mode-chip.fc { border-color: var(--warn); color: var(--warn); }
+        .mode-chip.en { border-color: var(--primary); color: var(--primary); }
 
         /* ---------- Virtual keyboard(滿版、貼底,比照 Lite) ---------- */
         .keyboard-container {
@@ -274,26 +275,47 @@
             flex: 1; display: flex; flex-direction: column; background: var(--bg-surface);
             overflow: hidden;
         }
-        /* 第 1 列:緩衝區 + 候選 */
+        /* 第 1 列:碼 + 緩衝區 + 候選(比照 Lite 的桌面 PWA 標題列)*/
         .mini-input-bar {
             flex: 0 0 auto; border-bottom: 1px solid var(--border-color);
             padding: 6px 10px; padding-top: max(6px, env(titlebar-area-height, 0px));
-            display: flex; align-items: center; gap: 8px; min-height: 44px;
+            padding-right: 0;
+            display: flex; align-items: center; gap: 8px; min-height: 44px; position: relative;
         }
-        .mini-compose { display: flex; gap: 4px; flex: 0 0 auto; align-items: center; }
+        /* 桌面 PWA(window-controls-overlay):整條列可拖曳視窗 */
+        .mini-drag-region {
+            position: absolute; inset: 0; -webkit-app-region: drag; z-index: 1;
+        }
+        .mini-code {
+            font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 1.05rem;
+            color: var(--primary); font-weight: 600; z-index: 2; position: relative;
+            letter-spacing: 1px; white-space: nowrap;
+        }
+        .mini-code:not(:empty)::after {
+            content: "|"; color: var(--text-muted); font-weight: 400; margin-left: 6px;
+        }
+        .mini-compose {
+            display: flex; gap: 4px; flex: 0 0 auto; align-items: center;
+            z-index: 2; position: relative; -webkit-app-region: no-drag;
+        }
         .mini-compose .cell { min-width: 28px; padding: 0 3px; }
         .mini-compose .cell .ch { font-size: 1.16rem; }
         .mini-compose .cell .keys { display: none; }
         .mini-cands {
             display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1;
-            align-items: center;
+            align-items: center; z-index: 2; position: relative; -webkit-app-region: no-drag;
+            white-space: nowrap;
         }
         .mini-cands::-webkit-scrollbar { display: none; }
         .mini-cands .cand { padding: 2px 7px; font-size: 1rem; }
         .mini-status {
-            flex: 0 0 auto; font-size: .74rem; color: var(--primary); border: 1px solid var(--border-color);
-            border-radius: 999px; padding: 1px 8px; cursor: pointer;
+            flex: 0 0 auto; font-size: .74rem; font-weight: 700; color: var(--primary);
+            border: 1px solid var(--border-color); border-radius: 4px; padding: 2px 6px;
+            cursor: pointer; margin-left: auto; margin-right: 8px; background: var(--bg-surface);
+            z-index: 10; position: relative; -webkit-app-region: no-drag;
         }
+        .mini-cands .cand { -webkit-app-region: no-drag; }
+        #mini-output { -webkit-app-region: no-drag; }
         /* 第 2 列:輸出 */
         #mini-output {
             flex: 1; width: 100%; background: transparent; border: 0; resize: none; outline: none;
@@ -301,11 +323,7 @@
             font-family: inherit; scrollbar-width: none;
         }
         #mini-output::-webkit-scrollbar { display: none; }
-        .mini-kb {
-            flex: 0 0 auto; border-top: 1px solid var(--border-color);
-            padding: 4px 4px max(4px, env(safe-area-inset-bottom));
-            background: var(--bg-surface);
-        }
+
 
         /* ---------- Mobile ---------- */
         @media (max-width: 480px) {
@@ -427,12 +445,13 @@
     <div id="mini-ui" class="mini-ui hidden">
         <div class="mini-card">
             <div class="mini-input-bar">
+                <div class="mini-drag-region"></div>
+                <div id="mini-code" class="mini-code"></div>
                 <div id="mini-compose" class="mini-compose"></div>
                 <div id="mini-cands" class="mini-cands"></div>
-                <div id="mini-status" class="mini-status" title="離開 Mini 模式">易2</div>
+                <div id="mini-status" class="mini-status" title="切換中/英(連按兩下 Ctrl 離開 Mini)">易2</div>
             </div>
             <textarea id="mini-output" readonly></textarea>
-            <div id="mini-kb" class="mini-kb"></div>
         </div>
     </div>
 

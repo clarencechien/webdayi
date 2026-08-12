@@ -70,7 +70,11 @@ const server = http.createServer((req, res) => {
   await typeSentence(tokensOf[2]);
   t('單碼字句 火車快要出發了', (await composeText()) === '火車快要出發了', await composeText());
   await page.keyboard.press('Space');
-  t('Space 當送出鍵', (await outText()).endsWith('火車快要出發了'), await outText());
+  await page.waitForTimeout(60);
+  t('單擊空白不送出(斷字)', !(await outText()).endsWith('火車快要出發了'), await outText());
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(80);
+  t('連按兩下空白 = 送出', (await outText()).endsWith('火車快要出發了'), await outText());
 
   // 4. 候選列預設對準「剛打的字」+ 傳統選字鍵 ' 換第 2 候選
   await typeSentence(tokensOf[3]);
@@ -136,6 +140,13 @@ const server = http.createServer((req, res) => {
   await page.keyboard.press('Enter');
   const miniOut = await page.$eval('#mini-output', e => e.value);
   t('Mini 輸出列同步', miniOut.endsWith('你吃飯了嗎'), miniOut);
+  t('Mini 模式沒有虛擬鍵盤(比照 Lite)', await page.$eval('#mini-ui', e => !e.querySelector('.vk')));
+  const dragGeom = await page.$eval('.mini-drag-region', e => {
+    const r = e.getBoundingClientRect(), bar = e.parentElement.getBoundingClientRect();
+    return { covers: Math.round(r.width) >= Math.round(bar.width) - 1 && Math.round(r.height) >= Math.round(bar.height) - 1,
+             region: getComputedStyle(e).webkitAppRegion || getComputedStyle(e).getPropertyValue('-webkit-app-region') };
+  });
+  t('Mini 有桌面 PWA 拖曳區(覆蓋整條標題列)', dragGeom.covers, JSON.stringify(dragGeom));
   await page.screenshot({ path: path.join(__dirname, 'screenshot-mini.png') });
   await page.keyboard.press('Escape');
   await page.waitForTimeout(120);
@@ -160,6 +171,35 @@ const server = http.createServer((req, res) => {
   await page.keyboard.press('Control');
   await page.waitForTimeout(400);
   t('單擊 Ctrl 不會誤觸 Mini 模式', await page.$eval('#mini-ui', e => e.classList.contains('hidden')));
+
+  // 8c. 地球鍵:中 / 英數 切換(Lite 規格,不可移除)
+  const globeSel = '.vk-row:last-child .vk-key:first-child';
+  t('鍵盤保留地球鍵', (await page.$eval(globeSel, e => e.textContent)).includes('🌐'));
+  const outBefore = await outText();
+  await page.click(globeSel);
+  await page.waitForTimeout(80);
+  t('切換到英數模式', (await page.$eval('#mode-chip', e => e.textContent)) === '英數 EN');
+  await type('abc');
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(60);
+  t('英數模式直接輸出字母', (await outText()) === outBefore + 'abc ', JSON.stringify(await outText()));
+  await page.keyboard.press('Backspace');
+  t('英數模式退格刪字元', (await outText()) === outBefore + 'abc', await outText());
+  await page.click(globeSel);
+  await page.waitForTimeout(80);
+  t('切回大易模式', (await page.$eval('#mode-chip', e => e.textContent)) === '智慧 2 碼');
+
+  // 8d. Alt 熱鍵:單擊送出、連按兩下清除緩衝區
+  await typeSentence(tokensOf[0]);
+  t('Alt 前緩衝區有字', (await composeText()).length > 0);
+  await page.keyboard.press('Alt');
+  await page.waitForTimeout(100);
+  t('單擊 Alt 送出緩衝區', (await outText()).endsWith('今天天氣很好'), await outText());
+  await typeSentence(tokensOf[0]);
+  await page.keyboard.press('Alt');
+  await page.keyboard.press('Alt');
+  await page.waitForTimeout(120);
+  t('連按兩下 Alt 清除緩衝區', (await composeText()) === '', await composeText());
 
   // 9. 設定持久化
   await page.click('#menu-fab');
