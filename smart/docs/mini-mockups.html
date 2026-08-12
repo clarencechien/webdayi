@@ -248,7 +248,7 @@
     <div class="eyebrow">WebDayi Smart · Mini 模式 A/B · 第 2 版</div>
     <h1>Mini 條 A 與 A′</h1>
     <p class="lede">
-      A′ 是照回饋改的 A:<strong>格子下面的碼不顯示</strong>、<strong>分隔線右推</strong>
+      A′ 是照回饋改的 A:格子照樣標碼,差別在版面——<strong>分隔線右推</strong>
       讓候選區固定 5 格、左邊的字拿走剩下的全部寬度,<code>=</code> 換頁。
       兩條吃同一段真實輸入(句子「預設值不知要設定」,候選取自實際 <code>decoder.js</code>),
       同步逐鍵播放,按 <span class="kbd">=</span> 兩條會一起換頁。
@@ -275,8 +275,8 @@
   <section class="variant" id="v-Ap">
     <div class="v-head">
       <span class="v-key">A′</span>
-      <span class="v-name">格子不標碼,候選固定 5 格</span>
-      <span class="v-idea">分隔線推到右邊:候選永遠是 5 格、位置固定,左邊的句子拿走剩下的全部寬度。</span>
+      <span class="v-name">候選固定 5 格,分隔線右推</span>
+      <span class="v-idea">格子與碼標和 A 相同;候選永遠是 5 格、位置固定,左邊的句子拿走剩下的全部寬度。</span>
     </div>
     <div class="frame">
       <div class="chrome"><span>⌄</span><span>⋮</span><span>—</span><span>▢</span><span>✕</span></div>
@@ -289,8 +289,8 @@
       <div class="out" id="Ap-out"></div>
     </div>
     <div class="notes">
-      <div class="note good"><b>好處</b>拿掉碼標之後字排得緊、一眼讀成句;候選 5 格位置固定,眼睛與手指都有肌肉記憶(第 3 個永遠在同一點)。左區寬度是 A 的兩倍以上,十幾個字也不用捲。</div>
-      <div class="note cost"><b>代價</b>看不到每個字打了什麼碼(要對照時得靠全碼模式);候選一次只給 5 個,冷僻字要按 <span class="kbd">=</span> 翻頁。</div>
+      <div class="note good"><b>好處</b>候選 5 格位置固定,眼睛與手指都有肌肉記憶(第 3 個永遠在同一點),而且每一格都按得到。左區寬度是 A 的兩倍以上,十幾個字不用捲就看得到,碼標也還在。</div>
+      <div class="note cost"><b>代價</b>候選一次只給 5 個,冷僻字要按 <span class="kbd">=</span> 翻頁。</div>
     </div>
     <div class="pick"><button data-pick="A-prime">選這款</button><span class="chosen" data-chosen="A-prime"></span></div>
   </section>
@@ -312,8 +312,8 @@
       <div class="out" id="A-out"></div>
     </div>
     <div class="notes">
-      <div class="note good"><b>好處</b>看得到每個字的碼,debug 期間有用。</div>
-      <div class="note cost"><b>代價</b>碼標讓每格變高變寬,字被切開讀不成句;候選數量隨寬度浮動,位置不固定,沒有肌肉記憶。</div>
+      <div class="note good"><b>好處</b>候選有多少列多少,常用字通常一眼看得完,不用翻頁。</div>
+      <div class="note cost"><b>代價</b>列出來的候選超過 6 個就沒有選字鍵可按了(只是裝飾);候選起點隨字數浮動,沒有肌肉記憶;左區只有 42%,長句要捲。</div>
     </div>
     <div class="pick"><button data-pick="A">選這款</button><span class="chosen" data-chosen="A"></span></div>
   </section>
@@ -326,9 +326,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>格子下的碼</td><td>顯示</td><td>不顯示</td></tr>
-        <tr><td>候選格數(1100px)</td><td class="num" id="cell-A-wide">—</td><td class="num">5(固定)</td></tr>
-        <tr><td>候選格數(560px)</td><td class="num" id="cell-A-narrow">—</td><td class="num">5(固定)</td></tr>
+        <tr><td>格子下的碼</td><td>顯示</td><td>顯示(相同)</td></tr>
+        <tr><td>列出的候選數(1100px)</td><td class="num" id="cell-A-wide">—</td><td class="num">5(固定)</td></tr>
+        <tr><td>列出的候選數(560px)</td><td class="num" id="cell-A-narrow">—</td><td class="num">5(固定)</td></tr>
+        <tr><td>其中<strong>按得到</strong>的(有選字鍵)</td><td class="num">6</td><td class="num">5(全部)</td></tr>
         <tr><td>候選位置</td><td>隨字數浮動</td><td>固定,同一格永遠同一個選字鍵</td></tr>
         <tr><td>左區可見字數(1100px)</td><td class="num" id="cell-A-chars">—</td><td class="num" id="cell-Ap-chars">—</td></tr>
         <tr><td>換頁</td><td>無(擠不下就看不到)</td><td><span class="kbd">=</span> 翻頁,右側顯示頁碼</td></tr>
@@ -616,7 +617,7 @@ function render() {
   $('#bar').style.width = ((i + 1) / DATA.states.length * 100) + '%';
 
   // A′:不標碼,候選固定 5 格 + 頁碼
-  $('#Ap-left').innerHTML = cellsHTML(chars, active, pending, false);
+  $('#Ap-left').innerHTML = cellsHTML(chars, active, pending, true);
   const slice = cands.slice(page * PAGE, page * PAGE + PAGE);
   $('#Ap-cands').innerHTML = Array.from({ length: PAGE }, (_, n) => slice[n]
     ? `<span class="cand"><i>${SEL[n]}</i>${esc(slice[n])}</span>`
