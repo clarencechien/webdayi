@@ -292,22 +292,15 @@
         .mini-drag-region {
             position: absolute; inset: 0; -webkit-app-region: drag; z-index: 1;
         }
-        /* 左半邊固定寬度:待配對碼 + 暫定字 + 游標。候選永遠從同一個 x 開始,不會被推著跑 */
+        /* A′:左區拿走剩餘全部寬度,分隔線被推到右邊(候選區固定寬度) */
         .mini-left {
-            flex: 0 0 clamp(140px, 42%, 340px);   /* 固定坑位:寬視窗也不會留下半條空白 */
-            min-width: 0;
+            flex: 1 1 auto; min-width: 0;
             display: flex; align-items: center; gap: 6px;
             overflow-x: auto; scrollbar-width: none;
             z-index: 2; position: relative; -webkit-app-region: no-drag;
-            border-right: 1px solid var(--border-color); padding-right: 8px;
+            border-right: 1px solid var(--border-color); padding-right: 10px;
         }
         .mini-left::-webkit-scrollbar { display: none; }
-        .mini-code {
-            font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 1.05rem;
-            color: var(--primary); font-weight: 600;
-            letter-spacing: 1px; white-space: nowrap;
-            flex: 0 0 auto; min-width: 2.4ch;   /* 固定坑位,打第 1 碼時不會整條抖動 */
-        }
         /* Lite 的極簡呼吸游標 */
         .mini-cursor {
             font-family: "SF Mono", Menlo, Consolas, monospace; font-weight: 700;
@@ -324,14 +317,22 @@
         }
         .mini-compose .cell { min-width: 28px; padding: 0 3px; }
         .mini-compose .cell .ch { font-size: 1.16rem; }
-        .mini-compose .cell .keys { display: none; }
+        .mini-compose .cell .keys { font-size: .55rem; }
+        /* A′:候選固定 5 格,位置永遠不動,每格都對應一個選字鍵 */
         .mini-cands {
-            display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1;
-            align-items: center; z-index: 2; position: relative; -webkit-app-region: no-drag;
-            white-space: nowrap;
+            flex: 0 0 auto; display: grid; grid-template-columns: repeat(5, minmax(42px, 1fr));
+            gap: 5px; width: 270px;
+            z-index: 2; position: relative; -webkit-app-region: no-drag;
         }
-        .mini-cands::-webkit-scrollbar { display: none; }
-        .mini-cands .cand { padding: 2px 7px; font-size: 1rem; }
+        .mini-cands .cand { padding: 2px 6px; font-size: 1rem; justify-content: center; }
+        .cand.empty { visibility: hidden; }
+        .page-pill {
+            flex: 0 0 auto; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .7rem;
+            color: var(--text-muted); border: 1px solid var(--border-color); border-radius: 999px;
+            padding: 1px 7px; cursor: pointer; z-index: 2; position: relative;
+            -webkit-app-region: no-drag;
+        }
+        .page-pill:hover { border-color: var(--primary); color: var(--primary); }
         .mini-status {
             flex: 0 0 auto; font-size: .74rem; font-weight: 700; color: var(--primary);
             border: 1px solid var(--border-color); border-radius: 4px; padding: 2px 6px;
@@ -471,11 +472,11 @@
             <div class="mini-input-bar">
                 <div class="mini-drag-region"></div>
                 <div class="mini-left">
-                    <div id="mini-code" class="mini-code"></div>
                     <div id="mini-compose" class="mini-compose"></div>
                     <span class="mini-cursor">_</span>
                 </div>
                 <div id="mini-cands" class="mini-cands"></div>
+                <span id="mini-page" class="page-pill">1/1</span>
                 <div id="mini-status" class="mini-status" title="切換中/英(連按兩下 Ctrl 離開 Mini)">易2</div>
             </div>
             <textarea id="mini-output" readonly></textarea>

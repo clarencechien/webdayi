@@ -7,7 +7,7 @@
  *   - 緩衝區的字都是「暫定」(Viterbi 目前最佳路徑,虛線標示,會隨後續輸入回頭修正)
  *   - 候選列預設對準「剛打的字」;要改別的位置就點該字(或 ←/→ 移游標)
  *   - 選字鍵沿用大易/Lite 傳統配置:
- *       Space=第1個、'=第2、[=第3、]=第4、-=第5、\=第6、= 換頁
+ *       Space=第1個、'=第2、[=第3、]=第4、-=第5,`=` 換頁(一頁固定 5 個)
  *     (數字鍵是大易碼,不當選字鍵)
  *   - `  進入全碼逃生口:打全碼 1-4 鍵,同一組選字鍵選字並鎖定
  *   - 空白 = 斷字(結束目前這個字);連按兩下空白 = 送出(Enter 亦可)
@@ -21,8 +21,9 @@
     const CTRL_DOUBLE_TAP_MS = 500;   // 連按兩下 Ctrl 切換 Mini 模式(與 Lite 相同)
     const ALT_DOUBLE_TAP_MS = 300;    // 連按兩下 Alt 清除緩衝區(與 Lite 相同)
     const SPACE_DOUBLE_TAP_MS = 400;  // 連按兩下空白 = 送出(空白單擊是斷字)
-    const SELECT_KEYS = [' ', "'", '[', ']', '-', '\\'];
-    const SELECT_LABELS = ['␣', "'", '[', ']', '-', '\\'];
+    // A′ 版面:一頁固定 5 個候選,每格都對應一個選字鍵(大易/Lite 傳統配置的前 5 個)
+    const SELECT_KEYS = [' ', "'", '[', ']', '-'];
+    const SELECT_LABELS = ['␣', "'", '[', ']', '-'];
     const PAGE_SIZE = SELECT_KEYS.length;
 
     const KEYBOARD_LAYOUT = [
@@ -89,8 +90,8 @@
         [
             'output-buffer', 'compose-area', 'candidate-bar', 'copy-btn', 'clear-btn', 'status-indicator',
             'latency', 'mode-chip', 'virtual-keyboard', 'menu-fab', 'menu-panel', 'toast',
-            'font-size-display', 'mini-ui', 'mini-compose', 'mini-cands', 'mini-output', 'mini-code',
-            'mini-status', 'history-count'
+            'font-size-display', 'mini-ui', 'mini-compose', 'mini-cands', 'mini-output',
+            'mini-status', 'mini-page', 'history-count'
         ].forEach(id => { els[camel(id)] = document.getElementById(id); });
 
         loadSettings();
@@ -254,10 +255,7 @@
             return frag;
         };
         els.composeArea.replaceChildren(build(false));
-        if (state.isMini) {
-            els.miniCompose.replaceChildren(build(true));
-            els.miniCode.textContent = state.fc ? state.fc.keys : (state.pendingKey || '\u00a0');
-        }
+        if (state.isMini) els.miniCompose.replaceChildren(build(true));
         // 讓最新的字保持在可視範圍
         els.composeArea.scrollLeft = els.composeArea.scrollWidth;
         if (state.isMini) els.miniCompose.scrollLeft = els.miniCompose.scrollWidth;
@@ -281,10 +279,19 @@
         const start = state.page * PAGE_SIZE;
         const pageCands = cands.slice(start, start + PAGE_SIZE);
 
+        const emptySlot = () => {
+            const el = document.createElement('span');
+            el.className = 'cand empty';
+            el.textContent = '·';
+            return el;
+        };
+
         const build = (mini) => {
             const frag = document.createDocumentFragment();
             if (!cands.length) {
-                if (!mini) {
+                // Mini(A′)保持 5 個空位,版面不塌;主 UI 給提示文字
+                if (mini) for (let n = 0; n < PAGE_SIZE; n++) frag.appendChild(emptySlot());
+                else {
                     const hint = document.createElement('span');
                     hint.className = 'cand-hint';
                     hint.textContent = state.fc ? '全碼模式:輸入 1-4 碼' : '打字後這裡會列出剛打那個字的候選';
@@ -299,14 +306,20 @@
                 hint.textContent = state.fc ? '全碼候選:' : `第 ${i + 1} 字:`;
                 frag.appendChild(hint);
             }
-            pageCands.forEach((c, idx) => {
+            for (let idx = 0; idx < PAGE_SIZE; idx++) {
+                const c = pageCands[idx];
+                if (!c) {
+                    if (mini) frag.appendChild(emptySlot());   // A′:候選格數固定
+                    continue;
+                }
                 const el = document.createElement('span');
                 el.className = 'cand';
                 el.innerHTML = `<span class="num">${SELECT_LABELS[idx]}</span>${c.char}`;
                 el.addEventListener('click', () => selectCandidate(idx));
                 frag.appendChild(el);
-            });
-            if (totalPages > 1) {
+            }
+            // Mini 的頁碼在候選區外面的獨立 pill,不佔候選格
+            if (!mini && totalPages > 1) {
                 const pg = document.createElement('span');
                 pg.className = 'cand-page';
                 pg.textContent = `${state.page + 1}/${totalPages} (=)`;
@@ -316,7 +329,10 @@
             return frag;
         };
         els.candidateBar.replaceChildren(build(false));
-        if (state.isMini) els.miniCands.replaceChildren(build(true));
+        if (state.isMini) {
+            els.miniCands.replaceChildren(build(true));
+            els.miniPage.textContent = `${state.page + 1}/${totalPages}`;
+        }
     }
 
     function fcCandidates() {
@@ -642,6 +658,7 @@
         els.copyBtn.addEventListener('click', () => copyOutput(false));
         els.clearBtn.addEventListener('click', () => { setOutput(''); toast('已清空輸出'); });
         els.miniStatus.addEventListener('click', toggleIM);
+        els.miniPage.addEventListener('click', nextPage);
 
         // FAB 選單
         els.menuFab.addEventListener('click', (e) => {
