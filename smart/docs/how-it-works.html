@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧 2 碼是怎麼猜到字的</title>
+<style>
+  :root {
+    --accent: #0b8ec4;          /* 選中的路徑 */
+    --accent-soft: #d9eef7;
+    --reject: #94a3ae;          /* 沒被選上的候選 */
+    --warn: #b0651a;
+    --ground: #f2f5f6;
+    --surface: #ffffff;
+    --surface-2: #eaf0f2;
+    --ink: #12222b;
+    --ink-2: #3d5460;
+    --ink-muted: #6a838f;
+    --line: #d5e0e4;
+    --line-strong: #b3c5cc;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Noto Sans TC", "PingFang TC", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --accent: #45c9f5;
+      --accent-soft: #0e3a4d;
+      --reject: #6b8290;
+      --warn: #e0a458;
+      --ground: #0c1419;
+      --surface: #142229;
+      --surface-2: #1b2c34;
+      --ink: #e7f0f3;
+      --ink-2: #b8ccd4;
+      --ink-muted: #8ba3ad;
+      --line: #263a44;
+      --line-strong: #3a525e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --accent: #45c9f5;
+    --accent-soft: #0e3a4d;
+    --reject: #6b8290;
+    --warn: #e0a458;
+    --ground: #0c1419;
+    --surface: #142229;
+    --surface-2: #1b2c34;
+    --ink: #e7f0f3;
+    --ink-2: #b8ccd4;
+    --ink-muted: #8ba3ad;
+    --line: #263a44;
+    --line-strong: #3a525e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.75;
+    padding: 40px 20px 96px;
+  }
+  .col { max-width: 46rem; margin: 0 auto; }
+  .wide { max-width: 60rem; margin: 0 auto; }
+
+  /* ---- 標題區 ---- */
+  .eyebrow {
+    font-family: var(--mono); font-size: .74rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  h1 {
+    font-size: clamp(1.9rem, 5vw, 2.7rem); line-height: 1.15; letter-spacing: -.02em;
+    font-weight: 680; text-wrap: balance; margin: .35em 0 .5em;
+  }
+  .standfirst { font-size: 1.12rem; color: var(--ink-2); text-wrap: pretty; }
+
+  h2 {
+    font-size: 1.35rem; line-height: 1.3; font-weight: 660; letter-spacing: -.01em;
+    margin: 2.6em 0 .2em; text-wrap: balance;
+  }
+  h2 .num {
+    font-family: var(--mono); font-size: .72rem; color: var(--accent); display: block;
+    letter-spacing: .12em; margin-bottom: .35em; font-weight: 700;
+  }
+  h3 { font-size: 1.02rem; font-weight: 640; margin: 1.8em 0 .1em; }
+  p { margin: .85em 0; }
+  p + p { margin-top: 1.1em; }
+  strong { font-weight: 640; }
+  code {
+    font-family: var(--mono); font-size: .88em; background: var(--surface-2);
+    padding: .1em .35em; border-radius: 4px;
+  }
+  a { color: var(--accent); }
+  ul, ol { margin: .9em 0 .9em 1.3em; }
+  li { margin: .35em 0; }
+  li::marker { color: var(--ink-muted); }
+
+  .lead-in { color: var(--ink-muted); font-size: .95rem; }
+
+  /* ---- 數字帶 ---- */
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    margin: 2em 0;
+  }
+  .stat { background: var(--surface); padding: 14px 16px; }
+  .stat b {
+    display: block; font-size: 1.6rem; font-weight: 660; letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums; line-height: 1.2;
+  }
+  .stat span { font-size: .8rem; color: var(--ink-muted); }
+
+  /* ---- 圖 ---- */
+  figure { margin: 2em 0; }
+  figure svg { display: block; width: 100%; max-width: 100%; height: auto; color: var(--ink); }
+  figcaption {
+    font-size: .87rem; color: var(--ink-muted); margin-top: .7em; text-wrap: pretty;
+    border-left: 2px solid var(--line-strong); padding-left: .8em;
+  }
+  .fig-box {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px;
+    overflow-x: auto;
+  }
+
+  /* ---- 公式 ---- */
+  .formula {
+    background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 10px; padding: 14px 16px; margin: 1.4em 0; overflow-x: auto;
+    font-family: var(--mono); font-size: .9rem; line-height: 1.9; white-space: pre;
+  }
+  .formula .c { color: var(--ink-muted); }
+
+  /* ---- 側註 ---- */
+  .aside {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 16px; margin: 1.4em 0; font-size: .93rem; color: var(--ink-2);
+  }
+  .aside b { display: block; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-muted); margin-bottom: .3em; }
+  .aside.warn { border-left: 3px solid var(--warn); }
+
+  /* ---- 表 ---- */
+  .table-wrap {
+    overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+    margin: 1.5em 0;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+  th { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 620; }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; font-family: var(--mono); text-align: right; white-space: nowrap; }
+  .yes { color: var(--accent); font-weight: 620; }
+  .no { color: var(--reject); }
+
+  /* ---- 名詞小抄 ---- */
+  .gloss { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden; margin: 1.5em 0; }
+  .gloss div { background: var(--surface); padding: 12px 16px; }
+  .gloss dt { font-weight: 640; }
+  .gloss dd { color: var(--ink-2); font-size: .93rem; margin-top: .15em; }
+
+  hr { border: 0; border-top: 1px solid var(--line); margin: 3em 0; }
+  footer { color: var(--ink-muted); font-size: .85rem; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+
+<body>
+<div class="col">
+  <header>
+    <div class="eyebrow">WebDayi Smart · 技術說明</div>
+    <h1>智慧 2 碼是怎麼猜到字的</h1>
+    <p class="standfirst">
+      大易輸入法一個字要打 4 碼。我們只讓你打 <strong>2 碼</strong>,剩下的交給機率模型補。
+      這篇說明它用了哪些統計量(是的,就是你想的 unigram 和 bigram)、
+      為什麼同樣的資料拿來「預測下一個字」會慘敗、拿來「解碼已經按下的碼」卻夠用,
+      以及中間那個叫 Viterbi 的動態規劃到底在算什麼。
+    </p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><b>8.7</b><span>2 碼平均有幾個字撞碼</span></div>
+    <div class="stat"><b>97.4%</b><span>選對字的比例(有上文時)</span></div>
+    <div class="stat"><b>2.3 ms</b><span>解一整句要多久</span></div>
+    <div class="stat"><b>3.6 MB</b><span>整包語言模型大小</span></div>
+  </div>
+</div>
+
+<div class="col">
+  <h2><span class="num">01 / 問題</span>2 碼會撞成一團</h2>
+
+  <p>
+    大易是「字形拆碼」的輸入法:一個字最多 4 碼,例如「吃」是 <code>o2c</code>、「個」是 <code>a7o</code>。
+    打滿全碼幾乎不會有歧義——我們的碼表裡 16,918 個全碼碼位,平均只對應 <strong>1.1 個字</strong>,
+    打完就是它了。
+  </p>
+  <p>
+    但打 4 碼很累。大易的慣例簡碼是取 <strong>首碼 + 末碼</strong>(吃 <code>o2c</code> → <code>oc</code>,
+    個 <code>a7o</code> → <code>ao</code>)。這樣按鍵數直接砍半,代價是碼位空間從 16,918 縮到 <strong>1,562</strong>,
+    13,052 個字擠進去,平均一個碼位 <strong>8.7 個字</strong>(中位數 7,最擠的有 62 個)。
+  </p>
+  <p>
+    用資訊理論的講法:要從 8.7 個候選收斂到 1 個,需要
+    <code>log₂(8.7) ≈ 3.1 bits</code> 的額外資訊。這 3.1 bits 就是整個系統要去別的地方湊出來的東西。
+  </p>
+
+  <div class="aside">
+    <b>為什麼是「首碼+末碼」而不是「前兩碼」</b>
+    首尾碼把字分散得更均勻。改用前兩碼時,同一個部首開頭的字會全部塞在同幾個碼位;
+    改回首尾碼之後,我們的離線評測準確率從 95.7% 升到 97.4%,詞庫體積也從 3.8MB 掉到 2.4MB。
+  </div>
+
+  <h2><span class="num">02 / 關鍵區分</span>「預測未知」和「解碼已知」是兩回事</h2>
+
+  <p>
+    這個專案先做過一版「Smart Compose」:根據你剛打完的字,猜你<em>還沒打</em>的下一個字,猜中就按 Tab 接受。
+    它失敗得很徹底,而且是結構性的失敗,不是程式寫壞。
+  </p>
+  <p>
+    原因可以直接算:中文字元的 bigram 條件熵大約 <strong>4–5 bits</strong>,
+    意思是「知道前一個字之後,下一個字仍然有 2⁴~2⁵ ≈ 16–32 個合理選擇」。
+    要從十幾二十個裡面猜中第一名,命中率天生就只有一兩成——再加上「看建議 → 判斷 → 決定按不按」
+    的認知中斷成本,體驗必然是負的。
+  </p>
+  <p>
+    但同樣這 4–5 bits,拿來做<strong>解碼</strong>就完全夠用:使用者已經按下 2 碼,
+    候選被壓到平均 8.7 個,只需要 3.1 bits 就能收斂。<strong>4–5 &gt; 3.1</strong>,綽綽有餘。
+    同一份 bigram 資料,用在預測是遠遠不夠,用在消歧義是綽綽有餘——差別只在於
+    使用者有沒有先給你那 2 碼的約束。
+  </p>
+
+  <figure class="wide">
+    <div class="fig-box">
+      <svg viewBox="0 0 720 250" role="img"
+           aria-label="兩種用法對比:預測從前一個字直接猜未打的下一個字,候選是整個字集約 16 到 32 個合理選項;解碼則先用已按下的 2 碼把候選縮到 8.7 個,再用同一份 bigram 挑一個。">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+          </marker>
+          <marker id="ar-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+
+        <!-- 上:預測 -->
+        <text x="0" y="16" font-size="12" font-weight="700" fill="currentColor">預測(Smart Compose,已封存)</text>
+        <rect x="0" y="30" width="96" height="38" rx="7" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <text x="48" y="54" font-size="14" text-anchor="middle" fill="currentColor">前一個字</text>
+        <line x1="96" y1="49" x2="188" y2="49" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+        <text x="142" y="41" font-size="11" text-anchor="middle" fill="currentColor" opacity=".75">bigram</text>
+        <rect x="190" y="24" width="290" height="50" rx="7" fill="none" stroke="var(--reject)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <text x="335" y="45" font-size="13" text-anchor="middle" fill="var(--reject)">候選 = 16～32 個合理的下一個字</text>
+        <text x="335" y="63" font-size="11" text-anchor="middle" fill="var(--reject)">沒有任何按鍵約束</text>
+        <line x1="480" y1="49" x2="560" y2="49" stroke="var(--reject)" stroke-width="1.2" marker-end="url(#ar)"/>
+        <text x="640" y="45" font-size="13" text-anchor="middle" fill="var(--reject)">top-1 命中一兩成</text>
+        <text x="640" y="63" font-size="11" text-anchor="middle" fill="var(--reject)">4–5 bits 不夠用</text>
+
+        <line x1="0" y1="100" x2="720" y2="100" stroke="currentColor" stroke-width="1" opacity=".25"/>
+
+        <!-- 下:解碼 -->
+        <text x="0" y="132" font-size="12" font-weight="700" fill="var(--accent)">解碼(智慧 2 碼,現行)</text>
+        <rect x="0" y="146" width="96" height="38" rx="7" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <text x="48" y="170" font-size="14" text-anchor="middle" fill="currentColor">前一個字</text>
+        <rect x="0" y="196" width="96" height="38" rx="7" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+        <text x="48" y="220" font-size="14" text-anchor="middle" fill="var(--accent)">已按 2 碼</text>
+        <line x1="96" y1="215" x2="188" y2="192" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#ar-a)"/>
+        <text x="142" y="225" font-size="11" text-anchor="middle" fill="var(--accent)">查碼表</text>
+        <line x1="96" y1="165" x2="188" y2="180" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+        <text x="142" y="152" font-size="11" text-anchor="middle" fill="currentColor" opacity=".75">同一份 bigram</text>
+        <rect x="190" y="163" width="290" height="50" rx="7" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.2"/>
+        <text x="335" y="184" font-size="13" text-anchor="middle" fill="currentColor">候選 = 8.7 個撞碼的字</text>
+        <text x="335" y="202" font-size="11" text-anchor="middle" fill="currentColor">只要 3.1 bits 就能收斂</text>
+        <line x1="480" y1="188" x2="560" y2="188" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#ar-a)"/>
+        <text x="640" y="184" font-size="13" text-anchor="middle" fill="var(--accent)">top-1 97.4%</text>
+        <text x="640" y="202" font-size="11" text-anchor="middle" fill="currentColor" opacity=".8">4–5 bits 綽綽有餘</text>
+      </svg>
+    </div>
+    <figcaption>
+      同一份 bigram 資料、同一個「前一個字」,差別只在使用者有沒有先用 2 碼把候選集鎖住。
+      鎖住之後要補的資訊量從 4–5 bits 掉到 3.1 bits,任務就從做不到變成做得到。
+    </figcaption>
+  </figure>
+
+  <h2><span class="num">03 / 資料</span>三張表,兩種統計量</h2>
+
+  <p>整個引擎只吃三個 JSON,全部是離線算好的靜態檔,瀏覽器抓下來就能用,沒有伺服器:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>檔案</th><th>裝什麼</th><th>統計量</th><th class="num">大小</th></tr></thead>
+      <tbody>
+        <tr><td><code>dayi_db.json</code></td><td>碼表:每個大易碼 → 哪些字</td><td>沒有機率,純查表</td><td class="num">1.5 MB</td></tr>
+        <tr><td><code>word_db.json</code></td><td>153,513 個詞(1–4 字)與它們的出現次數</td><td><strong>詞的 unigram</strong></td><td class="num">2.4 MB</td></tr>
+        <tr><td><code>char_bigram.json</code></td><td>83,401 組相鄰字對的次數</td><td><strong>字的 bigram</strong></td><td class="num">1.2 MB</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    所以回答那個問題:<strong>是的,就是 unigram 和 bigram</strong>,沒有神經網路、沒有 LLM 在跑。
+    但有一個關鍵設計:<strong>unigram 是算在「詞」上,不是算在「字」上</strong>。
+    「吃飯」在詞庫裡是一個條目、出現 585 次;引擎不是把「吃」的字頻乘上「飯」的字頻。
+    這個差別後面第 06 節會看到它有多要命。
+  </p>
+
+  <h3>資料哪裡來</h3>
+  <p>
+    詞頻主要取自 <strong>McBopomofo(小麥注音)</strong> 的 <code>phrase.occ</code>(MIT 授權),
+    這是台灣正體語境的詞頻表;不足的部分用 rime-essay 的詞頻表補洞,但打了 <code>×0.005</code> 的重折扣
+    ——因為它是大陸語料,直接用會讓「哪裏」壓過「哪裡」、「咋」壓過「吃」。
+    字 bigram 則是從同一批詞條的「詞內相鄰字對」加權統計出來的。
+  </p>
+
+  <div class="aside warn">
+    <b>這份 bigram 有個先天缺口</b>
+    它是從<em>詞表</em>算的,不是從連續文章算的,所以只涵蓋「詞內部」的字對。
+    像「你吃」這種跨詞的搭配,在表裡<strong>根本不存在</strong>。
+    第 05 節的 backoff 就是為了讓這種缺口不要害死解碼。
+  </div>
+
+  <h2><span class="num">04 / 演算法</span>把句子攤成一張圖,然後找最短路</h2>
+
+  <p>
+    使用者連續打 <code>at oc ax bj ob</code> 這 10 個鍵。引擎每 2 鍵切一個 token,
+    每個 token 去碼表查出它的候選字——這就攤成了一張叫 <strong>lattice(格狀圖)</strong> 的東西:
+    每一欄是一個字的位置,欄裡的每個節點是一個可能的字。
+  </p>
+  <p>
+    解碼 = 在這張圖上挑一條「最有可能」的路徑。候選數平均 8.7,五個字就有 8.7⁵ ≈ 5 萬條路徑,
+    十個字就是 25 億條,顯然不能一條一條試。
+    <strong>Viterbi 演算法</strong>就是解這件事的動態規劃:它從左到右走一次,
+    在每個節點只保留「走到這裡為止的最佳分數」,後面的計算就只看這個值,不必回頭重算前面。
+    複雜度從指數變成線性。
+  </p>
+
+  <figure class="wide">
+    <div class="fig-box">
+      <svg viewBox="0 0 760 330" role="img"
+           aria-label="以 你吃飯了嗎 為例的格狀圖:五欄分別是碼 at、oc、ax、bj、ob,每欄列出四個候選字，Viterbi 選出的路徑是你、吃、飯、了、嗎，其中吃飯了三個字是詞庫裡的一個詞條。">
+        <defs>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+
+        <!-- 欄標題:碼 -->
+        <text x="70"  y="20" font-size="13" text-anchor="middle" font-family="ui-monospace, monospace" fill="var(--accent)">at</text>
+        <text x="220" y="20" font-size="13" text-anchor="middle" font-family="ui-monospace, monospace" fill="var(--accent)">oc</text>
+        <text x="370" y="20" font-size="13" text-anchor="middle" font-family="ui-monospace, monospace" fill="var(--accent)">ax</text>
+        <text x="520" y="20" font-size="13" text-anchor="middle" font-family="ui-monospace, monospace" fill="var(--accent)">bj</text>
+        <text x="670" y="20" font-size="13" text-anchor="middle" font-family="ui-monospace, monospace" fill="var(--accent)">ob</text>
+        <text x="70"  y="36" font-size="10" text-anchor="middle" fill="currentColor" opacity=".6">人糸</text>
+        <text x="220" y="36" font-size="10" text-anchor="middle" fill="currentColor" opacity=".6">口鹿</text>
+        <text x="370" y="36" font-size="10" text-anchor="middle" fill="currentColor" opacity=".6">人水</text>
+        <text x="520" y="36" font-size="10" text-anchor="middle" fill="currentColor" opacity=".6">馬月</text>
+        <text x="670" y="36" font-size="10" text-anchor="middle" fill="currentColor" opacity=".6">口馬</text>
+
+        <!-- 第一列:被選中的字 -->
+        <rect x="42" y="52" width="56" height="36" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+        <text x="70" y="77" font-size="19" text-anchor="middle" fill="currentColor">你</text>
+        <rect x="192" y="52" width="56" height="36" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+        <text x="220" y="77" font-size="19" text-anchor="middle" fill="currentColor">吃</text>
+        <rect x="342" y="52" width="56" height="36" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+        <text x="370" y="77" font-size="19" text-anchor="middle" fill="currentColor">飯</text>
+        <rect x="492" y="52" width="56" height="36" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+        <text x="520" y="77" font-size="19" text-anchor="middle" fill="currentColor">了</text>
+        <rect x="642" y="52" width="56" height="36" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+        <text x="670" y="77" font-size="19" text-anchor="middle" fill="currentColor">嗎</text>
+
+        <!-- 被選中的路徑 -->
+        <line x1="98"  y1="70" x2="186" y2="70" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#ar2)"/>
+        <line x1="248" y1="70" x2="336" y2="70" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#ar2)"/>
+        <line x1="398" y1="70" x2="486" y2="70" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#ar2)"/>
+        <line x1="548" y1="70" x2="636" y2="70" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#ar2)"/>
+
+        <!-- 其餘候選 -->
+        <g fill="var(--reject)" font-size="17" text-anchor="middle">
+          <text x="70" y="118">係</text><text x="70" y="152">僚</text><text x="70" y="186">佘</text>
+          <text x="220" y="118">呢</text><text x="220" y="152">吧</text><text x="220" y="186">吼</text>
+          <text x="370" y="118">做</text><text x="370" y="152">使</text><text x="370" y="186">便</text>
+          <text x="520" y="118">予</text><text x="520" y="152">騎</text><text x="520" y="186">胥</text>
+          <text x="670" y="118">吟</text><text x="670" y="152">罵</text><text x="670" y="186">嗡</text>
+        </g>
+        <text x="70" y="212" font-size="10" text-anchor="middle" fill="var(--reject)">…共 16 個</text>
+        <text x="220" y="212" font-size="10" text-anchor="middle" fill="var(--reject)">…共 17 個</text>
+        <text x="370" y="212" font-size="10" text-anchor="middle" fill="var(--reject)">…共 42 個</text>
+        <text x="520" y="212" font-size="10" text-anchor="middle" fill="var(--reject)">…共 6 個</text>
+        <text x="670" y="212" font-size="10" text-anchor="middle" fill="var(--reject)">…共 7 個</text>
+
+        <!-- 詞條括號 -->
+        <path d="M 194 246 L 194 254 L 546 254 L 546 246" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        <text x="370" y="274" font-size="12" text-anchor="middle" fill="var(--accent)">詞庫裡的一個條目:「吃飯了」</text>
+        <text x="370" y="292" font-size="11" text-anchor="middle" fill="currentColor" opacity=".75">整段一次計分,不必逐字判斷</text>
+        <path d="M 44 246 L 44 254 L 96 254 L 96 246" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+        <text x="70" y="274" font-size="11" text-anchor="middle" fill="currentColor" opacity=".6">單字</text>
+        <path d="M 644 246 L 644 254 L 696 254 L 696 246" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+        <text x="670" y="274" font-size="11" text-anchor="middle" fill="currentColor" opacity=".6">單字</text>
+
+        <text x="0" y="322" font-size="11" fill="currentColor" opacity=".7">路徑總數 16×17×42×6×7 ≈ 48 萬條;Viterbi 只走一遍。</text>
+      </svg>
+    </div>
+    <figcaption>
+      真實的一次解碼。每欄的候選字與數量都取自實際引擎;藍線是 Viterbi 選出的最佳路徑。
+      注意中間三個字是被當成<strong>一個詞條</strong>「吃飯了」一起計分的,不是三個獨立的字。
+    </figcaption>
+  </figure>
+
+  <h3>分數怎麼算</h3>
+  <p>
+    路徑分數是把整條路徑上每一段的 log 機率加起來(用 log 是為了把連乘變成連加,避免浮點下溢)。
+    一條路徑被切成若干個詞,每個詞貢獻:
+  </p>
+
+  <div class="formula">score(路徑) = Σ<sub>每個詞 w</sub> [ <span class="c">// 詞本身有多常見</span>
+                   log P(w)
+                 + (len(w) − 1) × 3.0        <span class="c">// 詞長獎勵</span>
+                 + 2.0 × log(1 + 你選過幾次)  <span class="c">// 個人習慣</span>
+                 + 0.3 × log P(w首字 | 前詞末字) <span class="c">// 跨詞黏著 γ</span>
+                 ]</div>
+
+  <p>
+    四項各自的角色:第一項是<strong>詞的 unigram</strong>(這個詞在語料裡有多常見);
+    第二項補償「長詞的機率天生比短詞小」這個偏差,不然引擎會偏好把句子切成一堆單字;
+    第三項是個人化,等一下第 05 節講;
+    第四項是<strong>字的 bigram</strong>,只用在詞與詞的接縫上,而且權重只有 0.3。
+  </p>
+  <p>
+    γ 這麼小是實測掃出來的:我們掃過 0.15 到 1.0,γ 越大準確率反而越低。
+    這正好反映了第 03 節那個缺口——這份 bigram 只堪任接縫的黏著劑,不堪任主要訊號。
+  </p>
+
+  <h2><span class="num">05 / 三個細節</span>沒有它們就會壞掉的地方</h2>
+
+  <h3>Backoff:沒見過的字對不能判死刑</h3>
+  <p>
+    「你吃」這組字對在我們的 bigram 表裡查不到(它是跨詞搭配,詞表裡沒有)。
+    最直覺的作法是給它機率 0——但 log(0) 是負無限大,這條路徑就直接出局了,
+    哪怕「你」和「吃」都是超常用字。
+  </p>
+  <p>
+    正確作法叫 <strong>backoff(退避)</strong>:查不到 bigram 時,退一步用該字自己的 unigram,
+    再乘一個折扣係數 β = 0.02 表示「這是猜的,信心打折」:
+  </p>
+
+  <div class="formula">P(c₂ | c₁) = count(c₁c₂) / count(c₁)   <span class="c">// 查得到:正常算</span>
+P(c₂ | c₁) = β × P(c₂)                <span class="c">// 查不到:退避到打折的 unigram</span></div>
+
+  <div class="aside warn">
+    <b>這個地方以前踩過坑</b>
+    專案的前一版引擎給未見字對一個固定的 <code>1e-10</code>。結果是:
+    只要某個冷僻字<em>剛好</em>有一筆垃圾 bigram 紀錄,它就會絕對輾壓所有沒紀錄的常用字。
+    實測輸出是「你<span class="no">咋餓</span>了嗎」——每個錯字都是冷僻字。
+    這不是資料稀疏的隨機噪音,是計分公式的結構性缺陷。
+  </div>
+
+  <h3>詞級解碼:為什麼不是逐字算</h3>
+  <p>
+    前一版還有一個更根本的問題:它在第 2 個字以後<strong>完全沒有字頻項</strong>,只看 bigram。
+    於是當一整欄候選的 bigram 全都查不到時,它們分數完全相同,選字實際上是由物件的遍歷順序決定的
+    ——常用字和冷僻字一視同仁。
+  </p>
+  <p>
+    現在的作法讓每個位置的頻率資訊<strong>永遠存在</strong>,因為它內含在詞的機率裡。
+    而且詞級解碼還順手繞開了那個資料缺口:「吃飯」是詞庫裡的一個條目,
+    引擎根本不需要問「吃」後面接「飯」的 bigram 是多少。跨詞 bigram 只在接縫處用一次。
+  </p>
+
+  <h3>個人習慣:你改過的字會被記住</h3>
+  <p>
+    每次你手動改字(或送出一段文字),那個字會被記進瀏覽器的 <code>localStorage</code>,
+    分數加上 <code>2.0 × log(1 + 次數)</code>。用 log 是為了讓它成長會鈍化——
+    選過 1 次加 1.4 分,選過 100 次也只加 9.2 分,不會無限膨脹到壓死全域統計。
+  </p>
+  <p>
+    效果是:同一個碼你手動改過兩三次之後,那個字就會自己跳出來。
+    因為 unigram 是算在詞上,這個個人化不會污染既有詞彙的判斷
+    ——把「查」選熟了,「本來」「根本」「日本人」仍然正確。
+  </p>
+
+  <h2><span class="num">06 / 驗收</span>它到底準不準</h2>
+
+  <p>
+    評測用 159 句台灣正體句子(對話與新聞各半、共 1,240 字),
+    把每個字轉成 2 碼餵進解碼器,量 top-1 準確率。這份 harness 在 repo 裡,瀏覽器打開就能重跑。
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>指標</th><th class="num">結果</th><th class="num">門檻</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>2 碼 top-1(有上文)</td><td class="num">97.4%</td><td class="num">85%</td><td class="yes">過</td></tr>
+        <tr><td>2 碼 top-3(有上文)</td><td class="num">98.2%</td><td class="num">95%</td><td class="yes">過</td></tr>
+        <tr><td>句首第一個字(無上文)</td><td class="num">98.1%</td><td class="num">—</td><td></td></tr>
+        <tr><td>整句一字不錯</td><td class="num">84.3%</td><td class="num">—</td><td></td></tr>
+        <tr><td>整句解碼時間</td><td class="num">2.3 ms</td><td class="num">—</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    top-3 這個數字比 top-1 更重要:2 碼模式下錯字是必然的,決定體驗的是<strong>改錯成本</strong>。
+    98.2% 的 top-3 表示——就算第一個猜錯,正確答案幾乎一定就在候選列的前三個,按一下就換掉。
+    所以介面設計上,候選列永遠對準你剛打的那個字,直接按選字鍵就能替換,不用先點。
+  </p>
+
+  <p>剩下的錯誤集中在三類,誠實列出來:</p>
+  <ul>
+    <li><strong>同碼的高頻近義競爭</strong>(證/這、設/說、塞/賽):字 bigram 的資訊量不足以區分,屬於 2 碼模式的固有誤差。</li>
+    <li><strong>詞邊界切錯</strong>(存檔 → 在機):需要更強的跨詞模型。</li>
+    <li><strong>句首的專有名詞</strong>:沒有任何上文可用,只能靠字頻。</li>
+  </ul>
+
+  <h2><span class="num">07 / 小抄</span>名詞對照</h2>
+
+  <dl class="gloss">
+    <div><dt>Unigram</dt><dd>單獨一個單位出現的機率。我們算在「詞」上:P(吃飯) = 585 / 22,705,017。</dd></div>
+    <div><dt>Bigram</dt><dd>給定前一個單位,下一個是什麼的條件機率。我們算在「字」上,只用在詞與詞的接縫。</dd></div>
+    <div><dt>N-gram</dt><dd>unigram、bigram 的統稱(n=1、2)。這個系統沒有用到 n≥3。</dd></div>
+    <div><dt>Lattice</dt><dd>格狀圖。每一欄是句子的一個位置,欄裡的節點是那個位置的候選字。</dd></div>
+    <div><dt>Viterbi</dt><dd>在 lattice 上找最高分路徑的動態規劃演算法。從左到右走一次,每個節點只留最佳分數。</dd></div>
+    <div><dt>Backoff</dt><dd>查不到高階統計時退回低階統計並打折,避免把「沒見過」誤判成「不可能」。</dd></div>
+    <div><dt>條件熵</dt><dd>知道前文之後,下一個字還剩多少不確定性,單位是 bit。中文字元 bigram 約 4–5 bits。</dd></div>
+  </dl>
+
+  <hr>
+
+  <footer>
+    <p>
+      原始碼與資料:<code>smart/js/decoder.js</code>(引擎,約 200 行)、
+      <code>converter/build_smart_db.py</code>(離線資料管線)、
+      <code>smart/tests/eval.js</code>(評測 harness)。
+    </p>
+    <p>
+      詳細的失敗分析見 repo 內的 <code>smart/docs/mvp3-postmortem.md</code>(前一版引擎的驗屍報告)
+      與 <code>smart/docs/freq-diagnosis.md</code>(詞頻資料的診斷與修正)。
+      資料來源:<a href="https://github.com/openvanilla/McBopomofo">McBopomofo</a>(MIT)、
+      <a href="https://github.com/rime/rime-dayi">rime-dayi</a>、
+      <a href="https://github.com/rime/rime-essay">rime-essay</a>。
+    </p>
+  </footer>
+</div>
+</body>
+
+</html>

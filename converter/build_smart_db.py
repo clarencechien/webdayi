@@ -132,7 +132,7 @@ def main():
     total = sum(counts.values())
     out_words = {
         'meta': {
-            'sources': 'McBopomofo phrase.occ (MIT) + rime-essay gap-fill (x%.2f) + floor' % ESSAY_DISCOUNT,
+            'sources': 'McBopomofo phrase.occ (MIT) + rime-essay gap-fill (x%.3f) + floor' % ESSAY_DISCOUNT,
             'total_count': round(total, 2),
             'words': len(counts),
             'keys': len(word_db),

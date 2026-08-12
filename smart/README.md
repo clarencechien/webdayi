@@ -4,6 +4,9 @@
 **網址**:`https://clarencechien.github.io/webdayi/smart/`
 **定位**:每個字只打 **2 碼(首碼+末碼)**,由語言模型解碼消歧義。與 `/lite/`(傳統 4 碼穩定版)並存,互不影響。
 
+> **想知道技術細節?** 開 [`docs/how-it-works.html`](docs/how-it-works.html) ——
+> 用大學生看得懂的方式說明資訊理論框架、unigram/bigram 資料、Viterbi 解碼與平滑處理,附圖。
+
 ---
 
 ## 為什麼是 2 碼(而不是 Smart Compose)
@@ -77,6 +80,7 @@ smart/
 │   ├── ui_smoke.js     # 真瀏覽器 UI 煙霧測試(Playwright)
 │   └── mvp3_autopsy.js # mvp3 驗屍重現腳本
 └── docs/
+    ├── how-it-works.html   # 技術說明(給人看的:資訊理論、n-gram、Viterbi)
     ├── mvp3-postmortem.md  # MVP3 驗屍報告
     ├── freq-diagnosis.md   # 詞頻診斷與修正報告
     └── mini-mockups.html   # Mini 條版面 A/B 比較頁(A vs A′,可直接開)

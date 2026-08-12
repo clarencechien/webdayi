@@ -71,6 +71,13 @@
   Enter 送出 + Copy 交付、虛擬鍵盤(觸控展開)、深淺色主題。
 - 真瀏覽器煙霧測試 15/15 通過(Playwright + chromium),每鍵處理 ~1ms。
 
+### 文件
+- `smart/docs/how-it-works.html`:技術說明頁(給人看的)——資訊理論框架
+  (2 碼撞碼 8.7 個 → 需補 3.1 bits;bigram 供 4–5 bits,所以解碼夠、預測不夠)、
+  三張資料表(碼表 / 詞的 unigram / 字的 bigram)、詞級 lattice + Viterbi、
+  backoff 與詞長獎勵、個人化權重、評測數字與殘餘誤差。附兩張手寫 SVG 圖。
+- `smart/docs/mini-mockups.html`:Mini 條版面 A/B(已定案 A′)。
+
 ### 下一步
 1. GitHub Pages 部署後實際試打,收集體感回饋。
 2. 頁內「傳統(4 碼)/ 智慧(2 碼)」模式切換(傳統模式重用 Lite 引擎)。
