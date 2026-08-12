@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>WebDayi Smart - 智慧 2 碼大易輸入法</title>
     <meta name="app-name" content="WebDayi Smart">
-    <meta name="app-version" content="0.1.0">
-    <meta name="app-build" content="20260812-001">
+    <meta name="app-version" content="0.2.0">
+    <meta name="app-build" content="20260812-002">
+    <!-- WebDayi Smart 0.2.0 — 智慧 2 碼(首碼+末碼);Lite 對齊版 UX:傳統選字鍵、Mini 模式、自動複製 -->
     <link rel="icon" type="image/svg+xml" href="../lite/icon.svg">
-    <!-- WebDayi Smart 0.1.0 (PoC) — 智慧 2 碼:連碼輸入、Viterbi 解碼、可修正、全碼逃生口 -->
+    <link rel="apple-touch-icon" href="../lite/icon.svg">
     <style>
         :root {
             --primary: #0fb8f0;
@@ -24,7 +26,9 @@
             --radius-sm: 6px;
             --radius-md: 12px;
             --radius-lg: 16px;
+            --font-scale: 1;
         }
+
         [data-theme="dark"] {
             --bg-main: #0f172a;
             --bg-surface: #1e293b;
@@ -32,154 +36,374 @@
             --text-muted: #94a3b8;
             --border-color: #334155;
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; }
+
+        html, body { height: 100%; overscroll-behavior: none; }
+
         body {
-            font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+            font-family: system-ui, -apple-system, "Noto Sans TC", "PingFang TC", sans-serif;
             background: var(--bg-main);
             color: var(--text-main);
+            font-size: calc(1rem * var(--font-scale));
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .app-container {
+            max-width: 680px;
+            margin: 0 auto;
+            min-height: 100%;
             display: flex;
             flex-direction: column;
+            gap: 8px;
+            padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+        }
+
+        /* ---------- Header ---------- */
+        .app-header {
+            display: flex;
             align-items: center;
-            padding: 12px;
-            transition: background .2s;
+            justify-content: space-between;
+            padding: 2px 4px;
         }
-        .app { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 12px; }
-        header { display: flex; align-items: baseline; justify-content: space-between; padding: 4px 2px; }
-        header h1 { font-size: 1.15rem; }
-        header .links { font-size: .8rem; color: var(--text-muted); }
-        header .links a { color: var(--primary); text-decoration: none; }
-        .card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 12px; }
+        .app-header h1 { font-size: 1.02rem; font-weight: 600; }
+        .app-header h1 .accent { color: var(--primary); }
+        .app-header .tag {
+            font-size: .68rem; color: var(--text-muted); font-weight: 400; margin-left: 4px;
+        }
+        .header-actions { display: flex; align-items: center; gap: 4px; }
+        .icon-btn {
+            border: 0; background: none; color: var(--text-muted); cursor: pointer;
+            padding: 6px; border-radius: var(--radius-sm); display: flex; text-decoration: none;
+        }
+        .icon-btn:hover { background: var(--bg-surface); color: var(--primary); }
 
-        /* 輸出區 */
-        .out-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .out-head .label { font-size: .8rem; color: var(--text-muted); }
-        .out-head button {
-            border: 0; background: none; color: var(--primary); font-size: .9rem; cursor: pointer; padding: 4px 10px;
-            border-radius: var(--radius-sm);
+        .card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 10px;
         }
-        .out-head button:hover { background: color-mix(in srgb, var(--primary) 12%, transparent); }
-        .out-head button.danger { color: var(--danger); }
+
+        /* ---------- Output ---------- */
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+        }
+        .section-header h2 { font-size: .78rem; font-weight: 500; color: var(--text-muted); }
+        .actions { display: flex; gap: 2px; }
+        .action-btn {
+            display: flex; align-items: center; gap: 3px; border: 0; background: none; cursor: pointer;
+            font-size: .82rem; padding: 4px 8px; border-radius: var(--radius-sm); color: var(--primary);
+            font-family: inherit;
+        }
+        .action-btn .ico { font-size: 15px; }
+        .action-btn.danger-text { color: var(--danger); }
+        .action-btn:hover { background: var(--bg-main); }
+
         #output-buffer {
-            width: 100%; min-height: 72px; resize: vertical; border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); background: var(--bg-main); color: var(--text-main);
-            font-size: 1.15rem; padding: 10px; line-height: 1.6;
+            width: 100%; min-height: 64px; max-height: 34vh; resize: none;
+            border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            background: var(--bg-main); color: var(--text-main);
+            font-size: 1.12rem; padding: 8px 10px; line-height: 1.55; font-family: inherit;
+        }
+        @keyframes flash-green {
+            0% { background: var(--bg-main); }
+            50% { background: color-mix(in srgb, var(--success) 28%, var(--bg-main)); }
+            100% { background: var(--bg-main); }
         }
 
-        /* 緩衝區(暫定字) */
-        .compose-area { min-height: 74px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 2px; }
-        .compose-hint { color: var(--text-muted); font-size: .85rem; }
+        /* ---------- Compose (IME 緩衝區) ---------- */
+        .compose-row {
+            display: flex; align-items: center; gap: 6px; min-height: 58px;
+            overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;
+        }
+        .compose-row::-webkit-scrollbar { display: none; }
+        .compose-hint { color: var(--text-muted); font-size: .78rem; line-height: 1.5; }
+        .compose-hint code {
+            background: var(--bg-main); padding: 0 4px; border-radius: 4px; font-size: .95em;
+        }
         .cell {
-            display: flex; flex-direction: column; align-items: center; min-width: 44px; padding: 4px 6px;
-            border-radius: var(--radius-sm); cursor: pointer; border: 1px solid transparent; user-select: none;
+            display: flex; flex-direction: column; align-items: center; flex: 0 0 auto;
+            min-width: 38px; padding: 2px 5px; border-radius: var(--radius-sm);
+            border: 1px solid transparent; cursor: pointer; user-select: none;
         }
-        .cell .ch { font-size: 1.5rem; line-height: 1.25; border-bottom: 2px dashed color-mix(in srgb, var(--primary) 55%, transparent); }
+        .cell .ch {
+            font-size: 1.45rem; line-height: 1.2;
+            border-bottom: 2px dashed color-mix(in srgb, var(--primary) 55%, transparent);
+        }
         .cell.pinned .ch { border-bottom: 2px solid var(--success); }
-        .cell .keys { font-size: .68rem; color: var(--text-muted); margin-top: 2px; letter-spacing: 1px; }
-        .cell.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); }
         .cell.pending .ch { color: var(--text-muted); border-bottom-style: dotted; }
-        .fc-cell { border-color: var(--warn); }
-        .compose-actions { display: flex; gap: 8px; margin-top: 8px; }
-        .btn {
-            flex: 1; border: 0; border-radius: var(--radius-md); padding: 12px; font-size: 1rem; cursor: pointer;
-            background: var(--primary); color: #fff;
-        }
-        .btn:disabled { opacity: .45; cursor: default; }
-        .btn.secondary { background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); }
+        .cell .keys { font-size: .62rem; color: var(--text-muted); margin-top: 1px; letter-spacing: .5px; }
+        .cell.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
+        .cell.fc-cell { border-color: var(--warn); }
 
-        /* 候選列 */
-        .candidate-bar { display: flex; flex-wrap: wrap; gap: 6px; min-height: 46px; align-items: center; }
+        /* ---------- Candidates ---------- */
+        .candidate-bar {
+            display: flex; align-items: center; gap: 5px; min-height: 42px;
+            overflow-x: auto; scrollbar-width: none;
+        }
+        .candidate-bar::-webkit-scrollbar { display: none; }
         .cand {
-            display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: var(--radius-sm);
-            border: 1px solid var(--border-color); cursor: pointer; font-size: 1.15rem; user-select: none;
+            display: flex; align-items: center; gap: 4px; flex: 0 0 auto;
+            padding: 5px 9px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);
+            cursor: pointer; font-size: 1.1rem; user-select: none; background: var(--bg-main);
         }
-        .cand:hover { border-color: var(--primary); }
-        .cand .num { font-size: .72rem; color: var(--text-muted); }
-        .cand-hint { font-size: .8rem; color: var(--text-muted); }
+        .cand:hover, .cand:active { border-color: var(--primary); }
+        .cand .num {
+            font-size: .66rem; color: var(--text-muted); min-width: 10px; text-align: center;
+        }
+        .cand-hint { font-size: .78rem; color: var(--text-muted); flex: 0 0 auto; }
+        .cand-page { font-size: .7rem; color: var(--text-muted); flex: 0 0 auto; padding-left: 4px; }
 
-        /* 模式與狀態列 */
-        .status-line { display: flex; justify-content: space-between; align-items: center; font-size: .8rem; color: var(--text-muted); padding: 0 2px; }
-        .mode-chip { padding: 2px 10px; border-radius: 999px; border: 1px solid var(--border-color); }
+        .bar-head {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: .74rem; color: var(--text-muted); margin-bottom: 2px;
+        }
+        .mode-chip { padding: 1px 9px; border-radius: 999px; border: 1px solid var(--border-color); }
         .mode-chip.fc { border-color: var(--warn); color: var(--warn); }
 
-        /* 虛擬鍵盤 */
-        .vk { display: flex; flex-direction: column; gap: 5px; }
-        .vk-row { display: flex; gap: 5px; justify-content: center; }
+        /* ---------- Virtual keyboard ---------- */
+        .keyboard-container { padding: 0 2px; }
+        .vk { display: flex; flex-direction: column; gap: 4px; }
+        .vk-row { display: flex; gap: 4px; justify-content: center; }
         .vk-key {
-            flex: 1; max-width: 58px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
-            background: var(--bg-surface); color: var(--text-main); cursor: pointer; padding: 6px 0 4px;
-            display: flex; flex-direction: column; align-items: center; font-size: .85rem; user-select: none;
-            touch-action: manipulation;
+            flex: 1; max-width: 60px; min-height: 42px;
+            border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            background: var(--bg-surface); color: var(--text-main); cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: .82rem; user-select: none; touch-action: manipulation;
         }
-        .vk-key .sub { font-size: .72rem; color: var(--primary); }
-        .vk-key.special { max-width: 84px; color: var(--text-muted); }
-        .vk-key.wide { max-width: 200px; flex: 3; }
-        .vk-key:active, .vk-key.active-state { background: color-mix(in srgb, var(--primary) 22%, var(--bg-surface)); }
-        .vk-toggle { text-align: center; font-size: .8rem; color: var(--text-muted); cursor: pointer; padding: 4px; }
+        .vk-key .sub { font-size: .68rem; color: var(--primary); }
+        .vk-key.special { color: var(--text-muted); font-size: .74rem; }
+        .vk-key.wide { flex: 2.2; max-width: 150px; }
+        .vk-key.active-state { background: color-mix(in srgb, var(--primary) 24%, var(--bg-surface)); }
+
+        .status-bar {
+            font-size: .7rem; color: var(--text-muted); text-align: center; padding: 2px 0 4px;
+            display: flex; justify-content: space-between; padding-inline: 6px;
+        }
+
+        /* ---------- FAB / Menu ---------- */
+        .fab { font-size: 19px; 
+            position: fixed; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom));
+            width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
+            background: var(--primary); color: #fff; display: flex; align-items: center;
+            justify-content: center; box-shadow: 0 3px 10px rgba(0, 0, 0, .22); z-index: 60;
+        }
+        .menu-panel {
+            position: fixed; right: 14px; bottom: calc(66px + env(safe-area-inset-bottom));
+            background: var(--bg-surface); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); box-shadow: 0 6px 24px rgba(0, 0, 0, .18);
+            z-index: 61; min-width: 216px; overflow: hidden;
+        }
+        .menu-item {
+            display: flex; align-items: center; gap: 9px; padding: 10px 12px; cursor: pointer;
+            font-size: .86rem;
+        }
+        .menu-item:hover { background: var(--bg-main); }
+        .menu-item .ico { font-size: 15px; color: var(--text-muted); width: 18px; text-align: center; }
+        .menu-item span:nth-child(2) { flex: 1; }
+        .toggle-status { font-size: .72rem; color: var(--primary); font-weight: 600; }
+        .menu-divider { height: 1px; background: var(--border-color); }
+        .menu-controls { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px; }
+        .control-btn {
+            border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main);
+            border-radius: var(--radius-sm); cursor: pointer; padding: 4px 8px; display: flex;
+        }
 
         #toast {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            background: var(--text-main); color: var(--bg-surface); padding: 8px 18px; border-radius: 999px;
-            font-size: .9rem; opacity: 0; pointer-events: none; transition: opacity .25s;
+            position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+            background: var(--text-main); color: var(--bg-surface); padding: 7px 16px;
+            border-radius: 999px; font-size: .84rem; opacity: 0; pointer-events: none;
+            transition: opacity .22s; z-index: 90; display: flex; align-items: center; gap: 5px;
         }
-        #toast.show { opacity: .92; }
+        #toast.show { opacity: .93; }
+
         .hidden { display: none !important; }
-        @media (max-width: 480px) { .cell .ch { font-size: 1.35rem; } }
+
+        /* ---------- Focus mode(專心打字:隱藏頁首與狀態列) ---------- */
+        body.focus-mode .app-header,
+        body.focus-mode .status-bar { display: none !important; }
+
+        /* ---------- Mini mode(IME 兩列:輸入列 + 輸出列) ---------- */
+        body.mini-mode { overflow: hidden; }
+        body.mini-mode .app-container,
+        body.mini-mode .fab,
+        body.mini-mode .menu-panel { display: none !important; }
+
+        .mini-ui {
+            position: fixed; inset: 0; display: flex; flex-direction: column;
+            z-index: 9999; background: var(--bg-main);
+        }
+        .mini-ui.hidden { display: none !important; }
+        .mini-card {
+            flex: 1; display: flex; flex-direction: column; background: var(--bg-surface);
+            overflow: hidden;
+        }
+        /* 第 1 列:緩衝區 + 候選 */
+        .mini-input-bar {
+            flex: 0 0 auto; border-bottom: 1px solid var(--border-color);
+            padding: 6px 10px; padding-top: max(6px, env(titlebar-area-height, 0px));
+            display: flex; align-items: center; gap: 8px; min-height: 44px;
+        }
+        .mini-compose { display: flex; gap: 4px; flex: 0 0 auto; align-items: center; }
+        .mini-compose .cell { min-width: 28px; padding: 0 3px; }
+        .mini-compose .cell .ch { font-size: 1.16rem; }
+        .mini-compose .cell .keys { display: none; }
+        .mini-cands {
+            display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1;
+            align-items: center;
+        }
+        .mini-cands::-webkit-scrollbar { display: none; }
+        .mini-cands .cand { padding: 2px 7px; font-size: 1rem; }
+        .mini-status {
+            flex: 0 0 auto; font-size: .74rem; color: var(--primary); border: 1px solid var(--border-color);
+            border-radius: 999px; padding: 1px 8px; cursor: pointer;
+        }
+        /* 第 2 列:輸出 */
+        #mini-output {
+            flex: 1; width: 100%; background: transparent; border: 0; resize: none; outline: none;
+            padding: 6px 12px; font-size: 1.16rem; color: var(--text-main); line-height: 1.4;
+            font-family: inherit; scrollbar-width: none;
+        }
+        #mini-output::-webkit-scrollbar { display: none; }
+        .mini-kb { flex: 0 0 auto; border-top: 1px solid var(--border-color); padding: 5px; }
+
+        /* ---------- Mobile ---------- */
+        @media (max-width: 480px) {
+            .app-container { padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); gap: 6px; }
+            .card { padding: 8px; border-radius: var(--radius-md); }
+            #output-buffer { min-height: 56px; font-size: 1.05rem; }
+            .cell .ch { font-size: 1.32rem; }
+            .vk-key { min-height: 40px; max-width: none; font-size: .78rem; }
+            .app-header h1 { font-size: .94rem; }
+        }
+        @media (max-height: 560px) {
+            #output-buffer { min-height: 44px; max-height: 22vh; }
+            .compose-row { min-height: 48px; }
+        }
     </style>
 </head>
+
 <body>
-    <div class="app">
-        <header>
-            <h1>WebDayi <span style="color:var(--primary)">Smart</span> <small style="font-size:.7rem;color:var(--text-muted)">智慧2碼 PoC v0.1.0</small></h1>
-            <div class="links"><a href="../lite/index.html">← Lite(傳統版)</a> · <span id="theme-toggle" style="cursor:pointer">🌓</span></div>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>WebDayi <span class="accent">Smart</span><span class="tag">智慧 2 碼 v0.2.0</span></h1>
+            <div class="header-actions">
+                <a class="icon-btn" href="../lite/index.html" title="切換到 Lite(傳統 4 碼)">
+                    <span class="ico">⇄</span>
+                </a>
+            </div>
         </header>
 
-        <div class="card">
-            <div class="out-head">
-                <span class="label">輸出(送出後按 Copy 交付)</span>
-                <span>
-                    <button id="copy-btn">📋 Copy</button>
-                    <button id="clear-btn" class="danger">✕ 清空</button>
-                </span>
-            </div>
-            <textarea id="output-buffer" placeholder="送出的句子會出現在這裡…" readonly></textarea>
-        </div>
+        <main class="main-content" style="display:flex;flex-direction:column;gap:8px">
+            <!-- 輸出 -->
+            <section class="output-section card">
+                <div class="section-header">
+                    <h2>輸出 (Output)</h2>
+                    <div class="actions">
+                        <button id="copy-btn" class="action-btn">
+                            <span class="ico">⧉</span>Copy
+                        </button>
+                        <button id="clear-btn" class="action-btn danger-text">
+                            <span class="ico">✕</span>Clear
+                        </button>
+                    </div>
+                </div>
+                <textarea id="output-buffer" placeholder="送出的句子會出現在這裡…" readonly></textarea>
+            </section>
 
-        <div class="card">
-            <div class="status-line">
-                <span>輸入緩衝區(虛線=暫定,點字修正;綠線=已鎖定)</span>
-                <span id="mode-chip" class="mode-chip">智慧 2 碼</span>
-            </div>
-            <div id="compose-area" class="compose-area">
-                <span class="compose-hint">連續打碼:每字 2 鍵 = <b>首碼+末碼</b>(單碼字打 1 鍵 + 空白)。<code>`</code> = 全碼逃生口,Enter = 送出</span>
-            </div>
-            <div class="compose-actions">
-                <button id="commit-btn" class="btn" disabled>送出 ⏎</button>
-                <button id="buf-backspace-btn" class="btn secondary">⌫ 退格</button>
-            </div>
-        </div>
+            <!-- 緩衝區 + 候選 -->
+            <section class="input-section card">
+                <div class="bar-head">
+                    <span>緩衝區(虛線=暫定,點字修正;綠線=已鎖定)</span>
+                    <span id="mode-chip" class="mode-chip">智慧 2 碼</span>
+                </div>
+                <div id="compose-area" class="compose-row"></div>
+                <div id="candidate-bar" class="candidate-bar"></div>
+            </section>
+        </main>
 
-        <div class="card">
-            <div id="candidate-bar" class="candidate-bar">
-                <span class="cand-hint">點選緩衝區的字即可列出該位置候選(按數字鍵替換)</span>
-            </div>
-        </div>
-
-        <div class="card" id="vk-card">
+        <div class="keyboard-container">
             <div id="virtual-keyboard" class="vk"></div>
-            <div id="vk-toggle" class="vk-toggle">收合鍵盤 ▾</div>
         </div>
 
-        <div class="status-line"><span id="status-indicator">初始化中…</span><span id="latency"></span></div>
+        <div class="status-bar">
+            <span id="status-indicator">初始化中…</span>
+            <span id="latency"></span>
+        </div>
+
+        <button id="menu-fab" class="fab" aria-label="Menu">
+            <span class="ico">☰</span>
+        </button>
+
+        <div id="menu-panel" class="menu-panel hidden">
+            <div class="menu-item" id="toggle-autocopy">
+                <span class="ico">⧉</span>
+                <span>送出後自動複製</span>
+                <span class="toggle-status">ON</span>
+            </div>
+            <div class="menu-item" id="toggle-theme">
+                <span class="ico">◐</span>
+                <span>深色模式</span>
+                <span class="toggle-status">OFF</span>
+            </div>
+            <div class="menu-item" id="toggle-keyboard">
+                <span class="ico">⌨</span>
+                <span>虛擬鍵盤</span>
+                <span class="toggle-status">ON</span>
+            </div>
+            <div class="menu-item" id="toggle-focus">
+                <span class="ico">⛶</span>
+                <span>專注模式</span>
+                <span class="toggle-status">OFF</span>
+            </div>
+            <div class="menu-item" id="toggle-mini">
+                <span class="ico">▭</span>
+                <span>Mini 模式(IME 兩列)</span>
+                <span class="toggle-status">OFF</span>
+            </div>
+            <div class="menu-divider"></div>
+            <div class="menu-item" id="clear-history">
+                <span class="ico">↺</span>
+                <span>清除選字習慣</span>
+                <span class="toggle-status" id="history-count">0</span>
+            </div>
+            <div class="menu-divider"></div>
+            <div class="menu-controls">
+                <button id="font-decrease" class="control-btn" aria-label="縮小字級">
+                    <span class="ico">A-</span>
+                </button>
+                <span id="font-size-display">100%</span>
+                <button id="font-increase" class="control-btn" aria-label="放大字級">
+                    <span class="ico">A+</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="toast"></div>
     </div>
-    <div id="toast"></div>
+
+    <!-- Mini Mode(IME 兩列) -->
+    <div id="mini-ui" class="mini-ui hidden">
+        <div class="mini-card">
+            <div class="mini-input-bar">
+                <div id="mini-compose" class="mini-compose"></div>
+                <div id="mini-cands" class="mini-cands"></div>
+                <div id="mini-status" class="mini-status" title="離開 Mini 模式">易2</div>
+            </div>
+            <textarea id="mini-output" readonly></textarea>
+            <div id="mini-kb" class="mini-kb"></div>
+        </div>
+    </div>
 
     <script>
-        window.WEBDAYI_SMART_VERSION = { version: '0.1.0', build: '20260812-001', name: 'Smart 2-code PoC' };
+        window.WEBDAYI_SMART_VERSION = { version: '0.2.0', build: '20260812-002', name: 'Smart 2-code (Lite-aligned UX)' };
         console.log(`%cWebDayi Smart v${WEBDAYI_SMART_VERSION.version} (${WEBDAYI_SMART_VERSION.build})`, 'color:#0fb8f0;font-weight:bold');
     </script>
     <script src="js/decoder.js"></script>
     <script src="js/user_history.js"></script>
     <script src="js/app.js"></script>
 </body>
+
 </html>
