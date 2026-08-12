@@ -19,8 +19,8 @@ MVP2 Smart Compose 做的是「預測未知」:從前一個字猜使用者還沒
 
 | 操作 | 行為 |
 |---|---|
-| 連續打碼 | 每 **2 鍵 = 一個字**,不用空白切碼。緩衝區即時顯示 Viterbi 目前最佳句(虛線=暫定,會隨後續輸入回頭修正,這是預期行為) |
-| **單碼字**(一、大、火、車…84 個部首字) | 打該鍵 + **空白**(維持每字固定節奏) |
+| 連續打碼 | 每 **2 鍵 = 一個字**,取碼 = **首碼 + 末碼**(大易簡碼慣例,如 吃 `o2c` → `oc`),不用空白切碼。緩衝區即時顯示 Viterbi 目前最佳句(虛線=暫定,會隨後續輸入回頭修正,這是預期行為) |
+| **單碼字**(一、大、火、車…84 個部首字) | 打該鍵 + **空白**(維持每字固定節奏)。完整 token 之後多打的空白會被忽略(no-op),不會錯位 |
 | **修正** | 點緩衝區的字(或 ←/→ 移游標)→ 候選列出 → **數字鍵 1–9 替換**。替換後該字鎖定(綠線),右側以新 context 重跑 Viterbi |
 | 解除鎖定 | 點鎖定字 → 候選列的「↺ 解除鎖定」 |
 | **全碼逃生口** | <code>`</code> 進入全碼模式:打全碼 1–4 鍵,**空白**選第 1 候選(`' [ ] - \ =` 選 2–7)。專有名詞與冷僻字用這裡 |
@@ -38,7 +38,7 @@ smart/
 │   └── user_history.js # 使用者習慣層(localStorage,抽自 mvp2)
 ├── data/
 │   ├── dayi_db.json    # 大易碼表(rime-dayi;全碼模式用)
-│   ├── word_db.json    # 詞庫 3.8MB(McBopomofo phrase.occ 為主,essay 補洞)
+│   ├── word_db.json    # 詞庫 2.5MB(McBopomofo phrase.occ 為主,essay 補洞)
 │   └── char_bigram.json# 字 bigram 1.2MB(跨詞 glue)
 ├── tests/
 │   ├── eval.js / eval.html / testset.json  # 評測 harness(node CLI + 瀏覽器,可 export JSON)
@@ -60,9 +60,9 @@ score = Σ_詞 [ log P(詞) + 詞長獎勵 + μ·log(1+使用者習慣) ] + γ·
 
 | 指標 | 結果 | 門檻 |
 |---|---|---|
-| 2 碼 top-1(有左 context) | **95.7%** | ≥ 85% ✅ |
-| 2 碼 top-3(有左 context) | **95.5%** | ≥ 95% ✅ |
-| 句首(無 context)top-1 | 97.5% | 報告即可 |
+| 2 碼 top-1(有左 context) | **97.4%** | ≥ 85% ✅ |
+| 2 碼 top-3(有左 context) | **98.2%** | ≥ 95% ✅ |
+| 句首(無 context)top-1 | 98.1% | 報告即可 |
 | 4 碼(傳統)top-1 | 97.2%* | ~100% |
 | 每鍵處理延遲(真瀏覽器實測) | ~1ms | < 10ms ✅ |
 
@@ -78,7 +78,8 @@ node smart/tests/decoder.test.js      # 單元測試
 
 - Lite 是穩定版,URL、UI、行為完全不動。
 - Smart 是獨立目錄、獨立頁面;純 client-side、無 build step,push 即部署。
-- 資料庫約 5MB(gzip 後 ~1.5MB),首次載入後由瀏覽器快取。
+- 資料庫約 5MB(word_db 2.5MB + char_bigram 1.2MB + 碼表 1.5MB;gzip 後更小),
+  首次載入後由瀏覽器快取。
 
 ## 下一步(PoC 驗證後)
 
