@@ -237,6 +237,12 @@
                 cell.innerHTML = `<span class="ch">·</span><span class="keys">${keysLabel(state.pendingKey)}</span>`;
                 frag.appendChild(cell);
             }
+            if (frag.childNodes.length) {
+                const cur = document.createElement('span');
+                cur.className = mini ? 'mini-cursor-inline' : 'compose-cursor';
+                cur.textContent = '_';
+                if (!mini) frag.appendChild(cur);
+            }
             if (!mini && !frag.childNodes.length) {
                 const hint = document.createElement('span');
                 hint.className = 'compose-hint';
@@ -250,7 +256,7 @@
         els.composeArea.replaceChildren(build(false));
         if (state.isMini) {
             els.miniCompose.replaceChildren(build(true));
-            els.miniCode.textContent = state.fc ? state.fc.keys : (state.pendingKey || '');
+            els.miniCode.textContent = state.fc ? state.fc.keys : (state.pendingKey || '\u00a0');
         }
         // 讓最新的字保持在可視範圍
         els.composeArea.scrollLeft = els.composeArea.scrollWidth;

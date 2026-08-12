@@ -90,6 +90,12 @@ const server = http.createServer((req, res) => {
   const pinned = await page.$$eval('#compose-area .cell.pinned', els => els.length);
   t('替換後鎖定(綠線)', pinned === 1, String(pinned));
 
+  // 4b. 主 UI 也有呼吸游標,且待配對格不讓後面位移
+  const mainCursor = await page.$eval('#compose-area .compose-cursor', e => ({
+    text: e.textContent, anim: getComputedStyle(e).animationName,
+  })).catch(() => null);
+  t('主 UI 緩衝區有呼吸游標 _', mainCursor && mainCursor.text === '_' && mainCursor.anim === 'blink', JSON.stringify(mainCursor));
+
   // 5. 數字鍵是大易碼不是選字鍵
   const before = await composeText();
   await page.keyboard.press('1');
@@ -147,6 +153,23 @@ const server = http.createServer((req, res) => {
              region: getComputedStyle(e).webkitAppRegion || getComputedStyle(e).getPropertyValue('-webkit-app-region') };
   });
   t('Mini 有桌面 PWA 拖曳區(覆蓋整條標題列)', dragGeom.covers, JSON.stringify(dragGeom));
+
+  // Mini 左半邊固定寬度:候選列起點不隨字數位移
+  const leftX = async () => page.$eval('#mini-cands', e => Math.round(e.getBoundingClientRect().left));
+  for (let i = 0; i < 12; i++) await page.keyboard.press('Backspace');
+  const x0 = await leftX();
+  await typeSentence(tokensOf[0]);
+  const x1 = await leftX();
+  await type('ad');
+  await type('a');            // 留一個待配對碼,最容易觸發抖動
+  const x2 = await leftX();
+  t('候選列起點不隨輸入位移', x0 === x1 && x1 === x2, JSON.stringify([x0, x1, x2]));
+  const cursorOk = await page.$eval('.mini-cursor', e => {
+    const cs = getComputedStyle(e);
+    return { text: e.textContent, anim: cs.animationName, dur: cs.animationDuration };
+  });
+  t('Mini 有呼吸游標 _', cursorOk.text === '_' && cursorOk.anim === 'blink', JSON.stringify(cursorOk));
+  for (let i = 0; i < 12; i++) await page.keyboard.press('Backspace');
   await page.screenshot({ path: path.join(__dirname, 'screenshot-mini.png') });
   await page.keyboard.press('Escape');
   await page.waitForTimeout(120);
