@@ -4,78 +4,68 @@
 
 > 輕量、透明、網頁優先的大易輸入法引擎。
 
-[![Status](https://img.shields.io/badge/status-MVP%202.0%20Beta-blue)]()
+[![Status](https://img.shields.io/badge/status-Lite%20stable%20%2B%20Smart%20PoC-blue)]()
 [![License](https://img.shields.io/badge/license-open%20source-green)]()
 
 ---
 
 ## 📖 概述
 
-**WebDayi** 是一個現代化的網頁版大易輸入法實作。
+**WebDayi** 是一個現代化的網頁版大易輸入法實作。純客戶端執行、無伺服器、無 build step,
+push 即部署於 GitHub Pages。
 
-**當前重點：MVP 2.0 (預測型輸入)**
-我們已完成開發能夠顯著減少按鍵次數的預測引擎（"Adaptive Predictive Engine"）。
-- **智慧空白鍵 (Smart Spacebar)**：使用空白鍵確認「幽靈文字 (Phantom)」建議。
-- **Smart Compose**：連續預測下一個字，支援 Tab 鍵確認，具備智慧防呆與自動淡出功能。
-- **預測優化**：包含「頻率壓制 (Frequency Dominance)」與「上下文絕對優先 (Context Absolute Priority)」，確保預測精準度。
-- **預測引擎**：基於頻率、上下文 (Bigram) 和 **使用者習慣** 的智慧建議。
-- **智慧輸入**：支援 3/4 碼切換、智慧自動上字 (Smart Auto-Commit) 和錯誤防呆 (Shake)。
-- **輕量化**：純客戶端執行，無伺服器依賴。
+**產品現況**:
+
+- ✅ **WebDayi Lite**(`/lite/`):**唯一穩定版**。傳統 4 碼逐字輸入的輕量 PWA。
+- 🚧 **WebDayi Smart**(`/smart/`):**開發中**。智慧 2 碼輸入 PoC——連續打 2 碼、
+  Viterbi 解碼整句、可修正、附全碼逃生口。
+- 📦 **MVP2(Smart Compose 預測型輸入)**:已封存至 `archive/mvp2-predictive/`,
+  封存原因見其 README(預測方向的結構性問題)。
+- 📦 **MVP3(N-gram Smart Engine)**:已封存至 `archive/mvp3-smart-engine/`,
+  驗屍報告見 [`smart/docs/mvp3-postmortem.md`](smart/docs/mvp3-postmortem.md)。
 
 ---
 
 ## 🚀 快速開始
 
-### MVP 2.0: 預測型輸入 (最新版本)
-具備智慧空白鍵、預測功能和 Mini Mode 設定選單的最新版本。
-1.  前往 `mvp2-predictive/` 目錄。
-2.  在瀏覽器中打開 `index.html`。
-3.  詳情請參閱 `mvp2-predictive/README.md`。
-   
-[https://clarencechien.github.io/webdayi/lite/index.html](https://clarencechien.github.io/webdayi/mvp2-predictive/index.html)
-
-### WebDayi Lite (穩定版)
+### WebDayi Lite(穩定版)
 適用於手機和桌面的輕量級 PWA 版本。
-1.  前往 `lite/` 目錄。
-2.  打開 `index.html`。
-   
-[https://clarencechien.github.io/webdayi/lite/index.html](https://clarencechien.github.io/webdayi/lite/index.html)
 
-### 舊版本
-早期的原型 (MVP1, Vue.js) 已移動至 `archive/`。
+👉 **[https://clarencechien.github.io/webdayi/lite/index.html](https://clarencechien.github.io/webdayi/lite/index.html)**
+
+### WebDayi Smart(智慧 2 碼,開發中)
+每個字只打前 2 碼,由語言模型解碼消歧義;錯字可點選修正,冷僻字有全碼逃生口。
+
+👉 `https://clarencechien.github.io/webdayi/smart/`(PoC)
 
 ---
 
 ## 🏗️ 目錄結構
+
 ```
 webdayi/
-├── mvp2-predictive/        # MVP 2.0 (當前開發重點)
-│   ├── index.html          # 主應用程式
-│   ├── js/                 # 應用程式邏輯
-│   │   ├── app.js
-│   │   └── prediction_engine.js
-│   ├── tests/              # 測試與除錯工具
-│   │   ├── debug_lab.html
-│   │   ├── test.html
-│   │   └── test_integration.html
-│   ├── data/               # 資料檔案
-│   │   ├── bigram_lite.json
-│   │   ├── dayi_db.json
-│   │   └── zhuyin_db.json
-│   └── README.md           # MVP2 文件
-│
-├── lite/                   # WebDayi Lite (穩定版 PWA)
+├── lite/                   # WebDayi Lite(穩定版 PWA)— 不動它
 │   ├── index.html
-│   └── app.js
+│   └── dayi_db.json
+│
+├── smart/                  # WebDayi Smart(智慧 2 碼 PoC,開發中)
+│   ├── index.html          # 主頁面(以 Lite codebase 為起點)
+│   ├── js/                 # 解碼引擎與 UI 邏輯
+│   ├── data/               # 碼表 + 語言模型資料(抽自 mvp2/mvp3 可重用資產)
+│   ├── tests/              # 評測 harness 與驗屍腳本
+│   └── docs/               # mvp3-postmortem.md、freq-diagnosis.md
+│
+├── converter/              # 離線資料管線(碼表轉換、n-gram 建置)
 │
 ├── scripts/                # 工具腳本
-│   ├── analyze_cin.py
-│   ├── find_lines.py
-│   └── test-github-pages.js
 │
-├── archive/                # 舊版本存檔
-│   ├── mvp1/               # 原始 Vue.js 原型
-│   └── mvp1-pwa/           # 早期 PWA 實驗
+├── archive/                # 舊版本封存(僅供考古,不再維護)
+│   ├── mvp1_legacy/        # MVP1 Viterbi 版
+│   ├── mvp1_pwa_legacy/    # 早期 PWA 實驗
+│   ├── mvp2-predictive/    # MVP2 Smart Compose(封存說明見其 README)
+│   ├── mvp3-smart-engine/  # MVP3 N-gram 引擎(驗屍報告見 smart/docs/)
+│   ├── issue/              # 歷史 issue 截圖
+│   └── reference/          # 歷史參考資料
 │
 └── memory-bank/            # 專案文件
     ├── activeContext.md    # 當前狀態
@@ -88,39 +78,39 @@ webdayi/
 
 ## 📚 文件
 
-- **[activeContext.md](memory-bank/activeContext.md)**：當前開發狀態。
-- **[productContext.md](memory-bank/productContext.md)**：專案目標與願景。
-- **[systemPatterns.md](memory-bank/systemPatterns.md)**：架構與設計模式。
-- **[techContext.md](memory-bank/techContext.md)**：技術堆疊。
+- **[activeContext.md](memory-bank/activeContext.md)**:當前開發狀態。
+- **[smart/docs/mvp3-postmortem.md](smart/docs/mvp3-postmortem.md)**:MVP3 驗屍報告(為什麼收、學到什麼)。
+- **[productContext.md](memory-bank/productContext.md)**:專案目標與願景。
+- **[systemPatterns.md](memory-bank/systemPatterns.md)**:架構與設計模式。
+- **[techContext.md](memory-bank/techContext.md)**:技術堆疊。
 
 ---
 
 ## 🎯 路線圖
 
-- ✅ **MVP 1.0**：Vue.js 原型 (已存檔)
-- ✅ **WebDayi Lite**：輕量級 PWA (穩定版)
-- 🚧 **MVP 2.0**：預測型輸入 (已完成)
-    - ✅ 智慧空白鍵
-    - ✅ 3層權重預測引擎 (頻率 + Bigram + 使用者習慣)
-    - ✅ 擴充預測 (Prefix Search)
-    - ✅ Smart 3/4 碼切換與自動上字 (3碼自動，4碼手動)
-    - ✅ Smart Compose (連續預測 + Tab 確認 + 自動淡出)
-    - ✅ 預測優化 (頻率壓制 + 上下文絕對優先)
-    - ✅ Mini Mode 設定選單
-    - ✅ **PWA Mode Control**：Mobile 預設 Focus Mode，Laptop 預設 Mini Mode
-    - ✅ **Mini Mode Toggle**：Mini Mode 選單新增手動切換模式按鈕
-    - ✅ **Laptop Focus Mode**：桌面版 Focus Mode 介面優化（置中、限制寬度）
-- ✅ **Small Screen Optimization**：針對 iPhone SE 等小螢幕裝置優化版面配置
-    - ✅ Mobile Web UI 一致性優化 (Unified Header, No FAB)
-    - ✅ Focus Mode 鍵盤佈局修正
-    - ✅ **資料品質驗證 (Data Quality Verification)**：建立自動化測試框架，達成 100% 通過率。
+- 📦 **MVP 1.0**(Vue.js 原型 / Viterbi 版):已封存
+- ✅ **WebDayi Lite**:輕量級 PWA(穩定版)
+- 📦 **MVP 2.0(預測型輸入 / Smart Compose)**:**已封存**
+  —— 預測「未知的下一個字」條件熵太高(4–5 bits),top-1 命中率天生一兩成,
+  認知中斷成本為負體驗,屬結構性問題。詳見
+  [封存說明](archive/mvp2-predictive/README.md)。
+- 📦 **MVP 3.0(N-gram Smart Engine)**:**已封存**
+  —— 方向(解碼)正確,但 bigram 資料由詞頻表建出、跨詞轉移缺失,加上計分缺陷。
+  詳見 [驗屍報告](smart/docs/mvp3-postmortem.md)。
+- 🚧 **WebDayi Smart(智慧 2 碼)**:開發中
+  - 理論:2 碼把候選壓到 ~8 個(收斂只需 ~3 bits),bigram 供 4–5 bits
+    ——同一份資料,消歧義綽綽有餘、預測遠遠不夠。
+  - [ ] 評測 harness + 詞頻診斷(2 碼 top-1 ≥ 85% 離線驗證)
+  - [ ] 連碼 2 碼 Viterbi 解碼引擎
+  - [ ] 修正 UI(點選替換 + 重跑解碼)+ 全碼逃生口
+  - [ ] 傳統(4 碼)/ 智慧(2 碼)模式切換
 
 ---
 
 ## 📄 授權
 
-開源專案。歡迎貢獻！
+開源專案。歡迎貢獻!
 
 ### 致謝
-- **Rime 輸入法**：資料來源 ([rime/rime-dayi](https://github.com/rime/rime-dayi))
-- **大易輸入法**：由王贊傑先生發明。
+- **Rime 輸入法**:資料來源 ([rime/rime-dayi](https://github.com/rime/rime-dayi)、[rime/rime-essay](https://github.com/rime/rime-essay))
+- **大易輸入法**:由王贊傑先生發明。

@@ -1,5 +1,21 @@
 # WebDayi MVP 2.0: Predictive Type-ahead
 
+> ## 📦 已封存(Archived, 2026-08-12)
+>
+> **為什麼收**:MVP2(Smart Compose)的失敗是結構性的,不是 bug。它做的是「預測未知」——
+> 從前一個字猜使用者*還沒表達*的下一個字。中文字元 bigram 條件熵約 4–5 bits,等效於
+> 給定前文後仍有十幾到三十幾個合理選擇,top-1 命中率天生只有一兩成;再加上
+> 「看建議 → 判斷 → 決定按不按 Tab」的認知中斷成本,體驗必然是負的。
+> 為了救體感而加的「頻率壓制」「上下文絕對優先」heuristic 治標不治本,
+> 且被證實在消歧義(解碼)場景反而有害(見 `/smart/docs/mvp3-postmortem.md`)。
+>
+> **學到什麼**:同一份 bigram 資料,拿來「解碼已知」(使用者已按下的碼)綽綽有餘,
+> 拿來「預測未知」遠遠不夠。後續方向改為智慧 2 碼解碼,見 `/smart/`。
+>
+> **可重用資產已抽出**至 `/smart/`:碼表 `data/dayi_db.json`、`data/ngram_pruned.json`、
+> `data/freq_map.json`、使用者習慣層 `js/user_history.js`。
+> 本目錄其餘內容僅供考古,不再維護、不再部署。
+
 **Current Status**: 🚧 In Progress (Beta)
 
 MVP 2.0 introduces a **Predictive Engine** designed to reduce keystrokes by predicting the intended character before the full code is typed.
