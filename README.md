@@ -17,8 +17,11 @@ push 即部署於 GitHub Pages。
 **產品現況**:
 
 - ✅ **WebDayi Lite**(`/lite/`):**唯一穩定版**。傳統 4 碼逐字輸入的輕量 PWA。
-- 🚧 **WebDayi Smart**(`/smart/`):**開發中**。智慧 2 碼輸入 PoC——連續打 2 碼、
-  Viterbi 解碼整句、可修正、附全碼逃生口。
+- 🚧 **WebDayi Smart**(`/smart/`):**開發中(v0.2.0)**。智慧 2 碼輸入——每字只打
+  2 碼(首碼+末碼),詞級 Viterbi 解碼整句,錯字一鍵替換,附全碼逃生口;
+  UX 與 Lite 對齊(傳統選字鍵、Mini 模式、Ctrl/Alt 熱鍵、PWA)。
+  離線評測 top-1 **97.4%**。技術說明見
+  [`smart/docs/how-it-works.html`](smart/docs/how-it-works.html)。
 - 📦 **MVP2(Smart Compose 預測型輸入)**:已封存至 `archive/mvp2-predictive/`,
   封存原因見其 README(預測方向的結構性問題)。
 - 📦 **MVP3(N-gram Smart Engine)**:已封存至 `archive/mvp3-smart-engine/`,
@@ -34,9 +37,12 @@ push 即部署於 GitHub Pages。
 👉 **[https://clarencechien.github.io/webdayi/lite/index.html](https://clarencechien.github.io/webdayi/lite/index.html)**
 
 ### WebDayi Smart(智慧 2 碼,開發中)
-每個字只打 2 碼(首碼+末碼),由語言模型解碼消歧義;錯字可點選修正,冷僻字有全碼逃生口。
+每個字只打 2 碼(首碼+末碼),由語言模型解碼消歧義;錯字按選字鍵一下替換,冷僻字有全碼逃生口。
 
-👉 `https://clarencechien.github.io/webdayi/smart/`(PoC)
+👉 `https://clarencechien.github.io/webdayi/smart/`
+
+想知道它怎麼運作(unigram / bigram / Viterbi,大學生看得懂的版本):
+👉 `https://clarencechien.github.io/webdayi/smart/docs/how-it-works.html`
 
 ---
 
@@ -52,8 +58,8 @@ webdayi/
 │   ├── index.html          # 主頁面(以 Lite codebase 為起點)
 │   ├── js/                 # 解碼引擎與 UI 邏輯
 │   ├── data/               # 碼表 + 語言模型資料(抽自 mvp2/mvp3 可重用資產)
-│   ├── tests/              # 評測 harness 與驗屍腳本
-│   └── docs/               # mvp3-postmortem.md、freq-diagnosis.md
+│   ├── tests/              # 評測 harness、引擎單元測試、UI 煙霧測試、驗屍腳本
+│   └── docs/               # how-it-works.html(技術說明)、驗屍與診斷報告、UI mockup
 │
 ├── converter/              # 離線資料管線(碼表轉換、n-gram 建置)
 │
@@ -97,13 +103,16 @@ webdayi/
 - 📦 **MVP 3.0(N-gram Smart Engine)**:**已封存**
   —— 方向(解碼)正確,但 bigram 資料由詞頻表建出、跨詞轉移缺失,加上計分缺陷。
   詳見 [驗屍報告](smart/docs/mvp3-postmortem.md)。
-- 🚧 **WebDayi Smart(智慧 2 碼)**:PoC 完成,實測回饋中
+- 🚧 **WebDayi Smart(智慧 2 碼)**:v0.2.0,實測回饋中
   - 理論:2 碼把候選壓到 ~8 個(收斂只需 ~3 bits),bigram 供 4–5 bits
     ——同一份資料,消歧義綽綽有餘、預測遠遠不夠。
   - [x] 評測 harness + 詞頻診斷(2 碼 top-1 **97.4%**,門檻 85% ✅;
     資料重建自 McBopomofo phrase.occ,見 [freq-diagnosis](smart/docs/freq-diagnosis.md))
   - [x] 連碼 2 碼 Viterbi 解碼引擎(詞級 lattice,`smart/js/decoder.js`)
   - [x] 修正 UI(點選替換 + 重跑解碼)+ 全碼逃生口(`` ` ``)
+  - [x] UX 對齊 Lite:傳統選字鍵(一頁 5 個 + `=` 換頁)、Mini 模式(A′ 版面)、
+    Ctrl/Alt 熱鍵、送出後自動複製、滿版貼底鍵盤、PWA
+  - [x] [技術說明頁](smart/docs/how-it-works.html):資訊理論框架、資料來源、Viterbi 解碼
   - [ ] 傳統(4 碼)/ 智慧(2 碼)模式切換
 
 ---
