@@ -16,7 +16,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  /** 建立 char → canonical token(最長全碼的前 2 鍵;單碼字 = 該鍵)與全碼表 */
+  /** 建立 char → canonical token(最長全碼的首碼+末碼;單碼字 = 該鍵)與全碼表 */
   function buildCharMaps(dayiRaw) {
     const charToFull = {};
     for (const code in dayiRaw) {
@@ -28,7 +28,7 @@
     const charToToken = {};
     for (const ch in charToFull) {
       const code = charToFull[ch];
-      charToToken[ch] = code.length === 1 ? code : code.slice(0, 2);
+      charToToken[ch] = code.length === 1 ? code : code[0] + code[code.length - 1];
     }
     return { charToFull, charToToken };
   }

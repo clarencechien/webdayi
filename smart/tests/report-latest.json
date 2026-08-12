@@ -9,18 +9,18 @@
  },
  "totals": {
   "chars": 1240,
-  "top1AllOk": 1190,
+  "top1AllOk": 1209,
   "ctx": {
    "total": 1081,
-   "top1": 1035,
-   "top3": 1032
+   "top1": 1053,
+   "top3": 1062
   },
   "head": {
    "total": 159,
-   "top1": 155
+   "top1": 156
   },
   "sentences": 159,
-  "sentencesAllOk": 123,
+  "sentencesAllOk": 134,
   "skipped": []
  },
  "fullCode": {
@@ -29,23 +29,10 @@
  },
  "latency": {
   "decodes": 159,
-  "totalMs": 397,
-  "maxMs": 68
+  "totalMs": 361,
+  "maxMs": 35
  },
  "errors": [
-  {
-   "sent": "會議改到下午三點",
-   "group": "conversation",
-   "errs": [
-    {
-     "pos": 2,
-     "truth": "改",
-     "got": "已",
-     "token": "rc"
-    }
-   ],
-   "got": "會議已到下午三點"
-  },
   {
    "sent": "媽媽煮的菜最好吃",
    "group": "conversation",
@@ -53,17 +40,43 @@
     {
      "pos": 2,
      "truth": "煮",
-     "got": "場",
-     "token": "fd"
+     "got": "熱",
+     "token": "fy"
     },
     {
-     "pos": 3,
-     "truth": "的",
-     "got": "白",
-     "token": "/d"
+     "pos": 4,
+     "truth": "菜",
+     "got": "業",
+     "token": "ui"
     }
    ],
-   "got": "媽媽場白菜最好吃"
+   "got": "媽媽熱的業最好吃"
+  },
+  {
+   "sent": "我等一下再打給你",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 1,
+     "truth": "等",
+     "got": "的",
+     "token": "/."
+    }
+   ],
+   "got": "我的一下再打給你"
+  },
+  {
+   "sent": "手機快沒電了",
+   "group": "conversation",
+   "errs": [
+    {
+     "pos": 4,
+     "truth": "電",
+     "got": "完",
+     "token": "mc"
+    }
+   ],
+   "got": "手機快沒完了"
   },
   {
    "sent": "老闆算便宜一點啦",
@@ -72,55 +85,11 @@
     {
      "pos": 2,
      "truth": "算",
-     "got": "自",
-     "token": "/3"
-    },
-    {
-     "pos": 3,
-     "truth": "便",
-     "got": "傳",
-     "token": "ae"
-    },
-    {
-     "pos": 4,
-     "truth": "宜",
-     "got": "體",
-     "token": "mj"
+     "got": "血",
+     "token": "/u"
     }
    ],
-   "got": "老闆自傳體一點啦"
-  },
-  {
-   "sent": "我肚子好餓",
-   "group": "conversation",
-   "errs": [
-    {
-     "pos": 4,
-     "truth": "餓",
-     "got": "似",
-     "token": "a;"
-    }
-   ],
-   "got": "我肚子好似"
-  },
-  {
-   "sent": "你家住在哪裡",
-   "group": "conversation",
-   "errs": [
-    {
-     "pos": 1,
-     "truth": "家",
-     "got": "定",
-     "token": "me"
-    },
-    {
-     "pos": 2,
-     "truth": "住",
-     "got": "位",
-     "token": "ak"
-    }
-   ],
-   "got": "你定位在哪裡"
+   "got": "老闆血便宜一點啦"
   },
   {
    "sent": "放假想去墾丁玩",
@@ -129,24 +98,24 @@
     {
      "pos": 6,
      "truth": "玩",
-     "got": "球",
-     "token": "5e"
+     "got": "現",
+     "token": "5q"
     }
    ],
-   "got": "放假想去墾丁球"
+   "got": "放假想去墾丁現"
   },
   {
-   "sent": "票已經買好了",
+   "sent": "先訂位比較保險",
    "group": "conversation",
    "errs": [
     {
-     "pos": 0,
-     "truth": "票",
-     "got": "還",
-     "token": "4e"
+     "pos": 1,
+     "truth": "訂",
+     "got": "請",
+     "token": "1j"
     }
    ],
-   "got": "還已經買好了"
+   "got": "先請位比較保險"
   },
   {
    "sent": "位子在第七排",
@@ -168,11 +137,11 @@
     {
      "pos": 0,
      "truth": "藥",
-     "got": "首",
-     "token": "u/"
+     "got": "業",
+     "token": "ui"
     }
    ],
-   "got": "首要按時吃"
+   "got": "業要按時吃"
   },
   {
    "sent": "口罩戴好再出門",
@@ -181,11 +150,11 @@
     {
      "pos": 2,
      "truth": "戴",
-     "got": "毒",
-     "token": "f7"
+     "got": "越",
+     "token": "f5"
     }
    ],
-   "got": "口罩毒好再出門"
+   "got": "口罩越好再出門"
   },
   {
    "sent": "奶奶身體很健康",
@@ -194,23 +163,17 @@
     {
      "pos": 0,
      "truth": "奶",
-     "got": "媽",
-     "token": "lb"
+     "got": "姊",
+     "token": "l/"
     },
     {
      "pos": 1,
      "truth": "奶",
-     "got": "媽",
-     "token": "lb"
-    },
-    {
-     "pos": 4,
-     "truth": "很",
-     "got": "式",
-     "token": "er"
+     "got": "姊",
+     "token": "l/"
     }
    ],
-   "got": "媽媽身體式健康"
+   "got": "姊姊身體很健康"
   },
   {
    "sent": "連假高速公路會塞車",
@@ -219,75 +182,11 @@
     {
      "pos": 1,
      "truth": "假",
-     "got": "偏",
-     "token": "ah"
-    },
-    {
-     "pos": 7,
-     "truth": "塞",
-     "got": "賽",
-     "token": "ms"
+     "got": "做",
+     "token": "ax"
     }
    ],
-   "got": "連偏高速公路會賽車"
-  },
-  {
-   "sent": "還好證件都在",
-   "group": "conversation",
-   "errs": [
-    {
-     "pos": 2,
-     "truth": "證",
-     "got": "這",
-     "token": "10"
-    }
-   ],
-   "got": "還好這件都在"
-  },
-  {
-   "sent": "檔案記得先存檔",
-   "group": "conversation",
-   "errs": [
-    {
-     "pos": 5,
-     "truth": "存",
-     "got": "帶",
-     "token": "s1"
-    },
-    {
-     "pos": 6,
-     "truth": "檔",
-     "got": "機",
-     "token": "it"
-    }
-   ],
-   "got": "檔案記得先帶機"
-  },
-  {
-   "sent": "密碼不要設太簡單",
-   "group": "conversation",
-   "errs": [
-    {
-     "pos": 4,
-     "truth": "設",
-     "got": "說",
-     "token": "1q"
-    }
-   ],
-   "got": "密碼不要說太簡單"
-  },
-  {
-   "sent": "不要隨便點連結",
-   "group": "conversation",
-   "errs": [
-    {
-     "pos": 6,
-     "truth": "結",
-     "got": "續",
-     "token": "tf"
-    }
-   ],
-   "got": "不要隨便點連續"
+   "got": "連做高速公路會塞車"
   },
   {
    "sent": "衣服還沒有晾",
@@ -296,24 +195,24 @@
     {
      "pos": 5,
      "truth": "晾",
-     "got": "影",
-     "token": "dk"
+     "got": "景",
+     "token": "dt"
     }
    ],
-   "got": "衣服還沒有影"
+   "got": "衣服還沒有景"
   },
   {
-   "sent": "衛生局提醒民眾注意流感",
+   "sent": "氣象署發布豪雨特報",
    "group": "news",
    "errs": [
     {
-     "pos": 6,
-     "truth": "眾",
-     "got": "黔",
-     "token": "4a"
+     "pos": 8,
+     "truth": "報",
+     "got": "教",
+     "token": "fx"
     }
    ],
-   "got": "衛生局提醒民黔注意流感"
+   "got": "氣象署發布豪雨特教"
   },
   {
    "sent": "半導體產業表現亮眼",
@@ -322,37 +221,11 @@
     {
      "pos": 7,
      "truth": "亮",
-     "got": "就",
-     "token": "ko"
+     "got": "親",
+     "token": "kq"
     }
    ],
-   "got": "半導體產業表現就眼"
-  },
-  {
-   "sent": "失業率創下新低",
-   "group": "news",
-   "errs": [
-    {
-     "pos": 6,
-     "truth": "低",
-     "got": "創",
-     "token": "ar"
-    }
-   ],
-   "got": "失業率創下新創"
-  },
-  {
-   "sent": "勞動部修正勞基法規定",
-   "group": "news",
-   "errs": [
-    {
-     "pos": 2,
-     "truth": "部",
-     "got": "就",
-     "token": "ko"
-    }
-   ],
-   "got": "勞動就修正勞基法規定"
+   "got": "半導體產業表現親眼"
   },
   {
    "sent": "疫苗接種率持續提升",
@@ -361,11 +234,11 @@
     {
      "pos": 4,
      "truth": "率",
-     "got": "畜",
-     "token": "kt"
+     "got": "辦",
+     "token": "ks"
     }
    ],
-   "got": "疫苗接種畜持續提升"
+   "got": "疫苗接種辦持續提升"
   },
   {
    "sent": "演唱會門票秒殺",
@@ -381,30 +254,30 @@
    "got": "演唱會車票秒殺"
   },
   {
-   "sent": "警方呼籲民眾提高警覺",
-   "group": "news",
-   "errs": [
-    {
-     "pos": 5,
-     "truth": "眾",
-     "got": "黔",
-     "token": "4a"
-    }
-   ],
-   "got": "警方呼籲民黔提高警覺"
-  },
-  {
-   "sent": "台鐵新自強號上路",
+   "sent": "充電站數量持續增加",
    "group": "news",
    "errs": [
     {
      "pos": 2,
-     "truth": "新",
-     "got": "親",
-     "token": "ki"
+     "truth": "站",
+     "got": "商",
+     "token": "ko"
     }
    ],
-   "got": "台鐵親自強號上路"
+   "got": "充電商數量持續增加"
+  },
+  {
+   "sent": "高鐵加開班次因應連假",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 9,
+     "truth": "假",
+     "got": "做",
+     "token": "ax"
+    }
+   ],
+   "got": "高鐵加開班次因應連做"
   },
   {
    "sent": "夜市攤商生意變好",
@@ -413,164 +286,100 @@
     {
      "pos": 2,
      "truth": "攤",
-     "got": "技",
-     "token": "gs"
+     "got": "抬",
+     "token": "gf"
     },
     {
      "pos": 3,
      "truth": "商",
-     "got": "交",
-     "token": "k8"
+     "got": "高",
+     "token": "ko"
     }
    ],
-   "got": "夜市技交生意變好"
+   "got": "夜市抬高生意變好"
+  },
+  {
+   "sent": "水果價格波動較大",
+   "group": "news",
+   "errs": [
+    {
+     "pos": 4,
+     "truth": "波",
+     "got": "激",
+     "token": "xx"
+    }
+   ],
+   "got": "水果價格激動較大"
   },
   {
    "sent": "漁業署公布休漁期程",
    "group": "news",
    "errs": [
     {
-     "pos": 6,
-     "truth": "漁",
-     "got": "沒",
-     "token": "xn"
+     "pos": 5,
+     "truth": "休",
+     "got": "條",
+     "token": "ai"
     },
     {
-     "pos": 7,
-     "truth": "期",
-     "got": "其",
-     "token": "p8"
+     "pos": 6,
+     "truth": "漁",
+     "got": "測",
+     "token": "xn"
     },
     {
      "pos": 8,
      "truth": "程",
-     "got": "和",
-     "token": "vo"
+     "got": "我",
+     "token": "v5"
     }
    ],
-   "got": "漁業署公布休沒其和"
+   "got": "漁業署公布條測期我"
   },
   {
-   "sent": "電價審議委員會開會",
+   "sent": "離岸風電進度超前",
    "group": "news",
    "errs": [
     {
-     "pos": 0,
-     "truth": "電",
-     "got": "宴",
-     "token": "md"
+     "pos": 4,
+     "truth": "進",
+     "got": "健",
+     "token": "a0"
     },
     {
-     "pos": 1,
-     "truth": "價",
-     "got": "會",
-     "token": "a4"
+     "pos": 5,
+     "truth": "度",
+     "got": "康",
+     "token": "cx"
     }
    ],
-   "got": "宴會審議委員會開會"
-  },
-  {
-   "sent": "太陽能板裝設量增加",
-   "group": "news",
-   "errs": [
-    {
-     "pos": 6,
-     "truth": "量",
-     "got": "是",
-     "token": "de"
-    }
-   ],
-   "got": "太陽能板裝設是增加"
+   "got": "離岸風電健康超前"
   },
   {
    "sent": "水庫蓄水率回升",
    "group": "news",
    "errs": [
     {
-     "pos": 2,
-     "truth": "蓄",
-     "got": "薪",
-     "token": "uk"
+     "pos": 4,
+     "truth": "率",
+     "got": "章",
+     "token": "ks"
     }
    ],
-   "got": "水庫薪水率回升"
+   "got": "水庫蓄水章回升"
   },
   {
-   "sent": "民眾節約用水意識提高",
+   "sent": "個資保護法修正上路",
    "group": "news",
    "errs": [
     {
-     "pos": 1,
-     "truth": "眾",
-     "got": "黔",
-     "token": "4a"
+     "pos": 0,
+     "truth": "個",
+     "got": "合",
+     "token": "ao"
     }
    ],
-   "got": "民黔節約用水意識提高"
-  },
-  {
-   "sent": "青年購屋貸款放寬",
-   "group": "news",
-   "errs": [
-    {
-     "pos": 2,
-     "truth": "購",
-     "got": "貼",
-     "token": "38"
-    },
-    {
-     "pos": 3,
-     "truth": "屋",
-     "got": "近",
-     "token": "he"
-    }
-   ],
-   "got": "青年貼近貸款放寬"
-  },
-  {
-   "sent": "都市更新計畫啟動",
-   "group": "news",
-   "errs": [
-    {
-     "pos": 6,
-     "truth": "啟",
-     "got": "感",
-     "token": "ho"
-    }
-   ],
-   "got": "都市更新計畫感動"
-  },
-  {
-   "sent": "公車路網重新規劃",
-   "group": "news",
-   "errs": [
-    {
-     "pos": 3,
-     "truth": "網",
-     "got": "常",
-     "token": "tm"
-    }
-   ],
-   "got": "公車路常重新規劃"
-  },
-  {
-   "sent": "共享單車使用率提升",
-   "group": "news",
-   "errs": [
-    {
-     "pos": 2,
-     "truth": "單",
-     "got": "戰",
-     "token": "oo"
-    },
-    {
-     "pos": 3,
-     "truth": "車",
-     "got": "鬥",
-     "token": "6"
-    }
-   ],
-   "got": "共享戰鬥使用率提升"
+   "got": "合資保護法修正上路"
   },
   {
    "sent": "人工智慧應用越來越廣",
@@ -579,11 +388,11 @@
     {
      "pos": 9,
      "truth": "廣",
-     "got": "度",
-     "token": "cs"
+     "got": "真",
+     "token": "c8"
     }
    ],
-   "got": "人工智慧應用越來越度"
+   "got": "人工智慧應用越來越真"
   }
  ],
  "sentences": [
@@ -637,8 +446,8 @@
   },
   {
    "sent": "會議改到下午三點",
-   "got": "會議已到下午三點",
-   "ok": false,
+   "got": "會議改到下午三點",
+   "ok": true,
    "group": "conversation"
   },
   {
@@ -673,7 +482,7 @@
   },
   {
    "sent": "媽媽煮的菜最好吃",
-   "got": "媽媽場白菜最好吃",
+   "got": "媽媽熱的業最好吃",
    "ok": false,
    "group": "conversation"
   },
@@ -703,14 +512,14 @@
   },
   {
    "sent": "我等一下再打給你",
-   "got": "我等一下再打給你",
-   "ok": true,
+   "got": "我的一下再打給你",
+   "ok": false,
    "group": "conversation"
   },
   {
    "sent": "手機快沒電了",
-   "got": "手機快沒電了",
-   "ok": true,
+   "got": "手機快沒完了",
+   "ok": false,
    "group": "conversation"
   },
   {
@@ -733,14 +542,14 @@
   },
   {
    "sent": "老闆算便宜一點啦",
-   "got": "老闆自傳體一點啦",
+   "got": "老闆血便宜一點啦",
    "ok": false,
    "group": "conversation"
   },
   {
    "sent": "我肚子好餓",
-   "got": "我肚子好似",
-   "ok": false,
+   "got": "我肚子好餓",
+   "ok": true,
    "group": "conversation"
   },
   {
@@ -757,8 +566,8 @@
   },
   {
    "sent": "你家住在哪裡",
-   "got": "你定位在哪裡",
-   "ok": false,
+   "got": "你家住在哪裡",
+   "ok": true,
    "group": "conversation"
   },
   {
@@ -769,7 +578,7 @@
   },
   {
    "sent": "放假想去墾丁玩",
-   "got": "放假想去墾丁球",
+   "got": "放假想去墾丁現",
    "ok": false,
    "group": "conversation"
   },
@@ -805,8 +614,8 @@
   },
   {
    "sent": "先訂位比較保險",
-   "got": "先訂位比較保險",
-   "ok": true,
+   "got": "先請位比較保險",
+   "ok": false,
    "group": "conversation"
   },
   {
@@ -817,8 +626,8 @@
   },
   {
    "sent": "票已經買好了",
-   "got": "還已經買好了",
-   "ok": false,
+   "got": "票已經買好了",
+   "ok": true,
    "group": "conversation"
   },
   {
@@ -853,13 +662,13 @@
   },
   {
    "sent": "藥要按時吃",
-   "got": "首要按時吃",
+   "got": "業要按時吃",
    "ok": false,
    "group": "conversation"
   },
   {
    "sent": "口罩戴好再出門",
-   "got": "口罩毒好再出門",
+   "got": "口罩越好再出門",
    "ok": false,
    "group": "conversation"
   },
@@ -907,7 +716,7 @@
   },
   {
    "sent": "奶奶身體很健康",
-   "got": "媽媽身體式健康",
+   "got": "姊姊身體很健康",
    "ok": false,
    "group": "conversation"
   },
@@ -937,7 +746,7 @@
   },
   {
    "sent": "連假高速公路會塞車",
-   "got": "連偏高速公路會賽車",
+   "got": "連做高速公路會塞車",
    "ok": false,
    "group": "conversation"
   },
@@ -967,8 +776,8 @@
   },
   {
    "sent": "還好證件都在",
-   "got": "還好這件都在",
-   "ok": false,
+   "got": "還好證件都在",
+   "ok": true,
    "group": "conversation"
   },
   {
@@ -985,14 +794,14 @@
   },
   {
    "sent": "檔案記得先存檔",
-   "got": "檔案記得先帶機",
-   "ok": false,
+   "got": "檔案記得先存檔",
+   "ok": true,
    "group": "conversation"
   },
   {
    "sent": "密碼不要設太簡單",
-   "got": "密碼不要說太簡單",
-   "ok": false,
+   "got": "密碼不要設太簡單",
+   "ok": true,
    "group": "conversation"
   },
   {
@@ -1003,8 +812,8 @@
   },
   {
    "sent": "不要隨便點連結",
-   "got": "不要隨便點連續",
-   "ok": false,
+   "got": "不要隨便點連結",
+   "ok": true,
    "group": "conversation"
   },
   {
@@ -1039,7 +848,7 @@
   },
   {
    "sent": "衣服還沒有晾",
-   "got": "衣服還沒有影",
+   "got": "衣服還沒有景",
    "ok": false,
    "group": "conversation"
   },
@@ -1093,14 +902,14 @@
   },
   {
    "sent": "衛生局提醒民眾注意流感",
-   "got": "衛生局提醒民黔注意流感",
-   "ok": false,
+   "got": "衛生局提醒民眾注意流感",
+   "ok": true,
    "group": "news"
   },
   {
    "sent": "氣象署發布豪雨特報",
-   "got": "氣象署發布豪雨特報",
-   "ok": true,
+   "got": "氣象署發布豪雨特教",
+   "ok": false,
    "group": "news"
   },
   {
@@ -1153,7 +962,7 @@
   },
   {
    "sent": "半導體產業表現亮眼",
-   "got": "半導體產業表現就眼",
+   "got": "半導體產業表現親眼",
    "ok": false,
    "group": "news"
   },
@@ -1171,14 +980,14 @@
   },
   {
    "sent": "失業率創下新低",
-   "got": "失業率創下新創",
-   "ok": false,
+   "got": "失業率創下新低",
+   "ok": true,
    "group": "news"
   },
   {
    "sent": "勞動部修正勞基法規定",
-   "got": "勞動就修正勞基法規定",
-   "ok": false,
+   "got": "勞動部修正勞基法規定",
+   "ok": true,
    "group": "news"
   },
   {
@@ -1195,7 +1004,7 @@
   },
   {
    "sent": "疫苗接種率持續提升",
-   "got": "疫苗接種畜持續提升",
+   "got": "疫苗接種辦持續提升",
    "ok": false,
    "group": "news"
   },
@@ -1291,8 +1100,8 @@
   },
   {
    "sent": "警方呼籲民眾提高警覺",
-   "got": "警方呼籲民黔提高警覺",
-   "ok": false,
+   "got": "警方呼籲民眾提高警覺",
+   "ok": true,
    "group": "news"
   },
   {
@@ -1315,20 +1124,20 @@
   },
   {
    "sent": "充電站數量持續增加",
-   "got": "充電站數量持續增加",
-   "ok": true,
+   "got": "充電商數量持續增加",
+   "ok": false,
    "group": "news"
   },
   {
    "sent": "高鐵加開班次因應連假",
-   "got": "高鐵加開班次因應連假",
-   "ok": true,
+   "got": "高鐵加開班次因應連做",
+   "ok": false,
    "group": "news"
   },
   {
    "sent": "台鐵新自強號上路",
-   "got": "台鐵親自強號上路",
-   "ok": false,
+   "got": "台鐵新自強號上路",
+   "ok": true,
    "group": "news"
   },
   {
@@ -1363,7 +1172,7 @@
   },
   {
    "sent": "夜市攤商生意變好",
-   "got": "夜市技交生意變好",
+   "got": "夜市抬高生意變好",
    "ok": false,
    "group": "news"
   },
@@ -1381,20 +1190,20 @@
   },
   {
    "sent": "水果價格波動較大",
-   "got": "水果價格波動較大",
-   "ok": true,
+   "got": "水果價格激動較大",
+   "ok": false,
    "group": "news"
   },
   {
    "sent": "漁業署公布休漁期程",
-   "got": "漁業署公布休沒其和",
+   "got": "漁業署公布條測期我",
    "ok": false,
    "group": "news"
   },
   {
    "sent": "電價審議委員會開會",
-   "got": "宴會審議委員會開會",
-   "ok": false,
+   "got": "電價審議委員會開會",
+   "ok": true,
    "group": "news"
   },
   {
@@ -1405,19 +1214,19 @@
   },
   {
    "sent": "太陽能板裝設量增加",
-   "got": "太陽能板裝設是增加",
-   "ok": false,
-   "group": "news"
-  },
-  {
-   "sent": "離岸風電進度超前",
-   "got": "離岸風電進度超前",
+   "got": "太陽能板裝設量增加",
    "ok": true,
    "group": "news"
   },
   {
+   "sent": "離岸風電進度超前",
+   "got": "離岸風電健康超前",
+   "ok": false,
+   "group": "news"
+  },
+  {
    "sent": "水庫蓄水率回升",
-   "got": "水庫薪水率回升",
+   "got": "水庫蓄水章回升",
    "ok": false,
    "group": "news"
   },
@@ -1429,8 +1238,8 @@
   },
   {
    "sent": "民眾節約用水意識提高",
-   "got": "民黔節約用水意識提高",
-   "ok": false,
+   "got": "民眾節約用水意識提高",
+   "ok": true,
    "group": "news"
   },
   {
@@ -1441,14 +1250,14 @@
   },
   {
    "sent": "青年購屋貸款放寬",
-   "got": "青年貼近貸款放寬",
-   "ok": false,
+   "got": "青年購屋貸款放寬",
+   "ok": true,
    "group": "news"
   },
   {
    "sent": "都市更新計畫啟動",
-   "got": "都市更新計畫感動",
-   "ok": false,
+   "got": "都市更新計畫啟動",
+   "ok": true,
    "group": "news"
   },
   {
@@ -1465,14 +1274,14 @@
   },
   {
    "sent": "公車路網重新規劃",
-   "got": "公車路常重新規劃",
-   "ok": false,
+   "got": "公車路網重新規劃",
+   "ok": true,
    "group": "news"
   },
   {
    "sent": "共享單車使用率提升",
-   "got": "共享戰鬥使用率提升",
-   "ok": false,
+   "got": "共享單車使用率提升",
+   "ok": true,
    "group": "news"
   },
   {
@@ -1513,13 +1322,13 @@
   },
   {
    "sent": "個資保護法修正上路",
-   "got": "個資保護法修正上路",
-   "ok": true,
+   "got": "合資保護法修正上路",
+   "ok": false,
    "group": "news"
   },
   {
    "sent": "人工智慧應用越來越廣",
-   "got": "人工智慧應用越來越度",
+   "got": "人工智慧應用越來越真",
    "ok": false,
    "group": "news"
   },
@@ -1543,14 +1352,14 @@
   }
  ],
  "summary": {
-  "top1 全部": 96,
-  "top1 有左context (門檻85%)": 95.7,
-  "top3 有左context (門檻95%)": 95.5,
-  "top1 句首無context (僅報告)": 97.5,
-  "整句全對率": 77.4,
+  "top1 全部": 97.5,
+  "top1 有左context (門檻85%)": 97.4,
+  "top3 有左context (門檻95%)": 98.2,
+  "top1 句首無context (僅報告)": 98.1,
+  "整句全對率": 84.3,
   "4碼回歸 top1 (門檻~100%)": 97.2,
-  "平均整句解碼 ms": 2.5,
-  "最大整句解碼 ms": 68,
+  "平均整句解碼 ms": 2.27,
+  "最大整句解碼 ms": 35,
   "句數": 159,
   "字數": 1240,
   "skipped": 0

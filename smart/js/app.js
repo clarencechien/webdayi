@@ -2,7 +2,8 @@
  * WebDayi Smart — 智慧 2 碼 UI(PoC)
  *
  * 輸入行為:
- *   - 連續打碼,每 2 鍵 = 一個字(不用空白切碼)
+ *   - 連續打碼,每 2 鍵 = 一個字,取碼 = 首碼 + 末碼(大易簡碼慣例,不用空白切碼;
+ *     完整 token 之後的空白是 no-op,不會造成錯位)
  *   - 單碼字(一、大、火、車…84 個):打該鍵 + 空白
  *   - ` (backtick):全碼逃生口——接下來這個字打全碼(1-4 鍵),數字/空白選字後鎖定
  *   - 緩衝區的字都是「暫定」(Viterbi 目前最佳路徑,會隨後續輸入跳動;虛線標示)
@@ -158,7 +159,7 @@
         const area = els.composeArea;
         area.innerHTML = '';
         if (state.tokens.length === 0 && !state.pendingKey && !state.fc) {
-            area.innerHTML = '<span class="compose-hint">連續打碼:每字 2 鍵(單碼字打 1 鍵 + 空白)。<code>`</code> = 全碼逃生口,Enter = 送出</span>';
+            area.innerHTML = '<span class="compose-hint">連續打碼:每字 2 鍵 = <b>首碼+末碼</b>(單碼字打 1 鍵 + 空白)。<code>`</code> = 全碼逃生口,Enter = 送出</span>';
             return;
         }
         state.tokens.forEach((t, i) => {

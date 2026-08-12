@@ -34,7 +34,7 @@ push 即部署於 GitHub Pages。
 👉 **[https://clarencechien.github.io/webdayi/lite/index.html](https://clarencechien.github.io/webdayi/lite/index.html)**
 
 ### WebDayi Smart(智慧 2 碼,開發中)
-每個字只打前 2 碼,由語言模型解碼消歧義;錯字可點選修正,冷僻字有全碼逃生口。
+每個字只打 2 碼(首碼+末碼),由語言模型解碼消歧義;錯字可點選修正,冷僻字有全碼逃生口。
 
 👉 `https://clarencechien.github.io/webdayi/smart/`(PoC)
 
@@ -100,7 +100,7 @@ webdayi/
 - 🚧 **WebDayi Smart(智慧 2 碼)**:PoC 完成,實測回饋中
   - 理論:2 碼把候選壓到 ~8 個(收斂只需 ~3 bits),bigram 供 4–5 bits
     ——同一份資料,消歧義綽綽有餘、預測遠遠不夠。
-  - [x] 評測 harness + 詞頻診斷(2 碼 top-1 **95.7%**,門檻 85% ✅;
+  - [x] 評測 harness + 詞頻診斷(2 碼 top-1 **97.4%**,門檻 85% ✅;
     資料重建自 McBopomofo phrase.occ,見 [freq-diagnosis](smart/docs/freq-diagnosis.md))
   - [x] 連碼 2 碼 Viterbi 解碼引擎(詞級 lattice,`smart/js/decoder.js`)
   - [x] 修正 UI(點選替換 + 重跑解碼)+ 全碼逃生口(`` ` ``)

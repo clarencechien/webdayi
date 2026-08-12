@@ -8,7 +8,7 @@ Sources:
   - smart/data/dayi_db.json (Dayi code table, from rime-dayi)
 
 Outputs:
-  - smart/data/word_db.json   words (1-4 chars) keyed by Dayi 2-code-prefix
+  - smart/data/word_db.json   words (1-4 chars) keyed by Dayi first+last-code
                               token sequence ("tok|tok|..."), value [[word, count], ...]
   - smart/data/char_bigram.json  char bigram conditional counts derived from
                               phrase.occ (within-phrase pairs weighted by occ)
@@ -37,10 +37,11 @@ MIN_BIGRAM_COUNT = 2      # prune noise bigrams
 def load_dayi(path):
     with open(path, encoding='utf-8') as f:
         db = json.load(f)
-    char_tokens = defaultdict(set)   # char -> set of tokens (2-code prefix, or 1-key code)
+    # token = 首碼+末碼(大易簡碼慣例),單碼字 = 該鍵本身
+    char_tokens = defaultdict(set)   # char -> set of tokens
     char_longest = {}                # char -> longest full code (canonical typing for eval)
     for code, cands in db.items():
-        tok = code if len(code) == 1 else code[:2]
+        tok = code if len(code) == 1 else code[0] + code[-1]
         for c in cands:
             ch = c['char']
             char_tokens[ch].add(tok)
