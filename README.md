@@ -97,12 +97,13 @@ webdayi/
 - 📦 **MVP 3.0(N-gram Smart Engine)**:**已封存**
   —— 方向(解碼)正確,但 bigram 資料由詞頻表建出、跨詞轉移缺失,加上計分缺陷。
   詳見 [驗屍報告](smart/docs/mvp3-postmortem.md)。
-- 🚧 **WebDayi Smart(智慧 2 碼)**:開發中
+- 🚧 **WebDayi Smart(智慧 2 碼)**:PoC 完成,實測回饋中
   - 理論:2 碼把候選壓到 ~8 個(收斂只需 ~3 bits),bigram 供 4–5 bits
     ——同一份資料,消歧義綽綽有餘、預測遠遠不夠。
-  - [ ] 評測 harness + 詞頻診斷(2 碼 top-1 ≥ 85% 離線驗證)
-  - [ ] 連碼 2 碼 Viterbi 解碼引擎
-  - [ ] 修正 UI(點選替換 + 重跑解碼)+ 全碼逃生口
+  - [x] 評測 harness + 詞頻診斷(2 碼 top-1 **95.7%**,門檻 85% ✅;
+    資料重建自 McBopomofo phrase.occ,見 [freq-diagnosis](smart/docs/freq-diagnosis.md))
+  - [x] 連碼 2 碼 Viterbi 解碼引擎(詞級 lattice,`smart/js/decoder.js`)
+  - [x] 修正 UI(點選替換 + 重跑解碼)+ 全碼逃生口(`` ` ``)
   - [ ] 傳統(4 碼)/ 智慧(2 碼)模式切換
 
 ---

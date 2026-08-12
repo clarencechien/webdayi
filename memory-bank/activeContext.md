@@ -31,16 +31,32 @@
 - 根 `index.html` 跳轉修正(原指向已封存的 mvp1 → 改指 lite)。
 - 根 README 更新反映現況。
 
-### 下一步(依 handoff,死因 b ⇒ Phase 2 提前)
-1. **評測 harness**(`/smart/tests/`):100–200 句台灣正體句子,
-   量 2 碼 top-1 / top-3(分有/無左 context),瀏覽器可跑、可 export JSON。
-2. **詞頻診斷與資料/計分修正**:離線通過 2 碼 top-1 ≥ 85% 門檻,
-   寫 `smart/docs/freq-diagnosis.md`。已知修正方向:
-   - 計分基線:`log P(字)` + `λ·log P(字ᵢ|字ᵢ₋₁)`,未見 bigram backoff 到打折 unigram;
-   - 資料:lexicon 的正確用法是詞級 lattice(詞內不需跨詞 bigram),
-     或重建語料級字 bigram(台灣正體語源)。
-3. **`/smart/` UI**(85% 門檻通過後):連碼 2 碼、緩衝區暫定字、
-   點選/數字鍵修正 + 重跑 Viterbi、全碼逃生口、copy 交付。
+### Phase 2(提前執行)✅ 完成 — 離線過門檻
+- 診斷(`smart/docs/freq-diagnosis.md`):essay.txt 是詞頻表非語料,
+  單字頻率反轉台灣用字(吃 805 vs 咋 13,090)、缺常用詞(吃飯 0 筆)、
+  bigram 只有詞內轉移。
+- 修正:資料重建自 **McBopomofo phrase.occ**(MIT,台灣語境)
+  → `smart/data/word_db.json`(3.8MB)+ `char_bigram.json`(1.2MB),
+  essay 降級為重折扣補洞(×0.005、門檻 10)。
+  離線建置腳本:`converter/build_smart_db.py`(需 clone McBopomofo)。
+- 新引擎 `smart/js/decoder.js`:詞級 lattice Viterbi,每位置都有頻率項,
+  未見 bigram backoff 到打折 unigram;支援 pinned(逃生口)與候選排序(修正 UI)。
+  參數 harness 掃描定案:γ=0.3、β=0.02、lenBonus=3.0。
+- 評測(159 句/1,240 字):**top-1 有 context 95.7%**(門檻 85)、
+  **top-3 95.5%**(門檻 95)、句首 97.5%、整句解碼 2.5ms。
+  4 碼回歸 97.2%,缺口全為碼表固有同碼字(與 Lite 相同),非回歸。
+
+### Phase 1(/smart/ UI)✅ PoC 完成
+- `smart/index.html` + `smart/js/app.js`:連碼 2 碼、單碼字=鍵+空白、
+  暫定字虛線顯示、點字/方向鍵+數字鍵修正(替換即鎖定並重跑 Viterbi)、
+  `` ` `` 全碼逃生口(選字鍵沿用 Lite 慣例:空白 + ' [ ] - \ =)、
+  Enter 送出 + Copy 交付、虛擬鍵盤(觸控展開)、深淺色主題。
+- 真瀏覽器煙霧測試 15/15 通過(Playwright + chromium),每鍵處理 ~1ms。
+
+### 下一步
+1. GitHub Pages 部署後實際試打,收集體感回饋。
+2. 頁內「傳統(4 碼)/ 智慧(2 碼)」模式切換(傳統模式重用 Lite 引擎)。
+3. 使用者習慣層權重(μ)調校;需要時再引語料級字 bigram。
 
 ### 驗收門檻(handoff)
 | 指標 | 門檻 |
