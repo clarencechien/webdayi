@@ -141,6 +141,26 @@ const server = http.createServer((req, res) => {
   await page.waitForTimeout(120);
   t('Escape 離開 Mini 模式', await page.$eval('#mini-ui', e => e.classList.contains('hidden')));
 
+  // 8b. Ctrl 熱鍵:單擊複製、連按兩下切換 Mini 模式(與 Lite 相同)
+  await page.evaluate(() => navigator.clipboard.writeText('__reset__'));
+  await page.keyboard.press('Control');
+  await page.waitForTimeout(120);
+  const ctrlClip = await page.evaluate(() => navigator.clipboard.readText());
+  t('單擊 Ctrl 複製輸出', ctrlClip === (await outText()), ctrlClip);
+  await page.waitForTimeout(600);   // 超過 double-tap 視窗,確保下一組是全新的
+  await page.keyboard.press('Control');
+  await page.keyboard.press('Control');
+  await page.waitForTimeout(150);
+  t('連按兩下 Ctrl 進入 Mini 模式', await page.$eval('#mini-ui', e => !e.classList.contains('hidden')));
+  await page.keyboard.press('Control');
+  await page.keyboard.press('Control');
+  await page.waitForTimeout(150);
+  t('Mini 模式內連按兩下 Ctrl 切回主 UI', await page.$eval('#mini-ui', e => e.classList.contains('hidden')));
+  await page.waitForTimeout(600);
+  await page.keyboard.press('Control');
+  await page.waitForTimeout(400);
+  t('單擊 Ctrl 不會誤觸 Mini 模式', await page.$eval('#mini-ui', e => e.classList.contains('hidden')));
+
   // 9. 設定持久化
   await page.click('#menu-fab');
   await page.click('#toggle-autocopy');

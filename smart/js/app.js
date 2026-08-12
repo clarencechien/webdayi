@@ -16,6 +16,7 @@
     'use strict';
 
     const DAYI_KEY = /^[a-z0-9,.;/]$/;
+    const CTRL_DOUBLE_TAP_MS = 500;   // 連按兩下 Ctrl 切換 Mini 模式(與 Lite 相同)
     const SELECT_KEYS = [' ', "'", '[', ']', '-', '\\'];
     const SELECT_LABELS = ['␣', "'", '[', ']', '-', '\\'];
     const PAGE_SIZE = SELECT_KEYS.length;
@@ -66,6 +67,7 @@
         fc: null,         // 全碼模式 {keys}
         page: 0,
         isMini: false,
+        lastCtrlPressTime: 0,
         settings: { autoCopy: true, theme: null, keyboard: true, focusMode: false, fontScale: 1 },
     };
 
@@ -512,6 +514,18 @@
 
     function setupListeners() {
         document.addEventListener('keydown', (e) => {
+            // Ctrl 熱鍵(與 Lite 相同):單擊 = 複製輸出,連按兩下 = 切換 Mini 模式
+            if (e.key === 'Control') {
+                const now = Date.now();
+                if (now - state.lastCtrlPressTime < CTRL_DOUBLE_TAP_MS) {
+                    state.lastCtrlPressTime = 0;
+                    toggleMini();
+                    return;
+                }
+                state.lastCtrlPressTime = now;
+                if (getOutput()) copyOutput(false);
+                return;
+            }
             if (e.metaKey || e.ctrlKey || e.altKey || !decoder) return;
             const k = e.key;
 
