@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini 條四款提案</title>
+<style>
+  /* ---- tokens:淺色為基準,兩種深色路徑各自覆寫 ---- */
+  :root {
+    --accent: #0fb8f0;
+    --accent-soft: #d3eef9;
+    --ground: #eef3f5;
+    --surface: #ffffff;
+    --surface-2: #f6f9fa;
+    --ink: #14232c;
+    --ink-muted: #607889;
+    --line: #d8e3e8;
+    --line-strong: #b9cbd4;
+    --ok: #16a765;
+    --warn: #d98613;
+    --chrome: #e7eef1;
+    --shadow: 0 1px 2px rgba(16, 40, 55, .07), 0 8px 24px rgba(16, 40, 55, .06);
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Noto Sans TC", "PingFang TC", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --accent: #35c8fb;
+        --accent-soft: #10394c;
+      --ground: #0b141c;
+      --surface: #16232e;
+      --surface-2: #1c2b37;
+      --ink: #e9f1f5;
+      --ink-muted: #90a8b7;
+      --line: #2b3d4a;
+      --line-strong: #3d5464;
+      --ok: #35c98a;
+      --warn: #eaa63d;
+      --chrome: #101c25;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+    }
+  }
+  :root[data-theme="dark"] {
+    --accent: #35c8fb;
+    --accent-soft: #10394c;
+    --ground: #0b141c;
+    --surface: #16232e;
+    --surface-2: #1c2b37;
+    --ink: #e9f1f5;
+    --ink-muted: #90a8b7;
+    --line: #2b3d4a;
+    --line-strong: #3d5464;
+    --ok: #35c98a;
+    --warn: #eaa63d;
+    --chrome: #101c25;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    padding: 28px 20px 72px;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
+
+  header { display: flex; flex-direction: column; gap: 8px; }
+  .eyebrow {
+    font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-muted);
+    font-family: var(--mono);
+  }
+  h1 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); line-height: 1.2; text-wrap: balance; font-weight: 650; }
+  .lede { color: var(--ink-muted); max-width: 64ch; }
+
+  /* ---- 控制列 ---- */
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+    position: sticky; top: 8px; z-index: 5; box-shadow: var(--shadow);
+  }
+  button, select {
+    font-family: inherit; font-size: .85rem; color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  }
+  button:hover { border-color: var(--line-strong); }
+  button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #04222e; font-weight: 600; }
+  .step-read { font-family: var(--mono); font-size: .78rem; color: var(--ink-muted); margin-left: auto; }
+  .track {
+    flex: 1 1 220px; min-width: 160px; height: 4px; border-radius: 2px; background: var(--line);
+    position: relative; overflow: hidden;
+  }
+  .track i { position: absolute; inset: 0 auto 0 0; background: var(--accent); width: 0%; }
+
+  /* ---- 提案卡 ---- */
+  .variant { display: flex; flex-direction: column; gap: 10px; }
+  .v-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .v-key {
+    font-family: var(--mono); font-size: .78rem; font-weight: 700; letter-spacing: .1em;
+    color: var(--accent); border: 1px solid var(--accent); border-radius: 5px; padding: 0 7px;
+  }
+  .v-name { font-size: 1.05rem; font-weight: 650; }
+  .v-idea { color: var(--ink-muted); font-size: .88rem; }
+
+  /* 視窗框:模擬桌面 PWA 的 window-controls-overlay */
+  .frame {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .frame.narrow { max-width: 560px; }
+  .chrome {
+    height: 30px; background: var(--chrome); display: flex; align-items: center; justify-content: flex-end;
+    gap: 14px; padding-right: 12px; color: var(--ink-muted); font-size: .8rem; user-select: none;
+  }
+  .chrome span { opacity: .75; }
+
+  /* ---- 共用的 mini 條元件 ---- */
+  .bar {
+    display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 5px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .out {
+    padding: 9px 12px; font-size: 1.06rem; min-height: 42px; color: var(--ink);
+  }
+  .out .placeholder { color: var(--ink-muted); }
+  .code {
+    font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--accent);
+    letter-spacing: 1px; flex: 0 0 auto; min-width: 2.2ch;
+  }
+  .caret {
+    font-family: var(--mono); font-weight: 700; color: var(--accent); animation: blink 1.2s infinite;
+    flex: 0 0 auto;
+  }
+  @keyframes blink { 0%, 100% { opacity: 0 } 50% { opacity: 1 } }
+  @media (prefers-reduced-motion: reduce) { .caret { animation: none; opacity: .85 } }
+
+  /* A:現況 */
+  .a-left {
+    flex: 0 0 clamp(140px, 42%, 340px); min-width: 0; display: flex; align-items: center; gap: 6px;
+    overflow-x: auto; scrollbar-width: none; border-right: 1px solid var(--line); padding-right: 8px;
+  }
+  .a-left::-webkit-scrollbar { display: none }
+  .a-cell { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; padding: 0 3px; }
+  .a-cell s {
+    text-decoration: none; font-family: var(--mono); font-size: .58rem; color: var(--ink-muted);
+    letter-spacing: .5px;
+  }
+  .a-cell b {
+    font-weight: 400; font-size: 1.3rem; line-height: 1.25;
+    border-bottom: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  .a-cands { display: flex; gap: 5px; overflow: hidden; flex: 1; }
+  .a-cand {
+    display: flex; align-items: center; gap: 4px; flex: 0 0 auto; padding: 3px 8px;
+    border: 1px solid var(--line); border-radius: 6px; font-size: 1.05rem; background: var(--surface-2);
+  }
+  .a-cand i { font-style: normal; font-family: var(--mono); font-size: .66rem; color: var(--ink-muted); }
+
+  /* B:右靠齊 + 無框候選 */
+  .b-left {
+    flex: 0 0 clamp(120px, 34%, 300px); min-width: 0; display: flex; align-items: center;
+    justify-content: flex-end; gap: 2px; overflow: hidden; padding-right: 10px;
+    border-right: 1px solid var(--line); direction: rtl;
+  }
+  .b-text { direction: ltr; white-space: nowrap; font-size: 1.24rem; letter-spacing: .02em; }
+  .b-text u { text-decoration: none; border-bottom: 1.5px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+  .b-text mark {
+    background: var(--accent-soft); color: var(--ink); border-radius: 3px; padding: 1px 2px;
+    border-bottom: 1.5px solid var(--accent);
+  }
+  .b-cands { display: flex; gap: 13px; align-items: baseline; overflow: hidden; flex: 1; }
+  .b-cand { font-size: 1.14rem; white-space: nowrap; cursor: pointer; }
+  .b-cand i {
+    font-style: normal; font-family: var(--mono); font-size: .68rem; color: var(--accent);
+    vertical-align: .55em; margin-right: 1px;
+  }
+  .b-cand:first-child { font-weight: 600; }
+
+  /* C:inline composition(暫定字寫在輸出行) */
+  .c-cands { display: flex; gap: 13px; align-items: baseline; overflow: hidden; flex: 1; }
+  .c-out .tent {
+    border-bottom: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  .c-out .tent mark { background: var(--accent-soft); color: var(--ink); border-radius: 2px; }
+  .c-badge {
+    font-family: var(--mono); font-size: .7rem; color: var(--ink-muted); flex: 0 0 auto;
+    border: 1px solid var(--line); border-radius: 5px; padding: 0 6px;
+  }
+
+  /* D:只顯示作用字 */
+  .d-ctx {
+    font-family: var(--mono); font-size: .74rem; color: var(--ink-muted); flex: 0 0 auto;
+    border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px;
+  }
+  .d-focus {
+    font-size: 1.5rem; flex: 0 0 auto; min-width: 1.6em; text-align: center;
+    border-bottom: 2px solid var(--accent); padding: 0 4px;
+  }
+  .d-cands { display: flex; gap: 12px; align-items: baseline; overflow: hidden; flex: 1; }
+
+  .status {
+    flex: 0 0 auto; font-family: var(--mono); font-size: .72rem; font-weight: 700; color: var(--accent);
+    border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; margin-left: auto;
+  }
+
+  /* ---- 評比 ---- */
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+  .note {
+    border: 1px solid var(--line); border-left: 3px solid var(--line-strong); border-radius: 8px;
+    padding: 8px 11px; background: var(--surface); font-size: .85rem;
+  }
+  .note.good { border-left-color: var(--ok); }
+  .note.cost { border-left-color: var(--warn); }
+  .note b { display: block; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 600; }
+
+  .pick { display: flex; align-items: center; gap: 8px; }
+  .pick .chosen { color: var(--ok); font-size: .82rem; font-weight: 600; }
+
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; font-family: var(--mono); }
+  .verdict { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .verdict h2 { font-size: .95rem; margin-bottom: 6px; }
+  .verdict p { font-size: .88rem; color: var(--ink-muted); max-width: 72ch; }
+  footer { color: var(--ink-muted); font-size: .78rem; }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">WebDayi Smart · Mini 模式 A/B</div>
+    <h1>Mini 條四款提案</h1>
+    <p class="lede">
+      四款都吃同一份真實資料:句子「預設值不知要設定」,候選字直接取自 <code>smart/js/decoder.js</code>
+      的排序結果。按播放,四條會同步逐鍵演進——差別在於<strong>視線要跑多遠</strong>、
+      <strong>版面會不會抖</strong>、以及<strong>窄視窗先犧牲什麼</strong>。
+    </p>
+  </header>
+
+  <div class="controls">
+    <button id="play" class="primary">▶ 播放</button>
+    <button id="step">下一鍵</button>
+    <button id="reset">重播</button>
+    <label style="font-size:.85rem;color:var(--ink-muted)">
+      視窗寬度
+      <select id="width">
+        <option value="wide">寬(1100px 桌面)</option>
+        <option value="narrow">窄(560px 常駐小視窗)</option>
+      </select>
+    </label>
+    <div class="track"><i id="bar"></i></div>
+    <span class="step-read" id="read">—</span>
+  </div>
+
+  <!-- A -->
+  <section class="variant" id="v-A">
+    <div class="v-head">
+      <span class="v-key">A</span>
+      <span class="v-name">現況:格子 + 有框候選</span>
+      <span class="v-idea">每個暫定字一個格子,候選各自帶框。</span>
+    </div>
+    <div class="frame">
+      <div class="chrome"><span>⌄</span><span>⋮</span><span>—</span><span>▢</span><span>✕</span></div>
+      <div class="bar">
+        <div class="a-left" id="A-left"></div>
+        <div class="a-cands" id="A-cands"></div>
+        <span class="status">易2</span>
+      </div>
+      <div class="out" id="A-out"></div>
+    </div>
+    <div class="notes">
+      <div class="note good"><b>好處</b>每個字可點、可看到它的碼,修正目標明確。</div>
+      <div class="note cost"><b>代價</b>格線+框線密度高,字被切成方塊、讀不成句;候選佔位大,窄視窗只剩 3–4 個。</div>
+    </div>
+    <div class="pick"><button data-pick="A">選這款</button><span class="chosen" data-chosen="A"></span></div>
+  </section>
+
+  <!-- B -->
+  <section class="variant" id="v-B">
+    <div class="v-head">
+      <span class="v-key">B</span>
+      <span class="v-name">右靠齊:句子成句,候選去框</span>
+      <span class="v-idea">暫定字往右貼齊分隔線,最新的字永遠在同一個位置;候選改成純文字加上標選字鍵。</span>
+    </div>
+    <div class="frame">
+      <div class="chrome"><span>⌄</span><span>⋮</span><span>—</span><span>▢</span><span>✕</span></div>
+      <div class="bar">
+        <span class="code" id="B-code"></span>
+        <div class="b-left"><span class="b-text" id="B-text"></span></div>
+        <div class="b-cands" id="B-cands"></div>
+        <span class="status">易2</span>
+      </div>
+      <div class="out" id="B-out"></div>
+    </div>
+    <div class="notes">
+      <div class="note good"><b>好處</b>剛打的字與第一個候選只隔一條線,視線不用來回掃;去框後同寬度能多放 2–3 個候選,句子也讀得出來。</div>
+      <div class="note cost"><b>代價</b>前文往左滾出畫面,要改前面的字得先捲回去(或用 ← 鍵)。</div>
+    </div>
+    <div class="pick"><button data-pick="B">選這款</button><span class="chosen" data-chosen="B"></span></div>
+  </section>
+
+  <!-- C -->
+  <section class="variant" id="v-C">
+    <div class="v-head">
+      <span class="v-key">C</span>
+      <span class="v-name">Inline:暫定字直接寫在輸出行</span>
+      <span class="v-idea">上列只放候選;未定的字就顯示在文字最終會出現的位置,底線標示未定。</span>
+    </div>
+    <div class="frame">
+      <div class="chrome"><span>⌄</span><span>⋮</span><span>—</span><span>▢</span><span>✕</span></div>
+      <div class="bar">
+        <span class="code" id="C-code"></span>
+        <div class="c-cands" id="C-cands"></div>
+        <span class="c-badge" id="C-badge">8 字未定</span>
+        <span class="status">易2</span>
+      </div>
+      <div class="out c-out" id="C-out"></div>
+    </div>
+    <div class="notes">
+      <div class="note good"><b>好處</b>最接近系統 IME:眼睛只看一個地方,所見即所得,上列整條寬度都給候選。</div>
+      <div class="note cost"><b>代價</b>暫定字會在輸出行裡「跳動」(Viterbi 回頭改字),需要底線與底色把「還沒定案」講清楚。</div>
+    </div>
+    <div class="pick"><button data-pick="C">選這款</button><span class="chosen" data-chosen="C"></span></div>
+  </section>
+
+  <!-- D -->
+  <section class="variant" id="v-D">
+    <div class="v-head">
+      <span class="v-key">D</span>
+      <span class="v-name">聚焦:只留正在打的那個字</span>
+      <span class="v-idea">前文摺成一顆計數,放大目前這個字與它的候選。</span>
+    </div>
+    <div class="frame">
+      <div class="chrome"><span>⌄</span><span>⋮</span><span>—</span><span>▢</span><span>✕</span></div>
+      <div class="bar">
+        <span class="d-ctx" id="D-ctx">前文 0</span>
+        <span class="code" id="D-code"></span>
+        <span class="d-focus" id="D-focus"></span>
+        <div class="d-cands" id="D-cands"></div>
+        <span class="status">易2</span>
+      </div>
+      <div class="out" id="D-out"></div>
+    </div>
+    <div class="notes">
+      <div class="note good"><b>好處</b>寬度需求最低,超窄視窗也塞得下 6 個候選;注意力只有一個焦點。</div>
+      <div class="note cost"><b>代價</b>看不到整句,失去「後面的字改了前面」這個智慧 2 碼的核心回饋;盲打時沒有安全感。</div>
+    </div>
+    <div class="pick"><button data-pick="D">選這款</button><span class="chosen" data-chosen="D"></span></div>
+  </section>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>比較項</th><th>A 現況</th><th>B 右靠齊</th><th>C Inline</th><th>D 聚焦</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>看得到整句</td><td>是</td><td>是(前文捲動)</td><td>是</td><td>否</td></tr>
+        <tr><td>視線距離(暫定字↔候選)</td><td>遠</td><td>最近</td><td>中(跨兩列)</td><td>最近</td></tr>
+        <tr><td>窄視窗可見候選數</td><td class="num">3–4</td><td class="num">6</td><td class="num">6+</td><td class="num">6+</td></tr>
+        <tr><td>點字修正</td><td>直接點格子</td><td>點字(需捲動)</td><td>點輸出行的字</td><td>要先退回</td></tr>
+        <tr><td>版面穩定</td><td>穩(固定坑位)</td><td>穩(右靠齊)</td><td>輸出行會改字</td><td>最穩</td></tr>
+        <tr><td>實作成本(從現況)</td><td>—</td><td>小</td><td>中</td><td>小</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="verdict">
+    <h2>建議的 A/B 組合</h2>
+    <p>
+      先把 <strong>B</strong> 當對照組上線(改動最小、直接解掉視線來回與候選被擠掉兩個痛點),
+      <strong>C</strong> 當實驗組——它才是真正的 IME 心智模型,但暫定字在輸出行跳動的接受度要實測。
+      D 留給極窄視窗當自動降級版面,A 作為基準線保留即可。實際打一段字再決定;
+      按「選這款」會把選擇存進 <code>localStorage</code>,之後直接照它實作。
+    </p>
+  </div>
+
+  <footer>資料來源:<code>smart/data/word_db.json</code> + <code>smart/js/decoder.js</code> 實際輸出。此頁為靜態 mockup,不含解碼引擎。</footer>
+</div>
+
+<script>
+const DATA = {
+ "sentence": "預設值不知要設定",
+ "tokens": [
+  "b8",
+  "1x",
+  "a3",
+  "h9",
+  "2o",
+  "4l",
+  "1x",
+  "m9"
+ ],
+ "states": [
+  {
+   "pending": "",
+   "tentative": "預",
+   "cands": [
+    "預",
+    "翼",
+    "驥",
+    "騏",
+    "匊",
+    "頨"
+   ],
+   "active": 0,
+   "keys": "b8"
+  },
+  {
+   "pending": "1",
+   "tentative": "預",
+   "cands": [],
+   "active": 0
+  },
+  {
+   "pending": "",
+   "tentative": "預設",
+   "cands": [
+    "設",
+    "變",
+    "護",
+    "詠",
+    "謾",
+    "諼"
+   ],
+   "active": 1,
+   "keys": "1x"
+  },
+  {
+   "pending": "a",
+   "tentative": "預設",
+   "cands": [],
+   "active": 1
+  },
+  {
+   "pending": "",
+   "tentative": "預設值",
+   "cands": [
+    "作",
+    "值",
+    "俳",
+    "偗"
+   ],
+   "active": 2,
+   "keys": "a3"
+  },
+  {
+   "pending": "h",
+   "tentative": "預設值",
+   "cands": [],
+   "active": 2
+  },
+  {
+   "pending": "",
+   "tentative": "預設值不",
+   "cands": [
+    "不",
+    "歷",
+    "斥",
+    "歪",
+    "蹙",
+    "屣"
+   ],
+   "active": 3,
+   "keys": "h9"
+  },
+  {
+   "pending": "2",
+   "tentative": "預設值不",
+   "cands": [],
+   "active": 3
+  },
+  {
+   "pending": "",
+   "tentative": "預設值不知",
+   "cands": [
+    "知",
+    "告",
+    "矯",
+    "牯",
+    "犒",
+    "牾"
+   ],
+   "active": 4,
+   "keys": "2o"
+  },
+  {
+   "pending": "4",
+   "tentative": "預設值不知",
+   "cands": [],
+   "active": 4
+  },
+  {
+   "pending": "",
+   "tentative": "預設值不知要",
+   "cands": [
+    "要",
+    "黮"
+   ],
+   "active": 5,
+   "keys": "4l"
+  },
+  {
+   "pending": "1",
+   "tentative": "預設值不知要",
+   "cands": [],
+   "active": 5
+  },
+  {
+   "pending": "",
+   "tentative": "預設值不知要設",
+   "cands": [
+    "設",
+    "變",
+    "護",
+    "詠",
+    "謾",
+    "諼"
+   ],
+   "active": 6,
+   "keys": "1x"
+  },
+  {
+   "pending": "m",
+   "tentative": "預設值不知要設",
+   "cands": [],
+   "active": 6
+  },
+  {
+   "pending": "",
+   "tentative": "預設值不知要設定",
+   "cands": [
+    "定",
+    "靂",
+    "寁",
+    "寔",
+    "蹇",
+    "靋"
+   ],
+   "active": 7,
+   "keys": "m9"
+  }
+ ]
+};
+const SEL = ['␣', "'", '[', ']', '-', '\\'];
+const OUT_PREFIX = '會議紀錄:';
+
+let i = 0, timer = null;
+const $ = s => document.querySelector(s);
+
+function esc(s) { return s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+
+function render() {
+  const st = DATA.states[i];
+  const chars = [...st.tentative];
+  const active = Math.min(st.active, chars.length - 1);
+  const cands = st.cands;
+  const pending = st.pending || '';
+
+  $('#read').textContent = `${i + 1}/${DATA.states.length} · 碼 ${st.keys || pending + '…'}`;
+  $('#bar').style.width = ((i + 1) / DATA.states.length * 100) + '%';
+
+  // A:格子 + 有框候選
+  $('#A-left').innerHTML = chars.map((c, n) =>
+    `<span class="a-cell"><b>${esc(c)}</b><s>${esc(DATA.tokens[n] || '')}</s></span>`).join('')
+    + (pending ? `<span class="a-cell"><b style="opacity:.45">·</b><s>${esc(pending)}</s></span>` : '')
+    + `<span class="caret">_</span>`;
+  $('#A-cands').innerHTML = cands.map((c, n) =>
+    `<span class="a-cand"><i>${SEL[n]}</i>${esc(c)}</span>`).join('');
+  $('#A-out').innerHTML = `${OUT_PREFIX}`;
+
+  // B:右靠齊 + 無框候選
+  $('#B-code').textContent = pending || ' ';
+  $('#B-text').innerHTML = chars.map((c, n) =>
+    n === active && !pending ? `<mark>${esc(c)}</mark>` : `<u>${esc(c)}</u>`).join('')
+    + `<span class="caret">_</span>`;
+  $('#B-cands').innerHTML = cands.map((c, n) =>
+    `<span class="b-cand"><i>${SEL[n]}</i>${esc(c)}</span>`).join('');
+  $('#B-out').innerHTML = OUT_PREFIX;
+
+  // C:inline composition
+  $('#C-code').textContent = pending || ' ';
+  $('#C-cands').innerHTML = cands.map((c, n) =>
+    `<span class="b-cand"><i>${SEL[n]}</i>${esc(c)}</span>`).join('');
+  $('#C-badge').textContent = `${chars.length} 字未定`;
+  $('#C-out').innerHTML = OUT_PREFIX
+    + `<span class="tent">` + chars.map((c, n) =>
+      n === active && !pending ? `<mark>${esc(c)}</mark>` : esc(c)).join('') + `</span>`
+    + `<span class="caret">_</span>`;
+
+  // D:聚焦
+  $('#D-ctx').textContent = `前文 ${Math.max(0, chars.length - 1)}`;
+  $('#D-code').textContent = pending || ' ';
+  $('#D-focus').textContent = pending ? '·' : (chars[active] || '·');
+  $('#D-cands').innerHTML = cands.map((c, n) =>
+    `<span class="b-cand"><i>${SEL[n]}</i>${esc(c)}</span>`).join('');
+  $('#D-out').innerHTML = OUT_PREFIX;
+}
+
+function step() {
+  i = (i + 1) % DATA.states.length;
+  render();
+}
+
+$('#step').addEventListener('click', () => { pause(); step(); });
+$('#reset').addEventListener('click', () => { pause(); i = 0; render(); });
+$('#play').addEventListener('click', () => timer ? pause() : play());
+
+function play() {
+  timer = setInterval(step, 620);
+  $('#play').textContent = '❚❚ 暫停';
+}
+function pause() {
+  clearInterval(timer); timer = null;
+  $('#play').textContent = '▶ 播放';
+}
+
+$('#width').addEventListener('change', e => {
+  document.querySelectorAll('.frame').forEach(f => f.classList.toggle('narrow', e.target.value === 'narrow'));
+});
+
+document.querySelectorAll('[data-pick]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = btn.dataset.pick;
+    try { localStorage.setItem('webdayi_smart_mini_variant', v); } catch (e) { /* 無痕模式 */ }
+    showChosen(v);
+  });
+});
+function showChosen(v) {
+  document.querySelectorAll('[data-chosen]').forEach(el => {
+    el.textContent = el.dataset.chosen === v ? '✓ 已選為實作方向' : '';
+  });
+}
+try { showChosen(localStorage.getItem('webdayi_smart_mini_variant')); } catch (e) { /* 忽略 */ }
+
+render();
+play();
+</script>
+</body>
+
+</html>

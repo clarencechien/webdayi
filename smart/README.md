@@ -78,7 +78,8 @@ smart/
 │   └── mvp3_autopsy.js # mvp3 驗屍重現腳本
 └── docs/
     ├── mvp3-postmortem.md  # MVP3 驗屍報告
-    └── freq-diagnosis.md   # 詞頻診斷與修正報告
+    ├── freq-diagnosis.md   # 詞頻診斷與修正報告
+    └── mini-mockups.html   # Mini 條四款版面提案(A/B 比較頁,可直接開)
 ```
 
 **計分**(詳見 `docs/freq-diagnosis.md`):
@@ -114,8 +115,25 @@ node smart/tests/ui_smoke.js          # 真瀏覽器 UI 煙霧測試(30 項;需 
 - 資料庫約 5MB(word_db 2.5MB + char_bigram 1.2MB + 碼表 1.5MB;gzip 後更小),
   首次載入後由瀏覽器快取。
 
+## Mini 條版面 A/B(進行中)
+
+`docs/mini-mockups.html` 用**同一段真實輸入**(句子「預設值不知要設定」,候選取自實際 decoder)
+同步演示四款 Mini 條版面,可切換寬/窄視窗、逐鍵播放,比較「視線距離、版面抖動、
+窄視窗先犧牲什麼」:
+
+| | 提案 | 一句話 |
+|---|---|---|
+| **A** | 現況:格子 + 有框候選 | 每字一格、可點可看碼,但讀不成句、候選佔位大 |
+| **B** | 右靠齊、候選去框 | 最新的字永遠貼著分隔線,視線不用來回;同寬度多放 2–3 個候選 |
+| **C** | Inline composition | 暫定字寫在輸出行(底線標未定),上列整條給候選,最接近系統 IME |
+| **D** | 聚焦:只留正在打的字 | 寬度需求最低,但看不到整句,失去「後面改前面」的回饋 |
+
+建議:**B 當對照組、C 當實驗組**實測;D 留給極窄視窗自動降級,A 保留為基準線。
+頁面上按「選這款」會把選擇寫進 `localStorage.webdayi_smart_mini_variant`,決定後照它實作。
+
 ## 下一步(PoC 驗證後)
 
+- [ ] Mini 條版面依 A/B 結果定案(B / C)
 - [ ] 頁內「傳統(4 碼)/ 智慧(2 碼)」模式切換(傳統模式重用 Lite 引擎)
 - [ ] 使用者習慣層權重調校(μ)與個人詞庫匯出
 - [ ] 語料級字 bigram(zh-tw 語料)再推準確率
