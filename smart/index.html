@@ -149,6 +149,12 @@
         }
         .cell.pinned .ch { border-bottom: 2px solid var(--success); }
         .cell.pending .ch { color: var(--text-muted); border-bottom-style: dotted; }
+        .cell.pending { min-width: 44px; }   /* 固定坑位,打第 1 碼時後面的格子不會位移 */
+        .compose-cursor {
+            font-family: "SF Mono", Menlo, Consolas, monospace; font-weight: 700; font-size: 1.3rem;
+            color: var(--primary); animation: blink 1.2s infinite; opacity: .8;
+            flex: 0 0 auto; align-self: center; margin-left: -2px;
+        }
         .cell .keys { font-size: .62rem; color: var(--text-muted); margin-top: 1px; letter-spacing: .5px; }
         .cell.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
         .cell.fc-cell { border-color: var(--warn); }
@@ -286,13 +292,31 @@
         .mini-drag-region {
             position: absolute; inset: 0; -webkit-app-region: drag; z-index: 1;
         }
+        /* 左半邊固定寬度:待配對碼 + 暫定字 + 游標。候選永遠從同一個 x 開始,不會被推著跑 */
+        .mini-left {
+            flex: 0 0 clamp(140px, 42%, 340px);   /* 固定坑位:寬視窗也不會留下半條空白 */
+            min-width: 0;
+            display: flex; align-items: center; gap: 6px;
+            overflow-x: auto; scrollbar-width: none;
+            z-index: 2; position: relative; -webkit-app-region: no-drag;
+            border-right: 1px solid var(--border-color); padding-right: 8px;
+        }
+        .mini-left::-webkit-scrollbar { display: none; }
         .mini-code {
             font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 1.05rem;
-            color: var(--primary); font-weight: 600; z-index: 2; position: relative;
+            color: var(--primary); font-weight: 600;
             letter-spacing: 1px; white-space: nowrap;
+            flex: 0 0 auto; min-width: 2.4ch;   /* 固定坑位,打第 1 碼時不會整條抖動 */
         }
-        .mini-code:not(:empty)::after {
-            content: "|"; color: var(--text-muted); font-weight: 400; margin-left: 6px;
+        /* Lite 的極簡呼吸游標 */
+        .mini-cursor {
+            font-family: "SF Mono", Menlo, Consolas, monospace; font-weight: 700;
+            color: var(--primary); animation: blink 1.2s infinite; opacity: .8;
+            display: inline-block; flex: 0 0 auto;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
         }
         .mini-compose {
             display: flex; gap: 4px; flex: 0 0 auto; align-items: center;
@@ -446,8 +470,11 @@
         <div class="mini-card">
             <div class="mini-input-bar">
                 <div class="mini-drag-region"></div>
-                <div id="mini-code" class="mini-code"></div>
-                <div id="mini-compose" class="mini-compose"></div>
+                <div class="mini-left">
+                    <div id="mini-code" class="mini-code"></div>
+                    <div id="mini-compose" class="mini-compose"></div>
+                    <span class="mini-cursor">_</span>
+                </div>
                 <div id="mini-cands" class="mini-cands"></div>
                 <div id="mini-status" class="mini-status" title="切換中/英(連按兩下 Ctrl 離開 Mini)">易2</div>
             </div>
