@@ -82,7 +82,8 @@ const server = http.createServer((req, res) => {
   const candsNow = await page.$$eval('#candidate-bar .cand', els => els.map(e => e.lastChild.textContent));
   t('候選列自動列出最後一字候選', candsNow.length > 0, JSON.stringify(candsNow));
   const labels = await page.$$eval('#candidate-bar .cand .num', els => els.map(e => e.textContent));
-  t("選字鍵標示為 ␣ ' [ ] - \\", labels.slice(0, 3).join('') === "␣'[", JSON.stringify(labels));
+  t("選字鍵標示為 ␣ ' [ ] -", labels.join('') === "␣'[]-", JSON.stringify(labels));
+  t('主 UI 一頁固定 5 個候選', candsNow.length <= 5, String(candsNow.length));
   await page.keyboard.press("'");
   await page.waitForTimeout(80);
   const afterQuote = await composeText();
@@ -142,7 +143,17 @@ const server = http.createServer((req, res) => {
   const miniCompose = await page.$$eval('#mini-compose .cell .ch', els => els.map(e => e.textContent).join(''));
   t('Mini 緩衝區顯示解碼結果', miniCompose === '你吃飯了嗎', miniCompose);
   const miniCands = await page.$$eval('#mini-cands .cand', els => els.length);
-  t('Mini 候選列有候選', miniCands > 0, String(miniCands));
+  t('Mini 候選固定 5 格(A′)', miniCands === 5, String(miniCands));
+  const miniPage = await page.$eval('#mini-page', e => e.textContent);
+  t('Mini 顯示頁碼', /^\d+\/\d+$/.test(miniPage), miniPage);
+  const miniCandsX = await page.$eval('#mini-cands', e => Math.round(e.getBoundingClientRect().left));
+  await page.keyboard.press('=');
+  await page.waitForTimeout(80);
+  const miniPage2 = await page.$eval('#mini-page', e => e.textContent);
+  const miniCandsX2 = await page.$eval('#mini-cands', e => Math.round(e.getBoundingClientRect().left));
+  t('= 在 Mini 換頁', miniPage2 !== miniPage || miniPage.endsWith('/1'), `${miniPage} → ${miniPage2}`);
+  t('Mini 候選區位置固定', miniCandsX === miniCandsX2, `${miniCandsX} vs ${miniCandsX2}`);
+  t('Mini 格子有標碼(A′)', await page.$eval('#mini-compose .cell .keys', e => e.textContent.length > 0));
   await page.keyboard.press('Enter');
   const miniOut = await page.$eval('#mini-output', e => e.value);
   t('Mini 輸出列同步', miniOut.endsWith('你吃飯了嗎'), miniOut);

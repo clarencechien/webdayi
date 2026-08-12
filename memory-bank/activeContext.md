@@ -58,7 +58,11 @@
 - **PWA 比照 Lite**:manifest.json(standalone)+ 本地 icon + iOS meta,可加入主畫面。
 - 手機版首屏(390×664)不需捲動即可見緩衝區+候選+鍵盤。
 - 圖示改純 unicode,移除 Google Fonts 相依(離線可用)。
-- 真瀏覽器測試擴充到 30 項(含剪貼簿、Mini、設定持久化、手機版面),全綠。
+- **Mini 條採用 A′ 版面**(經 `smart/docs/mini-mockups.html` 的 A/B 比較定案):
+  候選區固定 5 格、位置不動、每格都有選字鍵(`空白 ' [ ] -`),分隔線右推,
+  左區(句子含碼標)拿走其餘全部寬度,`=` 換頁並顯示頁碼。
+  主 UI 一頁同樣 5 個,選字鍵映射兩邊一致。
+- 真瀏覽器測試擴充到 60 項(含剪貼簿、Mini、A′ 固定格數與換頁、設定持久化、手機版面),全綠。
 
 ### Phase 1(/smart/ UI)✅ PoC 完成
 - `smart/index.html` + `smart/js/app.js`:連碼 2 碼、單碼字=鍵+空白、
