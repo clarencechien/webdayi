@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebDayi Smart 評測 Harness</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif; margin: 2rem auto; max-width: 900px; padding: 0 1rem; background: #f8fafc; color: #0f172a; }
+  h1 { font-size: 1.4rem; }
+  button { padding: .6rem 1.2rem; font-size: 1rem; border: 0; border-radius: .5rem; background: #2563eb; color: #fff; cursor: pointer; margin-right: .5rem; }
+  button:disabled { background: #94a3b8; }
+  table { border-collapse: collapse; margin: 1rem 0; width: 100%; }
+  th, td { border: 1px solid #cbd5e1; padding: .4rem .7rem; text-align: left; font-size: .92rem; }
+  th { background: #e2e8f0; }
+  .ok { color: #16a34a; } .bad { color: #dc2626; }
+  .err-sent { font-size: .9rem; margin: .2rem 0; }
+  #status { margin: 1rem 0; color: #475569; }
+  .wrongchar { background: #fecaca; border-radius: 2px; padding: 0 1px; }
+</style>
+</head>
+<body>
+<h1>WebDayi Smart — 智慧 2 碼評測 Harness</h1>
+<p>離線評測解碼器準確率(handoff 驗收門檻:2 碼有左 context top-1 ≥ 85%、top-3 ≥ 95%)。</p>
+<button id="run">跑評測</button>
+<button id="export" disabled>Export JSON</button>
+<div id="status">尚未執行。</div>
+<div id="result"></div>
+
+<script src="../js/decoder.js"></script>
+<script src="eval.js"></script>
+<script>
+let lastReport = null;
+const statusEl = document.getElementById('status');
+const resultEl = document.getElementById('result');
+
+async function fetchJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(url + ' → HTTP ' + r.status);
+  return r.json();
+}
+
+document.getElementById('run').addEventListener('click', async () => {
+  try {
+    statusEl.textContent = '載入資料中…';
+    const [dayiRaw, wordDb, charBigram, testset] = await Promise.all([
+      fetchJSON('../data/dayi_db.json'),
+      fetchJSON('../data/word_db.json'),
+      fetchJSON('../data/char_bigram.json'),
+      fetchJSON('testset.json'),
+    ]);
+    statusEl.textContent = '評測中…';
+    await new Promise(r => setTimeout(r, 30));
+    const t0 = performance.now();
+    lastReport = SmartEval.runEval(SmartDecoder, { dayiRaw, wordDb, charBigram, testset });
+    const ms = Math.round(performance.now() - t0);
+    statusEl.textContent = `完成(${ms}ms)。`;
+    document.getElementById('export').disabled = false;
+    render(lastReport);
+  } catch (e) {
+    statusEl.textContent = '失敗:' + e.message;
+  }
+});
+
+document.getElementById('export').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(lastReport, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'webdayi-smart-eval-report.json';
+  a.click();
+});
+
+function render(rep) {
+  const rows = Object.entries(rep.summary).map(([k, v]) => {
+    let cls = '';
+    if (k.includes('85%')) cls = v >= 85 ? 'ok' : 'bad';
+    if (k.includes('95%')) cls = v >= 95 ? 'ok' : 'bad';
+    return `<tr><td>${k}</td><td class="${cls}">${v}</td></tr>`;
+  }).join('');
+  const errs = rep.errors.map(e => {
+    const marked = [...e.got].map((ch, i) => e.errs.some(x => x.pos === i) ? `<span class="wrongchar">${ch}</span>` : ch).join('');
+    return `<div class="err-sent">「${e.sent}」→「${marked}」</div>`;
+  }).join('');
+  resultEl.innerHTML = `<table><tr><th>指標</th><th>值</th></tr>${rows}</table>
+    <h3>錯誤句(${rep.errors.length})</h3>${errs}`;
+}
+</script>
+</body>
+</html>

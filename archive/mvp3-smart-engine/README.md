@@ -1,5 +1,16 @@
 # MVP 3.0: N-gram Smart Engine
 
+> ## 📦 已封存(Archived, 2026-08-12)
+>
+> 選字穩定選錯、結果不可用,已完成驗屍。**死因 (b):方向是解碼(正確),
+> 但資料品質不足**——bigram 由 rime-essay 詞頻表(lexicon)建出而非連續語料,
+> 跨詞轉移系統性缺失;並疊加計分缺陷(t≥1 位置無字頻項、未見 bigram 死刑罰分,
+> 結構性重現 MVP2「上下文絕對優先」)。完整證據與錯字重現見
+> **`/smart/docs/mvp3-postmortem.md`**。
+>
+> 可重用資產(碼表、n-gram 基線資料、驗屍/評測腳本)已抽出至 `/smart/`。
+> 本目錄僅供考古,不再維護。
+
 **Status**: 🔄 In Development (Experimental Feature Branch)
 **Branch**: feature/ngram-engine track
 **PRD**: WebDaYi PRD v1.3, Section 7
