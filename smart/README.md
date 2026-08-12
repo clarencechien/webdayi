@@ -31,10 +31,12 @@ MVP2 Smart Compose 做的是「預測未知」:從前一個字猜使用者還沒
 
 | 功能 | 說明 |
 |---|---|
-| **Mini 模式** | IME 式兩列:第 1 列=緩衝區+候選,第 2 列=輸出。適合小視窗/PWA 常駐;`Esc` 或點右上「易2」離開 |
+| **Mini 模式** | IME 式兩列:第 1 列=緩衝區+候選,第 2 列=輸出。適合小視窗/PWA 常駐。**連按兩下 `Ctrl` 切換**(與 Lite 相同),或 `Esc` / 點右上「易2」離開 |
+| **`Ctrl` 熱鍵** | 單擊 = 複製輸出到剪貼簿;500ms 內連按兩下 = 切換 Mini 模式(Lite 同規格) |
 | **專注模式** | 隱藏頁首與狀態列,只留輸入相關區塊 |
 | **送出後自動複製** | 預設開啟,送出即進剪貼簿並閃綠回饋(等同 Lite 的 Auto Copy) |
-| 虛擬鍵盤 | 部首標示的大易鍵盤,可收合;手機首屏不需捲動即可看到緩衝區+候選+鍵盤 |
+| 虛擬鍵盤 | **與 Lite 相同的幾何**:滿版、貼底、按鍵撐滿整列(高 48px,桌面 56px)。⇧ 的位置放「全碼」,🌐 的位置放「⏎ 送出」。上半部內容區自行捲動,鍵盤永遠固定在下方 |
+| **PWA** | 比照 Lite:`manifest.json`(standalone、window-controls-overlay)、本地 icon、iOS meta,可「加入主畫面」當獨立 App 用 |
 | 深色模式 / 字級 | 跟隨系統,可手動切換;字級 80–160% |
 | 清除選字習慣 | 一鍵清掉個人化權重(見下節) |
 
@@ -55,6 +57,8 @@ MVP2 Smart Compose 做的是「預測未知」:從前一個字猜使用者還沒
 ```
 smart/
 ├── index.html          # UI(單頁,無 build step)
+├── manifest.json       # PWA(比照 Lite)
+├── icon.svg / icon-192.png / icon-512.png / favicon.ico
 ├── js/
 │   ├── decoder.js      # 詞級 lattice Viterbi(UMD,node/browser 通用)
 │   ├── app.js          # UI 狀態機與事件

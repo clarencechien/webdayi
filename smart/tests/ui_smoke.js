@@ -141,6 +141,26 @@ const server = http.createServer((req, res) => {
   await page.waitForTimeout(120);
   t('Escape 離開 Mini 模式', await page.$eval('#mini-ui', e => e.classList.contains('hidden')));
 
+  // 8b. Ctrl 熱鍵:單擊複製、連按兩下切換 Mini 模式(與 Lite 相同)
+  await page.evaluate(() => navigator.clipboard.writeText('__reset__'));
+  await page.keyboard.press('Control');
+  await page.waitForTimeout(120);
+  const ctrlClip = await page.evaluate(() => navigator.clipboard.readText());
+  t('單擊 Ctrl 複製輸出', ctrlClip === (await outText()), ctrlClip);
+  await page.waitForTimeout(600);   // 超過 double-tap 視窗,確保下一組是全新的
+  await page.keyboard.press('Control');
+  await page.keyboard.press('Control');
+  await page.waitForTimeout(150);
+  t('連按兩下 Ctrl 進入 Mini 模式', await page.$eval('#mini-ui', e => !e.classList.contains('hidden')));
+  await page.keyboard.press('Control');
+  await page.keyboard.press('Control');
+  await page.waitForTimeout(150);
+  t('Mini 模式內連按兩下 Ctrl 切回主 UI', await page.$eval('#mini-ui', e => e.classList.contains('hidden')));
+  await page.waitForTimeout(600);
+  await page.keyboard.press('Control');
+  await page.waitForTimeout(400);
+  t('單擊 Ctrl 不會誤觸 Mini 模式', await page.$eval('#mini-ui', e => e.classList.contains('hidden')));
+
   // 9. 設定持久化
   await page.click('#menu-fab');
   await page.click('#toggle-autocopy');
@@ -163,6 +183,36 @@ const server = http.createServer((req, res) => {
   });
   t(`手機版鍵盤在首屏內(${fits.bottom}/${fits.vh})`, fits.bottom <= fits.vh, JSON.stringify(fits));
   t('手機版首屏無垂直捲動', !fits.scroll, JSON.stringify(fits));
+
+  // 10b. 鍵盤幾何(比照 Lite):貼底、滿版、按鍵撐滿整列
+  const kbGeom = await mobile.evaluate(() => {
+    const kc = document.querySelector('.keyboard-container').getBoundingClientRect();
+    const row = document.querySelector('.vk-row').getBoundingClientRect();
+    const keys = [...document.querySelectorAll('.vk-row')].map(r =>
+        [...r.children].map(k => k.getBoundingClientRect()));
+    const first = keys[0][0], last = keys[0][keys[0].length - 1];
+    return {
+      vw: window.innerWidth, vh: window.innerHeight,
+      kcLeft: Math.round(kc.left), kcRight: Math.round(kc.right),
+      gapBelow: Math.round(window.innerHeight - kc.bottom),
+      rowSpan: Math.round(last.right - first.left), rowWidth: Math.round(row.width),
+      keyH: Math.round(first.height),
+    };
+  });
+  t('鍵盤滿版(左右不留白)', kbGeom.kcLeft <= 1 && kbGeom.kcRight >= kbGeom.vw - 1, JSON.stringify(kbGeom));
+  t('鍵盤貼底(下方僅狀態列)', kbGeom.gapBelow <= 26, JSON.stringify(kbGeom));
+  t('按鍵撐滿整列', kbGeom.rowSpan >= kbGeom.rowWidth - 2, JSON.stringify(kbGeom));
+  t('按鍵高度可觸控(≥42px)', kbGeom.keyH >= 42, JSON.stringify(kbGeom));
+
+  // 10c. PWA:manifest 可取得且欄位正確
+  const mf = await mobile.evaluate(async () => {
+    const href = document.querySelector('link[rel=manifest]').getAttribute('href');
+    const r = await fetch(href);
+    return r.ok ? await r.json() : null;
+  });
+  t('manifest.json 可載入', !!mf, JSON.stringify(mf));
+  t('manifest 為 standalone(可裝成 PWA)', mf && mf.display === 'standalone', mf && mf.display);
+  t('manifest 有圖示', mf && Array.isArray(mf.icons) && mf.icons.length > 0);
   await mobile.screenshot({ path: path.join(__dirname, 'screenshot-mobile.png') });
 
   t('無 page error / console error', errors.length === 0, errors.join(' | '));

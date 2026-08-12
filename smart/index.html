@@ -9,8 +9,14 @@
     <meta name="app-version" content="0.2.0">
     <meta name="app-build" content="20260812-002">
     <!-- WebDayi Smart 0.2.0 — 智慧 2 碼(首碼+末碼);Lite 對齊版 UX:傳統選字鍵、Mini 模式、自動複製 -->
-    <link rel="icon" type="image/svg+xml" href="../lite/icon.svg">
-    <link rel="apple-touch-icon" href="../lite/icon.svg">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dayi2">
     <style>
         :root {
             --primary: #0fb8f0;
@@ -40,6 +46,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         html, body { height: 100%; overscroll-behavior: none; }
+        body { overflow: hidden; }
 
         body {
             font-family: system-ui, -apple-system, "Noto Sans TC", "PingFang TC", sans-serif;
@@ -52,12 +59,21 @@
         .app-container {
             max-width: 680px;
             margin: 0 auto;
-            min-height: 100%;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+            gap: 6px;
+            padding: 8px 8px 0;
+            overflow: hidden;
         }
+        /* 上半部可捲動,鍵盤永遠貼底(與 Lite 相同的骨架) */
+        .main-content {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
 
         /* ---------- Header ---------- */
         .app-header {
@@ -162,36 +178,54 @@
         .mode-chip { padding: 1px 9px; border-radius: 999px; border: 1px solid var(--border-color); }
         .mode-chip.fc { border-color: var(--warn); color: var(--warn); }
 
-        /* ---------- Virtual keyboard ---------- */
-        .keyboard-container { padding: 0 2px; }
+        /* ---------- Virtual keyboard(滿版、貼底,比照 Lite) ---------- */
+        .keyboard-container {
+            margin-top: auto;
+            flex: 0 0 auto;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+            padding: 4px 4px max(4px, env(safe-area-inset-bottom));
+            /* 滿版:抵銷 app-container 的左右內距 */
+            width: calc(100% + 16px);
+            margin-left: -8px;
+            margin-right: -8px;
+            user-select: none;
+        }
         .vk { display: flex; flex-direction: column; gap: 4px; }
-        .vk-row { display: flex; gap: 4px; justify-content: center; }
+        .vk-row { display: flex; gap: 4px; justify-content: center; width: 100%; }
         .vk-key {
-            flex: 1; max-width: 60px; min-height: 42px;
+            flex: 1 1 0; min-width: 0; height: 48px;
             border: 1px solid var(--border-color); border-radius: var(--radius-sm);
             background: var(--bg-surface); color: var(--text-main); cursor: pointer;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: .82rem; user-select: none; touch-action: manipulation;
+            font-size: 1.06rem; font-weight: 500; user-select: none; touch-action: manipulation;
+            padding: 0; transition: background-color .1s;
         }
-        .vk-key .sub { font-size: .68rem; color: var(--primary); }
-        .vk-key.special { color: var(--text-muted); font-size: .74rem; }
-        .vk-key.wide { flex: 2.2; max-width: 150px; }
-        .vk-key.active-state { background: color-mix(in srgb, var(--primary) 24%, var(--bg-surface)); }
+        .vk-key .sub { font-size: .72rem; color: var(--text-muted); margin-top: -2px; }
+        .vk-key.special { flex: 1.5 1 0; font-size: .92rem; color: var(--text-muted); }
+        .vk-key.wide { flex: 4 1 0; }
+        .vk-key:active, .vk-key.active-state {
+            border-color: var(--primary); color: var(--primary); transform: translateY(1px);
+        }
+        @media (min-width: 640px) {
+            .vk-key { height: 56px; font-size: 1.16rem; }
+        }
 
         .status-bar {
-            font-size: .7rem; color: var(--text-muted); text-align: center; padding: 2px 0 4px;
-            display: flex; justify-content: space-between; padding-inline: 6px;
+            flex: 0 0 auto;
+            font-size: .68rem; color: var(--text-muted); padding: 3px 8px;
+            display: flex; justify-content: space-between;
         }
 
         /* ---------- FAB / Menu ---------- */
-        .fab { font-size: 19px; 
-            position: fixed; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom));
+        .fab { font-size: 19px;
+            position: fixed; right: 12px; top: 8px;
             width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
             background: var(--primary); color: #fff; display: flex; align-items: center;
             justify-content: center; box-shadow: 0 3px 10px rgba(0, 0, 0, .22); z-index: 60;
         }
         .menu-panel {
-            position: fixed; right: 14px; bottom: calc(66px + env(safe-area-inset-bottom));
+            position: fixed; right: 12px; top: 58px;
             background: var(--bg-surface); border: 1px solid var(--border-color);
             border-radius: var(--radius-md); box-shadow: 0 6px 24px rgba(0, 0, 0, .18);
             z-index: 61; min-width: 216px; overflow: hidden;
@@ -267,20 +301,25 @@
             font-family: inherit; scrollbar-width: none;
         }
         #mini-output::-webkit-scrollbar { display: none; }
-        .mini-kb { flex: 0 0 auto; border-top: 1px solid var(--border-color); padding: 5px; }
+        .mini-kb {
+            flex: 0 0 auto; border-top: 1px solid var(--border-color);
+            padding: 4px 4px max(4px, env(safe-area-inset-bottom));
+            background: var(--bg-surface);
+        }
 
         /* ---------- Mobile ---------- */
         @media (max-width: 480px) {
-            .app-container { padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); gap: 6px; }
+            .app-container { padding: 6px 6px 0; gap: 5px; }
             .card { padding: 8px; border-radius: var(--radius-md); }
-            #output-buffer { min-height: 56px; font-size: 1.05rem; }
+            #output-buffer { min-height: 52px; font-size: 1.05rem; }
             .cell .ch { font-size: 1.32rem; }
-            .vk-key { min-height: 40px; max-width: none; font-size: .78rem; }
             .app-header h1 { font-size: .94rem; }
+            .keyboard-container { width: calc(100% + 12px); margin-left: -6px; margin-right: -6px; }
         }
-        @media (max-height: 560px) {
-            #output-buffer { min-height: 44px; max-height: 22vh; }
-            .compose-row { min-height: 48px; }
+        @media (max-height: 620px) {
+            #output-buffer { min-height: 42px; max-height: 20vh; }
+            .compose-row { min-height: 50px; }
+            .vk-key { height: 42px; }
         }
     </style>
 </head>
